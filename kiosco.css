@@ -1061,3 +1061,19 @@ body[data-panel="inventory"] #panel-inventory {
   color: #86efac;
   font-weight: 700;
 }
+
+/* ===== LIBRETA DE FIADO ===== */
+
+.libreta-cliente-row {
+  background: rgba(255,255,255,0.05);
+  text-align: left;
+}
+
+#libretalFiadoPrompt .relative {
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.pb-safe {
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 1.5rem));
+}
