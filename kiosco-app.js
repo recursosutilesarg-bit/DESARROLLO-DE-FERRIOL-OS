@@ -663,6 +663,9 @@
       closePaymentModal();
       closeCart();
       showScanToast('¡Venta registrada! $' + total.toLocaleString('es-AR'), false);
+      if (method === 'fiado' || method === 'transferencia_pendiente') {
+        setTimeout(function () { if (typeof window._mostrarFiadoPrompt === 'function') window._mostrarFiadoPrompt(items, total, method); }, 400);
+      }
     }
     function completeSale() {
       if (state.cart.length === 0) return;
@@ -1125,6 +1128,9 @@
       closeCobroRapidoModal();
       if (typeof playBeep === 'function') playBeep();
       if (typeof showScanToast === 'function') showScanToast('Cobro registrado', false);
+      if (method === 'fiado' || method === 'transferencia_pendiente') {
+        setTimeout(function () { if (typeof window._mostrarFiadoPrompt === 'function') window._mostrarFiadoPrompt(items, total, method); }, 400);
+      }
     }
 
     function openCart() {
@@ -2094,6 +2100,327 @@
         await supabaseClient.from('gastos').delete().eq('id', id).eq('user_id', currentUser.id);
         renderGastos(tipo);
       } catch (_) {}
+    };
+    // ============================================================
+    // LIBRETA DE FIADO
+    // ============================================================
+    var _libretalClienteActual = null; // { id, nombre, telefono }
+    var _libretalDesdePago = null;     // { items, total, tipo } — datos del pago post-venta
+
+    async function loadLibretaClientes() {
+      if (!supabaseClient || !currentUser?.id) return { ok: false, data: [], sinTabla: false };
+      try {
+        var res = await supabaseClient.from('libreta_clientes')
+          .select('id, nombre, telefono, created_at')
+          .eq('user_id', currentUser.id)
+          .order('nombre');
+        if (res.error) {
+          var sinTabla = res.error.code === '42P01' || (res.error.message && res.error.message.includes('does not exist'));
+          return { ok: false, data: [], sinTabla: sinTabla };
+        }
+        return { ok: true, data: res.data || [], sinTabla: false };
+      } catch (e) { return { ok: false, data: [], sinTabla: false }; }
+    }
+
+    async function loadLibretaItems(clienteId, soloPendientes) {
+      if (!supabaseClient || !currentUser?.id) return [];
+      try {
+        var q = supabaseClient.from('libreta_items')
+          .select('id, descripcion, monto, tipo, fecha_hora, pagado')
+          .eq('user_id', currentUser.id)
+          .eq('cliente_id', clienteId)
+          .order('fecha_hora', { ascending: false });
+        if (soloPendientes) q = q.eq('pagado', false);
+        var res = await q;
+        if (res.error) throw res.error;
+        return res.data || [];
+      } catch (e) { return []; }
+    }
+
+    async function renderLibretaClientes() {
+      var el = document.getElementById('libretalClientesList');
+      if (!el) return;
+      el.innerHTML = '<p class="text-white/50 text-center py-6">Cargando...</p>';
+      try {
+        var result = await loadLibretaClientes();
+        if (!result.ok && result.sinTabla) {
+          el.innerHTML = '<div class="glass rounded-xl p-4 border border-amber-500/30 text-center">' +
+            '<p class="text-amber-400 font-semibold text-sm mb-1">⚠️ Falta ejecutar el SQL</p>' +
+            '<p class="text-white/50 text-xs">Copiá el SQL de la conversación y ejecutalo en Supabase → SQL Editor.</p>' +
+            '</div>';
+          return;
+        }
+        if (!result.ok) {
+          el.innerHTML = '<p class="text-white/40 text-center py-6 text-sm">Error al conectar. Revisá la conexión.</p>';
+          return;
+        }
+        var clientes = result.data;
+        if (clientes.length === 0) {
+          el.innerHTML = '<div class="text-center py-10"><p class="text-white/40 text-sm">Sin clientes en la libreta.</p><p class="text-white/30 text-xs mt-1">Presioná "Nuevo cliente" para agregar.</p></div>';
+          lucide.createIcons(); return;
+        }
+        var totalesPromises = clientes.map(async function (c) {
+          var items = await loadLibretaItems(c.id, true);
+          var total = items.reduce(function (s, i) { return s + Number(i.monto || 0); }, 0);
+          return { cliente: c, total: total };
+        });
+        var datos = await Promise.all(totalesPromises);
+        el.innerHTML = datos.map(function (d) {
+          var c = d.cliente;
+          var total = d.total;
+          var badge = total > 0
+            ? '<span class="text-amber-400 font-bold text-sm">$' + Math.round(total).toLocaleString('es-AR') + '</span>'
+            : '<span class="text-green-400 text-sm font-medium">Al día ✓</span>';
+          return '<button onclick="window._verClienteLibreta(\'' + c.id + '\')" class="libreta-cliente-row w-full glass rounded-xl px-4 py-3.5 border border-white/10 flex items-center gap-3 hover:border-[#22c55e]/40 transition-all active:scale-[0.98] touch-target">' +
+            '<div class="w-9 h-9 rounded-xl bg-[#22c55e]/20 flex items-center justify-center shrink-0"><i data-lucide="user" class="w-4 h-4 text-[#86efac]"></i></div>' +
+            '<div class="flex-1 text-left min-w-0"><p class="font-semibold text-sm truncate">' + (c.nombre || '').replace(/</g,'&lt;') + '</p>' +
+            (c.telefono ? '<p class="text-xs text-white/40 truncate">' + c.telefono + '</p>' : '') + '</div>' +
+            badge + '<i data-lucide="chevron-right" class="w-4 h-4 text-white/30 shrink-0"></i></button>';
+        }).join('');
+        lucide.createIcons();
+      } catch (e) {
+        if (el) el.innerHTML = '<p class="text-white/40 text-center py-6 text-sm">Error inesperado. Revisá la consola.</p>';
+      }
+    }
+
+    window._verClienteLibreta = async function (clienteId) {
+      var clientes = await loadLibretaClientes();
+      var c = clientes.find(function (x) { return x.id === clienteId; });
+      if (!c) return;
+      _libretalClienteActual = c;
+      document.getElementById('libretalClienteNombre').textContent = c.nombre;
+      document.getElementById('libretalClienteTel').textContent = c.telefono || '';
+      var btn = document.getElementById('libretalBtnWhatsApp');
+      if (btn) btn.disabled = !c.telefono;
+      await renderLibretaItems(clienteId);
+      window._switchCajaTab('libreta-cliente');
+    };
+
+    async function renderLibretaItems(clienteId) {
+      var el = document.getElementById('libretalItemsList');
+      var totalEl = document.getElementById('libretalClienteTotal');
+      if (!el) return;
+      var items = await loadLibretaItems(clienteId, false);
+      var pendientes = items.filter(function (i) { return !i.pagado; });
+      var total = pendientes.reduce(function (s, i) { return s + Number(i.monto || 0); }, 0);
+      if (totalEl) totalEl.textContent = '$' + Math.round(total).toLocaleString('es-AR');
+      if (items.length === 0) {
+        el.innerHTML = '<p class="text-white/40 text-center py-4">Sin ítems registrados.</p>';
+        lucide.createIcons(); return;
+      }
+      el.innerHTML = items.map(function (item) {
+        var desc = (item.descripcion || '').replace(/</g,'&lt;');
+        var monto = Number(item.monto || 0);
+        var fecha = item.fecha_hora ? new Date(item.fecha_hora).toLocaleString('es-AR', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
+        var tipoLabel = item.tipo === 'transferencia_pendiente' ? 'Transf.' : 'Fiado';
+        var pagadoStyle = item.pagado ? 'opacity-50 line-through' : '';
+        return '<div class="flex items-start gap-2 py-2 border-b border-white/5 last:border-0 ' + pagadoStyle + '">' +
+          '<div class="flex-1 min-w-0">' +
+          '<p class="text-sm font-medium">' + desc + '</p>' +
+          '<p class="text-xs text-white/40">' + fecha + ' · <span class="text-white/50">' + tipoLabel + '</span></p>' +
+          '</div>' +
+          '<div class="shrink-0 flex items-center gap-2">' +
+          '<span class="font-bold text-sm ' + (item.pagado ? 'text-green-400' : 'text-amber-400') + '">$' + Math.round(monto).toLocaleString('es-AR') + '</span>' +
+          (!item.pagado ? '<button onclick="window._eliminarItemLibreta(\'' + item.id + '\')" class="p-1 rounded-lg hover:bg-red-500/20 touch-target" title="Eliminar"><i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-400/60"></i></button>' : '') +
+          '</div></div>';
+      }).join('');
+      lucide.createIcons();
+    }
+
+    window._abrirNuevoClienteLibreta = function () {
+      var el = document.getElementById('libretalNuevoNombre');
+      var tel = document.getElementById('libretalNuevoTel');
+      var err = document.getElementById('libretalNuevoClienteErr');
+      if (el) el.value = ''; if (tel) tel.value = ''; if (err) err.classList.add('hidden');
+      var m = document.getElementById('libretalNuevoClienteModal');
+      m.classList.remove('hidden'); m.classList.add('flex');
+      lucide.createIcons();
+      setTimeout(function () { if (el) el.focus(); }, 100);
+    };
+
+    window._guardarNuevoClienteLibreta = async function () {
+      var nombre = (document.getElementById('libretalNuevoNombre').value || '').trim();
+      var tel = (document.getElementById('libretalNuevoTel').value || '').trim();
+      var err = document.getElementById('libretalNuevoClienteErr');
+      err.classList.add('hidden');
+      if (!nombre) { err.textContent = 'Ingresá el nombre del cliente.'; err.classList.remove('hidden'); return; }
+      if (!supabaseClient || !currentUser?.id) { err.textContent = 'Sin conexión.'; err.classList.remove('hidden'); return; }
+      try {
+        var res = await supabaseClient.from('libreta_clientes').insert({ user_id: currentUser.id, nombre: nombre, telefono: tel }).select().single();
+        if (res.error) throw res.error;
+        window._cerrarModalLibreta('libretalNuevoClienteModal');
+        await renderLibretaClientes();
+        if (_libretalDesdePago) {
+          window._verClienteLibreta(res.data.id).then(function () { _agregarItemsDesdePago(res.data.id); });
+        }
+      } catch (e) { err.textContent = 'Error: ' + (e.message || 'intente de nuevo.'); err.classList.remove('hidden'); }
+    };
+
+    window._abrirNuevoItemLibreta = function () {
+      if (!_libretalClienteActual) return;
+      var el = document.getElementById('libretalItemDesc');
+      var m = document.getElementById('libretalItemMonto');
+      var err = document.getElementById('libretalItemErr');
+      var sub = document.getElementById('libretalItemModalSubtitle');
+      if (el) el.value = ''; if (m) m.value = ''; if (err) err.classList.add('hidden');
+      if (sub) sub.textContent = 'Cliente: ' + _libretalClienteActual.nombre;
+      var modal = document.getElementById('libretalNuevoItemModal');
+      modal.classList.remove('hidden'); modal.classList.add('flex');
+      lucide.createIcons();
+      setTimeout(function () { if (el) el.focus(); }, 100);
+    };
+
+    window._guardarItemLibreta = async function () {
+      if (!_libretalClienteActual) return;
+      var desc = (document.getElementById('libretalItemDesc').value || '').trim();
+      var monto = parseFloat(document.getElementById('libretalItemMonto').value) || 0;
+      var tipo = document.getElementById('libretalItemTipo').value;
+      var err = document.getElementById('libretalItemErr');
+      err.classList.add('hidden');
+      if (!desc) { err.textContent = 'Ingresá una descripción.'; err.classList.remove('hidden'); return; }
+      if (monto <= 0) { err.textContent = 'Ingresá un monto mayor a 0.'; err.classList.remove('hidden'); return; }
+      if (!supabaseClient || !currentUser?.id) { err.textContent = 'Sin conexión.'; err.classList.remove('hidden'); return; }
+      try {
+        var res = await supabaseClient.from('libreta_items').insert({ user_id: currentUser.id, cliente_id: _libretalClienteActual.id, descripcion: desc, monto: monto, tipo: tipo });
+        if (res.error) throw res.error;
+        window._cerrarModalLibreta('libretalNuevoItemModal');
+        renderLibretaItems(_libretalClienteActual.id);
+      } catch (e) { err.textContent = 'Error: ' + (e.message || 'intente de nuevo.'); err.classList.remove('hidden'); }
+    };
+
+    window._eliminarItemLibreta = async function (itemId) {
+      if (!confirm('¿Eliminar este ítem?')) return;
+      if (!supabaseClient || !currentUser?.id || !_libretalClienteActual) return;
+      try {
+        await supabaseClient.from('libreta_items').delete().eq('id', itemId).eq('user_id', currentUser.id);
+        renderLibretaItems(_libretalClienteActual.id);
+      } catch (_) {}
+    };
+
+    window._marcarLibretaPagada = async function () {
+      if (!_libretalClienteActual) return;
+      if (!confirm('¿Marcar toda la deuda de ' + _libretalClienteActual.nombre + ' como cobrada?')) return;
+      if (!supabaseClient || !currentUser?.id) return;
+      try {
+        await supabaseClient.from('libreta_items').update({ pagado: true }).eq('cliente_id', _libretalClienteActual.id).eq('user_id', currentUser.id).eq('pagado', false);
+        renderLibretaItems(_libretalClienteActual.id);
+      } catch (_) {}
+    };
+
+    window._enviarTicketWhatsApp = async function () {
+      if (!_libretalClienteActual || !_libretalClienteActual.telefono) return;
+      var items = await loadLibretaItems(_libretalClienteActual.id, true);
+      var total = items.reduce(function (s, i) { return s + Number(i.monto || 0); }, 0);
+      var negocio = (currentUser && currentUser.kioscoName) ? currentUser.kioscoName : 'El negocio';
+      var hoy = new Date().toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' });
+      var detalle = items.map(function (item) {
+        var d = item.descripcion || '';
+        var m = Math.round(Number(item.monto || 0)).toLocaleString('es-AR');
+        var fh = item.fecha_hora ? new Date(item.fecha_hora).toLocaleString('es-AR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
+        return '• ' + d + ' — $' + m + (fh ? ' (' + fh + ')' : '');
+      }).join('\n');
+      var msg = '📋 *CUENTA DE FIADO*\n'
+        + '👤 Cliente: *' + _libretalClienteActual.nombre + '*\n'
+        + '📅 ' + hoy + '\n\n'
+        + '🛒 *Detalle:*\n'
+        + detalle + '\n\n'
+        + '💰 *TOTAL ADEUDADO: $' + Math.round(total).toLocaleString('es-AR') + '*\n\n'
+        + '_' + negocio + '_';
+      var tel = _libretalClienteActual.telefono.replace(/\D/g, '');
+      window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(msg), '_blank');
+    };
+
+    window._cerrarModalLibreta = function (id) {
+      var m = document.getElementById(id);
+      if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+    };
+
+    // ── Prompt post-pago fiado ──────────────────────────────────
+    window._mostrarFiadoPrompt = async function (itemsVenta, totalVenta, metodo) {
+      _libretalDesdePago = { items: itemsVenta, total: totalVenta, tipo: metodo };
+      var clientes = await loadLibretaClientes();
+      var listEl = document.getElementById('libretalPromptClientesList');
+      if (listEl) {
+        if (clientes.length === 0) {
+          listEl.innerHTML = '<p class="text-white/40 text-sm text-center py-2">Sin clientes en la libreta aún.</p>';
+        } else {
+          listEl.innerHTML = clientes.map(function (c) {
+            return '<button onclick="window._elegirClienteDesdePrompt(\'' + c.id + '\')" class="w-full glass rounded-xl px-4 py-3 flex items-center gap-3 border border-white/10 hover:border-[#22c55e]/40 touch-target active:scale-[0.98] transition-all">' +
+              '<div class="w-8 h-8 rounded-lg bg-[#22c55e]/20 flex items-center justify-center shrink-0"><i data-lucide="user" class="w-4 h-4 text-[#86efac]"></i></div>' +
+              '<span class="text-sm font-medium">' + (c.nombre || '').replace(/</g,'&lt;') + '</span>' +
+              '</button>';
+          }).join('');
+        }
+      }
+      var prompt = document.getElementById('libretalFiadoPrompt');
+      prompt.classList.remove('hidden'); prompt.classList.add('flex');
+      lucide.createIcons();
+    };
+
+    window._cerrarFiadoPrompt = function () {
+      var p = document.getElementById('libretalFiadoPrompt');
+      p.classList.add('hidden'); p.classList.remove('flex');
+      _libretalDesdePago = null;
+    };
+
+    window._elegirClienteDesdePrompt = async function (clienteId) {
+      window._cerrarFiadoPrompt();
+      await _agregarItemsDesdePago(clienteId);
+      await window._verClienteLibreta(clienteId);
+      window._switchCajaTab('libreta-cliente');
+    };
+
+    window._abrirNuevoClienteDesdePrompt = function () {
+      window._cerrarFiadoPrompt();
+      window._switchCajaTab('libreta');
+      setTimeout(function () { window._abrirNuevoClienteLibreta(); }, 200);
+    };
+
+    async function _agregarItemsDesdePago(clienteId) {
+      if (!_libretalDesdePago || !supabaseClient || !currentUser?.id) return;
+      var tipo = _libretalDesdePago.tipo || 'fiado';
+      var items = _libretalDesdePago.items || [];
+      var fechaHora = new Date().toISOString();
+      for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        var desc = (it.nombre || 'Ítem') + (it.cant > 1 ? ' x' + it.cant : '');
+        var monto = Number(it.precio || 0) * Number(it.cant || 1);
+        if (monto <= 0) continue;
+        try {
+          await supabaseClient.from('libreta_items').insert({ user_id: currentUser.id, cliente_id: clienteId, descripcion: desc, monto: monto, tipo: tipo, fecha_hora: fechaHora });
+        } catch (_) {}
+      }
+      _libretalDesdePago = null;
+    }
+
+    // ── Actualizar _switchCajaTab para libreta ──────────────────
+    var _switchCajaTabOrig = window._switchCajaTab;
+    window._switchCajaTab = function (tab) {
+      var libretalSubs = ['caja-sub-libreta', 'caja-sub-libreta-cliente'];
+      libretalSubs.forEach(function (id) { var el = document.getElementById(id); if (el) el.classList.add('hidden'); });
+      if (tab === 'libreta') {
+        var hub = document.getElementById('caja-hub');
+        var subs = ['cierre','proveedores','gastos'];
+        if (hub) hub.classList.add('hidden');
+        subs.forEach(function (s) { var el = document.getElementById('caja-sub-' + s); if (el) el.classList.add('hidden'); });
+        var el = document.getElementById('caja-sub-libreta');
+        if (el) el.classList.remove('hidden');
+        renderLibretaClientes();
+        lucide.createIcons();
+        return;
+      }
+      if (tab === 'libreta-cliente') {
+        var hub = document.getElementById('caja-hub');
+        var subs = ['cierre','proveedores','gastos'];
+        if (hub) hub.classList.add('hidden');
+        subs.forEach(function (s) { var el = document.getElementById('caja-sub-' + s); if (el) el.classList.add('hidden'); });
+        document.getElementById('caja-sub-libreta').classList.add('hidden');
+        var el = document.getElementById('caja-sub-libreta-cliente');
+        if (el) el.classList.remove('hidden');
+        lucide.createIcons();
+        return;
+      }
+      _switchCajaTabOrig(tab);
     };
     // ============================================================
 
