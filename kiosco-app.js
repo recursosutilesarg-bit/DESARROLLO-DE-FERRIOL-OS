@@ -2338,22 +2338,30 @@
     // ── Prompt post-pago fiado ──────────────────────────────────
     window._mostrarFiadoPrompt = async function (itemsVenta, totalVenta, metodo) {
       _libretalDesdePago = { items: itemsVenta, total: totalVenta, tipo: metodo };
-      var clientes = await loadLibretaClientes();
       var listEl = document.getElementById('libretalPromptClientesList');
+      var nuevoFormEl = document.getElementById('libretalPromptNuevoForm');
+      if (nuevoFormEl) nuevoFormEl.classList.add('hidden');
       if (listEl) {
-        if (clientes.length === 0) {
-          listEl.innerHTML = '<p class="text-white/40 text-sm text-center py-2">Sin clientes en la libreta aún.</p>';
+        listEl.innerHTML = '<p class="text-white/40 text-sm text-center py-3">Cargando clientes...</p>';
+      }
+      var prompt = document.getElementById('libretalFiadoPrompt');
+      if (prompt) { prompt.classList.remove('hidden'); prompt.classList.add('flex'); }
+      var result = await loadLibretaClientes();
+      var clientes = (result && result.ok) ? result.data : [];
+      if (listEl) {
+        if (!result || !result.ok) {
+          listEl.innerHTML = '<p class="text-amber-400 text-sm text-center py-2">⚠️ Ejecutá el SQL en Supabase primero.</p>';
+        } else if (clientes.length === 0) {
+          listEl.innerHTML = '<p class="text-white/40 text-sm text-center py-2">Sin clientes aún. Creá uno nuevo.</p>';
         } else {
           listEl.innerHTML = clientes.map(function (c) {
             return '<button onclick="window._elegirClienteDesdePrompt(\'' + c.id + '\')" class="w-full glass rounded-xl px-4 py-3 flex items-center gap-3 border border-white/10 hover:border-[#22c55e]/40 touch-target active:scale-[0.98] transition-all">' +
               '<div class="w-8 h-8 rounded-lg bg-[#22c55e]/20 flex items-center justify-center shrink-0"><i data-lucide="user" class="w-4 h-4 text-[#86efac]"></i></div>' +
-              '<span class="text-sm font-medium">' + (c.nombre || '').replace(/</g,'&lt;') + '</span>' +
-              '</button>';
+              '<span class="text-sm font-medium flex-1 text-left">' + (c.nombre || '').replace(/</g,'&lt;') + '</span>' +
+              '<i data-lucide="chevron-right" class="w-4 h-4 text-white/30 shrink-0"></i></button>';
           }).join('');
         }
       }
-      var prompt = document.getElementById('libretalFiadoPrompt');
-      prompt.classList.remove('hidden'); prompt.classList.add('flex');
       lucide.createIcons();
     };
 
@@ -2371,9 +2379,46 @@
     };
 
     window._abrirNuevoClienteDesdePrompt = function () {
-      window._cerrarFiadoPrompt();
-      window._switchCajaTab('libreta');
-      setTimeout(function () { window._abrirNuevoClienteLibreta(); }, 200);
+      var listEl = document.getElementById('libretalPromptClientesList');
+      var formEl = document.getElementById('libretalPromptNuevoForm');
+      var nombreEl = document.getElementById('libretalPromptNombre');
+      var telEl = document.getElementById('libretalPromptTel');
+      var errEl = document.getElementById('libretalPromptErr');
+      if (listEl) listEl.classList.add('hidden');
+      if (errEl) { errEl.textContent = ''; errEl.classList.add('hidden'); }
+      if (nombreEl) nombreEl.value = '';
+      if (telEl) telEl.value = '';
+      if (formEl) formEl.classList.remove('hidden');
+      if (nombreEl) setTimeout(function () { nombreEl.focus(); }, 100);
+    };
+
+    window._cancelarNuevoClientePrompt = function () {
+      var listEl = document.getElementById('libretalPromptClientesList');
+      var formEl = document.getElementById('libretalPromptNuevoForm');
+      if (listEl) listEl.classList.remove('hidden');
+      if (formEl) formEl.classList.add('hidden');
+    };
+
+    window._guardarNuevoClienteDesdePrompt = async function () {
+      var nombreEl = document.getElementById('libretalPromptNombre');
+      var telEl = document.getElementById('libretalPromptTel');
+      var errEl = document.getElementById('libretalPromptErr');
+      var btnEl = document.getElementById('libretalPromptGuardarBtn');
+      var nombre = (nombreEl ? nombreEl.value : '').trim();
+      if (!nombre) { if (errEl) { errEl.textContent = 'Ingresá el nombre del cliente.'; errEl.classList.remove('hidden'); } return; }
+      if (btnEl) { btnEl.disabled = true; btnEl.textContent = 'Guardando...'; }
+      try {
+        var res = await supabaseClient.from('libreta_clientes').insert({ user_id: currentUser.id, nombre: nombre, telefono: telEl ? telEl.value.trim() : '' }).select('id').single();
+        if (res.error) throw res.error;
+        var nuevoId = res.data.id;
+        window._cerrarFiadoPrompt();
+        await _agregarItemsDesdePago(nuevoId);
+        await window._verClienteLibreta(nuevoId);
+        window._switchCajaTab('libreta-cliente');
+      } catch (e) {
+        if (errEl) { errEl.textContent = 'Error: ' + (e.message || 'intente de nuevo.'); errEl.classList.remove('hidden'); }
+        if (btnEl) { btnEl.disabled = false; btnEl.textContent = 'Crear y agregar'; }
+      }
     };
 
     async function _agregarItemsDesdePago(clienteId) {
