@@ -556,36 +556,6 @@
 
           <div class="mt-6 pt-6 border-t border-white/10">
             <h3 class="font-semibold mb-2 flex items-center gap-2">
-              <i data-lucide="zap" class="w-4 h-4 text-[#86efac]"></i>
-              Productos para cobro rápido
-            </h3>
-            <p class="text-sm text-white/60 mb-3">Nombres y porcentaje de ganancia para Cobro rápido (cualquier negocio). Si ponés margen %, se calcula el costo para la rentabilidad.</p>
-            <div class="space-y-3 mb-2">
-              <div class="flex gap-2 items-center flex-wrap">
-                <input type="text" id="configCobroRapido1" placeholder="Producto 1" class="glass rounded-xl px-3 py-2 border border-white/20 text-white placeholder-white/40 text-sm flex-1 min-w-[100px]">
-                <label class="flex items-center gap-1.5 text-sm text-white/70 shrink-0">Margen %</label>
-                <input type="number" id="configCobroRapidoMargen1" placeholder="0" min="0" max="500" class="glass rounded-xl px-3 py-2 border border-white/20 text-white w-20 text-sm">
-              </div>
-              <div class="flex gap-2 items-center flex-wrap">
-                <input type="text" id="configCobroRapido2" placeholder="Producto 2" class="glass rounded-xl px-3 py-2 border border-white/20 text-white placeholder-white/40 text-sm flex-1 min-w-[100px]">
-                <label class="flex items-center gap-1.5 text-sm text-white/70 shrink-0">Margen %</label>
-                <input type="number" id="configCobroRapidoMargen2" placeholder="0" min="0" max="500" class="glass rounded-xl px-3 py-2 border border-white/20 text-white w-20 text-sm">
-              </div>
-              <div class="flex gap-2 items-center flex-wrap">
-                <input type="text" id="configCobroRapido3" placeholder="Producto 3" class="glass rounded-xl px-3 py-2 border border-white/20 text-white placeholder-white/40 text-sm flex-1 min-w-[100px]">
-                <label class="flex items-center gap-1.5 text-sm text-white/70 shrink-0">Margen %</label>
-                <input type="number" id="configCobroRapidoMargen3" placeholder="0" min="0" max="500" class="glass rounded-xl px-3 py-2 border border-white/20 text-white w-20 text-sm">
-              </div>
-              <div class="flex gap-2 items-center flex-wrap">
-                <input type="text" id="configCobroRapido4" placeholder="Producto 4" class="glass rounded-xl px-3 py-2 border border-white/20 text-white placeholder-white/40 text-sm flex-1 min-w-[100px]">
-                <label class="flex items-center gap-1.5 text-sm text-white/70 shrink-0">Margen %</label>
-                <input type="number" id="configCobroRapidoMargen4" placeholder="0" min="0" max="500" class="glass rounded-xl px-3 py-2 border border-white/20 text-white w-20 text-sm">
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-6 pt-6 border-t border-white/10">
-            <h3 class="font-semibold mb-2 flex items-center gap-2">
               <i data-lucide="database-backup" class="w-4 h-4 text-[#86efac]"></i>
               Copia de seguridad
             </h3>
@@ -848,13 +818,10 @@
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="cobroRapidoOverlay"></div>
     <div class="relative glass-strong rounded-2xl p-5 w-full max-w-sm scale-in max-h-[95vh] overflow-y-auto">
       <h3 class="font-bold text-lg mb-1 text-center">Cobro rápido</h3>
-      <p class="text-sm text-white/60 text-center mb-3">Elegí producto, monto y agregá. Después cobrá.</p>
-      <div class="mb-3">
-        <p class="text-xs text-white/50 mb-1">Producto</p>
-        <div id="cobroRapidoProductosWrap" class="flex flex-wrap gap-1.5"></div>
-        <div id="cobroRapidoOtroWrap" class="hidden mt-1.5">
-          <input type="text" id="cobroRapidoOtroNombre" placeholder="Nombre" class="w-full glass rounded-lg px-3 py-2 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
-        </div>
+      <p class="text-sm text-white/60 text-center mb-3">Ingresá nombre, monto y agregá. Después cobrá.</p>
+      <div id="cobroRapidoOtroWrap" class="mb-3">
+        <p class="text-xs text-white/50 mb-1">Nombre del ítem (opcional)</p>
+        <input type="text" id="cobroRapidoOtroNombre" placeholder="Ej: Gaseosa, Servicio..." class="w-full glass rounded-lg px-3 py-2 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
       </div>
       <div class="mb-3 flex gap-2 items-end">
         <div class="flex-1">

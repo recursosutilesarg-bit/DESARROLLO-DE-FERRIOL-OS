@@ -722,8 +722,8 @@ textarea:focus-visible {
 
 /* ===== PANEL PRODUCTOS: PANTALLA COMPLETA ===== */
 
-/* Ocultar el header principal cuando estamos en Productos */
-body[data-panel="inventory"] #mainHeader {
+/* Ocultar el header principal en todos los paneles salvo Inicio */
+body[data-panel]:not([data-panel="dashboard"]) #mainHeader {
   display: none !important;
 }
 
@@ -861,10 +861,6 @@ body[data-panel="inventory"] #panel-inventory {
 /* ── TABLET (768px): restaurar header y cards ── */
 @media (min-width: 768px) {
 
-  /* Header visible en todos los paneles */
-  body[data-panel="inventory"] #mainHeader {
-    display: flex !important;
-  }
   body[data-panel="inventory"] #panel-inventory {
     padding-top: 0;
   }

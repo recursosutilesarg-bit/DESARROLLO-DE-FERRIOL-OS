@@ -138,30 +138,7 @@
     let _dataCache = { products: {}, ventas: { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 }, transacciones: 0, deudores: [], saldosACobrar: [], lastCierreDate: null };
 
     const STORAGE_KEY_PREFIX = 'ferriol_data_';
-    const COBRO_RAPIDO_PRODUCTOS_KEY = 'ferriol_cobro_rapido_productos';
     const LAST_QUICK_PAYMENT_KEY = 'ferriol_last_quick_payment';
-    function getCobroRapidoProductosList() {
-      try {
-        var raw = localStorage.getItem(COBRO_RAPIDO_PRODUCTOS_KEY);
-        if (raw) {
-          var arr = JSON.parse(raw);
-          if (Array.isArray(arr) && arr.length >= 4) {
-            return arr.slice(0, 4).map(function (x) {
-              return typeof x === 'object' && x !== null ? { nombre: x.nombre || 'Producto', margen: Number(x.margen) || 0 } : { nombre: String(x || 'Producto'), margen: 0 };
-            });
-          }
-        }
-      } catch (_) {}
-      return [{ nombre: 'Producto 1', margen: 0 }, { nombre: 'Producto 2', margen: 0 }, { nombre: 'Producto 3', margen: 0 }, { nombre: 'Producto 4', margen: 0 }];
-    }
-    function setCobroRapidoProductosList(arr) {
-      try {
-        var list = (arr || []).slice(0, 4).map(function (x) {
-          return typeof x === 'object' && x !== null ? { nombre: String(x.nombre || ''), margen: Number(x.margen) || 0 } : { nombre: String(x || ''), margen: 0 };
-        });
-        localStorage.setItem(COBRO_RAPIDO_PRODUCTOS_KEY, JSON.stringify(list));
-      } catch (_) {}
-    }
     function getStorageKey() { return currentUser?.id ? STORAGE_KEY_PREFIX + currentUser.id : null; }
     function loadFromLocalStorage() {
       const key = getStorageKey();
@@ -1022,24 +999,9 @@
       var margenEl = document.getElementById('cobroRapidoMargen'); if (margenEl) margenEl.value = '';
       document.getElementById('cobroRapidoCliente').value = '';
       document.getElementById('cobroRapidoOtroNombre').value = '';
-      document.getElementById('cobroRapidoOtroWrap').classList.add('hidden');
       var crw = document.getElementById('cobroRapidoWhatsappWrap'); if (crw) crw.classList.add('hidden');
       document.getElementById('cobroRapidoWhatsapp').value = '';
       var crwe = document.getElementById('cobroRapidoWhatsappErr'); if (crwe) crwe.classList.add('hidden');
-      var list = getCobroRapidoProductosList();
-      var wrap = document.getElementById('cobroRapidoProductosWrap');
-      if (wrap) {
-        var html = list.map(function (item) {
-          var nombre = (item && item.nombre) ? item.nombre : 'Producto';
-          var margen = (item && item.margen != null) ? Number(item.margen) : 0;
-          return '<button type="button" class="cobro-rapido-producto px-2.5 py-1.5 rounded-lg text-xs font-medium border border-white/20 bg-white/5 hover:bg-[#dc2626]/30 hover:border-[#dc2626]/50 touch-target transition-all" data-producto="' + (nombre || '').replace(/"/g, '&quot;') + '" data-margen="' + margen + '">' + (nombre || '').replace(/</g, '&lt;') + '</button>';
-        }).join('');
-        html += '<button type="button" class="cobro-rapido-producto px-2.5 py-1.5 rounded-lg text-xs font-medium border border-white/20 bg-white/5 hover:bg-[#dc2626]/30 hover:border-[#dc2626]/50 touch-target transition-all" data-producto="Otro" data-margen="0" id="cobroRapidoProductoOtro">Otro</button>';
-        wrap.innerHTML = html;
-      }
-      document.querySelectorAll('.cobro-rapido-producto').forEach(function (el) {
-        el.classList.remove('ring-2', 'ring-[#dc2626]', 'bg-[#dc2626]/25');
-      });
       document.querySelectorAll('.quick-payment-option').forEach(function (el) { el.classList.remove('ring-2', 'ring-[#dc2626]'); });
       var lastMethod = '';
       try { lastMethod = localStorage.getItem(LAST_QUICK_PAYMENT_KEY) || ''; } catch (_) {}
@@ -1056,21 +1018,13 @@
       lucide.createIcons();
     }
     function getCobroRapidoProductoNombre() {
-      var sel = document.querySelector('.cobro-rapido-producto.ring-2');
-      if (!sel) return 'Venta rápida';
-      var p = sel.dataset.producto;
-      if (p === 'Otro') {
-        var otro = document.getElementById('cobroRapidoOtroNombre').value.trim();
-        return otro || 'Otro';
-      }
-      return p || 'Venta rápida';
+      var el = document.getElementById('cobroRapidoOtroNombre');
+      return (el && el.value.trim()) ? el.value.trim() : 'Venta rápida';
     }
     function getCobroRapidoProductoMargen() {
       var inputEl = document.getElementById('cobroRapidoMargen');
       if (inputEl && inputEl.value !== '' && !isNaN(parseFloat(inputEl.value))) return parseFloat(inputEl.value) || 0;
-      var sel = document.querySelector('.cobro-rapido-producto.ring-2');
-      if (!sel || !sel.dataset.margen) return 0;
-      return parseFloat(sel.dataset.margen) || 0;
+      return 0;
     }
     function costoDesdeMargen(amount, margenPct) {
       var a = Number(amount);
@@ -1398,16 +1352,6 @@
     document.getElementById('btnCobroRapido').onclick = openCobroRapidoModal;
     document.getElementById('closeCobroRapido').onclick = closeCobroRapidoModal;
     document.getElementById('cobroRapidoOverlay').onclick = closeCobroRapidoModal;
-    document.getElementById('cobroRapidoProductosWrap').addEventListener('click', function (e) {
-      var btn = e.target.closest('.cobro-rapido-producto');
-      if (!btn) return;
-      document.querySelectorAll('.cobro-rapido-producto').forEach(function (el) {
-        el.classList.remove('ring-2', 'ring-[#dc2626]', 'bg-[#dc2626]/25');
-      });
-      btn.classList.add('ring-2', 'ring-[#dc2626]', 'bg-[#dc2626]/25');
-      var wrap = document.getElementById('cobroRapidoOtroWrap');
-      if (btn.dataset.producto === 'Otro') wrap.classList.remove('hidden'); else wrap.classList.add('hidden');
-    });
     document.getElementById('cobroRapidoAgregarBtn').onclick = function () {
       var amount = parseInt((document.getElementById('cobroRapidoMonto').value || '').replace(/\D/g, ''), 10) || 0;
       if (amount <= 0) { alert('Ingresá un monto mayor a 0.'); return; }
@@ -2544,30 +2488,11 @@ async function showApp() {
       if (!currentUser || currentUser.role === 'super') return;
       document.getElementById('configKioscoName').value = currentUser.kioscoName || '';
       document.getElementById('configWhatsappMsg').value = currentUser.whatsappMessage || DEFAULT_WHATSAPP;
-      var list = getCobroRapidoProductosList();
-      for (var i = 1; i <= 4; i++) {
-        var item = list[i - 1];
-        var nom = (item && item.nombre) ? item.nombre : ('Producto ' + i);
-        var marg = (item && item.margen != null) ? item.margen : 0;
-        var el = document.getElementById('configCobroRapido' + i);
-        var mel = document.getElementById('configCobroRapidoMargen' + i);
-        if (el) el.value = nom;
-        if (mel) mel.value = marg;
-      }
     }
     async function saveConfig() {
       if (!currentUser || currentUser.role === 'super') return;
       const kioscoName = document.getElementById('configKioscoName').value.trim();
       const whatsappMessage = document.getElementById('configWhatsappMsg').value.trim() || DEFAULT_WHATSAPP;
-      var cr = [];
-      for (var i = 1; i <= 4; i++) {
-        var el = document.getElementById('configCobroRapido' + i);
-        var mel = document.getElementById('configCobroRapidoMargen' + i);
-        var nombre = el ? ((el.value || '').trim() || 'Producto ' + i) : 'Producto ' + i;
-        var margen = mel ? (parseFloat(mel.value) || 0) : 0;
-        cr.push({ nombre: nombre, margen: margen });
-      }
-      setCobroRapidoProductosList(cr);
       if (supabaseClient) {
         await supabaseClient.from('profiles').update({ kiosco_name: kioscoName, whatsapp_message: whatsappMessage }).eq('id', currentUser.id);
       }
