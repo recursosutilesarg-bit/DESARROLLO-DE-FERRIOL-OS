@@ -377,33 +377,40 @@
     <!-- Cierre de caja -->
     <section id="panel-caja" class="panel hidden">
 
-      <!-- HUB: 3 botones grandes -->
+      <!-- HUB: 4 botones grandes (2×2) -->
       <div id="caja-hub" class="p-4">
         <h2 class="font-bold text-xl mb-5 flex items-center gap-2 pt-1">
           <i data-lucide="wallet" class="w-5 h-5 text-[#86efac]"></i>
           Caja
         </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <button onclick="window._switchCajaTab('cierre')" class="caja-hub-btn glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
-            <div class="w-14 h-14 rounded-2xl bg-[#22c55e]/20 flex items-center justify-center">
-              <i data-lucide="check-circle" class="w-7 h-7 text-[#86efac]"></i>
+        <div class="grid grid-cols-2 gap-4">
+          <button onclick="window._switchCajaTab('cierre')" class="caja-hub-btn glass rounded-2xl p-5 border border-white/10 flex flex-col items-center gap-3 w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
+            <div class="w-12 h-12 rounded-2xl bg-[#22c55e]/20 flex items-center justify-center">
+              <i data-lucide="check-circle" class="w-6 h-6 text-[#86efac]"></i>
             </div>
-            <span class="font-semibold text-base">Cierre de caja</span>
-            <span class="text-xs text-white/60 text-center">Resumen del día y cierre</span>
+            <span class="font-semibold text-sm">Cierre de caja</span>
+            <span class="text-xs text-white/50 text-center leading-tight">Resumen del día</span>
           </button>
-          <button onclick="window._switchCajaTab('proveedores')" class="caja-hub-btn glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
-            <div class="w-14 h-14 rounded-2xl bg-[#22c55e]/20 flex items-center justify-center">
-              <i data-lucide="truck" class="w-7 h-7 text-[#86efac]"></i>
+          <button onclick="window._switchCajaTab('libreta')" class="caja-hub-btn glass rounded-2xl p-5 border border-white/10 flex flex-col items-center gap-3 w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
+            <div class="w-12 h-12 rounded-2xl bg-[#22c55e]/20 flex items-center justify-center">
+              <i data-lucide="notebook-pen" class="w-6 h-6 text-[#86efac]"></i>
             </div>
-            <span class="font-semibold text-base">Proveedores</span>
-            <span class="text-xs text-white/60 text-center">Registrar pagos a proveedores</span>
+            <span class="font-semibold text-sm">Libreta de fiado</span>
+            <span class="text-xs text-white/50 text-center leading-tight">Clientes con deuda</span>
           </button>
-          <button onclick="window._switchCajaTab('gastos')" class="caja-hub-btn glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
-            <div class="w-14 h-14 rounded-2xl bg-[#22c55e]/20 flex items-center justify-center">
-              <i data-lucide="receipt" class="w-7 h-7 text-[#86efac]"></i>
+          <button onclick="window._switchCajaTab('proveedores')" class="caja-hub-btn glass rounded-2xl p-5 border border-white/10 flex flex-col items-center gap-3 w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
+            <div class="w-12 h-12 rounded-2xl bg-[#22c55e]/20 flex items-center justify-center">
+              <i data-lucide="truck" class="w-6 h-6 text-[#86efac]"></i>
             </div>
-            <span class="font-semibold text-base">Gastos fijos</span>
-            <span class="text-xs text-white/60 text-center">Luz, alquiler, limpieza…</span>
+            <span class="font-semibold text-sm">Proveedores</span>
+            <span class="text-xs text-white/50 text-center leading-tight">Pagos a proveedores</span>
+          </button>
+          <button onclick="window._switchCajaTab('gastos')" class="caja-hub-btn glass rounded-2xl p-5 border border-white/10 flex flex-col items-center gap-3 w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
+            <div class="w-12 h-12 rounded-2xl bg-[#22c55e]/20 flex items-center justify-center">
+              <i data-lucide="receipt" class="w-6 h-6 text-[#86efac]"></i>
+            </div>
+            <span class="font-semibold text-sm">Gastos fijos</span>
+            <span class="text-xs text-white/50 text-center leading-tight">Luz, alquiler…</span>
           </button>
         </div>
       </div>
@@ -581,7 +588,147 @@
         </div>
       </div>
 
+      <!-- Sub-vista: Libreta de fiado — lista de clientes -->
+      <div id="caja-sub-libreta" class="hidden">
+        <div class="caja-subview-header">
+          <button onclick="window._switchCajaTab('hub')" class="caja-back-btn touch-target">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i> Caja
+          </button>
+        </div>
+        <div class="p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <h2 class="font-bold text-lg flex items-center gap-2">
+              <i data-lucide="notebook-pen" class="w-5 h-5 text-[#86efac]"></i>
+              Libreta de fiado
+            </h2>
+            <button onclick="window._abrirNuevoClienteLibreta()" class="btn-glow rounded-xl px-3 py-2 flex items-center gap-1.5 text-sm font-semibold touch-target">
+              <i data-lucide="user-plus" class="w-4 h-4"></i> Nuevo cliente
+            </button>
+          </div>
+          <div id="libretalClientesList" class="space-y-2">
+            <p class="text-white/50 text-center py-8">Cargando...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-vista: Detalle de cliente en libreta -->
+      <div id="caja-sub-libreta-cliente" class="hidden">
+        <div class="caja-subview-header">
+          <button onclick="window._switchCajaTab('libreta')" class="caja-back-btn touch-target">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i> Libreta
+          </button>
+        </div>
+        <div class="p-4 space-y-4">
+          <!-- Cabecera del cliente -->
+          <div class="glass rounded-2xl p-4 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-[#22c55e]/20 flex items-center justify-center shrink-0">
+                <i data-lucide="user" class="w-5 h-5 text-[#86efac]"></i>
+              </div>
+              <div>
+                <p id="libretalClienteNombre" class="font-bold text-base">Cliente</p>
+                <p id="libretalClienteTel" class="text-xs text-white/50"></p>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <p class="text-xs text-white/50">Total adeudado</p>
+              <p id="libretalClienteTotal" class="font-bold text-lg text-amber-400">$0</p>
+            </div>
+          </div>
+          <!-- Acciones del cliente -->
+          <div class="flex gap-2 flex-wrap">
+            <button id="libretalBtnWhatsApp" onclick="window._enviarTicketWhatsApp()" class="btn-glow rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm font-semibold touch-target flex-1">
+              <i data-lucide="message-circle" class="w-4 h-4"></i> Ticket WhatsApp
+            </button>
+            <button onclick="window._abrirNuevoItemLibreta()" class="btn-neomorphic rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm font-semibold touch-target flex-1">
+              <i data-lucide="plus" class="w-4 h-4"></i> Agregar ítem
+            </button>
+            <button onclick="window._marcarLibretaPagada()" class="rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm font-semibold touch-target border border-green-500/40 text-green-400 hover:bg-green-500/10 transition-colors">
+              <i data-lucide="check" class="w-4 h-4"></i> Cobrado
+            </button>
+          </div>
+          <!-- Lista de ítems -->
+          <div class="glass rounded-2xl p-4">
+            <h3 class="font-semibold text-sm text-white/70 mb-3">Detalle de compras</h3>
+            <div id="libretalItemsList" class="space-y-2 text-sm">
+              <p class="text-white/40 text-center py-4">Sin ítems registrados.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </section>
+
+    <!-- Modal: Nuevo cliente en libreta -->
+    <div id="libretalNuevoClienteModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="window._cerrarModalLibreta('libretalNuevoClienteModal')"></div>
+      <div class="relative glass-strong rounded-2xl p-5 w-full max-w-sm scale-in">
+        <h3 class="font-bold text-lg mb-4 text-center">Nuevo cliente</h3>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs text-white/60 mb-1">Nombre del cliente</label>
+            <input type="text" id="libretalNuevoNombre" placeholder="Ej: Juan Pérez" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+          </div>
+          <div>
+            <label class="block text-xs text-white/60 mb-1">WhatsApp (opcional)</label>
+            <input type="tel" id="libretalNuevoTel" placeholder="Ej: 549111234567" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+          </div>
+        </div>
+        <p id="libretalNuevoClienteErr" class="text-red-300 text-xs mt-2 hidden"></p>
+        <div class="flex gap-2 mt-5">
+          <button onclick="window._cerrarModalLibreta('libretalNuevoClienteModal')" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cancelar</button>
+          <button onclick="window._guardarNuevoClienteLibreta()" class="flex-1 btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target">Guardar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Agregar ítem a cliente -->
+    <div id="libretalNuevoItemModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="window._cerrarModalLibreta('libretalNuevoItemModal')"></div>
+      <div class="relative glass-strong rounded-2xl p-5 w-full max-w-sm scale-in">
+        <h3 class="font-bold text-lg mb-1 text-center">Agregar ítem</h3>
+        <p id="libretalItemModalSubtitle" class="text-sm text-white/50 text-center mb-4"></p>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs text-white/60 mb-1">¿Qué se llevó?</label>
+            <input type="text" id="libretalItemDesc" placeholder="Ej: Gaseosa, pan, cigarrillos..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+          </div>
+          <div class="flex gap-3">
+            <div class="flex-1">
+              <label class="block text-xs text-white/60 mb-1">Monto ($)</label>
+              <input type="number" id="libretalItemMonto" placeholder="0" min="1" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+            </div>
+            <div class="flex-1">
+              <label class="block text-xs text-white/60 mb-1">Tipo</label>
+              <select id="libretalItemTipo" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm bg-transparent">
+                <option value="fiado" class="bg-[#052e16]">Fiado</option>
+                <option value="transferencia_pendiente" class="bg-[#052e16]">Transf. pendiente</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <p id="libretalItemErr" class="text-red-300 text-xs mt-2 hidden"></p>
+        <div class="flex gap-2 mt-5">
+          <button onclick="window._cerrarModalLibreta('libretalNuevoItemModal')" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cancelar</button>
+          <button onclick="window._guardarItemLibreta()" class="flex-1 btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target">Guardar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prompt post-pago: agregar a libreta de fiado -->
+    <div id="libretalFiadoPrompt" class="fixed inset-0 z-[80] hidden items-end justify-center">
+      <div class="absolute inset-0 bg-black/40" onclick="window._cerrarFiadoPrompt()"></div>
+      <div class="relative glass-strong rounded-t-3xl p-6 w-full max-w-md mx-auto scale-in pb-safe">
+        <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>
+        <h3 class="font-bold text-base mb-1">¿Agregar a la libreta de fiado?</h3>
+        <p class="text-sm text-white/60 mb-4">Guardá esta venta en la cuenta de un cliente.</p>
+        <div id="libretalPromptClientesList" class="max-h-48 overflow-y-auto space-y-2 mb-4"></div>
+        <button onclick="window._abrirNuevoClienteDesdePrompt()" class="w-full btn-neomorphic rounded-xl py-2.5 text-sm font-medium touch-target flex items-center justify-center gap-2 mb-3">
+          <i data-lucide="user-plus" class="w-4 h-4"></i> Nuevo cliente
+        </button>
+        <button onclick="window._cerrarFiadoPrompt()" class="w-full text-sm text-white/40 py-2 touch-target">Omitir</button>
+      </div>
+    </div>
 
     <!-- Más — Historial, Configuración, Clientes -->
     <section id="panel-mas" class="panel hidden">
