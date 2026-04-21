@@ -16,12 +16,12 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#450a0a">
+  <meta name="theme-color" content="#052e16">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Ferriol OS">
-  <title>Ferriol OS — Sistema de Gestión Premium</title>
+  <title>Ferriol OS — Sistema de Gestión</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon-192.svg">
@@ -60,7 +60,7 @@
         <h1>Ferriol OS</h1>
         <p class="sub">Sistema de gestión para kioscos — SaaS</p>
         <div id="loginErr" class="login-err"></div>
-        <div id="loginContactAdminWrap" class="hidden mt-3 p-3 rounded-xl bg-[#dc2626]/20 border border-[#dc2626]/40">
+        <div id="loginContactAdminWrap" class="hidden mt-3 p-3 rounded-xl bg-[#22c55e]/20 border border-[#22c55e]/40">
           <p class="text-sm text-white/80 mb-2">Contactá por WhatsApp para darte de alta o renovar:</p>
           <div id="loginContactWhatsAppLinks" class="space-y-2"></div>
         </div>
@@ -76,9 +76,9 @@
           <button type="button" id="loginBtn" class="btn-login">Entrar</button>
         </form>
         <p class="login-hint" id="loginHint">
-          <a href="#" id="showSignUp" class="text-[#f87171]">Crear cuenta</a>
+          <a href="#" id="showSignUp" class="text-[#86efac]">Crear cuenta</a>
           <span class="mx-2">·</span>
-          <a href="#" id="forgotPwd" class="text-[#f87171]">¿Olvidaste tu contraseña?</a>
+          <a href="#" id="forgotPwd" class="text-[#86efac]">¿Olvidaste tu contraseña?</a>
         </p>
         <div id="resetPwdBox" class="hidden mt-4 pt-4 border-t border-white/10">
           <p class="text-sm text-white/70 mb-2">Ingresá tu email y te enviamos un enlace para restablecer la contraseña.</p>
@@ -114,13 +114,13 @@
         </div>
         <input type="text" id="signUpKioscoName" placeholder="Nombre del negocio" class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white">
         <div class="mb-4 flex items-start gap-2">
-          <input type="checkbox" id="signUpAcceptTerms" class="mt-1.5 rounded border-white/30 bg-white/10 text-[#dc2626] focus:ring-[#dc2626]">
+          <input type="checkbox" id="signUpAcceptTerms" class="mt-1.5 rounded border-white/30 bg-white/10 text-[#22c55e] focus:ring-[#22c55e]">
           <label for="signUpAcceptTerms" class="text-sm text-white/80 leading-tight">
-            Acepto los <button type="button" id="openTermsModal" class="text-[#f87171] underline font-medium">Términos y Condiciones</button> y el Contrato de Servicio de Ferriol OS (incluyendo que no hay responsabilidad por pérdida de datos y que los datos están sujetos a la licencia del servicio).
+            Acepto los <button type="button" id="openTermsModal" class="text-[#86efac] underline font-medium">Términos y Condiciones</button> y el Contrato de Servicio de Ferriol OS (incluyendo que no hay responsabilidad por pérdida de datos y que los datos están sujetos a la licencia del servicio).
           </label>
         </div>
         <button type="button" id="doSignUp" class="btn-login w-full py-2">Crear cuenta</button>
-        <p class="login-hint mt-4"><a href="#" id="backToLogin" class="text-[#f87171]">Volver al inicio de sesión</a></p>
+        <p class="login-hint mt-4"><a href="#" id="backToLogin" class="text-[#86efac]">Volver al inicio de sesión</a></p>
       </div>
 
       <!-- Modal Términos y Condiciones -->
@@ -253,11 +253,11 @@
           </div>
         </div>
         <!-- Resumen del día: entraron + ventas + chips por método -->
-        <div id="dashboardResumenDia" class="glass rounded-2xl p-5 slide-up kiosquero-only border border-[#dc2626]/30">
+        <div id="dashboardResumenDia" class="glass rounded-2xl p-5 slide-up kiosquero-only border border-[#22c55e]/30">
           <div class="flex items-center justify-between gap-4 flex-wrap">
             <div class="flex-1 min-w-0">
               <p class="text-sm text-white/60 mb-0.5">Resumen del día</p>
-              <p id="resumenDiaTexto" class="text-2xl sm:text-3xl font-bold text-[#f87171]">Entraron $0</p>
+              <p id="resumenDiaTexto" class="text-2xl sm:text-3xl font-bold text-[#86efac]">Entraron $0</p>
               <p id="resumenDiaVentas" class="text-sm text-white/50 mt-1">0 ventas</p>
               <div id="resumenDiaPorMetodo" class="flex flex-wrap gap-1.5 mt-2"></div>
             </div>
@@ -269,7 +269,7 @@
         <!-- Productos frecuentes (más vendidos hoy) -->
         <div id="dashboardFrecuentesWrap" class="slide-up kiosquero-only hidden">
           <h3 class="font-semibold mb-2 flex items-center gap-2 text-sm text-white/80">
-            <i data-lucide="trending-up" class="w-4 h-4 text-[#f87171]"></i>
+            <i data-lucide="trending-up" class="w-4 h-4 text-[#86efac]"></i>
             Más vendidos hoy
           </h3>
           <div id="dashboardFrecuentes" class="flex gap-2 overflow-x-auto pb-2 -mx-1 scrollbar-hide">
@@ -278,16 +278,16 @@
         </div>
         <div class="glass rounded-2xl p-6 slide-up">
           <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
-            <i data-lucide="activity" class="w-5 h-5 text-[#f87171]"></i>
+            <i data-lucide="activity" class="w-5 h-5 text-[#86efac]"></i>
             Métricas del día
           </h2>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            <button type="button" id="btnVentasCard" class="glass rounded-xl p-4 border border-white/10 text-left transition-all hover:border-[#dc2626]/50 active:scale-[0.98] touch-target">
+            <button type="button" id="btnVentasCard" class="glass rounded-xl p-4 border border-white/10 text-left transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
               <p class="text-xs text-white/60 mb-1">Dinero que entró</p>
-              <p id="metricVentas" class="text-2xl font-bold text-[#f87171]">$0</p>
+              <p id="metricVentas" class="text-2xl font-bold text-[#86efac]">$0</p>
               <p class="text-xs text-white/50 mt-1">Facturación del día</p>
             </button>
-            <button type="button" id="btnTransCard" class="glass rounded-xl p-4 border border-white/10 text-left transition-all hover:border-[#dc2626]/50 active:scale-[0.98] touch-target">
+            <button type="button" id="btnTransCard" class="glass rounded-xl p-4 border border-white/10 text-left transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
               <p class="text-xs text-white/60 mb-1">Ganancia / Rentabilidad</p>
               <p id="metricTrans" class="text-2xl font-bold text-green-400">$0</p>
               <p class="text-xs text-white/50 mt-1">Precio − costo de productos</p>
@@ -296,7 +296,7 @@
         </div>
         <div class="glass rounded-2xl p-6 slide-up" style="animation-delay: 0.05s">
           <h3 class="font-semibold mb-4 flex items-center gap-2">
-            <i data-lucide="wallet" class="w-4 h-4 text-[#f87171]"></i>
+            <i data-lucide="wallet" class="w-4 h-4 text-[#86efac]"></i>
             Saldos a cobrar
           </h3>
           <p class="text-xs text-white/50 mb-3">Fiados y transferencias pendientes. Marcá como pagado cuando cobres.</p>
@@ -306,13 +306,13 @@
           <p id="saldosACobrarEmpty" class="text-sm text-white/50 py-4 text-center hidden">No hay saldos pendientes.</p>
         </div>
         <!-- Cuenta regresiva prueba (abajo, después de saldos a cobrar) -->
-        <div id="trialCountdownBanner" class="glass rounded-2xl p-4 slide-up kiosquero-only hidden border border-[#dc2626]/40">
+        <div id="trialCountdownBanner" class="glass rounded-2xl p-4 slide-up kiosquero-only hidden border border-[#22c55e]/40">
           <div class="flex items-center justify-between gap-3 flex-wrap">
             <div class="flex items-center gap-2 flex-1 min-w-0">
-              <i data-lucide="clock" class="w-5 h-5 text-[#f87171] shrink-0"></i>
+              <i data-lucide="clock" class="w-5 h-5 text-[#86efac] shrink-0"></i>
               <span id="trialCountdownText" class="font-medium">15 días de prueba restantes</span>
             </div>
-            <span id="trialCountdownDays" class="px-3 py-1 rounded-full bg-[#dc2626]/30 text-[#f87171] font-bold text-lg shrink-0">15</span>
+            <span id="trialCountdownDays" class="px-3 py-1 rounded-full bg-[#22c55e]/30 text-[#86efac] font-bold text-lg shrink-0">15</span>
             <button type="button" id="trialRenovarBtn" class="w-full sm:w-auto mt-2 sm:mt-0 inline-flex items-center justify-center gap-2 rounded-xl py-2.5 px-4 text-sm font-medium touch-target shrink-0 bg-green-600 hover:bg-green-500 text-white">
               <i data-lucide="refresh-cw" class="w-4 h-4"></i> Renovar
             </button>
@@ -325,10 +325,10 @@
     <section id="panel-scanner" class="panel hidden">
       <div class="glass rounded-2xl p-6 slide-up">
         <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
-          <i data-lucide="scan-line" class="w-5 h-5 text-[#f87171]"></i>
+          <i data-lucide="scan-line" class="w-5 h-5 text-[#86efac]"></i>
           Escáner de códigos
         </h2>
-        <div class="relative aspect-square max-w-sm mx-auto rounded-2xl overflow-hidden border-2 border-[#dc2626]/50 pulse-glow bg-black/40">
+        <div class="relative aspect-square max-w-sm mx-auto rounded-2xl overflow-hidden border-2 border-[#22c55e]/50 pulse-glow bg-black/40">
           <video id="scannerVideo" class="w-full h-full object-cover" playsinline muted></video>
           <canvas id="scannerCanvas" class="hidden"></canvas>
           <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -347,7 +347,7 @@
             <i data-lucide="scan" class="w-5 h-5"></i> Mantener presionado para escanear
           </button>
           <div class="flex gap-2">
-            <input type="text" id="manualCode" placeholder="Código manual" class="flex-1 glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#dc2626] text-base" inputmode="numeric">
+            <input type="text" id="manualCode" placeholder="Código manual" class="flex-1 glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base" inputmode="numeric">
             <button id="manualAdd" class="btn-neomorphic rounded-xl px-4 py-3 transition-transform active:scale-95 touch-target">
               <i data-lucide="plus" class="w-5 h-5"></i>
             </button>
@@ -360,12 +360,12 @@
     <section id="panel-inventory" class="panel hidden">
       <div class="glass rounded-2xl p-6 slide-up">
         <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
-          <i data-lucide="package-search" class="w-5 h-5 text-[#f87171]"></i>
+          <i data-lucide="package-search" class="w-5 h-5 text-[#86efac]"></i>
           Productos
         </h2>
         <p class="text-xs text-white/50 mb-2">Máximo 100 productos. Buscá o agregá uno nuevo.</p>
         <div class="flex flex-col sm:flex-row gap-2 mb-4">
-          <input type="text" id="searchInventory" placeholder="Buscar producto..." class="flex-1 glass rounded-xl px-4 py-3 sm:py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#dc2626] text-base" autocomplete="off">
+          <input type="text" id="searchInventory" placeholder="Buscar producto..." class="flex-1 glass rounded-xl px-4 py-3 sm:py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base" autocomplete="off">
           <button id="addProduct" class="btn-glow rounded-xl px-4 py-3 sm:py-2.5 flex items-center justify-center gap-2 touch-target">
             <i data-lucide="plus" class="w-4 h-4"></i> Agregar
           </button>
@@ -380,7 +380,7 @@
     <section id="panel-caja" class="panel hidden">
       <div class="glass rounded-2xl p-6 slide-up">
         <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
-          <i data-lucide="banknote" class="w-5 h-5 text-[#f87171]"></i>
+          <i data-lucide="banknote" class="w-5 h-5 text-[#86efac]"></i>
           Cierre de caja ejecutivo
         </h2>
         <p class="text-sm text-white/70 mb-4">Al cerrar caja se guarda el resumen del día y se reinician los totales (efectivo, tarjeta, etc.) para empezar el día siguiente. Las ventas ya quedan guardadas en el historial.</p>
@@ -411,7 +411,7 @@
           </div>
           <div class="flex justify-between py-4 text-lg">
             <span class="font-semibold">Total</span>
-            <span id="cajaTotal" class="font-bold text-[#f87171] text-xl">$0</span>
+            <span id="cajaTotal" class="font-bold text-[#86efac] text-xl">$0</span>
           </div>
         </div>
         <button id="generateTicket" class="w-full btn-glow rounded-xl py-3 font-semibold flex items-center justify-center gap-2 mb-3">
@@ -422,7 +422,7 @@
         </button>
         <div class="border-t border-white/10 pt-4">
           <h3 class="font-semibold mb-3 flex items-center gap-2 text-sm text-white/80">
-            <i data-lucide="history" class="w-4 h-4 text-[#f87171]"></i> Historial de cierres
+            <i data-lucide="history" class="w-4 h-4 text-[#86efac]"></i> Historial de cierres
           </h3>
           <div id="cierresCajaList" class="space-y-2 max-h-[40vh] overflow-y-auto text-sm">
             <p class="text-white/50 text-center py-4">Cargando...</p>
@@ -435,27 +435,27 @@
     <section id="panel-mas" class="panel hidden">
       <div class="glass rounded-2xl p-6 slide-up">
         <h2 class="font-bold text-xl mb-6 flex items-center gap-2">
-          <i data-lucide="menu" class="w-5 h-5 text-[#f87171]"></i>
+          <i data-lucide="menu" class="w-5 h-5 text-[#86efac]"></i>
           Más opciones
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button data-nav="historial" class="glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#dc2626]/50 active:scale-[0.98] touch-target">
-            <div class="w-14 h-14 rounded-2xl bg-[#dc2626]/30 flex items-center justify-center">
-              <i data-lucide="history" class="w-7 h-7 text-[#f87171]"></i>
+          <button data-nav="historial" class="glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
+            <div class="w-14 h-14 rounded-2xl bg-[#22c55e]/30 flex items-center justify-center">
+              <i data-lucide="history" class="w-7 h-7 text-[#86efac]"></i>
             </div>
             <span class="font-semibold text-base">Historial</span>
             <span class="text-xs text-white/60">Ventas y deudores</span>
           </button>
-          <button data-nav="config" class="glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#dc2626]/50 active:scale-[0.98] touch-target">
-            <div class="w-14 h-14 rounded-2xl bg-[#dc2626]/30 flex items-center justify-center">
-              <i data-lucide="settings" class="w-7 h-7 text-[#f87171]"></i>
+          <button data-nav="config" class="glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
+            <div class="w-14 h-14 rounded-2xl bg-[#22c55e]/30 flex items-center justify-center">
+              <i data-lucide="settings" class="w-7 h-7 text-[#86efac]"></i>
             </div>
             <span class="font-semibold text-base">Configuración</span>
             <span class="text-xs text-white/60">Nombre, mensajes y copia de seguridad</span>
           </button>
-          <button data-nav="clientes" class="glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#dc2626]/50 active:scale-[0.98] touch-target">
-            <div class="w-14 h-14 rounded-2xl bg-[#dc2626]/30 flex items-center justify-center">
-              <i data-lucide="book-user" class="w-7 h-7 text-[#f87171]"></i>
+          <button data-nav="clientes" class="glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
+            <div class="w-14 h-14 rounded-2xl bg-[#22c55e]/30 flex items-center justify-center">
+              <i data-lucide="book-user" class="w-7 h-7 text-[#86efac]"></i>
             </div>
             <span class="font-semibold text-base">Clientes</span>
             <span class="text-xs text-white/60">Lista con teléfono y datos</span>
@@ -469,12 +469,12 @@
       <div class="glass rounded-2xl p-4 sm:p-6 slide-up">
         <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
           <h2 class="font-bold text-lg sm:text-xl flex items-center gap-2 shrink-0">
-            <i data-lucide="history" class="w-5 h-5 text-[#f87171]"></i>
+            <i data-lucide="history" class="w-5 h-5 text-[#86efac]"></i>
             Historial
           </h2>
           <div class="flex flex-col gap-3">
           <div class="flex flex-wrap items-center gap-2">
-            <button type="button" class="historial-tab-btn px-3 py-1.5 rounded-xl text-sm font-medium transition-all touch-target bg-[#dc2626]/30 border border-[#dc2626]/50" data-tab="ventas">Ventas</button>
+            <button type="button" class="historial-tab-btn px-3 py-1.5 rounded-xl text-sm font-medium transition-all touch-target bg-[#22c55e]/30 border border-[#22c55e]/50" data-tab="ventas">Ventas</button>
             <button type="button" class="historial-tab-btn px-3 py-1.5 rounded-xl text-sm font-medium transition-all touch-target glass border border-white/10" data-tab="deudores">Deudores</button>
           </div>
           <div class="flex flex-wrap items-center gap-2">
@@ -523,11 +523,11 @@
     <section id="panel-clientes" class="panel hidden">
       <div class="glass rounded-2xl p-6 slide-up">
         <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
-          <i data-lucide="book-user" class="w-5 h-5 text-[#f87171]"></i>
+          <i data-lucide="book-user" class="w-5 h-5 text-[#86efac]"></i>
           Lista de clientes
         </h2>
         <div class="flex flex-col sm:flex-row gap-2 mb-4">
-          <input type="text" id="clientesSearch" placeholder="Buscar por nombre o teléfono..." class="flex-1 glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#dc2626] text-base" autocomplete="off">
+          <input type="text" id="clientesSearch" placeholder="Buscar por nombre o teléfono..." class="flex-1 glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base" autocomplete="off">
           <button type="button" id="btnAddCliente" class="btn-glow rounded-xl px-4 py-3 flex items-center justify-center gap-2 touch-target">
             <i data-lucide="user-plus" class="w-4 h-4"></i> Agregar cliente
           </button>
@@ -540,24 +540,24 @@
     <section id="panel-config" class="panel hidden">
       <div class="glass rounded-2xl p-6 slide-up">
         <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
-          <i data-lucide="settings" class="w-5 h-5 text-[#f87171]"></i>
+          <i data-lucide="settings" class="w-5 h-5 text-[#86efac]"></i>
           Configuración del negocio
         </h2>
         <p class="text-sm text-white/70 mb-4">Podés exportar o importar una copia de tus datos (productos, ventas del día, saldos a cobrar) más abajo en esta pantalla.</p>
         <div class="space-y-4">
           <div>
             <label class="block text-sm text-white/70 mb-2">Nombre del negocio</label>
-            <input type="text" id="configKioscoName" placeholder="Ej: Mi Negocio" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#dc2626]">
+            <input type="text" id="configKioscoName" placeholder="Ej: Mi Negocio" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
           </div>
           <div>
-            <label class="block text-sm text-white/70 mb-2">Mensaje de cobro por WhatsApp (usá <code class="text-[#f87171]">{cliente}</code> y <code class="text-[#f87171]">{monto}</code>)</label>
-            <textarea id="configWhatsappMsg" rows="4" placeholder="Hola {cliente}, tenés un saldo de ${monto}..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#dc2626] resize-y"></textarea>
+            <label class="block text-sm text-white/70 mb-2">Mensaje de cobro por WhatsApp (usá <code class="text-[#86efac]">{cliente}</code> y <code class="text-[#86efac]">{monto}</code>)</label>
+            <textarea id="configWhatsappMsg" rows="4" placeholder="Hola {cliente}, tenés un saldo de ${monto}..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] resize-y"></textarea>
           </div>
           <button id="saveConfig" class="btn-glow rounded-xl py-3 px-6 font-semibold">Guardar</button>
 
           <div class="mt-6 pt-6 border-t border-white/10">
             <h3 class="font-semibold mb-2 flex items-center gap-2">
-              <i data-lucide="zap" class="w-4 h-4 text-[#f87171]"></i>
+              <i data-lucide="zap" class="w-4 h-4 text-[#86efac]"></i>
               Productos para cobro rápido
             </h3>
             <p class="text-sm text-white/60 mb-3">Nombres y porcentaje de ganancia para Cobro rápido (cualquier negocio). Si ponés margen %, se calcula el costo para la rentabilidad.</p>
@@ -587,7 +587,7 @@
 
           <div class="mt-6 pt-6 border-t border-white/10">
             <h3 class="font-semibold mb-2 flex items-center gap-2">
-              <i data-lucide="database-backup" class="w-4 h-4 text-[#f87171]"></i>
+              <i data-lucide="database-backup" class="w-4 h-4 text-[#86efac]"></i>
               Copia de seguridad
             </h3>
             <p class="text-sm text-white/60 mb-3">Exportá tus datos (productos, caja, ventas del día, saldos a cobrar) antes de actualizar la app. Así podés actualizar sin riesgo: si algo falla, importá el archivo para recuperar todo.</p>
@@ -604,7 +604,7 @@
           </div>
           <div class="mt-6 pt-6 border-t border-white/10">
             <h3 class="font-semibold mb-2 flex items-center gap-2">
-              <i data-lucide="file-spreadsheet" class="w-4 h-4 text-[#f87171]"></i>
+              <i data-lucide="file-spreadsheet" class="w-4 h-4 text-[#86efac]"></i>
               Exportar a hoja de cálculo (CSV)
             </h3>
             <p class="text-sm text-white/60 mb-3">Descargá listas en formato CSV para abrir en Excel o Google Sheets. Las tildes se guardan correctamente (UTF-8).</p>
@@ -617,7 +617,7 @@
           </div>
           <div class="mt-6 pt-6 border-t border-white/10 kiosquero-only">
             <h3 class="font-semibold mb-2 flex items-center gap-2">
-              <i data-lucide="log-out" class="w-4 h-4 text-[#f87171]"></i>
+              <i data-lucide="log-out" class="w-4 h-4 text-[#86efac]"></i>
               Cerrar sesión
             </h3>
             <button type="button" id="logoutBtnConfig" class="btn-neomorphic rounded-xl py-3 px-4 font-medium flex items-center gap-2 touch-target w-full sm:w-auto">
@@ -634,7 +634,7 @@
         <!-- Sección Negocios -->
         <div id="super-section-negocios" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up relative">
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2">
-            <i data-lucide="store" class="w-5 h-5 text-[#f87171]"></i>
+            <i data-lucide="store" class="w-5 h-5 text-[#86efac]"></i>
             Negocios
           </h2>
           <div class="flex flex-wrap gap-2 mb-4">
@@ -643,9 +643,9 @@
             </button>
           </div>
           <p class="text-xs text-white/50 mb-3">Tocá un negocio para ver detalles, membresía y estado. Para quitar a una persona se pide contraseña de admin (configurarla en Ajustes).</p>
-          <input type="text" id="superSearchEmail" placeholder="Buscar por email o nombre..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#dc2626] text-sm mb-3" autocomplete="off">
+          <input type="text" id="superSearchEmail" placeholder="Buscar por email o nombre..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm mb-3" autocomplete="off">
           <div class="flex gap-2 mb-2">
-            <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-[#dc2626]/50 bg-[#dc2626]/30" data-filter="todos">Todos</button>
+            <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-[#22c55e]/50 bg-[#22c55e]/30" data-filter="todos">Todos</button>
             <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-white/20 glass" data-filter="activos">Activos</button>
             <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-white/20 glass" data-filter="inactivos">Inactivos</button>
           </div>
@@ -656,30 +656,30 @@
         <!-- Sección Ajustes -->
         <div id="super-section-ajustes" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
-            <i data-lucide="settings" class="w-5 h-5 text-[#f87171]"></i>
+            <i data-lucide="settings" class="w-5 h-5 text-[#86efac]"></i>
             Ajustes
           </h2>
           <div class="space-y-4">
             <div>
               <p class="text-xs text-white/50 mb-2">Números de contacto que verán los usuarios cuando la cuenta esté desactivada o se termine la prueba.</p>
               <label class="block text-xs text-white/70 mb-1">Contacto 1 (WhatsApp)</label>
-              <input type="tel" id="adminContactWhatsapp" placeholder="Ej. 5491112345678" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#dc2626] text-base mb-3">
+              <input type="tel" id="adminContactWhatsapp" placeholder="Ej. 5491112345678" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
               <label class="block text-xs text-white/70 mb-1">Contacto 2 (WhatsApp)</label>
-              <input type="tel" id="adminContactWhatsapp2" placeholder="Ej. 5491198765432 (opcional)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#dc2626] text-base mb-3">
+              <input type="tel" id="adminContactWhatsapp2" placeholder="Ej. 5491198765432 (opcional)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
               <label class="block text-xs text-white/70 mb-1">Contacto 3 (WhatsApp, opcional)</label>
-              <input type="tel" id="adminContactWhatsapp3" placeholder="Opcional" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#dc2626] text-base mb-3">
+              <input type="tel" id="adminContactWhatsapp3" placeholder="Opcional" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
               <label class="block text-xs text-white/70 mb-1">Contacto 4 (WhatsApp, opcional)</label>
-              <input type="tel" id="adminContactWhatsapp4" placeholder="Opcional" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#dc2626] text-base mb-3">
+              <input type="tel" id="adminContactWhatsapp4" placeholder="Opcional" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
             </div>
             <div>
               <label class="block text-xs text-white/70 mb-1">Contraseña para quitar usuarios (opcional)</label>
-              <input type="password" id="adminDeletePassword" placeholder="Al quitar un negocio se pedirá esta contraseña" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#dc2626] text-base mb-3">
+              <input type="password" id="adminDeletePassword" placeholder="Al quitar un negocio se pedirá esta contraseña" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
             </div>
             <button type="button" id="saveAdminContact" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold">Guardar ajustes</button>
             <p id="adminContactMsg" class="text-xs mt-2 text-green-300 hidden"></p>
             <div class="border-t border-white/10 pt-4 mt-6">
               <h3 class="font-semibold mb-2 flex items-center gap-2 text-sm text-white/90">
-                <i data-lucide="database-backup" class="w-4 h-4 text-[#f87171]"></i> Respaldo de todos los usuarios
+                <i data-lucide="database-backup" class="w-4 h-4 text-[#86efac]"></i> Respaldo de todos los usuarios
               </h3>
               <p class="text-xs text-white/50 mb-3">Exportá una copia o importá para complementar: al importar se suman los datos del archivo a lo que ya tiene cada usuario (no se reemplaza nada).</p>
               <div class="flex flex-wrap gap-2 mb-2">
@@ -698,12 +698,12 @@
         <!-- Sección Notificaciones -->
         <div id="super-section-notificaciones" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; min-height: 100%; max-height: 85vh;">
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2">
-            <i data-lucide="bell" class="w-5 h-5 text-[#f87171]"></i>
+            <i data-lucide="bell" class="w-5 h-5 text-[#86efac]"></i>
             Notificaciones
           </h2>
           <p class="text-xs text-white/50 mb-3">Enviá un mensaje a todos los negocios. Lo verán en la campana de la app.</p>
           <label class="block text-sm font-medium text-white/80 mb-2">Mensaje para todos los usuarios</label>
-          <textarea id="adminNotificationMessage" rows="5" placeholder="Ej: Mañana cerramos a las 18 hs. / Recordá cargar stock de..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#dc2626] text-base resize-y mb-4 min-h-[120px]"></textarea>
+          <textarea id="adminNotificationMessage" rows="5" placeholder="Ej: Mañana cerramos a las 18 hs. / Recordá cargar stock de..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base resize-y mb-4 min-h-[120px]"></textarea>
           <button type="button" id="sendNotificationBtn" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold flex items-center gap-2 touch-target w-full sm:w-auto">
             <i data-lucide="send" class="w-4 h-4"></i> Enviar a todos
           </button>
@@ -712,11 +712,11 @@
         <!-- Sección Más -->
         <div id="super-section-mas" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0" style="display: none;">
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2">
-            <i data-lucide="user-cog" class="w-5 h-5 text-[#f87171]"></i>
+            <i data-lucide="user-cog" class="w-5 h-5 text-[#86efac]"></i>
             Agregar otro administrador
           </h2>
           <p class="text-xs text-white/50 mb-3">En Supabase → SQL Editor ejecutá (cambiá el email):</p>
-          <pre class="text-xs bg-black/30 rounded-lg p-3 overflow-x-auto text-[#f87171] mb-2" id="sqlAddAdmin">UPDATE profiles SET role = 'super' WHERE id = (SELECT id FROM auth.users WHERE email = 'tu-email@ejemplo.com');</pre>
+          <pre class="text-xs bg-black/30 rounded-lg p-3 overflow-x-auto text-[#86efac] mb-2" id="sqlAddAdmin">UPDATE profiles SET role = 'super' WHERE id = (SELECT id FROM auth.users WHERE email = 'tu-email@ejemplo.com');</pre>
         </div>
       </div>
     </section>
@@ -733,16 +733,16 @@
         </div>
         <p class="text-sm text-white/70 mb-4">Completá los datos para dar de alta un nuevo usuario. Podrá iniciar sesión con el email y contraseña que ingreses.</p>
         <div id="newKiosqueroErr" class="login-err hidden mb-3"></div>
-        <input type="email" id="newKiosqueroEmail" placeholder="Email (obligatorio)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#dc2626] text-base mb-3">
-        <input type="tel" id="newKiosqueroPhone" placeholder="Teléfono (opcional)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#dc2626] text-base mb-3">
+        <input type="email" id="newKiosqueroEmail" placeholder="Email (obligatorio)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+        <input type="tel" id="newKiosqueroPhone" placeholder="Teléfono (opcional)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
         <div class="password-wrap mb-3">
-          <input type="password" id="newKiosqueroPassword" placeholder="Contraseña (mín. 6)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#dc2626] text-base" minlength="6">
+          <input type="password" id="newKiosqueroPassword" placeholder="Contraseña (mín. 6)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base" minlength="6">
           <label class="toggle-pwd" for="showNewKiosqueroPwd" title="Ver contraseña">
             <input type="checkbox" id="showNewKiosqueroPwd" class="pwd-checkbox">
             <span class="pwd-label">Ver</span>
           </label>
         </div>
-        <input type="text" id="newKiosqueroKioscoName" placeholder="Nombre del negocio" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#dc2626] text-base mb-4">
+        <input type="text" id="newKiosqueroKioscoName" placeholder="Nombre del negocio" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-4">
         <button type="button" id="btnCreateUserInModal" class="btn-glow rounded-xl py-3 w-full font-semibold flex items-center justify-center gap-2 touch-target">
           <i data-lucide="user-plus" class="w-5 h-5"></i> Crear negocio
         </button>
@@ -774,7 +774,7 @@
       <div class="p-6 h-full flex flex-col">
         <div class="flex justify-between items-center mb-6">
           <h3 class="font-bold text-xl flex items-center gap-2">
-            <i data-lucide="shopping-bag" class="w-5 h-5 text-[#f87171]"></i>
+            <i data-lucide="shopping-bag" class="w-5 h-5 text-[#86efac]"></i>
             Carrito
           </h3>
           <button id="closeCart" class="btn-neomorphic rounded-xl p-2.5 touch-target">
@@ -786,10 +786,10 @@
         </div>
         <div class="mt-6 pt-6 border-t border-white/10">
           <label class="block text-sm text-white/70 mb-2">Nombre del cliente</label>
-          <input type="text" id="cartClientName" placeholder="Ej: Juan, María..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#dc2626] text-base mb-4">
+          <input type="text" id="cartClientName" placeholder="Ej: Juan, María..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-4">
           <div class="flex justify-between text-lg mb-4">
             <span>Total</span>
-            <span id="cartTotal" class="font-bold text-[#f87171]">$0</span>
+            <span id="cartTotal" class="font-bold text-[#86efac]">$0</span>
           </div>
           <div class="flex flex-col gap-2">
             <button id="completeSale" class="w-full btn-glow rounded-xl py-4 font-semibold flex items-center justify-center gap-2 touch-target text-base">
@@ -811,27 +811,27 @@
     <div class="relative glass-strong rounded-2xl p-6 w-full max-w-sm scale-in max-h-[90vh] overflow-y-auto">
       <h3 class="font-bold text-lg mb-2 text-center">¿Cómo cobra?</h3>
       <p class="text-sm text-white/60 text-center mb-2">Elegí el método de pago</p>
-      <input type="text" id="paymentClientName" placeholder="Cliente (opcional)" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-[#dc2626]">
+      <input type="text" id="paymentClientName" placeholder="Cliente (opcional)" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
       <div id="paymentWhatsappWrap" class="hidden mb-4">
         <label class="block text-xs text-white/70 mb-1">WhatsApp (obligatorio para cobrar después)</label>
-        <input type="tel" id="paymentWhatsapp" placeholder="Ej: 54911 1234-5678" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#dc2626]">
+        <input type="tel" id="paymentWhatsapp" placeholder="Ej: 54911 1234-5678" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
         <p id="paymentWhatsappErr" class="text-red-300 text-xs mt-1 hidden">Ingresá el número de WhatsApp para poder cobrar después.</p>
       </div>
       <div class="grid grid-cols-2 gap-3">
-        <button data-payment="efectivo" class="payment-option glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#dc2626]/50 active:scale-[0.98] touch-target transition-all">
-          <i data-lucide="banknote" class="w-8 h-8 text-[#f87171]"></i>
+        <button data-payment="efectivo" class="payment-option glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#22c55e]/50 active:scale-[0.98] touch-target transition-all">
+          <i data-lucide="banknote" class="w-8 h-8 text-[#86efac]"></i>
           <span class="font-medium text-sm">Efectivo</span>
         </button>
-        <button data-payment="tarjeta" class="payment-option glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#dc2626]/50 active:scale-[0.98] touch-target transition-all">
-          <i data-lucide="credit-card" class="w-8 h-8 text-[#f87171]"></i>
+        <button data-payment="tarjeta" class="payment-option glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#22c55e]/50 active:scale-[0.98] touch-target transition-all">
+          <i data-lucide="credit-card" class="w-8 h-8 text-[#86efac]"></i>
           <span class="font-medium text-sm">Tarjeta</span>
         </button>
-        <button data-payment="transferencia" class="payment-option glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#dc2626]/50 active:scale-[0.98] touch-target transition-all">
-          <i data-lucide="smartphone" class="w-8 h-8 text-[#f87171]"></i>
+        <button data-payment="transferencia" class="payment-option glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#22c55e]/50 active:scale-[0.98] touch-target transition-all">
+          <i data-lucide="smartphone" class="w-8 h-8 text-[#86efac]"></i>
           <span class="font-medium text-sm">Transferencia</span>
         </button>
-        <button data-payment="fiado" class="payment-option glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#dc2626]/50 active:scale-[0.98] touch-target transition-all">
-          <i data-lucide="user-check" class="w-8 h-8 text-[#f87171]"></i>
+        <button data-payment="fiado" class="payment-option glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#22c55e]/50 active:scale-[0.98] touch-target transition-all">
+          <i data-lucide="user-check" class="w-8 h-8 text-[#86efac]"></i>
           <span class="font-medium text-sm">Fiado</span>
         </button>
         <button data-payment="transferencia_pendiente" class="payment-option col-span-2 glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#f59e0b]/50 active:scale-[0.98] touch-target transition-all">
@@ -854,23 +854,23 @@
         <p class="text-xs text-white/50 mb-1">Producto</p>
         <div id="cobroRapidoProductosWrap" class="flex flex-wrap gap-1.5"></div>
         <div id="cobroRapidoOtroWrap" class="hidden mt-1.5">
-          <input type="text" id="cobroRapidoOtroNombre" placeholder="Nombre" class="w-full glass rounded-lg px-3 py-2 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#dc2626]">
+          <input type="text" id="cobroRapidoOtroNombre" placeholder="Nombre" class="w-full glass rounded-lg px-3 py-2 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
         </div>
       </div>
       <div class="mb-3 flex gap-2 items-end">
         <div class="flex-1">
           <p class="text-xs text-white/50 mb-1">Precio final ($)</p>
-          <input type="number" id="cobroRapidoMonto" placeholder="0" min="1" step="1" class="w-full glass rounded-lg px-3 py-2.5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#dc2626] text-center">
+          <input type="number" id="cobroRapidoMonto" placeholder="0" min="1" step="1" class="w-full glass rounded-lg px-3 py-2.5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-center">
         </div>
         <div class="w-20">
           <p class="text-xs text-white/50 mb-1">Margen %</p>
-          <input type="number" id="cobroRapidoMargen" placeholder="0" min="0" step="1" class="w-full glass rounded-lg px-2 py-2.5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#dc2626] text-center text-sm" title="Ganancia % para calcular rentabilidad">
+          <input type="number" id="cobroRapidoMargen" placeholder="0" min="0" step="1" class="w-full glass rounded-lg px-2 py-2.5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-center text-sm" title="Ganancia % para calcular rentabilidad">
         </div>
       </div>
       <div id="cobroRapidoListaWrap" class="mb-3 min-h-[2.5rem]">
         <div id="cobroRapidoLista" class="space-y-1 max-h-24 overflow-y-auto"></div>
         <p id="cobroRapidoListaEmpty" class="text-xs text-white/40 py-1.5">Sin ítems. Agregá producto y precio final.</p>
-        <p id="cobroRapidoTotal" class="text-right font-bold text-[#f87171] mt-1 hidden">Total: $0</p>
+        <p id="cobroRapidoTotal" class="text-right font-bold text-[#86efac] mt-1 hidden">Total: $0</p>
       </div>
       <div id="cobroRapidoAtajoWrap" class="hidden mb-2">
         <button type="button" id="cobroRapidoAtajoBtn" class="w-full btn-glow rounded-xl py-3 font-semibold flex items-center justify-center gap-2 touch-target">
@@ -881,28 +881,28 @@
       <button type="button" id="cobroRapidoAgregarBtn" class="w-full btn-neomorphic rounded-xl py-2.5 font-medium flex items-center justify-center gap-2 touch-target mb-3">
         <i data-lucide="plus" class="w-4 h-4"></i> Agregar producto
       </button>
-      <input type="text" id="cobroRapidoCliente" placeholder="Cliente (opcional)" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-[#dc2626]">
+      <input type="text" id="cobroRapidoCliente" placeholder="Cliente (opcional)" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
       <div id="cobroRapidoWhatsappWrap" class="hidden mb-3">
         <label class="block text-xs text-white/70 mb-1">WhatsApp</label>
-        <input type="tel" id="cobroRapidoWhatsapp" placeholder="Ej: 54911 1234-5678" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#dc2626]">
+        <input type="tel" id="cobroRapidoWhatsapp" placeholder="Ej: 54911 1234-5678" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
         <p id="cobroRapidoWhatsappErr" class="text-red-300 text-xs mt-1 hidden">Ingresá WhatsApp.</p>
       </div>
       <p class="text-sm text-white/60 text-center mb-2">¿Cómo cobra?</p>
       <div class="grid grid-cols-2 gap-2 mb-4">
-        <button type="button" data-quick-payment="efectivo" class="quick-payment-option glass rounded-xl p-4 flex flex-col items-center gap-1 border border-white/10 hover:border-[#dc2626]/50 touch-target transition-all active:scale-[0.98]">
-          <i data-lucide="banknote" class="w-7 h-7 text-[#f87171]"></i>
+        <button type="button" data-quick-payment="efectivo" class="quick-payment-option glass rounded-xl p-4 flex flex-col items-center gap-1 border border-white/10 hover:border-[#22c55e]/50 touch-target transition-all active:scale-[0.98]">
+          <i data-lucide="banknote" class="w-7 h-7 text-[#86efac]"></i>
           <span class="font-medium text-sm">Efectivo</span>
         </button>
-        <button type="button" data-quick-payment="tarjeta" class="quick-payment-option glass rounded-xl p-4 flex flex-col items-center gap-1 border border-white/10 hover:border-[#dc2626]/50 touch-target transition-all active:scale-[0.98]">
-          <i data-lucide="credit-card" class="w-7 h-7 text-[#f87171]"></i>
+        <button type="button" data-quick-payment="tarjeta" class="quick-payment-option glass rounded-xl p-4 flex flex-col items-center gap-1 border border-white/10 hover:border-[#22c55e]/50 touch-target transition-all active:scale-[0.98]">
+          <i data-lucide="credit-card" class="w-7 h-7 text-[#86efac]"></i>
           <span class="font-medium text-sm">Tarjeta</span>
         </button>
-        <button type="button" data-quick-payment="transferencia" class="quick-payment-option glass rounded-xl p-4 flex flex-col items-center gap-1 border border-white/10 hover:border-[#dc2626]/50 touch-target transition-all active:scale-[0.98]">
-          <i data-lucide="smartphone" class="w-7 h-7 text-[#f87171]"></i>
+        <button type="button" data-quick-payment="transferencia" class="quick-payment-option glass rounded-xl p-4 flex flex-col items-center gap-1 border border-white/10 hover:border-[#22c55e]/50 touch-target transition-all active:scale-[0.98]">
+          <i data-lucide="smartphone" class="w-7 h-7 text-[#86efac]"></i>
           <span class="font-medium text-sm">Transferencia</span>
         </button>
-        <button type="button" data-quick-payment="fiado" class="quick-payment-option glass rounded-xl p-4 flex flex-col items-center gap-1 border border-white/10 hover:border-[#dc2626]/50 touch-target transition-all active:scale-[0.98]">
-          <i data-lucide="user-check" class="w-7 h-7 text-[#f87171]"></i>
+        <button type="button" data-quick-payment="fiado" class="quick-payment-option glass rounded-xl p-4 flex flex-col items-center gap-1 border border-white/10 hover:border-[#22c55e]/50 touch-target transition-all active:scale-[0.98]">
+          <i data-lucide="user-check" class="w-7 h-7 text-[#86efac]"></i>
           <span class="font-medium text-sm">Fiado</span>
         </button>
         <button type="button" data-quick-payment="transferencia_pendiente" class="quick-payment-option col-span-2 glass rounded-xl p-3 flex flex-col items-center gap-1 border border-white/10 hover:border-[#f59e0b]/50 touch-target transition-all active:scale-[0.98]">
@@ -921,11 +921,11 @@
       <h3 class="font-bold text-lg mb-4" id="clienteModalTitle">Nuevo cliente</h3>
       <input type="hidden" id="clienteId" value="">
       <div class="space-y-3">
-        <input type="text" id="clienteNombre" placeholder="Nombre completo" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#dc2626]">
-        <input type="tel" id="clienteTelefono" placeholder="Teléfono (con código de país)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#dc2626]">
-        <input type="email" id="clienteEmail" placeholder="Email (opcional)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#dc2626]">
-        <input type="text" id="clienteDireccion" placeholder="Dirección (opcional)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#dc2626]">
-        <textarea id="clienteNotas" placeholder="Notas (opcional)" rows="2" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#dc2626] resize-none"></textarea>
+        <input type="text" id="clienteNombre" placeholder="Nombre completo" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+        <input type="tel" id="clienteTelefono" placeholder="Teléfono (con código de país)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+        <input type="email" id="clienteEmail" placeholder="Email (opcional)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+        <input type="text" id="clienteDireccion" placeholder="Dirección (opcional)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+        <textarea id="clienteNotas" placeholder="Notas (opcional)" rows="2" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e] resize-none"></textarea>
         <button type="button" id="saveCliente" class="w-full btn-glow rounded-xl py-3 font-semibold">Guardar</button>
       </div>
     </div>
@@ -941,9 +941,9 @@
       </div>
       <input type="hidden" id="prodEditCodigo" value="">
       <div class="space-y-4">
-        <input type="text" id="prodNombre" placeholder="Nombre" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#dc2626]">
+        <input type="text" id="prodNombre" placeholder="Nombre" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
         <div class="flex gap-2">
-          <input type="text" id="prodCodigo" placeholder="Código" class="flex-1 glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#dc2626]">
+          <input type="text" id="prodCodigo" placeholder="Código" class="flex-1 glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
           <button type="button" id="prodEscanearCodigo" class="btn-neomorphic rounded-xl px-4 py-3 shrink-0 touch-target" title="Escanear código">
             <i data-lucide="scan" class="w-5 h-5"></i>
           </button>
@@ -951,25 +951,25 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs text-white/60 mb-1">Costo ($)</label>
-            <input type="number" id="prodCosto" placeholder="Ej. 2345" min="0" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#dc2626]">
+            <input type="number" id="prodCosto" placeholder="Ej. 2345" min="0" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
             <p id="prodCostoHint" class="text-xs text-red-400 mt-1 hidden">Poné 0 para poder recalcular el costo desde el precio.</p>
           </div>
           <div>
             <label class="block text-xs text-white/60 mb-1">Margen de ganancia (%)</label>
-            <input type="number" id="prodMargen" placeholder="Ej. 30" min="0" max="500" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#dc2626]">
+            <input type="number" id="prodMargen" placeholder="Ej. 30" min="0" max="500" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
             <p id="prodMargenError" class="text-xs text-red-400 mt-1 hidden">Falta el porcentaje de ganancia.</p>
           </div>
         </div>
         <p class="text-xs text-white/50">Precio al consumidor: se redondea al número entero más cercano de 100 (ej. 3048 → $3000).</p>
         <div>
           <label class="block text-xs text-white/60 mb-1">Precio al consumidor ($)</label>
-          <input type="number" id="prodPrecio" placeholder="Precio (calculado o manual)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#dc2626]">
+          <input type="number" id="prodPrecio" placeholder="Precio (calculado o manual)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
         </div>
         <label class="block text-xs text-white/60 mb-1">Stock disponible</label>
-        <input type="number" id="prodStock" placeholder="Stock disponible" value="10" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#dc2626]">
+        <input type="number" id="prodStock" placeholder="Stock disponible" value="10" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
         <div id="prodStockInicialWrap" class="hidden">
           <label class="block text-xs text-white/60 mb-1">Stock inicial (solo referencia)</label>
-          <input type="number" id="prodStockInicial" placeholder="Ej. 50" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#dc2626]">
+          <input type="number" id="prodStockInicial" placeholder="Ej. 50" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
         </div>
         <div class="flex gap-2">
           <button id="saveProduct" class="flex-1 btn-glow rounded-xl py-3 font-semibold">Guardar</button>
@@ -984,7 +984,7 @@
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="ventasProductosOverlay"></div>
     <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md max-h-[85vh] flex flex-col scale-in">
       <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-        <i data-lucide="package" class="w-5 h-5 text-[#f87171]"></i>
+        <i data-lucide="package" class="w-5 h-5 text-[#86efac]"></i>
         Productos vendidos hoy
       </h3>
       <div id="ventasProductosList" class="flex-1 overflow-y-auto space-y-2 text-sm"></div>
@@ -997,7 +997,7 @@
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="transaccionesOverlay"></div>
     <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md max-h-[85vh] flex flex-col scale-in">
       <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-        <i data-lucide="receipt" class="w-5 h-5 text-[#f87171]"></i>
+        <i data-lucide="receipt" class="w-5 h-5 text-[#86efac]"></i>
         Transacciones del día
       </h3>
       <div id="transaccionesList" class="flex-1 overflow-y-auto space-y-4 text-sm"></div>
@@ -1011,7 +1011,7 @@
     <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto scale-in">
       <div class="flex items-center justify-between mb-4">
         <h3 class="font-bold text-lg flex items-center gap-2">
-          <i data-lucide="receipt" class="w-5 h-5 text-[#f87171]"></i>
+          <i data-lucide="receipt" class="w-5 h-5 text-[#86efac]"></i>
           Detalle de la venta
         </h3>
         <button type="button" id="detalleVentaModalClose" class="btn-neomorphic rounded-xl p-2 touch-target">

@@ -1,12 +1,12 @@
 :root {
-  --indigo-deep: #450a0a;
-  --indigo-mid: #991b1b;
-  --violet-electric: #dc2626;
-  --violet-light: #f87171;
+  --indigo-deep: #052e16;
+  --indigo-mid: #14532d;
+  --violet-electric: #22c55e;
+  --violet-light: #86efac;
   --white-pure: #ffffff;
   --glass-bg: rgba(255, 255, 255, 0.08);
   --glass-border: rgba(255, 255, 255, 0.18);
-  --glow-violet: rgba(220, 38, 38, 0.45);
+  --glow-violet: rgba(34, 197, 94, 0.45);
   --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.35);
   --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.12);
   --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
@@ -29,7 +29,7 @@ html {
 
 body {
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  background: linear-gradient(145deg, #0f0505 0%, #450a0a 38%, #5c1212 62%, #1a0a0a 100%);
+  background: linear-gradient(145deg, #020b05 0%, #052e16 38%, #064e1f 62%, #020d06 100%);
   min-height: 100vh;
   min-height: 100dvh;
   color: var(--white-pure);
@@ -43,9 +43,9 @@ body::before {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 90% 55% at 50% -15%, rgba(220, 38, 38, 0.28), transparent 55%),
-    radial-gradient(ellipse 70% 45% at 100% 100%, rgba(248, 113, 113, 0.14), transparent 50%),
-    radial-gradient(ellipse 50% 40% at 0% 80%, rgba(153, 27, 27, 0.2), transparent 45%);
+    radial-gradient(ellipse 90% 55% at 50% -15%, rgba(34, 197, 94, 0.22), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 100% 100%, rgba(134, 239, 172, 0.1), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 0% 80%, rgba(20, 83, 45, 0.2), transparent 45%);
   pointer-events: none;
   z-index: 0;
 }
@@ -92,7 +92,7 @@ body::before {
 
 .btn-glow:hover {
   filter: brightness(1.08);
-  box-shadow: 0 0 36px rgba(220, 38, 38, 0.55);
+  box-shadow: 0 0 36px rgba(34, 197, 94, 0.55);
 }
 
 .laser-line {
@@ -124,7 +124,7 @@ body::before {
     box-shadow: 0 0 20px var(--glow-violet);
   }
   50% {
-    box-shadow: 0 0 44px rgba(220, 38, 38, 0.55);
+    box-shadow: 0 0 44px rgba(34, 197, 94, 0.55);
   }
 }
 
@@ -177,7 +177,7 @@ body::before {
 }
 
 .nav-item.active {
-  background: rgba(220, 38, 38, 0.38);
+  background: rgba(34, 197, 94, 0.25);
   border-left: 3px solid var(--violet-electric);
 }
 
@@ -202,21 +202,21 @@ body::before {
 .header-gradient {
   background: linear-gradient(
     105deg,
-    rgba(40, 10, 10, 0.98) 0%,
-    rgba(153, 27, 27, 0.92) 42%,
-    rgba(160, 30, 30, 0.9) 58%,
-    rgba(50, 12, 12, 0.98) 100%
+    rgba(3, 20, 9, 0.98) 0%,
+    rgba(20, 83, 45, 0.92) 42%,
+    rgba(22, 90, 50, 0.9) 58%,
+    rgba(4, 25, 11, 0.98) 100%
   );
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(220, 38, 38, 0.45);
+  border-bottom: 1px solid rgba(34, 197, 94, 0.35);
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.25),
-    0 1px 0 rgba(248, 113, 113, 0.15);
+    0 1px 0 rgba(134, 239, 172, 0.12);
 }
 
 .notif-panel {
-  background: rgba(45, 12, 12, 0.97);
+  background: rgba(4, 22, 11, 0.97);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -240,7 +240,7 @@ body::before {
 .bottom-nav-btn:hover,
 .bottom-nav-btn.active {
   color: #fff;
-  background: rgba(220, 38, 38, 0.3);
+  background: rgba(34, 197, 94, 0.25);
 }
 
 .bottom-nav-btn:active {
@@ -249,14 +249,14 @@ body::before {
 
 #headerSuperAjustesBtn.active,
 #headerSuperNotifBtn.active {
-  background: rgba(220, 38, 38, 0.4);
+  background: rgba(34, 197, 94, 0.3);
   color: #fff;
-  box-shadow: 0 0 22px rgba(220, 38, 38, 0.35);
+  box-shadow: 0 0 22px rgba(34, 197, 94, 0.35);
 }
 
 .scanner-circle {
   border: 3px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.35);
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.35);
   transition: transform 0.15s var(--ease-out), box-shadow 0.2s;
 }
 
@@ -274,8 +274,8 @@ body::before {
   justify-content: center;
   padding: 1.5rem;
   background:
-    radial-gradient(ellipse 100% 80% at 50% -20%, rgba(220, 38, 38, 0.35), transparent 50%),
-    linear-gradient(160deg, #0d0404 0%, #450a0a 45%, #4a1010 100%);
+    radial-gradient(ellipse 100% 80% at 50% -20%, rgba(34, 197, 94, 0.28), transparent 50%),
+    linear-gradient(160deg, #020b05 0%, #052e16 45%, #064e1f 100%);
 }
 
 #loginScreen.hidden {
@@ -284,7 +284,7 @@ body::before {
 
 .login-glass {
   position: relative;
-  background: rgba(40, 12, 12, 0.82);
+  background: rgba(5, 30, 15, 0.85);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -294,8 +294,8 @@ body::before {
   max-width: 420px;
   box-shadow:
     0 32px 64px -16px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(220, 38, 38, 0.15),
-    0 0 40px rgba(220, 38, 38, 0.2);
+    0 0 0 1px rgba(34, 197, 94, 0.15),
+    0 0 40px rgba(34, 197, 94, 0.18);
 }
 
 .login-glass::before {
@@ -304,7 +304,7 @@ body::before {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(248, 113, 113, 0.45), transparent 40%, rgba(220, 38, 38, 0.25));
+  background: linear-gradient(135deg, rgba(134, 239, 172, 0.45), transparent 40%, rgba(34, 197, 94, 0.25));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -319,7 +319,7 @@ body::before {
   letter-spacing: -0.03em;
   margin-bottom: 0.25rem;
   color: #fafafa;
-  text-shadow: 0 2px 24px rgba(248, 113, 113, 0.45);
+  text-shadow: 0 2px 24px rgba(134, 239, 172, 0.45);
 }
 
 .login-glass .sub {
@@ -344,20 +344,20 @@ body::before {
 .login-glass .btn-login {
   width: 100%;
   padding: 0.8rem;
-  background: linear-gradient(135deg, var(--violet-electric), #991b1b);
+  background: linear-gradient(135deg, var(--violet-electric), #14532d);
   color: #fff;
   font-weight: 600;
   border-radius: 0.65rem;
   border: none;
   cursor: pointer;
   margin-top: 0.5rem;
-  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.4);
+  box-shadow: 0 4px 20px rgba(34, 197, 94, 0.35);
   transition: transform 0.15s var(--ease-out), box-shadow 0.2s, filter 0.2s;
 }
 
 .login-glass .btn-login:hover {
   filter: brightness(1.06);
-  box-shadow: 0 6px 28px rgba(220, 38, 38, 0.5);
+  box-shadow: 0 6px 28px rgba(34, 197, 94, 0.5);
 }
 
 .login-glass .btn-login:active {
@@ -442,7 +442,7 @@ body::before {
   width: 52px;
   height: 28px;
   flex-shrink: 0;
-  background: rgba(239, 68, 68, 0.4);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 9999px;
   cursor: pointer;
   transition: background 0.2s;
@@ -476,7 +476,7 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid var(--violet-light);
+  outline: 2px solid var(--violet-electric);
   outline-offset: 2px;
 }
 
@@ -484,12 +484,12 @@ textarea:focus-visible {
 .login-glass input:focus-visible {
   outline: none !important;
   border-color: var(--violet-electric);
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.35);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.35);
 }
 
 .login-glass button:focus-visible {
   outline: none !important;
-  box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.65);
+  box-shadow: 0 0 0 2px rgba(134, 239, 172, 0.65);
 }
 
 @media (max-width: 640px) {
@@ -553,12 +553,12 @@ textarea:focus-visible {
 }
 
 #pwaInstallBanner .pwa-banner-inner {
-  background: rgba(40, 12, 12, 0.96);
+  background: rgba(4, 22, 11, 0.96);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 1.15rem;
   padding: 1.1rem 1.1rem 1.3rem;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45), 0 0 28px rgba(220, 38, 38, 0.25);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45), 0 0 28px rgba(34, 197, 94, 0.2);
 }
 
 #pwaInstallBanner .pwa-banner-top {
@@ -613,6 +613,7 @@ textarea:focus-visible {
   transition: filter 0.2s, transform 0.15s;
 }
 
+
 #pwaInstallBanner .pwa-btn:hover {
   filter: brightness(1.06);
 }
@@ -623,24 +624,129 @@ textarea:focus-visible {
 
 #pwaInstallBanner .pwa-need-server {
   font-size: 0.85rem;
-  color: #f87171;
+  color: #86efac;
   margin: 0.5rem 0 0;
   line-height: 1.4;
 }
 
 #pwaInstallBanner .pwa-hint {
   font-size: 0.85rem;
-  color: #f87171;
+  color: #86efac;
   margin: 0.75rem 0 0;
   padding: 0.65rem 0.8rem;
-  background: rgba(220, 38, 38, 0.18);
+  background: rgba(34, 197, 94, 0.15);
   border-radius: 0.55rem;
   line-height: 1.45;
   white-space: pre-line;
   display: none;
-  border: 1px solid rgba(220, 38, 38, 0.25);
+  border: 1px solid rgba(34, 197, 94, 0.25);
 }
 
 #pwaInstallBanner .pwa-hint.show {
   display: block;
+}
+
+/* ===== PANTALLAS COMPLETAS SIN LÍMITES ===== */
+
+/* App wrapper ocupa toda la pantalla en columna */
+#appWrap:not(.hidden) {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+
+/* Main ocupa el espacio restante entre el header y los navs fijos */
+#mainContent {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Cada panel llena el área del mainContent y scrollea internamente */
+.panel {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 1rem 1rem max(6.5rem, env(safe-area-inset-bottom, 0) + 6rem);
+}
+
+/* Animación de entrada al mostrar un panel */
+.panel:not(.hidden) {
+  animation: panelEntrada 0.3s var(--ease-out) forwards;
+}
+
+@keyframes panelEntrada {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Sin límites visuales: quitar fondo, borde y radio a los cards de los paneles ── */
+.panel > .glass,
+.panel > div.glass,
+.panel > .space-y-6 > .glass,
+.panel > .space-y-6 > div.glass {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Separador sutil entre bloques del dashboard */
+.panel > .space-y-6 > div + div {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+/* Panel super */
+#panel-super > .relative > .super-section {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Los inputs, botones y listas dentro de los paneles conservan su estilo glass */
+.panel input,
+.panel textarea,
+.panel select,
+.panel .glass.rounded-xl,
+.panel .glass.rounded-lg,
+.panel .btn-neomorphic,
+.panel .btn-glow {
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
+/* Inputs y textareas recuperan su propio fondo */
+.panel input,
+.panel textarea,
+.panel select {
+  background: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Botones glow y neomorphic mantienen su propio estilo */
+.panel .btn-glow {
+  background: linear-gradient(135deg, var(--violet-electric), var(--indigo-mid)) !important;
+  border: none !important;
+}
+
+.panel .btn-neomorphic {
+  background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05)) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
 }
