@@ -1258,7 +1258,7 @@
         if (typeof window._stopScannerInterval === 'function') window._stopScannerInterval();
         // No hacer focus en manualCode: en móvil abre el teclado y tapa el escáner. El teclado se abre solo al tocar la casilla "Código manual".
       } else if (typeof window._stopScannerInterval === 'function') window._stopScannerInterval();
-      if (name === 'caja') renderCierresCajaHistorial();
+      if (name === 'caja') window._switchCajaTab('hub');
       if (name === 'historial') {
         switchHistorialTab('ventas');
         renderHistorial(state.historialFilter || 'hoy');
@@ -1948,6 +1948,154 @@
       updateDashboard();
       renderCierresCajaHistorial();
     };
+
+    // ============================================================
+    // GASTOS Y PROVEEDORES
+    // ============================================================
+    var _gastosFiltro = { proveedor: 'hoy', gasto_fijo: 'hoy' };
+
+    function _fechaDesde(filtro) {
+      var hoy = new Date();
+      if (filtro === 'hoy') return hoy.toISOString().slice(0, 10);
+      if (filtro === 'semana') { var d = new Date(hoy); d.setDate(hoy.getDate() - 6); return d.toISOString().slice(0, 10); }
+      if (filtro === 'mes') { var d = new Date(hoy); d.setDate(1); return d.toISOString().slice(0, 10); }
+      return hoy.toISOString().slice(0, 10);
+    }
+
+    async function loadGastos(tipo) {
+      if (!supabaseClient || !currentUser?.id) return [];
+      try {
+        var desde = _fechaDesde(_gastosFiltro[tipo]);
+        var res = await supabaseClient.from('gastos')
+          .select('id, tipo, descripcion, monto, fecha, created_at')
+          .eq('user_id', currentUser.id).eq('tipo', tipo).gte('fecha', desde)
+          .order('fecha', { ascending: false }).order('created_at', { ascending: false });
+        if (res.error) throw res.error;
+        return res.data || [];
+      } catch (e) { return []; }
+    }
+
+    async function renderGastos(tipo) {
+      var listId = tipo === 'proveedor' ? 'proveedoresList' : 'gastosList';
+      var resumenId = tipo === 'proveedor' ? 'proveedoresResumen' : 'gastosResumen';
+      var totalId = tipo === 'proveedor' ? 'proveedoresTotalText' : 'gastosTotalText';
+      var listEl = document.getElementById(listId);
+      var resumenEl = document.getElementById(resumenId);
+      var totalEl = document.getElementById(totalId);
+      if (!listEl) return;
+      listEl.innerHTML = '<p class="text-white/50 text-center py-4">Cargando...</p>';
+      var rows = await loadGastos(tipo);
+      if (rows.length === 0) {
+        listEl.innerHTML = '<p class="text-white/50 text-center py-4">Sin registros para este período.</p>';
+        if (resumenEl) resumenEl.classList.add('hidden');
+        lucide.createIcons(); return;
+      }
+      var total = rows.reduce(function (s, r) { return s + Number(r.monto || 0); }, 0);
+      if (totalEl) totalEl.textContent = '$' + Math.round(total).toLocaleString('es-AR');
+      if (resumenEl) resumenEl.classList.remove('hidden');
+      listEl.innerHTML = rows.map(function (r) {
+        var desc = r.descripcion || '';
+        var fecha = (r.fecha || '').toString().slice(0, 10);
+        var monto = Number(r.monto || 0);
+        var icono = tipo === 'proveedor' ? 'truck' : 'receipt';
+        return '<div class="gasto-item glass rounded-xl px-4 py-3 border border-white/10 flex items-center gap-3">' +
+          '<i data-lucide="' + icono + '" class="w-4 h-4 text-[#86efac] shrink-0"></i>' +
+          '<div class="flex-1 min-w-0"><p class="font-medium text-sm truncate">' + desc.replace(/</g,'&lt;') + '</p>' +
+          '<p class="text-xs text-white/50">' + fecha + '</p></div>' +
+          '<div class="flex items-center gap-2 shrink-0">' +
+          '<span class="font-bold text-sm text-red-300">−$' + Math.round(monto).toLocaleString('es-AR') + '</span>' +
+          '<button onclick="window._eliminarGasto(\'' + r.id + '\',\'' + tipo + '\')" class="p-1.5 rounded-lg hover:bg-red-500/20 touch-target transition-colors" title="Eliminar"><i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-400/70"></i></button>' +
+          '</div></div>';
+      }).join('');
+      lucide.createIcons();
+    }
+
+    window._switchCajaTab = function (tab) {
+      var hub = document.getElementById('caja-hub');
+      var subs = ['cierre', 'proveedores', 'gastos'];
+      if (tab === 'hub') {
+        if (hub) hub.classList.remove('hidden');
+        subs.forEach(function (s) { var el = document.getElementById('caja-sub-' + s); if (el) el.classList.add('hidden'); });
+        return;
+      }
+      if (hub) hub.classList.add('hidden');
+      subs.forEach(function (s) { var el = document.getElementById('caja-sub-' + s); if (el) el.classList.add('hidden'); });
+      var sub = document.getElementById('caja-sub-' + tab);
+      if (sub) sub.classList.remove('hidden');
+      if (tab === 'cierre') renderCierresCajaHistorial();
+      if (tab === 'proveedores') { _resetFormInline('proveedor'); renderGastos('proveedor'); }
+      if (tab === 'gastos') { _resetFormInline('gasto_fijo'); renderGastos('gasto_fijo'); }
+      lucide.createIcons();
+    };
+
+    function _resetFormInline(tipo) {
+      var hoy = new Date().toISOString().slice(0, 10);
+      if (tipo === 'proveedor') {
+        var n = document.getElementById('provNombre'); if (n) n.value = '';
+        var d = document.getElementById('provDescripcion'); if (d) d.value = '';
+        var m = document.getElementById('provMonto'); if (m) m.value = '';
+        var f = document.getElementById('provFecha'); if (f) f.value = hoy;
+        var e = document.getElementById('provErr'); if (e) e.classList.add('hidden');
+      } else {
+        var d = document.getElementById('gastoDescInline'); if (d) d.value = '';
+        var m = document.getElementById('gastoMontoInline'); if (m) m.value = '';
+        var f = document.getElementById('gastoFechaInline'); if (f) f.value = hoy;
+        var e = document.getElementById('gastoErrInline'); if (e) e.classList.add('hidden');
+      }
+    }
+
+    window._guardarGastoInline = async function (tipo) {
+      var errId = tipo === 'proveedor' ? 'provErr' : 'gastoErrInline';
+      var errEl = document.getElementById(errId);
+      if (errEl) errEl.classList.add('hidden');
+      var descripcionFinal = '';
+      var monto = 0;
+      var fecha = '';
+      if (tipo === 'proveedor') {
+        var nombre = (document.getElementById('provNombre').value || '').trim();
+        var desc = (document.getElementById('provDescripcion').value || '').trim();
+        monto = parseFloat(document.getElementById('provMonto').value) || 0;
+        fecha = document.getElementById('provFecha').value;
+        if (!nombre) { if (errEl) { errEl.textContent = 'Ingresá el nombre del proveedor.'; errEl.classList.remove('hidden'); } return; }
+        descripcionFinal = nombre + (desc ? ' — ' + desc : '');
+      } else {
+        var desc = (document.getElementById('gastoDescInline').value || '').trim();
+        monto = parseFloat(document.getElementById('gastoMontoInline').value) || 0;
+        fecha = document.getElementById('gastoFechaInline').value;
+        if (!desc) { if (errEl) { errEl.textContent = 'Ingresá una descripción.'; errEl.classList.remove('hidden'); } return; }
+        descripcionFinal = desc;
+      }
+      if (monto <= 0) { if (errEl) { errEl.textContent = 'Ingresá un monto mayor a 0.'; errEl.classList.remove('hidden'); } return; }
+      if (!fecha) { if (errEl) { errEl.textContent = 'Seleccioná una fecha.'; errEl.classList.remove('hidden'); } return; }
+      if (!supabaseClient || !currentUser?.id) { if (errEl) { errEl.textContent = 'Sin conexión a Supabase.'; errEl.classList.remove('hidden'); } return; }
+      try {
+        var res = await supabaseClient.from('gastos').insert({ user_id: currentUser.id, tipo: tipo, descripcion: descripcionFinal, monto: monto, fecha: fecha });
+        if (res.error) throw res.error;
+        _resetFormInline(tipo);
+        renderGastos(tipo);
+      } catch (e) {
+        if (errEl) { errEl.textContent = 'Error al guardar: ' + (e.message || 'intente de nuevo.'); errEl.classList.remove('hidden'); }
+      }
+    };
+
+    window._filtrarGastos = function (tipo, filtro) {
+      _gastosFiltro[tipo] = filtro;
+      var selectorClass = tipo === 'proveedor' ? '.prov-filtro' : '.gasto-filtro';
+      document.querySelectorAll(selectorClass).forEach(function (b) {
+        b.classList.toggle('active', b.dataset.filtro === filtro);
+      });
+      renderGastos(tipo);
+    };
+
+    window._eliminarGasto = async function (id, tipo) {
+      if (!confirm('¿Eliminar este registro?')) return;
+      if (!supabaseClient || !currentUser?.id) return;
+      try {
+        await supabaseClient.from('gastos').delete().eq('id', id).eq('user_id', currentUser.id);
+        renderGastos(tipo);
+      } catch (_) {}
+    };
+    // ============================================================
 
     document.getElementById('exportDeudoresCSVBtn').onclick = function () { exportDeudoresCSV(); lucide.createIcons(); };
     document.getElementById('exportProductosCSVBtn').onclick = function () { exportProductosCSV(); lucide.createIcons(); };
