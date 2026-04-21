@@ -993,6 +993,7 @@
       });
       lucide.createIcons();
     }
+    window._abrirCobroRapido = function () { openCobroRapidoModal(); };
     function openCobroRapidoModal() {
       state.cobroRapidoItems = [];
       document.getElementById('cobroRapidoMonto').value = '';
