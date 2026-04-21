@@ -929,61 +929,41 @@ body[data-panel="inventory"] #panel-inventory {
   }
 }
 
-/* ── PC GRANDE (≥1100px): dos columnas en Productos ── */
+/* ── PC GRANDE (≥1100px) ── */
 @media (min-width: 1100px) {
 
-  /* Nav inferior más estrecha */
+  /* Nav inferior más estrecha y centrada */
   #navKiosquero .bottom-nav-bar,
   #navSuperBottom .bottom-nav-bar {
     max-width: 600px;
     border-radius: 1rem 1rem 0 0;
   }
 
-  /* Lista de productos: deja lugar para el panel de detalle a la derecha */
-  body[data-panel="inventory"] #panel-inventory {
-    right: 420px !important;
-    overflow-y: auto;
+  /* Lista de productos: centrada con ancho cómodo para PC */
+  .inv-topbar, .inv-searchbar {
+    max-width: 780px;
+  }
+  #inventoryList {
+    max-width: 780px;
   }
 
-  /* Panel de detalle: columna derecha fija, NO participa en el flujo del layout */
-  body[data-panel="inventory"] #productDetailPanel {
+  /* Detalle de producto en PC: modal centrado (igual que mobile, sin dos columnas) */
+  #productDetailPanel {
     position: fixed !important;
-    top: 0 !important;
-    left: auto !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 420px !important;
-    display: flex !important;
-    background: linear-gradient(160deg, #020b05 0%, #052e16 60%, #064e1f 100%) !important;
-    border-left: 1px solid rgba(255,255,255,0.08) !important;
-    z-index: 11 !important;
-  }
-
-  /* Mostrar siempre la columna derecha en PC cuando está en Productos */
-  body[data-panel="inventory"] #productDetailPanel.hidden {
-    display: flex !important;
-  }
-  body[data-panel="inventory"] #productDetailPanel.hidden > * {
-    display: none !important;
-  }
-  body[data-panel="inventory"] #productDetailPanel.hidden::before {
-    content: 'Tocá un producto para ver el detalle';
-    display: block;
-    position: absolute;
-    inset: 0;
-    padding: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    font-size: 0.9rem;
-    color: rgba(255,255,255,0.25);
-    line-height: 1.6;
-  }
-
-  /* Ocultar botón "atrás" en PC */
-  body[data-panel="inventory"] #productDetailBack {
+    inset: 0 !important;
     display: none;
+    width: 100% !important;
+  }
+  #productDetailPanel:not(.hidden) {
+    display: flex !important;
+  }
+  /* Contenido del detalle centrado en pantalla grande */
+  #productDetailPanel > div,
+  #productDetailPanel > * {
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
   }
 }
 
