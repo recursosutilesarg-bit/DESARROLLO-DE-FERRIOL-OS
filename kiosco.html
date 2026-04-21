@@ -225,9 +225,9 @@
             <i data-lucide="scan" class="w-7 h-7 sm:w-8 sm:h-8 text-white"></i>
           </button>
         </div>
-        <button data-nav="caja" class="bottom-nav-btn nav-item flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Cierre de caja">
-          <i data-lucide="receipt" class="w-5 h-5 shrink-0"></i>
-          <span class="truncate w-full text-center">Cierre</span>
+        <button data-nav="caja" class="bottom-nav-btn nav-item flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Caja">
+          <i data-lucide="wallet" class="w-5 h-5 shrink-0"></i>
+          <span class="truncate w-full text-center">Caja</span>
         </button>
         <button data-nav="mas" class="bottom-nav-btn nav-item flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Deudores y Ajustes">
           <i data-lucide="menu" class="w-5 h-5 shrink-0"></i>
@@ -376,58 +376,162 @@
 
     <!-- Cierre de caja -->
     <section id="panel-caja" class="panel hidden">
-      <div class="glass rounded-2xl p-6 slide-up">
-        <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
-          <i data-lucide="banknote" class="w-5 h-5 text-[#86efac]"></i>
-          Cierre de caja ejecutivo
-        </h2>
-        <p class="text-sm text-white/70 mb-4">Al cerrar caja se guarda el resumen del día y se reinician los totales (efectivo, tarjeta, etc.) para empezar el día siguiente. Las ventas ya quedan guardadas en el historial.</p>
-        <div id="cajaSummary" class="space-y-4 mb-6">
-          <div class="flex justify-between py-3 border-b border-white/10">
-            <span>Efectivo</span>
-            <span id="cajaEfectivo" class="font-bold">$0</span>
+      <!-- Pestañas de navegación -->
+      <div class="caja-tabs-wrap">
+        <div class="caja-tabs">
+          <button class="caja-tab-btn active" data-caja-tab="cierre" onclick="window._switchCajaTab('cierre')">
+            <i data-lucide="check-circle" class="w-4 h-4"></i> Cierre
+          </button>
+          <button class="caja-tab-btn" data-caja-tab="proveedores" onclick="window._switchCajaTab('proveedores')">
+            <i data-lucide="truck" class="w-4 h-4"></i> Proveedores
+          </button>
+          <button class="caja-tab-btn" data-caja-tab="gastos" onclick="window._switchCajaTab('gastos')">
+            <i data-lucide="receipt" class="w-4 h-4"></i> Gastos
+          </button>
+        </div>
+      </div>
+
+      <!-- Sub-panel: Cierre de caja -->
+      <div id="caja-sub-cierre" class="caja-sub-panel">
+        <div class="glass rounded-2xl p-6 slide-up">
+          <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
+            <i data-lucide="banknote" class="w-5 h-5 text-[#86efac]"></i>
+            Cierre de caja
+          </h2>
+          <p class="text-sm text-white/70 mb-4">Al cerrar caja se guarda el resumen del día y se reinician los totales para empezar el día siguiente.</p>
+          <div id="cajaSummary" class="space-y-4 mb-6">
+            <div class="flex justify-between py-3 border-b border-white/10">
+              <span>Efectivo</span>
+              <span id="cajaEfectivo" class="font-bold">$0</span>
+            </div>
+            <div class="flex justify-between py-3 border-b border-white/10">
+              <span>Tarjeta</span>
+              <span id="cajaTarjeta" class="font-bold">$0</span>
+            </div>
+            <div class="flex justify-between py-3 border-b border-white/10">
+              <span>Transferencia</span>
+              <span id="cajaTransf" class="font-bold">$0</span>
+            </div>
+            <div class="flex justify-between py-3 border-b border-white/10">
+              <span>Fiado</span>
+              <span id="cajaFiado" class="font-bold">$0</span>
+            </div>
+            <div class="flex justify-between py-3 border-b border-white/10">
+              <span>Transferir pendiente</span>
+              <span id="cajaTransfPend" class="font-bold">$0</span>
+            </div>
+            <div class="flex justify-between py-3 border-b border-white/10">
+              <span class="text-green-400/90">Ganancia del día (precio − costo)</span>
+              <span id="cajaUtilidad" class="font-bold text-green-400">$0</span>
+            </div>
+            <div class="flex justify-between py-4 text-lg">
+              <span class="font-semibold">Total</span>
+              <span id="cajaTotal" class="font-bold text-[#86efac] text-xl">$0</span>
+            </div>
           </div>
-          <div class="flex justify-between py-3 border-b border-white/10">
-            <span>Tarjeta</span>
-            <span id="cajaTarjeta" class="font-bold">$0</span>
-          </div>
-          <div class="flex justify-between py-3 border-b border-white/10">
-            <span>Transferencia</span>
-            <span id="cajaTransf" class="font-bold">$0</span>
-          </div>
-          <div class="flex justify-between py-3 border-b border-white/10">
-            <span>Fiado</span>
-            <span id="cajaFiado" class="font-bold">$0</span>
-          </div>
-          <div class="flex justify-between py-3 border-b border-white/10">
-            <span>Transferir pendiente</span>
-            <span id="cajaTransfPend" class="font-bold">$0</span>
-          </div>
-          <div class="flex justify-between py-3 border-b border-white/10">
-            <span class="text-green-400/90">Ganancia del día (precio − costo)</span>
-            <span id="cajaUtilidad" class="font-bold text-green-400">$0</span>
-          </div>
-          <div class="flex justify-between py-4 text-lg">
-            <span class="font-semibold">Total</span>
-            <span id="cajaTotal" class="font-bold text-[#86efac] text-xl">$0</span>
+          <button id="generateTicket" class="w-full btn-glow rounded-xl py-3 font-semibold flex items-center justify-center gap-2 mb-3">
+            <i data-lucide="share-2" class="w-5 h-5"></i> Generar ticket digital
+          </button>
+          <button id="cerrarCaja" class="w-full btn-neomorphic rounded-xl py-3 font-semibold flex items-center justify-center gap-2 mb-6">
+            <i data-lucide="check-circle" class="w-5 h-5"></i> Cerrar caja y reiniciar
+          </button>
+          <div class="border-t border-white/10 pt-4">
+            <h3 class="font-semibold mb-3 flex items-center gap-2 text-sm text-white/80">
+              <i data-lucide="history" class="w-4 h-4 text-[#86efac]"></i> Historial de cierres
+            </h3>
+            <div id="cierresCajaList" class="space-y-2 max-h-[40vh] overflow-y-auto text-sm">
+              <p class="text-white/50 text-center py-4">Cargando...</p>
+            </div>
           </div>
         </div>
-        <button id="generateTicket" class="w-full btn-glow rounded-xl py-3 font-semibold flex items-center justify-center gap-2 mb-3">
-          <i data-lucide="share-2" class="w-5 h-5"></i> Generar ticket digital
-        </button>
-        <button id="cerrarCaja" class="w-full btn-neomorphic rounded-xl py-3 font-semibold flex items-center justify-center gap-2 mb-6">
-          <i data-lucide="check-circle" class="w-5 h-5"></i> Cerrar caja y reiniciar
-        </button>
-        <div class="border-t border-white/10 pt-4">
-          <h3 class="font-semibold mb-3 flex items-center gap-2 text-sm text-white/80">
-            <i data-lucide="history" class="w-4 h-4 text-[#86efac]"></i> Historial de cierres
-          </h3>
-          <div id="cierresCajaList" class="space-y-2 max-h-[40vh] overflow-y-auto text-sm">
-            <p class="text-white/50 text-center py-4">Cargando...</p>
+      </div>
+
+      <!-- Sub-panel: Proveedores -->
+      <div id="caja-sub-proveedores" class="caja-sub-panel hidden">
+        <div class="glass rounded-2xl p-6 slide-up">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-bold text-xl flex items-center gap-2">
+              <i data-lucide="truck" class="w-5 h-5 text-[#86efac]"></i>
+              Pagos a proveedores
+            </h2>
+            <button onclick="window._abrirModalGasto('proveedor')" class="btn-glow rounded-xl px-3 py-2 flex items-center gap-1.5 text-sm font-semibold touch-target">
+              <i data-lucide="plus" class="w-4 h-4"></i> Nuevo
+            </button>
+          </div>
+          <div class="flex gap-2 mb-4">
+            <button class="gastos-filtro-btn active text-xs px-3 py-1.5 rounded-lg glass border border-white/20 touch-target" data-filtro="hoy" onclick="window._filtrarGastos('proveedor','hoy')">Hoy</button>
+            <button class="gastos-filtro-btn text-xs px-3 py-1.5 rounded-lg glass border border-white/20 touch-target" data-filtro="semana" onclick="window._filtrarGastos('proveedor','semana')">Semana</button>
+            <button class="gastos-filtro-btn text-xs px-3 py-1.5 rounded-lg glass border border-white/20 touch-target" data-filtro="mes" onclick="window._filtrarGastos('proveedor','mes')">Mes</button>
+          </div>
+          <div id="proveedoresResumen" class="hidden mb-3 p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+            <span class="text-sm text-white/70">Total pagado:</span>
+            <span id="proveedoresTotalText" class="font-bold text-[#86efac]">$0</span>
+          </div>
+          <div id="proveedoresList" class="space-y-2 text-sm">
+            <p class="text-white/50 text-center py-6">Sin pagos registrados.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-panel: Gastos fijos -->
+      <div id="caja-sub-gastos" class="caja-sub-panel hidden">
+        <div class="glass rounded-2xl p-6 slide-up">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-bold text-xl flex items-center gap-2">
+              <i data-lucide="receipt" class="w-5 h-5 text-[#86efac]"></i>
+              Gastos fijos
+            </h2>
+            <button onclick="window._abrirModalGasto('gasto_fijo')" class="btn-glow rounded-xl px-3 py-2 flex items-center gap-1.5 text-sm font-semibold touch-target">
+              <i data-lucide="plus" class="w-4 h-4"></i> Nuevo
+            </button>
+          </div>
+          <div class="flex gap-2 mb-4">
+            <button class="gastos-filtro-btn active text-xs px-3 py-1.5 rounded-lg glass border border-white/20 touch-target" data-filtro="hoy" onclick="window._filtrarGastos('gasto_fijo','hoy')">Hoy</button>
+            <button class="gastos-filtro-btn text-xs px-3 py-1.5 rounded-lg glass border border-white/20 touch-target" data-filtro="semana" onclick="window._filtrarGastos('gasto_fijo','semana')">Semana</button>
+            <button class="gastos-filtro-btn text-xs px-3 py-1.5 rounded-lg glass border border-white/20 touch-target" data-filtro="mes" onclick="window._filtrarGastos('gasto_fijo','mes')">Mes</button>
+          </div>
+          <div id="gastosResumen" class="hidden mb-3 p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
+            <span class="text-sm text-white/70">Total gastado:</span>
+            <span id="gastosTotalText" class="font-bold text-red-400">$0</span>
+          </div>
+          <div id="gastosList" class="space-y-2 text-sm">
+            <p class="text-white/50 text-center py-6">Sin gastos registrados.</p>
           </div>
         </div>
       </div>
     </section>
+
+    <!-- Modal: Nuevo gasto / pago a proveedor -->
+    <div id="gastoModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="gastoModalOverlay"></div>
+      <div class="relative glass-strong rounded-2xl p-5 w-full max-w-sm scale-in">
+        <h3 class="font-bold text-lg mb-4 text-center" id="gastoModalTitle">Nuevo gasto</h3>
+        <input type="hidden" id="gastoTipo">
+        <div class="space-y-3">
+          <div id="gastoProveedorWrap">
+            <label class="block text-xs text-white/60 mb-1">Proveedor</label>
+            <input type="text" id="gastoProveedor" placeholder="Ej: Distribuidora Pérez" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+          </div>
+          <div>
+            <label class="block text-xs text-white/60 mb-1">Descripción</label>
+            <input type="text" id="gastoDescripcion" placeholder="Ej: Mercadería semanal, Luz, Alquiler..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+          </div>
+          <div>
+            <label class="block text-xs text-white/60 mb-1">Monto ($)</label>
+            <input type="number" id="gastoMonto" placeholder="0" min="1" step="1" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+          </div>
+          <div>
+            <label class="block text-xs text-white/60 mb-1">Fecha</label>
+            <input type="date" id="gastoFecha" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+          </div>
+        </div>
+        <div class="flex gap-2 mt-5">
+          <button type="button" id="gastoModalCancelar" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cancelar</button>
+          <button type="button" id="gastoModalGuardar" class="flex-1 btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target">Guardar</button>
+        </div>
+        <p id="gastoModalErr" class="text-red-300 text-xs mt-2 hidden text-center"></p>
+      </div>
+    </div>
 
     <!-- Más — Historial, Configuración, Clientes -->
     <section id="panel-mas" class="panel hidden">
