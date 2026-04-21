@@ -1006,10 +1006,6 @@
       var lastMethod = '';
       try { lastMethod = localStorage.getItem(LAST_QUICK_PAYMENT_KEY) || ''; } catch (_) {}
       if (lastMethod) document.querySelectorAll('.quick-payment-option').forEach(function (el) { if (el.dataset.quickPayment === lastMethod) el.classList.add('ring-2', 'ring-[#dc2626]'); });
-      if (list.length === 1) {
-        var firstBtn = wrap.querySelector('.cobro-rapido-producto');
-        if (firstBtn) { firstBtn.classList.add('ring-2', 'ring-[#dc2626]', 'bg-[#dc2626]/25'); }
-      }
       updateCobroRapidoLista();
       document.getElementById('cobroRapidoModal').classList.remove('hidden');
       document.getElementById('cobroRapidoModal').classList.add('flex');
