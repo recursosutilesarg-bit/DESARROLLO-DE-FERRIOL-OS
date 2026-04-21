@@ -2131,16 +2131,17 @@
     document.getElementById('prodPrecio').addEventListener('input', function () { updateCostoFromPrecioMargen(); updateCostoCampoEstado(); });
     document.getElementById('prodPrecio').addEventListener('focus', updateCostoCampoEstado);
     document.getElementById('prodPrecio').addEventListener('blur', updateCostoCampoEstado);
-    document.querySelectorAll('.margen-rapido-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        document.getElementById('prodMargen').value = btn.dataset.margen;
-        document.querySelectorAll('.margen-rapido-btn').forEach(function(b) { b.classList.remove('margen-rapido-active'); });
-        btn.classList.add('margen-rapido-active');
-        updatePrecioFromCostoMargen();
-        updateCostoFromPrecioMargen();
-        updateCostoCampoEstado();
+    window._setMargenRapido = function(margenVal) {
+      var inputEl = document.getElementById('prodMargen');
+      if (!inputEl) return;
+      inputEl.value = margenVal;
+      document.querySelectorAll('.margen-rapido-btn').forEach(function(b) {
+        b.classList.toggle('margen-rapido-active', String(b.dataset.margen) === String(margenVal));
       });
-    });
+      updatePrecioFromCostoMargen();
+      updateCostoFromPrecioMargen();
+      updateCostoCampoEstado();
+    };
     function resetMargenRapidoBtns(margenVal) {
       var v = String(margenVal || '').trim();
       document.querySelectorAll('.margen-rapido-btn').forEach(function(b) {

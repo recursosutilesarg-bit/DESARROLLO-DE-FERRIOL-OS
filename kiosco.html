@@ -951,11 +951,11 @@
         <div>
           <label class="block text-xs text-white/60 mb-1">Margen de ganancia (%)</label>
           <div class="flex gap-1.5 mb-2 flex-wrap">
-            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="20">20%</button>
-            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="30">30%</button>
-            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="40">40%</button>
-            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="50">50%</button>
-            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="100">100%</button>
+            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="20" onclick="window._setMargenRapido(20)">20%</button>
+            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="30" onclick="window._setMargenRapido(30)">30%</button>
+            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="40" onclick="window._setMargenRapido(40)">40%</button>
+            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="50" onclick="window._setMargenRapido(50)">50%</button>
+            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="100" onclick="window._setMargenRapido(100)">100%</button>
           </div>
           <input type="number" id="prodMargen" placeholder="O escribí el % manualmente" min="0" max="500" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
           <p id="prodMargenError" class="text-xs text-red-400 mt-1 hidden">Falta el porcentaje de ganancia.</p>
