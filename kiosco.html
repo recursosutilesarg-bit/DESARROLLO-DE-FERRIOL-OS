@@ -693,18 +693,10 @@
             <label class="block text-xs text-white/60 mb-1">¿Qué se llevó?</label>
             <input type="text" id="libretalItemDesc" placeholder="Ej: Gaseosa, pan, cigarrillos..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
           </div>
-          <div class="flex gap-3">
-            <div class="flex-1">
-              <label class="block text-xs text-white/60 mb-1">Monto ($)</label>
-              <input type="number" id="libretalItemMonto" placeholder="0" min="1" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
-            </div>
-            <div class="flex-1">
-              <label class="block text-xs text-white/60 mb-1">Tipo</label>
-              <select id="libretalItemTipo" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm bg-transparent">
-                <option value="fiado" class="bg-[#052e16]">Fiado</option>
-                <option value="transferencia_pendiente" class="bg-[#052e16]">Transf. pendiente</option>
-              </select>
-            </div>
+          <div>
+            <label class="block text-xs text-white/60 mb-1">Monto ($)</label>
+            <input type="number" id="libretalItemMonto" placeholder="0" min="1" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+            <input type="hidden" id="libretalItemTipo" value="fiado">
           </div>
         </div>
         <p id="libretalItemErr" class="text-red-300 text-xs mt-2 hidden"></p>
