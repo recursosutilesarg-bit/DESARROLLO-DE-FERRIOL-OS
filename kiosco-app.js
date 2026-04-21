@@ -2184,7 +2184,8 @@
     }
 
     window._verClienteLibreta = async function (clienteId) {
-      var clientes = await loadLibretaClientes();
+      var result = await loadLibretaClientes();
+      var clientes = (result && result.ok) ? result.data : [];
       var c = clientes.find(function (x) { return x.id === clienteId; });
       if (!c) return;
       _libretalClienteActual = c;
