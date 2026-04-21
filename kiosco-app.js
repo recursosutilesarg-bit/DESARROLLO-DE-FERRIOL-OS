@@ -439,15 +439,16 @@
       );
       list.innerHTML = items.map(p => {
         const quedan = Math.max(0, Number(p.stock) || 0);
+        const stockColor = quedan === 0 ? 'text-red-400' : quedan <= 3 ? 'text-amber-400' : 'text-white/40';
         return `
-          <div class="inventory-item glass rounded-xl p-3 sm:p-4 flex gap-3 items-center border border-white/10 touch-target cursor-pointer active:scale-[0.99] transition-transform" data-codigo="${p.codigo}" role="button" tabindex="0">
-            <div class="flex-1 min-w-0" data-action="edit">
-              <p class="font-semibold truncate text-base">${(p.nombre || '').replace(/</g, '&lt;')}</p>
-              <p class="text-[#f87171] font-medium text-sm sm:text-base">$${(p.precio ?? 0).toLocaleString('es-AR')}</p>
-              <p class="text-xs text-white/60 mt-1">quedan (${quedan})</p>
+          <div class="inventory-item" data-codigo="${p.codigo}" role="button" tabindex="0">
+            <div class="inv-item-info">
+              <span class="inv-item-name">${(p.nombre || '').replace(/</g, '&lt;')}</span>
+              <span class="inv-item-price">$${(p.precio ?? 0).toLocaleString('es-AR')}</span>
+              <span class="inv-item-stock ${stockColor}">${quedan}</span>
             </div>
-            <button type="button" class="add-to-cart-btn btn-glow rounded-xl p-2.5 touch-target shrink-0" data-codigo="${p.codigo}" title="Agregar al carrito">
-              <i data-lucide="plus" class="w-5 h-5"></i>
+            <button type="button" class="add-to-cart-btn inv-item-btn" data-codigo="${p.codigo}" title="Agregar al carrito">
+              <i data-lucide="plus" class="w-4 h-4"></i>
             </button>
           </div>
         `;
@@ -456,12 +457,46 @@
       list.querySelectorAll('.inventory-item').forEach(el => {
         el.addEventListener('click', function (e) {
           if (e.target.closest('.add-to-cart-btn')) return;
-          openEditProduct(el.dataset.codigo);
+          showProductDetail(el.dataset.codigo);
         });
       });
       list.querySelectorAll('.add-to-cart-btn').forEach(btn => {
         btn.onclick = (e) => { e.stopPropagation(); addToCart(btn.dataset.codigo); };
       });
+    }
+
+    function showProductDetail(codigo) {
+      const d = getData();
+      const p = (d.products || {})[codigo];
+      if (!p) return;
+      document.getElementById('productDetailName').textContent = p.nombre || '';
+      document.getElementById('productDetailPrice').textContent = '$' + (p.precio ?? 0).toLocaleString('es-AR');
+      document.getElementById('productDetailCost').textContent = p.costo != null ? '$' + Number(p.costo).toLocaleString('es-AR') : 'No cargado';
+      const margin = (p.costo && p.precio && p.costo > 0) ? Math.round(((p.precio - p.costo) / p.costo) * 100) : null;
+      document.getElementById('productDetailMargin').textContent = margin !== null ? margin + '%' : 'No calculado';
+      document.getElementById('productDetailStock').textContent = (Math.max(0, Number(p.stock) || 0)) + ' unidades';
+      document.getElementById('productDetailCode').textContent = p.codigo || 'Sin código';
+      document.getElementById('productDetailEdit').onclick = function() {
+        closeProductDetail();
+        openEditProduct(codigo);
+      };
+      document.getElementById('productDetailDelete').onclick = function() {
+        if (confirm('¿Eliminar "' + (p.nombre || 'este producto') + '"?')) {
+          deleteProduct(codigo);
+          closeProductDetail();
+        }
+      };
+      document.getElementById('productDetailBack').onclick = closeProductDetail;
+      const panel = document.getElementById('productDetailPanel');
+      panel.classList.remove('hidden');
+      panel.classList.add('flex');
+      lucide.createIcons();
+    }
+
+    function closeProductDetail() {
+      const panel = document.getElementById('productDetailPanel');
+      panel.classList.add('hidden');
+      panel.classList.remove('flex');
     }
 
     function openEditProduct(codigo) {
@@ -1240,6 +1275,7 @@
     function showPanel(name) {
       if (name !== 'scanner') window._scanForProductCode = false;
       state.currentPanel = name;
+      document.body.setAttribute('data-panel', name);
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       const navKey = (name === 'config' || name === 'historial' || name === 'clientes') ? 'mas' : name;
       const btn = document.querySelector('[data-nav="' + navKey + '"]');

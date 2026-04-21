@@ -356,23 +356,22 @@
       </div>
     </section>
 
-    <!-- Productos (antes Inventario) -->
+    <!-- Productos -->
     <section id="panel-inventory" class="panel hidden">
-      <div class="glass rounded-2xl p-6 slide-up">
-        <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
-          <i data-lucide="package-search" class="w-5 h-5 text-[#86efac]"></i>
+      <div class="inv-topbar">
+        <span class="inv-title">
+          <i data-lucide="package-search" class="w-4 h-4"></i>
           Productos
-        </h2>
-        <p class="text-xs text-white/50 mb-2">Máximo 100 productos. Buscá o agregá uno nuevo.</p>
-        <div class="flex flex-col sm:flex-row gap-2 mb-4">
-          <input type="text" id="searchInventory" placeholder="Buscar producto..." class="flex-1 glass rounded-xl px-4 py-3 sm:py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base" autocomplete="off">
-          <button id="addProduct" class="btn-glow rounded-xl px-4 py-3 sm:py-2.5 flex items-center justify-center gap-2 touch-target">
-            <i data-lucide="plus" class="w-4 h-4"></i> Agregar
-          </button>
-        </div>
-        <div id="inventoryList" class="inventory-scroll space-y-2 sm:space-y-3 max-h-[55vh] sm:max-h-[60vh] overflow-y-auto">
-          <!-- productos dinámicos -->
-        </div>
+        </span>
+        <button id="addProduct" class="btn-glow rounded-xl px-3 py-2 flex items-center gap-1.5 text-sm font-semibold touch-target">
+          <i data-lucide="plus" class="w-4 h-4"></i> Nuevo
+        </button>
+      </div>
+      <div class="inv-searchbar">
+        <input type="text" id="searchInventory" placeholder="Buscar producto..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/15 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base" autocomplete="off">
+      </div>
+      <div id="inventoryList" class="inventory-scroll">
+        <!-- productos dinámicos -->
       </div>
     </section>
 
@@ -1038,6 +1037,48 @@
       </div>
       <div id="detalleDeudorModalContent" class="space-y-3 text-sm"></div>
       <button type="button" id="detalleDeudorModalCloseBtn" class="mt-4 w-full btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- Pantalla detalle de producto -->
+  <div id="productDetailPanel" class="fixed inset-0 z-[52] hidden flex-col" style="background: linear-gradient(145deg, #020b05 0%, #052e16 38%, #064e1f 62%, #020d06 100%);">
+    <div class="flex items-center gap-3 px-4 border-b border-white/10" style="padding-top: max(0.75rem, env(safe-area-inset-top, 0)); padding-bottom: 0.75rem;">
+      <button type="button" id="productDetailBack" class="btn-neomorphic rounded-xl p-2.5 touch-target shrink-0">
+        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+      </button>
+      <h2 id="productDetailName" class="font-bold text-lg flex-1 truncate"></h2>
+    </div>
+    <div class="flex-1 overflow-y-auto px-5 py-5 space-y-5">
+      <div class="flex flex-col gap-4">
+        <div class="flex justify-between items-center py-3 border-b border-white/8">
+          <span class="text-white/60 text-sm">Precio</span>
+          <span id="productDetailPrice" class="font-bold text-2xl text-[#86efac]"></span>
+        </div>
+        <div class="flex justify-between items-center py-3 border-b border-white/8">
+          <span class="text-white/60 text-sm">Costo</span>
+          <span id="productDetailCost" class="font-semibold text-white"></span>
+        </div>
+        <div class="flex justify-between items-center py-3 border-b border-white/8">
+          <span class="text-white/60 text-sm">Ganancia</span>
+          <span id="productDetailMargin" class="font-semibold text-green-400"></span>
+        </div>
+        <div class="flex justify-between items-center py-3 border-b border-white/8">
+          <span class="text-white/60 text-sm">Stock</span>
+          <span id="productDetailStock" class="font-semibold text-white"></span>
+        </div>
+        <div class="flex justify-between items-center py-3 border-b border-white/8">
+          <span class="text-white/60 text-sm">Código</span>
+          <span id="productDetailCode" class="font-mono text-white/80 text-sm"></span>
+        </div>
+      </div>
+    </div>
+    <div class="px-4 pb-6 pt-3 flex gap-3" style="padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0) + 1rem);">
+      <button type="button" id="productDetailEdit" class="flex-1 btn-glow rounded-xl py-3.5 font-semibold flex items-center justify-center gap-2 touch-target">
+        <i data-lucide="pencil" class="w-5 h-5"></i> Editar
+      </button>
+      <button type="button" id="productDetailDelete" class="rounded-xl py-3.5 px-5 font-semibold flex items-center justify-center gap-2 touch-target bg-red-500/20 text-red-300 border border-red-500/30">
+        <i data-lucide="trash-2" class="w-5 h-5"></i>
+      </button>
     </div>
   </div>
 
