@@ -834,6 +834,173 @@ body[data-panel="inventory"] #panel-inventory {
   filter: brightness(1.1);
 }
 
+/* ===================================================================
+   RESPONSIVE: MOBILE (<768px)  —  TABLET (768-1099px)  —  PC (≥1100px)
+   =================================================================== */
+
+/* ── MOBILE: mejoras táctiles ── */
+@media (max-width: 767px) {
+
+  /* Filas de producto: altura mínima táctil 48px */
+  .inventory-item {
+    padding: 0.85rem 1rem;
+    min-height: 48px;
+  }
+
+  /* Topbar con separación del status bar en PWA */
+  body[data-panel="inventory"] .inv-topbar {
+    padding-top: max(0.75rem, env(safe-area-inset-top, 0.75rem));
+  }
+
+  /* Botones del detalle de producto: no cubiertos por la nav */
+  #productDetailPanel > div:last-child {
+    padding-bottom: max(5.5rem, env(safe-area-inset-bottom, 0) + 5rem) !important;
+  }
+}
+
+/* ── TABLET (768px): restaurar header y cards ── */
+@media (min-width: 768px) {
+
+  /* Header visible en todos los paneles */
+  body[data-panel="inventory"] #mainHeader {
+    display: flex !important;
+  }
+  body[data-panel="inventory"] #panel-inventory {
+    padding-top: 0;
+  }
+
+  /* Paneles con más aire */
+  .panel {
+    padding: 1.5rem 2rem max(5.5rem, env(safe-area-inset-bottom, 0) + 5rem);
+  }
+  #panel-inventory {
+    padding: 0 0 max(5.5rem, env(safe-area-inset-bottom, 0) + 5rem);
+  }
+
+  /* Productos: centrar contenido */
+  .inv-topbar, .inv-searchbar {
+    max-width: 860px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  #inventoryList {
+    max-width: 860px;
+    margin-left: auto;
+    margin-right: auto;
+    border-left: 1px solid rgba(255,255,255,0.06);
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+  .inventory-item { padding: 0.85rem 1.5rem; }
+  .inv-item-name  { font-size: 1rem; }
+  .inv-item-price { font-size: 1rem; }
+  .inv-item-stock { font-size: 0.85rem; min-width: 4rem; }
+
+  /* Restaurar glass en paneles (mobile tenía todo transparent) */
+  #panel-scanner > .glass,
+  #panel-caja    > .glass,
+  #panel-mas     > .glass,
+  #panel-historial > .glass,
+  #panel-clientes  > .glass,
+  #panel-config    > .glass {
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: var(--shadow-soft), var(--shadow-inset) !important;
+    border-radius: 1rem !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    max-width: 860px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  #panel-super > .relative > .super-section {
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: var(--shadow-soft), var(--shadow-inset) !important;
+    border-radius: 1rem !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+  }
+
+  /* Panel de detalle de producto: modal centrado en tablet */
+  #productDetailPanel {
+    padding: 0 !important;
+  }
+}
+
+/* ── PC GRANDE (≥1100px): dos columnas en Productos ── */
+@media (min-width: 1100px) {
+
+  /* Nav inferior más estrecha */
+  #navKiosquero .bottom-nav-bar,
+  #navSuperBottom .bottom-nav-bar {
+    max-width: 600px;
+    border-radius: 1rem 1rem 0 0;
+  }
+
+  /* Panel productos: grid dos columnas */
+  #panel-inventory {
+    display: grid !important;
+    grid-template-columns: 1fr 400px;
+    grid-template-rows: auto auto 1fr;
+    overflow: hidden;
+  }
+
+  .inv-topbar {
+    grid-column: 1; grid-row: 1;
+    max-width: none;
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+  .inv-searchbar {
+    grid-column: 1; grid-row: 2;
+    max-width: none;
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+  #inventoryList {
+    grid-column: 1; grid-row: 3;
+    overflow-y: auto !important;
+    max-height: none !important;
+    border-left: none;
+    border-right: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* Detalle: columna derecha fija */
+  #productDetailPanel {
+    position: relative !important;
+    inset: auto !important;
+    grid-column: 2;
+    grid-row: 1 / 4;
+    background: rgba(255,255,255,0.03) !important;
+    border-left: 1px solid rgba(255,255,255,0.07);
+    overflow-y: auto;
+  }
+  /* Siempre visible en PC (columna derecha) */
+  #productDetailPanel.hidden {
+    display: flex !important;
+  }
+  #productDetailPanel.hidden > *:not(.pc-placeholder) {
+    display: none !important;
+  }
+  #productDetailPanel.hidden::before {
+    content: 'Tocá un producto\Apara ver el detalle';
+    white-space: pre;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: absolute;
+    inset: 0;
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.25);
+    line-height: 1.6;
+  }
+  /* Ocultar botón "atrás" en detalle — no hace falta en PC */
+  #productDetailBack {
+    display: none;
+  }
+}
+
 /* ── Listas internas: el panel scrollea, no la lista ── */
 #inventoryList,
 #clientesList,
