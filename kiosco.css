@@ -734,6 +734,20 @@ textarea:focus-visible {
   -webkit-backdrop-filter: blur(20px) !important;
 }
 
+/* ── Listas internas: el panel scrollea, no la lista ── */
+#inventoryList,
+#clientesList,
+#cierresCajaList,
+#saldosACobrarList,
+#deudoresPendientesList,
+#deudoresCobradosList,
+#superUsersList,
+#historialList,
+#notifList {
+  max-height: none !important;
+  overflow-y: visible !important;
+}
+
 /* Los inputs, botones y listas dentro de los paneles conservan su estilo glass */
 .panel input,
 .panel textarea,
