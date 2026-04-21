@@ -689,24 +689,28 @@ textarea:focus-visible {
   }
 }
 
-/* ── Sin límites visuales: quitar fondo, borde y radio a los cards de los paneles ── */
-.panel > .glass,
-.panel > div.glass,
-.panel > .space-y-6 > .glass,
-.panel > .space-y-6 > div.glass {
+/* ── Sin límites visuales: paneles seleccionados ── */
+/* Solo los paneles que NO son dashboard tienen look abierto */
+#panel-inventory > .glass,
+#panel-inventory > div.glass,
+#panel-scanner > .glass,
+#panel-scanner > div.glass,
+#panel-caja > .glass,
+#panel-caja > div.glass,
+#panel-mas > .glass,
+#panel-mas > div.glass,
+#panel-historial > .glass,
+#panel-historial > div.glass,
+#panel-clientes > .glass,
+#panel-clientes > div.glass,
+#panel-config > .glass,
+#panel-config > div.glass {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   border-radius: 0 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-}
-
-/* Separador sutil entre bloques del dashboard */
-.panel > .space-y-6 > div + div {
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  padding-top: 1.25rem;
-  margin-top: 1.25rem;
 }
 
 /* Panel super */
@@ -717,6 +721,17 @@ textarea:focus-visible {
   border-radius: 0 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+}
+
+/* Dashboard (Inicio): conserva sus tarjetas con bordes y glass */
+#panel-dashboard > .space-y-6 > .glass,
+#panel-dashboard > .space-y-6 > div.glass {
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--shadow-soft), var(--shadow-inset) !important;
+  border-radius: 1rem !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
 }
 
 /* Los inputs, botones y listas dentro de los paneles conservan su estilo glass */
