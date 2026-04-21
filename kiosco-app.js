@@ -443,7 +443,7 @@
           <div class="inventory-item glass rounded-xl p-3 sm:p-4 flex gap-3 items-center border border-white/10 touch-target cursor-pointer active:scale-[0.99] transition-transform" data-codigo="${p.codigo}" role="button" tabindex="0">
             <div class="flex-1 min-w-0" data-action="edit">
               <p class="font-semibold truncate text-base">${(p.nombre || '').replace(/</g, '&lt;')}</p>
-              <p class="text-[#a78bfa] font-medium text-sm sm:text-base">$${(p.precio ?? 0).toLocaleString('es-AR')}</p>
+              <p class="text-[#f87171] font-medium text-sm sm:text-base">$${(p.precio ?? 0).toLocaleString('es-AR')}</p>
               <p class="text-xs text-white/60 mt-1">quedan (${quedan})</p>
             </div>
             <button type="button" class="add-to-cart-btn btn-glow rounded-xl p-2.5 touch-target shrink-0" data-codigo="${p.codigo}" title="Agregar al carrito">
@@ -555,8 +555,8 @@
       } else {
         itemsEl.innerHTML = state.cart.map((item, idx) => `
           <div class="flex items-center gap-3 glass rounded-xl p-3">
-            <div class="w-10 h-10 rounded-lg bg-[#7c3aed]/30 flex items-center justify-center">
-              <i data-lucide="package" class="w-5 h-5 text-[#a78bfa]"></i>
+            <div class="w-10 h-10 rounded-lg bg-[#dc2626]/30 flex items-center justify-center">
+              <i data-lucide="package" class="w-5 h-5 text-[#f87171]"></i>
             </div>
             <div class="flex-1 min-w-0">
               <p class="font-medium truncate">${item.nombre}</p>
@@ -766,7 +766,7 @@
           '<p class="font-medium truncate">' + (s.clientName || 'Cliente').replace(/</g, '&lt;') + '</p>' +
           '<p class="text-xs text-white/60 mt-0.5">' + (methodLabels[s.method] || s.method) + (s.whatsapp ? ' · ' + s.whatsapp.replace(/</g, '&lt;') : '') + '</p>' +
           '<p class="text-xs text-white/50 mt-1 truncate" title="' + itemsText.replace(/"/g, '&quot;') + '">' + itemsText.replace(/</g, '&lt;').slice(0, 60) + (itemsText.length > 60 ? '…' : '') + '</p>' +
-          '<p class="font-semibold text-[#a78bfa] mt-1">$' + (s.total || 0).toLocaleString('es-AR') + '</p>' +
+          '<p class="font-semibold text-[#f87171] mt-1">$' + (s.total || 0).toLocaleString('es-AR') + '</p>' +
           '</div>' +
           '<div class="flex gap-2 shrink-0">' +
           (tel.length >= 8 ? '<a href="' + waUrl + '" target="_blank" rel="noopener" class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target inline-flex items-center gap-1" title="Enviar WhatsApp"><i data-lucide="message-circle" class="w-4 h-4"></i></a>' : '') +
@@ -808,7 +808,7 @@
             return '<div class="flex items-center justify-between gap-2 py-2 px-2 rounded-lg border border-white/10 hover:bg-white/5" data-saldo-id="' + (s.id || '').replace(/"/g, '&quot;') + '">' +
               '<div class="min-w-0 flex-1 flex items-center gap-2">' +
               '<span class="font-medium truncate">' + nombre + '</span>' +
-              '<span class="font-semibold text-[#a78bfa] shrink-0">$' + (s.total || 0).toLocaleString('es-AR') + '</span>' +
+              '<span class="font-semibold text-[#f87171] shrink-0">$' + (s.total || 0).toLocaleString('es-AR') + '</span>' +
               '</div>' +
               '<div class="flex gap-1 shrink-0">' +
               (tel.length >= 8 ? '<a href="' + waUrl + '" target="_blank" rel="noopener" class="btn-neomorphic rounded-lg p-1.5 touch-target inline-flex" title="WhatsApp"><i data-lucide="message-circle" class="w-4 h-4"></i></a>' : '') +
@@ -834,7 +834,7 @@
           cobradosEl.innerHTML = cobrados.map(function (s) {
             var nombre = (s.clientName || '').trim() || 'Sin nombre';
             nombre = nombre.replace(/</g, '&lt;');
-            return '<button type="button" class="deudor-cobrado-card w-full text-left flex items-center justify-between gap-2 py-2 px-2 rounded-lg border border-white/10 hover:bg-white/5 active:bg-[#7c3aed]/20 touch-target transition-colors" data-saldo-id="' + (s.id || '').replace(/"/g, '&quot;') + '">' +
+            return '<button type="button" class="deudor-cobrado-card w-full text-left flex items-center justify-between gap-2 py-2 px-2 rounded-lg border border-white/10 hover:bg-white/5 active:bg-[#dc2626]/20 touch-target transition-colors" data-saldo-id="' + (s.id || '').replace(/"/g, '&quot;') + '">' +
               '<span class="font-medium truncate">' + nombre + '</span>' +
               '<span class="font-semibold text-green-400 shrink-0">$' + (s.total || 0).toLocaleString('es-AR') + '</span>' +
               '</button>';
@@ -863,7 +863,7 @@
       content.innerHTML = '<p><span class="text-white/50">Cliente:</span> ' + (saldo.clientName || '—').replace(/</g, '&lt;') + '</p>' +
         '<p><span class="text-white/50">Fecha:</span> ' + fecha + '</p>' +
         '<p><span class="text-white/50">Método:</span> ' + (methodLabelsDeudores[saldo.method] || saldo.method) + '</p>' +
-        '<p><span class="text-white/50">Total:</span> <strong class="text-[#a78bfa]">$' + (saldo.total || 0).toLocaleString('es-AR') + '</strong></p>' +
+        '<p><span class="text-white/50">Total:</span> <strong class="text-[#f87171]">$' + (saldo.total || 0).toLocaleString('es-AR') + '</strong></p>' +
         '<div class="pt-2"><p class="text-white/70 mb-2">Productos:</p><ul class="space-y-0">' + items + '</ul></div>';
       document.getElementById('detalleDeudorModal').classList.remove('hidden');
       document.getElementById('detalleDeudorModal').classList.add('flex');
@@ -883,7 +883,7 @@
       content.innerHTML = '<p><span class="text-white/50">Fecha y hora:</span> ' + fmt(v.fecha_hora) + '</p>' +
         '<p><span class="text-white/50">Cliente:</span> ' + ((v.cliente_nombre || '').trim() || 'Sin nombre').replace(/</g, '&lt;') + '</p>' +
         '<p><span class="text-white/50">Método de pago:</span> ' + (methodLabels[v.metodo_pago] || v.metodo_pago) + '</p>' +
-        '<p><span class="text-white/50">Total:</span> <strong class="text-[#a78bfa]">$' + Number(v.total).toLocaleString('es-AR') + '</strong></p>' +
+        '<p><span class="text-white/50">Total:</span> <strong class="text-[#f87171]">$' + Number(v.total).toLocaleString('es-AR') + '</strong></p>' +
         '<div class="pt-2"><p class="text-white/70 mb-2">Productos:</p><ul class="space-y-0">' + items + '</ul></div>';
       document.getElementById('detalleVentaModal').classList.remove('hidden');
       document.getElementById('detalleVentaModal').classList.add('flex');
@@ -929,7 +929,7 @@
         var precio = prod ? prod.precio : 0;
         var stock = prod ? prod.stock : 0;
         var disabled = stock <= 0 ? ' opacity-50 pointer-events-none' : '';
-        return '<button type="button" class="freq-product-btn flex-shrink-0 glass rounded-xl px-4 py-3 border border-white/10 hover:border-[#7c3aed]/50 active:scale-95 touch-target text-left min-w-0 max-w-[140px]' + disabled + '" data-codigo="' + (p.codigo || '').replace(/"/g, '&quot;') + '" title="Agregar al carrito"><p class="font-medium truncate text-sm">' + (nombre || '').replace(/</g, '&lt;') + '</p><p class="text-[#a78bfa] text-xs mt-0.5">$' + (precio || 0).toLocaleString('es-AR') + '</p></button>';
+        return '<button type="button" class="freq-product-btn flex-shrink-0 glass rounded-xl px-4 py-3 border border-white/10 hover:border-[#dc2626]/50 active:scale-95 touch-target text-left min-w-0 max-w-[140px]' + disabled + '" data-codigo="' + (p.codigo || '').replace(/"/g, '&quot;') + '" title="Agregar al carrito"><p class="font-medium truncate text-sm">' + (nombre || '').replace(/</g, '&lt;') + '</p><p class="text-[#f87171] text-xs mt-0.5">$' + (precio || 0).toLocaleString('es-AR') + '</p></button>';
       }).join('');
       cont.querySelectorAll('.freq-product-btn').forEach(function (btn) {
         btn.onclick = function () {
@@ -996,21 +996,21 @@
         var html = list.map(function (item) {
           var nombre = (item && item.nombre) ? item.nombre : 'Producto';
           var margen = (item && item.margen != null) ? Number(item.margen) : 0;
-          return '<button type="button" class="cobro-rapido-producto px-2.5 py-1.5 rounded-lg text-xs font-medium border border-white/20 bg-white/5 hover:bg-[#7c3aed]/30 hover:border-[#7c3aed]/50 touch-target transition-all" data-producto="' + (nombre || '').replace(/"/g, '&quot;') + '" data-margen="' + margen + '">' + (nombre || '').replace(/</g, '&lt;') + '</button>';
+          return '<button type="button" class="cobro-rapido-producto px-2.5 py-1.5 rounded-lg text-xs font-medium border border-white/20 bg-white/5 hover:bg-[#dc2626]/30 hover:border-[#dc2626]/50 touch-target transition-all" data-producto="' + (nombre || '').replace(/"/g, '&quot;') + '" data-margen="' + margen + '">' + (nombre || '').replace(/</g, '&lt;') + '</button>';
         }).join('');
-        html += '<button type="button" class="cobro-rapido-producto px-2.5 py-1.5 rounded-lg text-xs font-medium border border-white/20 bg-white/5 hover:bg-[#7c3aed]/30 hover:border-[#7c3aed]/50 touch-target transition-all" data-producto="Otro" data-margen="0" id="cobroRapidoProductoOtro">Otro</button>';
+        html += '<button type="button" class="cobro-rapido-producto px-2.5 py-1.5 rounded-lg text-xs font-medium border border-white/20 bg-white/5 hover:bg-[#dc2626]/30 hover:border-[#dc2626]/50 touch-target transition-all" data-producto="Otro" data-margen="0" id="cobroRapidoProductoOtro">Otro</button>';
         wrap.innerHTML = html;
       }
       document.querySelectorAll('.cobro-rapido-producto').forEach(function (el) {
-        el.classList.remove('ring-2', 'ring-[#7c3aed]', 'bg-[#7c3aed]/25');
+        el.classList.remove('ring-2', 'ring-[#dc2626]', 'bg-[#dc2626]/25');
       });
-      document.querySelectorAll('.quick-payment-option').forEach(function (el) { el.classList.remove('ring-2', 'ring-[#7c3aed]'); });
+      document.querySelectorAll('.quick-payment-option').forEach(function (el) { el.classList.remove('ring-2', 'ring-[#dc2626]'); });
       var lastMethod = '';
       try { lastMethod = localStorage.getItem(LAST_QUICK_PAYMENT_KEY) || ''; } catch (_) {}
-      if (lastMethod) document.querySelectorAll('.quick-payment-option').forEach(function (el) { if (el.dataset.quickPayment === lastMethod) el.classList.add('ring-2', 'ring-[#7c3aed]'); });
+      if (lastMethod) document.querySelectorAll('.quick-payment-option').forEach(function (el) { if (el.dataset.quickPayment === lastMethod) el.classList.add('ring-2', 'ring-[#dc2626]'); });
       if (list.length === 1) {
         var firstBtn = wrap.querySelector('.cobro-rapido-producto');
-        if (firstBtn) { firstBtn.classList.add('ring-2', 'ring-[#7c3aed]', 'bg-[#7c3aed]/25'); }
+        if (firstBtn) { firstBtn.classList.add('ring-2', 'ring-[#dc2626]', 'bg-[#dc2626]/25'); }
       }
       updateCobroRapidoLista();
       document.getElementById('cobroRapidoModal').classList.remove('hidden');
@@ -1365,9 +1365,9 @@
       var btn = e.target.closest('.cobro-rapido-producto');
       if (!btn) return;
       document.querySelectorAll('.cobro-rapido-producto').forEach(function (el) {
-        el.classList.remove('ring-2', 'ring-[#7c3aed]', 'bg-[#7c3aed]/25');
+        el.classList.remove('ring-2', 'ring-[#dc2626]', 'bg-[#dc2626]/25');
       });
-      btn.classList.add('ring-2', 'ring-[#7c3aed]', 'bg-[#7c3aed]/25');
+      btn.classList.add('ring-2', 'ring-[#dc2626]', 'bg-[#dc2626]/25');
       var wrap = document.getElementById('cobroRapidoOtroWrap');
       if (btn.dataset.producto === 'Otro') wrap.classList.remove('hidden'); else wrap.classList.add('hidden');
     });
@@ -1459,7 +1459,7 @@
         el.innerHTML = items.map(p => `
           <div class="glass rounded-xl p-3 flex justify-between items-center">
             <span class="font-medium truncate flex-1">${p.nombre}</span>
-            <span class="text-[#a78bfa] font-semibold shrink-0 ml-2">${p.cant} un.</span>
+            <span class="text-[#f87171] font-semibold shrink-0 ml-2">${p.cant} un.</span>
           </div>
         `).join('');
       }
@@ -1479,8 +1479,8 @@
         el.innerHTML = list.slice().reverse().map(t => `
           <div class="glass rounded-xl p-4 border border-white/10">
             <div class="flex justify-between items-start mb-2">
-              <span class="px-2 py-0.5 rounded text-xs bg-[#7c3aed]/30">${methodLabels[t.method] || t.method}</span>
-              <span class="font-bold text-[#a78bfa]">$${t.total.toLocaleString('es-AR')}</span>
+              <span class="px-2 py-0.5 rounded text-xs bg-[#dc2626]/30">${methodLabels[t.method] || t.method}</span>
+              <span class="font-bold text-[#f87171]">$${t.total.toLocaleString('es-AR')}</span>
             </div>
             <p class="text-white/40 text-[10px] mb-1">${fmt(t.fechaHora)}</p>
             <p class="text-white/60 text-xs mb-2">Cliente: ${t.client || '—'}</p>
@@ -1574,7 +1574,7 @@
         var cliente = (v.cliente_nombre || '').trim();
         if (!cliente) cliente = 'Sin nombre';
         cliente = cliente.replace(/</g, '&lt;');
-        return '<button type="button" class="historial-venta-row w-full flex items-center justify-between gap-3 py-3 px-3 rounded-xl border-b border-white/10 hover:bg-white/5 active:bg-[#7c3aed]/20 text-left touch-target transition-colors" data-index="' + idx + '"><span class="font-medium truncate min-w-0">' + cliente + '</span><span class="font-bold text-[#a78bfa] shrink-0">$' + Number(v.total).toLocaleString('es-AR') + '</span></button>';
+        return '<button type="button" class="historial-venta-row w-full flex items-center justify-between gap-3 py-3 px-3 rounded-xl border-b border-white/10 hover:bg-white/5 active:bg-[#dc2626]/20 text-left touch-target transition-colors" data-index="' + idx + '"><span class="font-medium truncate min-w-0">' + cliente + '</span><span class="font-bold text-[#f87171] shrink-0">$' + Number(v.total).toLocaleString('es-AR') + '</span></button>';
       }).join('');
       listEl.querySelectorAll('.historial-venta-row').forEach(btn => {
         btn.onclick = function () {
@@ -1607,7 +1607,7 @@
       if (filtroLabel) filtroLabel.textContent = filterLabels[filter] || filter;
       document.querySelectorAll('.historial-chip').forEach(function (chip) {
         var active = chip.dataset.filter === filter;
-        chip.className = 'historial-chip px-2.5 py-1.5 rounded-xl text-xs font-medium touch-target transition-all border ' + (active ? 'bg-[#7c3aed]/30 border-[#7c3aed]/50' : 'border-white/20');
+        chip.className = 'historial-chip px-2.5 py-1.5 rounded-xl text-xs font-medium touch-target transition-all border ' + (active ? 'bg-[#dc2626]/30 border-[#dc2626]/50' : 'border-white/20');
       });
     }
     document.querySelectorAll('.historial-chip').forEach(function (btn) {
@@ -1630,7 +1630,7 @@
       var deudoresWrap = document.getElementById('historialDeudoresWrap');
       document.querySelectorAll('.historial-tab-btn').forEach(function (btn) {
         var isActive = btn.dataset.tab === tabName;
-        btn.className = 'historial-tab-btn px-3 py-1.5 rounded-xl text-sm font-medium transition-all touch-target ' + (isActive ? 'bg-[#7c3aed]/30 border border-[#7c3aed]/50' : 'glass border border-white/10');
+        btn.className = 'historial-tab-btn px-3 py-1.5 rounded-xl text-sm font-medium transition-all touch-target ' + (isActive ? 'bg-[#dc2626]/30 border border-[#dc2626]/50' : 'glass border border-white/10');
       });
       if (ventasWrap) ventasWrap.classList.toggle('hidden', tabName !== 'ventas');
       if (deudoresWrap) deudoresWrap.classList.toggle('hidden', tabName !== 'deudores');
@@ -1940,7 +1940,7 @@
             var fecha = (r.fecha || r.fecha_cierre || '').toString().slice(0, 10);
             var total = Number(r.total_facturado || 0);
             var gan = Number(r.ganancia || 0);
-            return '<div class="glass rounded-xl p-3 border border-white/10 flex justify-between items-center gap-2"><div><span class="text-white/70">' + fecha + '</span></div><div class="text-right"><span class="font-semibold text-[#a78bfa]">$' + total.toLocaleString('es-AR') + '</span><span class="text-green-400/90 text-xs ml-2">$' + Math.round(gan).toLocaleString('es-AR') + ' gan.</span></div></div>';
+            return '<div class="glass rounded-xl p-3 border border-white/10 flex justify-between items-center gap-2"><div><span class="text-white/70">' + fecha + '</span></div><div class="text-right"><span class="font-semibold text-[#f87171]">$' + total.toLocaleString('es-AR') + '</span><span class="text-green-400/90 text-xs ml-2">$' + Math.round(gan).toLocaleString('es-AR') + ' gan.</span></div></div>';
           }).join('');
         }
       } catch (e) {
@@ -2673,7 +2673,7 @@ async function showApp() {
         var endsAt = card && card.getAttribute('data-trial-ends-at');
         var t = trialLabelFull(endsAt);
         span.textContent = t.expired ? 'Vencida' : t.text;
-        span.className = 'super-list-countdown px-2 py-1 rounded-lg text-xs ' + (t.expired ? 'bg-red-500/20 text-red-300' : 'bg-[#7c3aed]/30 text-[#a78bfa]');
+        span.className = 'super-list-countdown px-2 py-1 rounded-lg text-xs ' + (t.expired ? 'bg-red-500/20 text-red-300' : 'bg-[#dc2626]/30 text-[#f87171]');
       });
     }
     function openSuperUserDetail(user) {
@@ -2691,7 +2691,7 @@ async function showApp() {
           <p><span class="text-white/50">Email:</span> ${email || '—'}</p>
           <p><span class="text-white/50">Rol:</span> ${(user.role || 'kiosquero').replace(/</g, '&lt;')}</p>
           <p><span class="text-white/50">Estado:</span> <span class="${user.active ? 'text-green-300' : 'text-red-300'}">${user.active ? 'Activo' : 'Inactivo'}</span></p>
-          <p><span class="text-white/50">Membresía:</span> <span id="superDetailCountdown" class="${trialFull.expired ? 'text-red-300' : 'text-[#a78bfa]'}">${trialFull.text}</span></p>
+          <p><span class="text-white/50">Membresía:</span> <span id="superDetailCountdown" class="${trialFull.expired ? 'text-red-300' : 'text-[#f87171]'}">${trialFull.text}</span></p>
         </div>
         <div class="border-t border-white/10 pt-4 space-y-3">
           <div class="flex items-center gap-2 flex-wrap">
@@ -2708,7 +2708,7 @@ async function showApp() {
             <button type="button" class="super-detail-reset w-full py-2.5 rounded-xl text-sm bg-amber-500/20 text-amber-300 border border-amber-500/40 touch-target flex items-center justify-center gap-2">
               <i data-lucide="key" class="w-4 h-4"></i> Enviar enlace para restablecer contraseña
             </button>
-            <button type="button" class="super-detail-email w-full py-2.5 rounded-xl text-sm bg-[#7c3aed]/30 text-[#a78bfa] border border-[#7c3aed]/50 touch-target flex items-center justify-center gap-2">
+            <button type="button" class="super-detail-email w-full py-2.5 rounded-xl text-sm bg-[#dc2626]/30 text-[#f87171] border border-[#dc2626]/50 touch-target flex items-center justify-center gap-2">
               <i data-lucide="mail" class="w-4 h-4"></i> Cómo cambiar el email (Supabase)
             </button>
             <button type="button" class="super-detail-quitar w-full py-2.5 rounded-xl text-sm bg-red-500/20 text-red-300 border border-red-500/40 touch-target flex items-center justify-center gap-2">
@@ -2789,7 +2789,7 @@ async function showApp() {
         superDetailCountdownInterval = setInterval(function () {
           const t = trialLabelFull(u.trial_ends_at);
           countdownEl.textContent = t.text;
-          countdownEl.className = t.expired ? 'text-red-300' : 'text-[#a78bfa]';
+          countdownEl.className = t.expired ? 'text-red-300' : 'text-[#f87171]';
         }, 1000);
       }
     }
@@ -2823,7 +2823,7 @@ async function showApp() {
         }
         if (superFilterState !== 'todos') {
           document.querySelectorAll('.super-filter-btn').forEach(function (b) {
-            b.className = 'super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border touch-target ' + (b.dataset.filter === superFilterState ? 'border-[#7c3aed]/50 bg-[#7c3aed]/30' : 'border-white/20 glass');
+            b.className = 'super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border touch-target ' + (b.dataset.filter === superFilterState ? 'border-[#dc2626]/50 bg-[#dc2626]/30' : 'border-white/20 glass');
           });
         }
       } catch (_) {}
@@ -2860,10 +2860,10 @@ async function showApp() {
         const name = (u.kiosco_name || u.email || 'Sin nombre').replace(/</g, '&lt;');
         const trialFull = trialLabelFull(u.trial_ends_at);
         const badge = trialFull.expired ? 'Vencida' : trialFull.text;
-        const badgeClass = trialFull.expired ? 'bg-red-500/20 text-red-300' : 'bg-[#7c3aed]/30 text-[#a78bfa]';
+        const badgeClass = trialFull.expired ? 'bg-red-500/20 text-red-300' : 'bg-[#dc2626]/30 text-[#f87171]';
         const endIso = (u.trial_ends_at || '').replace(/"/g, '&quot;');
         return `
-          <button type="button" class="super-user-card w-full text-left glass rounded-xl p-4 flex items-center justify-between gap-3 border border-white/10 hover:border-[#7c3aed]/40 active:scale-[0.99] transition-all touch-target" data-id="${u.id}" data-trial-ends-at="${endIso}">
+          <button type="button" class="super-user-card w-full text-left glass rounded-xl p-4 flex items-center justify-between gap-3 border border-white/10 hover:border-[#dc2626]/40 active:scale-[0.99] transition-all touch-target" data-id="${u.id}" data-trial-ends-at="${endIso}">
             <div class="flex-1 min-w-0">
               <p class="font-semibold truncate">${name}</p>
               <p class="text-xs text-white/50 truncate mt-0.5">${(u.email || '').replace(/</g, '&lt;')}</p>
@@ -2911,9 +2911,9 @@ async function showApp() {
         var name = (u.kiosco_name || u.email || 'Sin nombre').replace(/</g, '&lt;');
         var trialFull = trialLabelFull(u.trial_ends_at);
         var badge = trialFull.expired ? 'Vencida' : trialFull.text;
-        var badgeClass = trialFull.expired ? 'bg-red-500/20 text-red-300' : 'bg-[#7c3aed]/30 text-[#a78bfa]';
+        var badgeClass = trialFull.expired ? 'bg-red-500/20 text-red-300' : 'bg-[#dc2626]/30 text-[#f87171]';
         var endIso = (u.trial_ends_at || '').replace(/"/g, '&quot;');
-        return '<button type="button" class="super-user-card w-full text-left glass rounded-xl p-4 flex items-center justify-between gap-3 border border-white/10 hover:border-[#7c3aed]/40 active:scale-[0.99] transition-all touch-target" data-id="' + u.id + '" data-trial-ends-at="' + endIso + '"><div class="flex-1 min-w-0"><p class="font-semibold truncate">' + name + '</p><p class="text-xs text-white/50 truncate mt-0.5">' + (u.email || '').replace(/</g, '&lt;') + '</p></div><div class="flex items-center gap-2 shrink-0"><span class="super-list-countdown px-2 py-1 rounded-lg text-xs ' + badgeClass + '">' + badge + '</span><i data-lucide="chevron-right" class="w-5 h-5 text-white/40"></i></div></button>';
+        return '<button type="button" class="super-user-card w-full text-left glass rounded-xl p-4 flex items-center justify-between gap-3 border border-white/10 hover:border-[#dc2626]/40 active:scale-[0.99] transition-all touch-target" data-id="' + u.id + '" data-trial-ends-at="' + endIso + '"><div class="flex-1 min-w-0"><p class="font-semibold truncate">' + name + '</p><p class="text-xs text-white/50 truncate mt-0.5">' + (u.email || '').replace(/</g, '&lt;') + '</p></div><div class="flex items-center gap-2 shrink-0"><span class="super-list-countdown px-2 py-1 rounded-lg text-xs ' + badgeClass + '">' + badge + '</span><i data-lucide="chevron-right" class="w-5 h-5 text-white/40"></i></div></button>';
       }).join('');
       listEl.querySelectorAll('.super-user-card').forEach(function (btn) {
         btn.onclick = function () {
@@ -3075,7 +3075,7 @@ async function showApp() {
       btn.onclick = function () {
         superFilterState = btn.dataset.filter || 'todos';
         document.querySelectorAll('.super-filter-btn').forEach(function (b) {
-          b.className = 'super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border touch-target ' + (b.dataset.filter === superFilterState ? 'border-[#7c3aed]/50 bg-[#7c3aed]/30' : 'border-white/20 glass');
+          b.className = 'super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border touch-target ' + (b.dataset.filter === superFilterState ? 'border-[#dc2626]/50 bg-[#dc2626]/30' : 'border-white/20 glass');
         });
         renderSuper();
       };

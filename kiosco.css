@@ -1,12 +1,12 @@
 :root {
-  --indigo-deep: #1e1b4b;
-  --indigo-mid: #3730a3;
-  --violet-electric: #7c3aed;
-  --violet-light: #a78bfa;
+  --indigo-deep: #450a0a;
+  --indigo-mid: #991b1b;
+  --violet-electric: #dc2626;
+  --violet-light: #f87171;
   --white-pure: #ffffff;
   --glass-bg: rgba(255, 255, 255, 0.08);
   --glass-border: rgba(255, 255, 255, 0.18);
-  --glow-violet: rgba(124, 58, 237, 0.45);
+  --glow-violet: rgba(220, 38, 38, 0.45);
   --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.35);
   --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.12);
   --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
@@ -23,13 +23,13 @@ html {
 }
 
 ::selection {
-  background: rgba(124, 58, 237, 0.35);
+  background: rgba(220, 38, 38, 0.35);
   color: var(--white-pure);
 }
 
 body {
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  background: linear-gradient(145deg, #080510 0%, #1e1b4b 38%, #2e2a6e 62%, #1a1538 100%);
+  background: linear-gradient(145deg, #0f0505 0%, #450a0a 38%, #5c1212 62%, #1a0a0a 100%);
   min-height: 100vh;
   min-height: 100dvh;
   color: var(--white-pure);
@@ -43,9 +43,9 @@ body::before {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 90% 55% at 50% -15%, rgba(124, 58, 237, 0.28), transparent 55%),
-    radial-gradient(ellipse 70% 45% at 100% 100%, rgba(167, 139, 250, 0.14), transparent 50%),
-    radial-gradient(ellipse 50% 40% at 0% 80%, rgba(55, 48, 163, 0.2), transparent 45%);
+    radial-gradient(ellipse 90% 55% at 50% -15%, rgba(220, 38, 38, 0.28), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 100% 100%, rgba(248, 113, 113, 0.14), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 0% 80%, rgba(153, 27, 27, 0.2), transparent 45%);
   pointer-events: none;
   z-index: 0;
 }
@@ -92,7 +92,7 @@ body::before {
 
 .btn-glow:hover {
   filter: brightness(1.08);
-  box-shadow: 0 0 36px rgba(124, 58, 237, 0.55);
+  box-shadow: 0 0 36px rgba(220, 38, 38, 0.55);
 }
 
 .laser-line {
@@ -124,7 +124,7 @@ body::before {
     box-shadow: 0 0 20px var(--glow-violet);
   }
   50% {
-    box-shadow: 0 0 44px rgba(124, 58, 237, 0.55);
+    box-shadow: 0 0 44px rgba(220, 38, 38, 0.55);
   }
 }
 
@@ -177,7 +177,7 @@ body::before {
 }
 
 .nav-item.active {
-  background: rgba(124, 58, 237, 0.38);
+  background: rgba(220, 38, 38, 0.38);
   border-left: 3px solid var(--violet-electric);
 }
 
@@ -202,21 +202,21 @@ body::before {
 .header-gradient {
   background: linear-gradient(
     105deg,
-    rgba(22, 19, 58, 0.98) 0%,
-    rgba(55, 48, 163, 0.92) 42%,
-    rgba(67, 56, 180, 0.9) 58%,
-    rgba(30, 27, 75, 0.98) 100%
+    rgba(40, 10, 10, 0.98) 0%,
+    rgba(153, 27, 27, 0.92) 42%,
+    rgba(160, 30, 30, 0.9) 58%,
+    rgba(50, 12, 12, 0.98) 100%
   );
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(124, 58, 237, 0.45);
+  border-bottom: 1px solid rgba(220, 38, 38, 0.45);
   box-shadow:
     0 4px 24px rgba(0, 0, 0, 0.25),
-    0 1px 0 rgba(167, 139, 250, 0.15);
+    0 1px 0 rgba(248, 113, 113, 0.15);
 }
 
 .notif-panel {
-  background: rgba(26, 22, 62, 0.97);
+  background: rgba(45, 12, 12, 0.97);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -240,7 +240,7 @@ body::before {
 .bottom-nav-btn:hover,
 .bottom-nav-btn.active {
   color: #fff;
-  background: rgba(124, 58, 237, 0.3);
+  background: rgba(220, 38, 38, 0.3);
 }
 
 .bottom-nav-btn:active {
@@ -249,14 +249,14 @@ body::before {
 
 #headerSuperAjustesBtn.active,
 #headerSuperNotifBtn.active {
-  background: rgba(124, 58, 237, 0.4);
+  background: rgba(220, 38, 38, 0.4);
   color: #fff;
-  box-shadow: 0 0 22px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 0 22px rgba(220, 38, 38, 0.35);
 }
 
 .scanner-circle {
   border: 3px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.35);
   transition: transform 0.15s var(--ease-out), box-shadow 0.2s;
 }
 
@@ -274,8 +274,8 @@ body::before {
   justify-content: center;
   padding: 1.5rem;
   background:
-    radial-gradient(ellipse 100% 80% at 50% -20%, rgba(124, 58, 237, 0.35), transparent 50%),
-    linear-gradient(160deg, #06030f 0%, #1e1b4b 45%, #2d2670 100%);
+    radial-gradient(ellipse 100% 80% at 50% -20%, rgba(220, 38, 38, 0.35), transparent 50%),
+    linear-gradient(160deg, #0d0404 0%, #450a0a 45%, #4a1010 100%);
 }
 
 #loginScreen.hidden {
@@ -284,7 +284,7 @@ body::before {
 
 .login-glass {
   position: relative;
-  background: rgba(22, 18, 52, 0.82);
+  background: rgba(40, 12, 12, 0.82);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -294,8 +294,8 @@ body::before {
   max-width: 420px;
   box-shadow:
     0 32px 64px -16px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(124, 58, 237, 0.15),
-    0 0 40px rgba(124, 58, 237, 0.2);
+    0 0 0 1px rgba(220, 38, 38, 0.15),
+    0 0 40px rgba(220, 38, 38, 0.2);
 }
 
 .login-glass::before {
@@ -304,7 +304,7 @@ body::before {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(167, 139, 250, 0.45), transparent 40%, rgba(124, 58, 237, 0.25));
+  background: linear-gradient(135deg, rgba(248, 113, 113, 0.45), transparent 40%, rgba(220, 38, 38, 0.25));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -319,7 +319,7 @@ body::before {
   letter-spacing: -0.03em;
   margin-bottom: 0.25rem;
   color: #fafafa;
-  text-shadow: 0 2px 24px rgba(167, 139, 250, 0.45);
+  text-shadow: 0 2px 24px rgba(248, 113, 113, 0.45);
 }
 
 .login-glass .sub {
@@ -344,20 +344,20 @@ body::before {
 .login-glass .btn-login {
   width: 100%;
   padding: 0.8rem;
-  background: linear-gradient(135deg, var(--violet-electric), #5b21b6);
+  background: linear-gradient(135deg, var(--violet-electric), #991b1b);
   color: #fff;
   font-weight: 600;
   border-radius: 0.65rem;
   border: none;
   cursor: pointer;
   margin-top: 0.5rem;
-  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
+  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.4);
   transition: transform 0.15s var(--ease-out), box-shadow 0.2s, filter 0.2s;
 }
 
 .login-glass .btn-login:hover {
   filter: brightness(1.06);
-  box-shadow: 0 6px 28px rgba(124, 58, 237, 0.5);
+  box-shadow: 0 6px 28px rgba(220, 38, 38, 0.5);
 }
 
 .login-glass .btn-login:active {
@@ -391,7 +391,7 @@ body::before {
 }
 
 .login-hint a:hover {
-  color: #ddd6fe;
+  color: #fecaca;
 }
 
 .password-wrap {
@@ -484,12 +484,12 @@ textarea:focus-visible {
 .login-glass input:focus-visible {
   outline: none !important;
   border-color: var(--violet-electric);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.35);
 }
 
 .login-glass button:focus-visible {
   outline: none !important;
-  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.65);
+  box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.65);
 }
 
 @media (max-width: 640px) {
@@ -553,12 +553,12 @@ textarea:focus-visible {
 }
 
 #pwaInstallBanner .pwa-banner-inner {
-  background: rgba(22, 18, 52, 0.96);
+  background: rgba(40, 12, 12, 0.96);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 1.15rem;
   padding: 1.1rem 1.1rem 1.3rem;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45), 0 0 28px rgba(124, 58, 237, 0.25);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45), 0 0 28px rgba(220, 38, 38, 0.25);
 }
 
 #pwaInstallBanner .pwa-banner-top {
@@ -623,22 +623,22 @@ textarea:focus-visible {
 
 #pwaInstallBanner .pwa-need-server {
   font-size: 0.85rem;
-  color: #a78bfa;
+  color: #f87171;
   margin: 0.5rem 0 0;
   line-height: 1.4;
 }
 
 #pwaInstallBanner .pwa-hint {
   font-size: 0.85rem;
-  color: #a78bfa;
+  color: #f87171;
   margin: 0.75rem 0 0;
   padding: 0.65rem 0.8rem;
-  background: rgba(124, 58, 237, 0.18);
+  background: rgba(220, 38, 38, 0.18);
   border-radius: 0.55rem;
   line-height: 1.45;
   white-space: pre-line;
   display: none;
-  border: 1px solid rgba(124, 58, 237, 0.25);
+  border: 1px solid rgba(220, 38, 38, 0.25);
 }
 
 #pwaInstallBanner .pwa-hint.show {
