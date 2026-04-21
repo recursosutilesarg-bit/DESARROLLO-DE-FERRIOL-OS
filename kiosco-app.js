@@ -513,6 +513,7 @@
       const costoNum = p.costo != null ? Number(p.costo) : 0;
       const margen = costoNum > 0 && precioNum > 0 ? Math.round(((precioNum - costoNum) / costoNum) * 100) : '';
       document.getElementById('prodMargen').value = margen;
+      resetMargenRapidoBtns(margen);
       document.getElementById('prodPrecio').value = p.precio ?? '';
       document.getElementById('prodStock').value = p.stock ?? '';
       document.getElementById('prodStockInicialWrap').classList.remove('hidden');
@@ -2039,6 +2040,7 @@
       document.getElementById('prodPrecio').value = '';
       document.getElementById('prodCosto').value = '';
       document.getElementById('prodMargen').value = '';
+      resetMargenRapidoBtns('');
       document.getElementById('prodStock').value = '10';
       document.getElementById('prodStockInicial').value = '';
       document.getElementById('prodStockInicialWrap').classList.add('hidden');
@@ -2119,10 +2121,32 @@
     }
     document.getElementById('prodCosto').addEventListener('focus', function () { _userTouchedCost = true; updateCostoCampoEstado(); });
     document.getElementById('prodCosto').addEventListener('input', function () { _userTouchedCost = true; updatePrecioFromCostoMargen(); updateCostoCampoEstado(); });
-    document.getElementById('prodMargen').addEventListener('input', function () { updatePrecioFromCostoMargen(); updateCostoFromPrecioMargen(); updateCostoCampoEstado(); });
+    document.getElementById('prodMargen').addEventListener('input', function () {
+      updatePrecioFromCostoMargen(); updateCostoFromPrecioMargen(); updateCostoCampoEstado();
+      var v = this.value.trim();
+      document.querySelectorAll('.margen-rapido-btn').forEach(function(b) {
+        b.classList.toggle('margen-rapido-active', b.dataset.margen === v);
+      });
+    });
     document.getElementById('prodPrecio').addEventListener('input', function () { updateCostoFromPrecioMargen(); updateCostoCampoEstado(); });
     document.getElementById('prodPrecio').addEventListener('focus', updateCostoCampoEstado);
     document.getElementById('prodPrecio').addEventListener('blur', updateCostoCampoEstado);
+    document.querySelectorAll('.margen-rapido-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.getElementById('prodMargen').value = btn.dataset.margen;
+        document.querySelectorAll('.margen-rapido-btn').forEach(function(b) { b.classList.remove('margen-rapido-active'); });
+        btn.classList.add('margen-rapido-active');
+        updatePrecioFromCostoMargen();
+        updateCostoFromPrecioMargen();
+        updateCostoCampoEstado();
+      });
+    });
+    function resetMargenRapidoBtns(margenVal) {
+      var v = String(margenVal || '').trim();
+      document.querySelectorAll('.margen-rapido-btn').forEach(function(b) {
+        b.classList.toggle('margen-rapido-active', b.dataset.margen === v);
+      });
+    }
     document.getElementById('saveProduct').onclick = () => {
       var margenErr = document.getElementById('prodMargenError');
       var margenVal = document.getElementById('prodMargen').value.trim();

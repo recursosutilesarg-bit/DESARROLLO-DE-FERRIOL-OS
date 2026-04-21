@@ -947,22 +947,30 @@
             <i data-lucide="scan" class="w-5 h-5"></i>
           </button>
         </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs text-white/60 mb-1">Costo ($)</label>
-            <input type="number" id="prodCosto" placeholder="Ej. 2345" min="0" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
-            <p id="prodCostoHint" class="text-xs text-red-400 mt-1 hidden">Poné 0 para poder recalcular el costo desde el precio.</p>
-          </div>
-          <div>
-            <label class="block text-xs text-white/60 mb-1">Margen de ganancia (%)</label>
-            <input type="number" id="prodMargen" placeholder="Ej. 30" min="0" max="500" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
-            <p id="prodMargenError" class="text-xs text-red-400 mt-1 hidden">Falta el porcentaje de ganancia.</p>
-          </div>
-        </div>
-        <p class="text-xs text-white/50">Precio al consumidor: se redondea al número entero más cercano de 100 (ej. 3048 → $3000).</p>
+        <!-- 1. Margen primero -->
         <div>
-          <label class="block text-xs text-white/60 mb-1">Precio al consumidor ($)</label>
-          <input type="number" id="prodPrecio" placeholder="Precio (calculado o manual)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+          <label class="block text-xs text-white/60 mb-1">Margen de ganancia (%)</label>
+          <div class="flex gap-1.5 mb-2 flex-wrap">
+            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="20">20%</button>
+            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="30">30%</button>
+            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="40">40%</button>
+            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="50">50%</button>
+            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="100">100%</button>
+          </div>
+          <input type="number" id="prodMargen" placeholder="O escribí el % manualmente" min="0" max="500" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+          <p id="prodMargenError" class="text-xs text-red-400 mt-1 hidden">Falta el porcentaje de ganancia.</p>
+        </div>
+        <!-- 2. Costo -->
+        <div>
+          <label class="block text-xs text-white/60 mb-1">Costo ($)</label>
+          <input type="number" id="prodCosto" placeholder="Lo que pagaste por el producto" min="0" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+          <p id="prodCostoHint" class="text-xs text-red-400 mt-1 hidden">Poné 0 para poder recalcular el costo desde el precio.</p>
+        </div>
+        <!-- 3. Precio al consumidor (calculado automáticamente) -->
+        <div>
+          <label class="block text-xs text-white/60 mb-1">Precio al consumidor ($) <span class="text-white/35">— se calcula solo, o editalo vos</span></label>
+          <input type="number" id="prodPrecio" placeholder="Se calcula desde costo + margen" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+          <p class="text-xs text-white/35 mt-1">Se redondea al 100 más cercano (ej. 3048 → $3000).</p>
         </div>
         <label class="block text-xs text-white/60 mb-1">Stock disponible</label>
         <input type="number" id="prodStock" placeholder="Stock disponible" value="10" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">

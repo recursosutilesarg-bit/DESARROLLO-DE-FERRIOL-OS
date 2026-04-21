@@ -967,6 +967,21 @@ body[data-panel="inventory"] #panel-inventory {
   }
 }
 
+/* ── Botones de margen rápido en el formulario de producto ── */
+.margen-rapido-btn {
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  color: rgba(255,255,255,0.7);
+}
+.margen-rapido-btn:hover {
+  color: #fff;
+}
+.margen-rapido-btn.margen-rapido-active {
+  background: rgba(34, 197, 94, 0.25) !important;
+  border-color: rgba(34, 197, 94, 0.7) !important;
+  color: #86efac !important;
+  font-weight: 700;
+}
+
 /* ── Listas internas: el panel scrollea, no la lista ── */
 #inventoryList,
 #clientesList,
