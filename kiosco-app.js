@@ -2428,24 +2428,24 @@
     };
 
     window._abrirNuevoClienteDesdePrompt = function () {
-      var listEl = document.getElementById('libretalPromptClientesList');
       var formEl = document.getElementById('libretalPromptNuevoForm');
+      var btnEl = document.getElementById('libretalPromptNuevoBtn');
       var nombreEl = document.getElementById('libretalPromptNombre');
       var telEl = document.getElementById('libretalPromptTel');
       var errEl = document.getElementById('libretalPromptErr');
-      if (listEl) listEl.classList.add('hidden');
       if (errEl) { errEl.textContent = ''; errEl.classList.add('hidden'); }
       if (nombreEl) nombreEl.value = '';
       if (telEl) telEl.value = '';
       if (formEl) formEl.classList.remove('hidden');
+      if (btnEl) btnEl.classList.add('hidden');
       if (nombreEl) setTimeout(function () { nombreEl.focus(); }, 100);
     };
 
     window._cancelarNuevoClientePrompt = function () {
-      var listEl = document.getElementById('libretalPromptClientesList');
       var formEl = document.getElementById('libretalPromptNuevoForm');
-      if (listEl) listEl.classList.remove('hidden');
+      var btnEl = document.getElementById('libretalPromptNuevoBtn');
       if (formEl) formEl.classList.add('hidden');
+      if (btnEl) btnEl.classList.remove('hidden');
     };
 
     window._guardarNuevoClienteDesdePrompt = async function () {
