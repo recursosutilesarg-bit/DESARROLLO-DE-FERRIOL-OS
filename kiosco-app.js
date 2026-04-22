@@ -987,11 +987,15 @@
       var atajoWrap = document.getElementById('cobroRapidoAtajoWrap');
       var atajoLabel = document.getElementById('cobroRapidoAtajoLabel');
       if (atajoWrap && atajoLabel) {
-        atajoWrap.classList.remove('hidden');
         var lastMethod = '';
         try { lastMethod = localStorage.getItem(LAST_QUICK_PAYMENT_KEY) || 'efectivo'; } catch (_) { lastMethod = 'efectivo'; }
-        var labels = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia', fiado: 'Fiado', transferencia_pendiente: 'Transf. pendiente' };
-        atajoLabel.textContent = 'Cobrar con ' + (labels[lastMethod] || 'Efectivo');
+        if (lastMethod === 'fiado' || lastMethod === 'transferencia_pendiente') {
+          atajoWrap.classList.add('hidden');
+        } else {
+          atajoWrap.classList.remove('hidden');
+          var labels = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia' };
+          atajoLabel.textContent = 'Cobrar con ' + (labels[lastMethod] || 'Efectivo');
+        }
       }
       listEl.querySelectorAll('.cobro-rapido-quitar').forEach(function (btn) {
         btn.onclick = function () {
