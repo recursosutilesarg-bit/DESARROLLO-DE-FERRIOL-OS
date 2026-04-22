@@ -27,14 +27,14 @@
   <link rel="apple-touch-icon" href="icons/icon-192.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
     (function(){var w=console.warn;console.warn=function(m){if(typeof m==='string'&&m.indexOf('should not be used in production')!==-1)return;w.apply(console,arguments);};})();
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="kiosco.css?v=20260422l">
+  <link rel="stylesheet" href="kiosco.css?v=20260422n">
 </head>
 <body class="relative">
   <!-- Banner instalar como app (PWA) — visible al abrir el link -->
@@ -1347,7 +1347,7 @@
         Ventas del día
       </h3>
       <p class="text-xs text-white/50 mb-3">Efectivo, tarjeta, transferencia y cobro de libreta. Fiado y transf. pendiente: libreta.</p>
-      <div id="ventasCobradasList" class="flex-1 overflow-y-auto space-y-4 text-sm min-h-0"></div>
+      <div id="ventasCobradasList" class="ventas-cuaderno-list flex-1 min-h-0"></div>
       <div id="ventasCobradasFooter" class="mt-3 pt-3 border-t border-white/10 space-y-2 text-xs shrink-0"></div>
       <button id="closeVentasCobradas" class="mt-4 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cerrar</button>
     </div>
@@ -1443,7 +1443,7 @@
   </div>
   </div><!-- /#appWrap -->
   <script src="kiosco-config.js"></script>
-  <script defer src="kiosco-app.js?v=20260422m"></script>
+  <script defer src="kiosco-app.js?v=20260422n"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>

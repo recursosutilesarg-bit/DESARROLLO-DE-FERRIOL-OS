@@ -1317,3 +1317,81 @@ body[data-panel="inventory"] #panel-inventory {
     padding-bottom: max(1.75rem, env(safe-area-inset-bottom, 0) + 1rem);
   }
 }
+
+/* Lista "Ventas del día": hoja de cuaderno con renglones */
+#ventasCobradasModal .ventas-cuaderno-list {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 0.45rem;
+}
+
+#ventasCobradasModal .ventas-cuaderno {
+  --cuaderno-line: 1.35rem;
+  font-family: "Caveat", cursive;
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: var(--cuaderno-line);
+  color: #1e293b;
+  background-color: #faf6e8;
+  background-image:
+    linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 10px,
+      rgba(200, 90, 90, 0.45) 10px,
+      rgba(200, 90, 90, 0.45) 12px,
+      transparent 12px
+    ),
+    repeating-linear-gradient(
+      transparent 0,
+      transparent calc(var(--cuaderno-line) - 1px),
+      rgba(90, 120, 190, 0.2) calc(var(--cuaderno-line) - 1px),
+      rgba(90, 120, 190, 0.2) var(--cuaderno-line)
+    );
+  background-size: 100% 100%, 100% var(--cuaderno-line);
+  background-attachment: local, local;
+  box-shadow: inset 0 0 0 1px rgba(30, 41, 59, 0.08), 0 1px 3px rgba(0, 0, 0, 0.12);
+  border-radius: 0.4rem;
+  padding: 0.4rem 0.55rem 0.55rem 0.85rem;
+  min-height: 3.5rem;
+}
+
+#ventasCobradasModal .ventas-cuaderno--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  color: #64748b;
+  font-size: 1.35rem;
+  padding: 1.25rem 0.75rem;
+}
+
+#ventasCobradasModal .ventas-cuaderno-bloque + .ventas-cuaderno-bloque {
+  margin-top: 0.15rem;
+  padding-top: 0.2rem;
+  border-top: 1px dashed rgba(90, 120, 190, 0.28);
+}
+
+#ventasCobradasModal .ventas-cuaderno-meta {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #64748b;
+  line-height: var(--cuaderno-line);
+  padding-bottom: 0.05rem;
+  margin-bottom: 0.05rem;
+}
+
+#ventasCobradasModal .ventas-cuaderno-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.45rem;
+  min-height: var(--cuaderno-line);
+  font-size: 1.15rem;
+}
+
+#ventasCobradasModal .ventas-cuaderno-line .ventas-cuaderno-monto {
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  color: #0f172a;
+}

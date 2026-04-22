@@ -1431,22 +1431,25 @@
       const footEl = document.getElementById('ventasCobradasFooter');
       if (listEl) {
         if (cobradas.length === 0) {
-          listEl.innerHTML = '<p class="text-white/60 py-4 text-center">Aún no hay ventas del día (caja) en este dispositivo.</p>';
+          listEl.innerHTML = '<div class="ventas-cuaderno ventas-cuaderno--empty">Aún no hay ventas del día (caja) en este dispositivo.</div>';
         } else {
           const fmt = (s) => s ? new Date(s).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : '';
-          listEl.innerHTML = cobradas.slice().reverse().map(function (t) {
-            return '<div class="glass rounded-xl p-4 border border-white/10">' +
-              '<div class="flex justify-between items-start mb-2">' +
-              '<span class="px-2 py-0.5 rounded text-xs bg-[#22c55e]/25 text-[#86efac]">' + (methodLabels[t.method] || t.method) + '</span>' +
-              '<span class="font-bold text-[#f87171]">$' + Number(t.total).toLocaleString('es-AR') + '</span></div>' +
-              '<p class="text-white/40 text-[10px] mb-1">' + fmt(t.fechaHora) + '</p>' +
-              '<p class="text-white/60 text-xs mb-2">Cliente: ' + String(t.client || '—').replace(/</g, '&lt;') + '</p>' +
-              '<ul class="space-y-1 text-xs">' +
-              (t.items || []).map(function (i) {
-                return '<li>' + String(i.nombre || '—').replace(/</g, '&lt;') + ' x ' + (i.cant || 0) + ' — $' + (Number(i.precio) * (i.cant || 0)).toLocaleString('es-AR') + '</li>';
-              }).join('') +
-              '</ul></div>';
+          var blocksHtml = cobradas.slice().reverse().map(function (t) {
+            var meta = fmt(t.fechaHora) + ' · ' + (methodLabels[t.method] || t.method);
+            var items = t.items || [];
+            var itemsHtml = items.map(function (i) {
+              var nombre = String(i.nombre || '—').replace(/</g, '&lt;');
+              var cant = i.cant || 0;
+              var sub = Number(i.precio) * cant;
+              var etiqueta = cant > 1 ? nombre + ' ×' + cant : nombre;
+              return '<div class="ventas-cuaderno-line"><span class="truncate min-w-0">' + etiqueta + '</span><span class="ventas-cuaderno-monto">$' + sub.toLocaleString('es-AR') + '</span></div>';
+            }).join('');
+            if (!itemsHtml) {
+              itemsHtml = '<div class="ventas-cuaderno-line"><span class="truncate min-w-0">Venta</span><span class="ventas-cuaderno-monto">$' + Number(t.total).toLocaleString('es-AR') + '</span></div>';
+            }
+            return '<div class="ventas-cuaderno-bloque"><div class="ventas-cuaderno-meta">' + meta.replace(/</g, '&lt;') + '</div>' + itemsHtml + '</div>';
           }).join('');
+          listEl.innerHTML = '<div class="ventas-cuaderno">' + blocksHtml + '</div>';
         }
       }
       if (footEl) {
