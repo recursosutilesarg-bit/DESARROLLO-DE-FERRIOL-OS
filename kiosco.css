@@ -1221,6 +1221,17 @@ body[data-panel="inventory"] #panel-inventory {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Pie del modal "Sacar cuenta": por encima de la barra inferior */
+.libreta-cuenta-modal-footer {
+  padding-bottom: max(5.5rem, env(safe-area-inset-bottom, 0) + 4.75rem);
+}
+
+@media (min-width: 768px) {
+  .libreta-cuenta-modal-footer {
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0) + 1rem);
+  }
+}
+
 /* Pie de pantalla detalle de producto: no queda tapado por la nav inferior */
 .product-detail-footer {
   padding-left: 1rem;

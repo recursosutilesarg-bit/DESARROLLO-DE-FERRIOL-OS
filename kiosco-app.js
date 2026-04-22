@@ -2184,8 +2184,6 @@
       _libretalClienteActual = c;
       document.getElementById('libretalClienteNombre').textContent = c.nombre;
       document.getElementById('libretalClienteTel').textContent = c.telefono || '';
-      var btn = document.getElementById('libretalBtnWhatsApp');
-      if (btn) btn.disabled = !c.telefono;
       await renderLibretaItems(clienteId);
       window._switchCajaTab('libreta-cliente');
     };
@@ -2291,19 +2289,10 @@
       } catch (_) {}
     };
 
-    window._marcarLibretaPagada = async function () {
-      if (!_libretalClienteActual) return;
-      if (!confirm('¿Marcar toda la deuda de ' + _libretalClienteActual.nombre + ' como cobrada?')) return;
-      if (!supabaseClient || !currentUser?.id) return;
-      try {
-        await supabaseClient.from('libreta_items').update({ pagado: true }).eq('cliente_id', _libretalClienteActual.id).eq('user_id', currentUser.id).eq('pagado', false);
-        renderLibretaItems(_libretalClienteActual.id);
-      } catch (_) {}
-    };
+    var _libretalCuentaItemsCache = null;
+    var _libretalCuentaUltimoMonto = 0;
 
-    window._enviarTicketWhatsApp = async function () {
-      if (!_libretalClienteActual || !_libretalClienteActual.telefono) return;
-      var items = await loadLibretaItems(_libretalClienteActual.id, true);
+    function _libretaBuildMsgPendiente(cliente, items) {
       var total = items.reduce(function (s, i) { return s + Number(i.monto || 0); }, 0);
       var negocio = (currentUser && currentUser.kioscoName) ? currentUser.kioscoName : 'El negocio';
       var hoy = new Date().toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' });
@@ -2313,15 +2302,122 @@
         var fh = item.fecha_hora ? new Date(item.fecha_hora).toLocaleString('es-AR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
         return '• ' + d + ' — $' + m + (fh ? ' (' + fh + ')' : '');
       }).join('\n');
-      var msg = '📋 *CUENTA DE FIADO*\n'
-        + '👤 Cliente: *' + _libretalClienteActual.nombre + '*\n'
+      return '📋 *CUENTA DE FIADO*\n'
+        + '👤 Cliente: *' + (cliente.nombre || '') + '*\n'
         + '📅 ' + hoy + '\n\n'
         + '🛒 *Detalle:*\n'
         + detalle + '\n\n'
         + '💰 *TOTAL ADEUDADO: $' + Math.round(total).toLocaleString('es-AR') + '*\n\n'
         + '_' + negocio + '_';
-      var tel = _libretalClienteActual.telefono.replace(/\D/g, '');
-      window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(msg), '_blank');
+    }
+
+    function _libretaBuildMsgComprobante(cliente, montoPagado) {
+      var negocio = (currentUser && currentUser.kioscoName) ? currentUser.kioscoName : 'El negocio';
+      var hoy = new Date().toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+      return '✅ *CUENTA SALDADA*\n'
+        + '👤 Cliente: *' + (cliente.nombre || '') + '*\n'
+        + '💵 Monto cobrado: *$' + Math.round(montoPagado).toLocaleString('es-AR') + '*\n'
+        + '📅 ' + hoy + '\n\n'
+        + 'Gracias por tu pago.\n'
+        + '_' + negocio + '_';
+    }
+
+    function _libretaAbrirWhatsAppConTexto(telRaw, texto) {
+      if (!telRaw) {
+        if (typeof showScanToast === 'function') showScanToast('Falta el teléfono del cliente', true);
+        return;
+      }
+      var tel = String(telRaw).replace(/\D/g, '');
+      if (!tel) {
+        if (typeof showScanToast === 'function') showScanToast('Teléfono no válido', true);
+        return;
+      }
+      window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(texto), '_blank');
+    }
+
+    window._abrirCuentaLibreta = async function () {
+      if (!_libretalClienteActual) return;
+      var items = await loadLibretaItems(_libretalClienteActual.id, true);
+      if (!items.length) {
+        if (typeof showScanToast === 'function') showScanToast('No hay deuda pendiente', false);
+        return;
+      }
+      _libretalCuentaItemsCache = items;
+      var total = items.reduce(function (s, i) { return s + Number(i.monto || 0); }, 0);
+      var nombreEl = document.getElementById('libretalCuentaClienteNombre');
+      if (nombreEl) nombreEl.textContent = _libretalClienteActual.nombre || '';
+      var ticketEl = document.getElementById('libretalCuentaTicket');
+      var sinTel = document.getElementById('libretalCuentaSinTel');
+      if (ticketEl) {
+        ticketEl.innerHTML = items.map(function (item) {
+          var desc = (item.descripcion || '').replace(/</g, '&lt;');
+          var m = Math.round(Number(item.monto || 0)).toLocaleString('es-AR');
+          return '<div class="libreta-cuenta-line flex justify-between gap-3 px-4 py-3 border-b border-white/08"><span class="text-white/90 min-w-0 flex-1 truncate">' + desc + '</span><span class="font-bold text-[#4ade80] shrink-0">$' + m + '</span></div>';
+        }).join('') + '<div class="flex justify-between items-baseline px-4 pt-4 pb-2"><span class="text-white/60 text-sm">Total adeudado</span><span class="font-bold text-xl text-amber-400">$' + Math.round(total).toLocaleString('es-AR') + '</span></div>';
+      }
+      if (sinTel) {
+        var tieneTel = !!(_libretalClienteActual.telefono && String(_libretalClienteActual.telefono).replace(/\D/g, ''));
+        sinTel.classList.toggle('hidden', tieneTel);
+      }
+      var btnWA = document.getElementById('libretalCuentaBtnWA');
+      if (btnWA) {
+        var okTel = !!(_libretalClienteActual.telefono && String(_libretalClienteActual.telefono).replace(/\D/g, ''));
+        btnWA.disabled = !okTel;
+        btnWA.classList.toggle('opacity-45', !okTel);
+      }
+      document.getElementById('libretalCuentaFooterPendiente').classList.remove('hidden');
+      document.getElementById('libretalCuentaFooterExito').classList.add('hidden');
+      var modal = document.getElementById('libretalCuentaModal');
+      if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+      lucide.createIcons();
+    };
+
+    window._cerrarCuentaLibreta = function () {
+      var modal = document.getElementById('libretalCuentaModal');
+      if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+      _libretalCuentaItemsCache = null;
+    };
+
+    window._libretaCuentaCompartirPendiente = function () {
+      if (!_libretalClienteActual || !_libretalCuentaItemsCache || !_libretalCuentaItemsCache.length) return;
+      var msg = _libretaBuildMsgPendiente(_libretalClienteActual, _libretalCuentaItemsCache);
+      _libretaAbrirWhatsAppConTexto(_libretalClienteActual.telefono, msg);
+    };
+
+    window._libretaCuentaConfirmarCobro = async function () {
+      if (!_libretalClienteActual || !supabaseClient || !currentUser?.id) return;
+      var items = _libretalCuentaItemsCache;
+      if (!items || !items.length) return;
+      var total = items.reduce(function (s, i) { return s + Number(i.monto || 0); }, 0);
+      if (!confirm('¿Confirmás que cobraste $' + Math.round(total).toLocaleString('es-AR') + ' y querés saldar la cuenta?')) return;
+      try {
+        var res = await supabaseClient.from('libreta_items').update({ pagado: true }).eq('cliente_id', _libretalClienteActual.id).eq('user_id', currentUser.id).eq('pagado', false);
+        if (res.error) throw res.error;
+        _libretalCuentaUltimoMonto = total;
+        await renderLibretaItems(_libretalClienteActual.id);
+        document.getElementById('libretalCuentaFooterPendiente').classList.add('hidden');
+        var exito = document.getElementById('libretalCuentaFooterExito');
+        var txt = document.getElementById('libretalCuentaExitoTexto');
+        if (txt) txt.textContent = 'Cuenta saldada por $' + Math.round(total).toLocaleString('es-AR');
+        var btnWAc = document.getElementById('libretalCuentaBtnWAComprobante');
+        var okTel = !!(_libretalClienteActual.telefono && String(_libretalClienteActual.telefono).replace(/\D/g, ''));
+        if (btnWAc) {
+          btnWAc.disabled = !okTel;
+          btnWAc.classList.toggle('opacity-45', !okTel);
+        }
+        if (exito) exito.classList.remove('hidden');
+        if (typeof showScanToast === 'function') showScanToast('Cuenta saldada', false);
+        lucide.createIcons();
+      } catch (e) {
+        console.error(e);
+        if (typeof showScanToast === 'function') showScanToast('No se pudo actualizar', true);
+      }
+    };
+
+    window._libretaCuentaCompartirComprobante = function () {
+      if (!_libretalClienteActual) return;
+      var msg = _libretaBuildMsgComprobante(_libretalClienteActual, _libretalCuentaUltimoMonto);
+      _libretaAbrirWhatsAppConTexto(_libretalClienteActual.telefono, msg);
     };
 
     window._cerrarModalLibreta = function (id) {
