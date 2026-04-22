@@ -852,9 +852,9 @@ body[data-panel="inventory"] #panel-inventory {
     padding-top: max(0.75rem, env(safe-area-inset-top, 0.75rem));
   }
 
-  /* Botones del detalle de producto: no cubiertos por la nav */
-  #productDetailPanel > div:last-child {
-    padding-bottom: max(5.5rem, env(safe-area-inset-bottom, 0) + 5rem) !important;
+  /* Pie detalle producto: espacio por encima de la barra inferior */
+  #productDetailPanel .product-detail-footer {
+    padding-bottom: max(6rem, env(safe-area-inset-bottom, 0) + 5.25rem) !important;
   }
 }
 
@@ -1212,4 +1212,24 @@ body[data-panel="inventory"] #panel-inventory {
 
 .pb-safe {
   padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 1.5rem));
+}
+
+/* Detalle ítem libreta (hoja inferior): por encima de la barra de navegación */
+.libreta-item-detalle-sheet {
+  padding: 1.25rem 1.25rem 1rem;
+  margin-bottom: max(5.5rem, env(safe-area-inset-bottom, 0) + 4.75rem);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Pie de pantalla detalle de producto: no queda tapado por la nav inferior */
+.product-detail-footer {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-bottom: max(6rem, env(safe-area-inset-bottom, 0) + 5.25rem);
+}
+
+@media (min-width: 768px) {
+  .product-detail-footer {
+    padding-bottom: max(1.75rem, env(safe-area-inset-bottom, 0) + 1rem);
+  }
 }
