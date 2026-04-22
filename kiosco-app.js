@@ -1894,6 +1894,124 @@
       t.classList.add('hidden');
     };
 
+    function _monthBoundsLocal(d) {
+      var y = d.getFullYear();
+      var m = d.getMonth();
+      var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+      var startDate = y + '-' + pad(m + 1) + '-01';
+      var lastD = new Date(y, m + 1, 0);
+      var endDate = y + '-' + pad(m + 1) + '-' + pad(lastD.getDate());
+      var start = new Date(y, m, 1, 0, 0, 0, 0);
+      var end = new Date(y, m + 1, 0, 23, 59, 59, 999);
+      var todayStr = y + '-' + pad(m + 1) + '-' + pad(d.getDate());
+      return {
+        startDate: startDate,
+        endDate: endDate,
+        startISO: start.toISOString(),
+        endISO: end.toISOString(),
+        label: start.toLocaleString('es-AR', { month: 'long', year: 'numeric' }),
+        todayStr: todayStr
+      };
+    }
+
+    async function renderResumenMensualCaja() {
+      var labelEl = document.getElementById('cajaMesLabel');
+      var fuenteEl = document.getElementById('cajaMesIngresosFuente');
+      var ingEl = document.getElementById('cajaMesIngresos');
+      var gfEl = document.getElementById('cajaMesGastosFijos');
+      var gpEl = document.getElementById('cajaMesGastosProv');
+      var gtEl = document.getElementById('cajaMesGastosTotal');
+      var balEl = document.getElementById('cajaMesBalance');
+      var notaEl = document.getElementById('cajaMesNota');
+      if (!labelEl || !ingEl) return;
+      var now = new Date();
+      var mb = _monthBoundsLocal(now);
+      labelEl.textContent = mb.label;
+      if (fuenteEl) {
+        fuenteEl.classList.add('hidden');
+        fuenteEl.textContent = '';
+      }
+      if (!supabaseClient || !currentUser?.id) {
+        ingEl.textContent = '—';
+        if (gfEl) gfEl.textContent = '—';
+        if (gpEl) gpEl.textContent = '—';
+        if (gtEl) gtEl.textContent = '—';
+        if (balEl) { balEl.textContent = '—'; balEl.className = 'font-bold text-xl shrink-0 text-white/50'; }
+        if (notaEl) notaEl.textContent = 'Configurá Supabase para ver ingresos, gastos y balance del mes.';
+        try { lucide.createIcons(); } catch (_) {}
+        return;
+      }
+      var uid = currentUser.id;
+      var ingresos = null;
+      var fuente = '';
+      try {
+        var vres = await supabaseClient.from('ventas').select('total, metodo_pago').eq('user_id', uid).gte('fecha_hora', mb.startISO).lte('fecha_hora', mb.endISO);
+        if (!vres.error && Array.isArray(vres.data)) {
+          ingresos = vres.data.reduce(function (s, v) {
+            var metodo = (v.metodo_pago || '').toLowerCase().replace(/\s/g, '_');
+            if (metodo === 'fiado' || metodo === 'transferencia_pendiente') return s;
+            return s + (Number(v.total) || 0);
+          }, 0);
+          fuente = 'Ingresos: suma de ventas del mes (efectivo, tarjeta, transferencia y cobro libreta). Fiado y transf. pendiente no suman.';
+        }
+      } catch (_) {}
+      if (ingresos === null) {
+        ingresos = 0;
+        try {
+          var cres = await supabaseClient.from('cierres_caja').select('fecha, total_facturado').eq('user_id', uid).gte('fecha', mb.startDate).lte('fecha', mb.endDate);
+          if (!cres.error && Array.isArray(cres.data)) {
+            var fechasCierre = {};
+            cres.data.forEach(function (r) {
+              ingresos += Number(r.total_facturado) || 0;
+              fechasCierre[(r.fecha || '').toString().slice(0, 10)] = true;
+            });
+            if (!fechasCierre[mb.todayStr]) {
+              var mLive = await getMetricasDelDia();
+              ingresos += mLive.total || 0;
+              fuente = 'Ingresos: cierres guardados este mes más lo vendido hoy (aún sin cerrar). Si falta el historial de ventas, este modo es el que aplica.';
+            } else {
+              fuente = 'Ingresos: solo cierres de caja guardados en el mes (no se pudo usar la tabla ventas).';
+            }
+          } else {
+            fuente = 'No se pudieron leer ventas ni cierres para el mes.';
+          }
+        } catch (_) {
+          fuente = 'Error al calcular ingresos del mes.';
+        }
+      }
+      var gastosF = 0;
+      var gastosP = 0;
+      try {
+        var gres = await supabaseClient.from('gastos').select('tipo, monto').eq('user_id', uid).gte('fecha', mb.startDate).lte('fecha', mb.endDate);
+        if (!gres.error && Array.isArray(gres.data)) {
+          gres.data.forEach(function (r) {
+            var mo = Number(r.monto) || 0;
+            if (r.tipo === 'proveedor') gastosP += mo;
+            else if (r.tipo === 'gasto_fijo') gastosF += mo;
+            else gastosP += mo;
+          });
+        }
+      } catch (_) {}
+      var gastosTot = gastosF + gastosP;
+      var balance = ingresos - gastosTot;
+      ingEl.textContent = '$' + Math.round(ingresos).toLocaleString('es-AR');
+      if (gfEl) gfEl.textContent = '−$' + Math.round(gastosF).toLocaleString('es-AR');
+      if (gpEl) gpEl.textContent = '−$' + Math.round(gastosP).toLocaleString('es-AR');
+      if (gtEl) gtEl.textContent = '−$' + Math.round(gastosTot).toLocaleString('es-AR');
+      if (balEl) {
+        balEl.textContent = (balance >= 0 ? '' : '−') + '$' + Math.abs(Math.round(balance)).toLocaleString('es-AR');
+        balEl.className = 'font-bold text-xl shrink-0 ' + (balance >= 0 ? 'text-[#86efac]' : 'text-red-300');
+      }
+      if (fuenteEl && fuente) {
+        fuenteEl.textContent = fuente;
+        fuenteEl.classList.remove('hidden');
+      }
+      if (notaEl) {
+        notaEl.textContent = 'Balance aproximado: ingresos cobrados del mes menos gastos fijos y pagos a proveedores registrados con fecha en el mes. No incluye stock ni impuestos.';
+      }
+      try { lucide.createIcons(); } catch (_) {}
+    }
+
     async function renderCierresCajaHistorial() {
       var listEl = document.getElementById('cierresCajaList');
       if (!listEl) return;
@@ -1942,6 +2060,7 @@
       setData(d);
       updateDashboard();
       renderCierresCajaHistorial();
+      renderResumenMensualCaja();
     };
 
     // ============================================================
@@ -2017,7 +2136,10 @@
       subs.forEach(function (s) { var el = document.getElementById('caja-sub-' + s); if (el) el.classList.add('hidden'); });
       var sub = document.getElementById('caja-sub-' + tab);
       if (sub) sub.classList.remove('hidden');
-      if (tab === 'cierre') renderCierresCajaHistorial();
+      if (tab === 'cierre') {
+        renderCierresCajaHistorial();
+        renderResumenMensualCaja();
+      }
       if (tab === 'proveedores') { _resetFormInline('proveedor'); renderGastos('proveedor'); }
       if (tab === 'gastos') { _resetFormInline('gasto_fijo'); renderGastos('gasto_fijo'); }
       lucide.createIcons();
@@ -2068,6 +2190,7 @@
         if (res.error) throw res.error;
         _resetFormInline(tipo);
         renderGastos(tipo);
+        renderResumenMensualCaja();
       } catch (e) {
         if (errEl) { errEl.textContent = 'Error al guardar: ' + (e.message || 'intente de nuevo.'); errEl.classList.remove('hidden'); }
       }
@@ -2088,6 +2211,7 @@
       try {
         await supabaseClient.from('gastos').delete().eq('id', id).eq('user_id', currentUser.id);
         renderGastos(tipo);
+        renderResumenMensualCaja();
       } catch (_) {}
     };
     // ============================================================

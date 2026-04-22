@@ -455,6 +455,37 @@
                 <span id="cajaTotal" class="font-bold text-[#86efac] text-xl">$0</span>
               </div>
             </div>
+            <div id="cajaMesResumenCard" class="glass rounded-2xl p-5 mb-6 border border-[#22c55e]/20">
+              <h3 class="font-semibold text-sm text-white/85 mb-0.5 flex items-center gap-2">
+                <i data-lucide="calendar-range" class="w-4 h-4 text-[#86efac]"></i>
+                Balance del mes
+              </h3>
+              <p id="cajaMesLabel" class="text-xs text-white/45 mb-3 capitalize"></p>
+              <p id="cajaMesIngresosFuente" class="text-[10px] text-white/35 mb-2 leading-snug hidden"></p>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between gap-3 py-2 border-b border-white/08">
+                  <span class="text-white/65">Ingresos (ventas cobradas)</span>
+                  <span id="cajaMesIngresos" class="font-semibold text-[#86efac] shrink-0">$0</span>
+                </div>
+                <div class="flex justify-between gap-3 py-1.5 text-xs border-b border-white/06">
+                  <span class="text-white/50">Gastos fijos</span>
+                  <span id="cajaMesGastosFijos" class="text-red-300/90 shrink-0">−$0</span>
+                </div>
+                <div class="flex justify-between gap-3 py-1.5 text-xs border-b border-white/06">
+                  <span class="text-white/50">Pagos a proveedores</span>
+                  <span id="cajaMesGastosProv" class="text-red-300/90 shrink-0">−$0</span>
+                </div>
+                <div class="flex justify-between gap-3 py-2 border-b border-white/08">
+                  <span class="text-white/65">Total gastos</span>
+                  <span id="cajaMesGastosTotal" class="font-semibold text-red-300 shrink-0">−$0</span>
+                </div>
+                <div class="flex justify-between gap-3 pt-2 text-base">
+                  <span class="font-semibold text-white/90">Balance (aprox.)</span>
+                  <span id="cajaMesBalance" class="font-bold text-xl shrink-0">$0</span>
+                </div>
+              </div>
+              <p id="cajaMesNota" class="text-[10px] text-white/40 mt-3 leading-relaxed"></p>
+            </div>
             <button id="generateTicket" class="w-full btn-glow rounded-xl py-3 font-semibold flex items-center justify-center gap-2 mb-3">
               <i data-lucide="share-2" class="w-5 h-5"></i> Generar ticket digital
             </button>
@@ -1447,7 +1478,7 @@
   </div>
   </div><!-- /#appWrap -->
   <script src="kiosco-config.js"></script>
-  <script defer src="kiosco-app.js?v=20260422o"></script>
+  <script defer src="kiosco-app.js?v=20260422p"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>
