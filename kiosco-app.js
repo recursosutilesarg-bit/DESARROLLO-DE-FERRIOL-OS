@@ -1342,10 +1342,16 @@
       if (name !== 'scanner') window._scanForProductCode = false;
       state.currentPanel = name;
       document.body.setAttribute('data-panel', name);
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       const navKey = (name === 'config' || name === 'historial' || name === 'clientes') ? 'mas' : name;
-      const btn = document.querySelector('[data-nav="' + navKey + '"]');
-      if (btn) btn.classList.add('active');
+      var kNav = document.getElementById('navKiosquero');
+      if (kNav) {
+        kNav.querySelectorAll('[data-nav]').forEach(function (n) { n.classList.remove('active'); });
+        var kBtn = kNav.querySelector('[data-nav="' + navKey + '"]');
+        if (kBtn) kBtn.classList.add('active');
+        if (document.activeElement && kNav.contains(document.activeElement)) {
+          try { document.activeElement.blur(); } catch (_) {}
+        }
+      }
       document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
       const panel = document.getElementById('panel-' + name);
       if (panel) panel.classList.remove('hidden');
@@ -1401,6 +1407,7 @@
         showPanel(s.panel, s.cajaTab != null && s.cajaTab !== '' ? s.cajaTab : undefined);
       } else {
         showPanel('dashboard');
+        history.replaceState({ panel: 'dashboard', root: true }, '', location.href);
       }
       state._restoringFromHistory = false;
     });
@@ -3141,7 +3148,7 @@ async function showApp() {
         state._restoringFromHistory = true;
         showPanel('dashboard');
         state._restoringFromHistory = false;
-        history.replaceState({ panel: 'dashboard' }, '', location.href);
+        history.replaceState({ panel: 'dashboard', root: true }, '', location.href);
         lucide.createIcons();
     }
 } // <--- ASEGURATE DE QUE ESTA LLAVE CIERRE TODO EL BLOQUE

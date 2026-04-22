@@ -1221,9 +1221,23 @@ body[data-panel="inventory"] #panel-inventory {
   transition: background 0.12s;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
   margin: 0;
   width: 100%;
   box-sizing: border-box;
+}
+
+/* Evita que Chrome/Android trate el toque como selección de texto → "Buscar en Google" */
+.libreta-detalle-row *,
+.libreta-item-row,
+.libreta-item-row *,
+.libreta-cuenta-line,
+.libreta-cuenta-line * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .libreta-detalle-row:active {
