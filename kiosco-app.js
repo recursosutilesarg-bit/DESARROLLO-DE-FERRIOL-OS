@@ -591,12 +591,7 @@
 
     function openPaymentModal() {
       if (state.cart.length === 0) return;
-      _pendingPaymentMethod = null;
       _selectedLibretaClienteForPayment = null;
-      var fiadoSection = document.getElementById('paymentFiadoSection');
-      if (fiadoSection) fiadoSection.classList.add('hidden');
-      if (document.getElementById('paymentClientName')) document.getElementById('paymentClientName').value = '';
-      if (document.getElementById('paymentWhatsapp')) document.getElementById('paymentWhatsapp').value = '';
       var we = document.getElementById('paymentWhatsappErr'); if (we) we.classList.add('hidden');
       document.getElementById('paymentModal').classList.remove('hidden');
       document.getElementById('paymentModal').classList.add('flex');
@@ -1010,13 +1005,10 @@
     window._abrirCobroRapido = function () { openCobroRapidoModal(); };
     function openCobroRapidoModal() {
       state.cobroRapidoItems = [];
-      _pendingPaymentMethod = null;
       _selectedLibretaClienteForPayment = null;
       document.getElementById('cobroRapidoMonto').value = '';
       var margenEl = document.getElementById('cobroRapidoMargen'); if (margenEl) margenEl.value = '';
-      if (document.getElementById('cobroRapidoCliente')) document.getElementById('cobroRapidoCliente').value = '';
       document.getElementById('cobroRapidoOtroNombre').value = '';
-      var crfs = document.getElementById('cobroRapidoFiadoSection'); if (crfs) crfs.classList.add('hidden');
       document.getElementById('cobroRapidoWhatsapp').value = '';
       var crwe = document.getElementById('cobroRapidoWhatsappErr'); if (crwe) crwe.classList.add('hidden');
       document.querySelectorAll('.quick-payment-option').forEach(function (el) { el.classList.remove('ring-2', 'ring-[#dc2626]'); });
@@ -1392,17 +1384,7 @@
     document.getElementById('cobroRapidoAtajoBtn').onclick = function () {
       var lastMethod = '';
       try { lastMethod = localStorage.getItem(LAST_QUICK_PAYMENT_KEY) || 'efectivo'; } catch (_) { lastMethod = 'efectivo'; }
-      if (lastMethod === 'fiado' || lastMethod === 'transferencia_pendiente') {
-        _pendingPaymentMethod = lastMethod;
-        _selectedLibretaClienteForPayment = null;
-        var sectionEl = document.getElementById('cobroRapidoFiadoSection');
-        if (sectionEl) sectionEl.classList.remove('hidden');
-        if (document.getElementById('cobroRapidoCliente')) document.getElementById('cobroRapidoCliente').value = '';
-        if (document.getElementById('cobroRapidoWhatsapp')) document.getElementById('cobroRapidoWhatsapp').value = '';
-        _cargarClientesPickerPago('cobroRapidoFiadoClientesList', 'cobroRapidoCliente', 'cobroRapidoWhatsapp');
-        lucide.createIcons();
-        return;
-      }
+      _selectedLibretaClienteForPayment = null;
       completeQuickSale(lastMethod, '', '').catch(function (err) {
         console.warn('Cobro rápido (atajo):', err && err.message ? err.message : err);
       });
@@ -1410,19 +1392,7 @@
     document.querySelectorAll('.quick-payment-option').forEach(function (btn) {
       btn.onclick = function () {
         var method = btn.dataset.quickPayment;
-        if (method === 'fiado' || method === 'transferencia_pendiente') {
-          _pendingPaymentMethod = method;
-          _selectedLibretaClienteForPayment = null;
-          var sectionEl = document.getElementById('cobroRapidoFiadoSection');
-          if (sectionEl) sectionEl.classList.remove('hidden');
-          if (document.getElementById('cobroRapidoCliente')) document.getElementById('cobroRapidoCliente').value = '';
-          if (document.getElementById('cobroRapidoWhatsapp')) document.getElementById('cobroRapidoWhatsapp').value = '';
-          _cargarClientesPickerPago('cobroRapidoFiadoClientesList', 'cobroRapidoCliente', 'cobroRapidoWhatsapp');
-          lucide.createIcons();
-          return;
-        }
-        var errEl = document.getElementById('cobroRapidoWhatsappErr');
-        if (errEl) errEl.classList.add('hidden');
+        _selectedLibretaClienteForPayment = null;
         completeQuickSale(method, '', '').catch(function (err) {
           console.warn('Cobro rápido:', err && err.message ? err.message : err);
         });
@@ -1743,19 +1713,7 @@
     document.querySelectorAll('[data-payment]').forEach(btn => {
       btn.onclick = () => {
         const method = btn.dataset.payment;
-        if (method === 'fiado' || method === 'transferencia_pendiente') {
-          _pendingPaymentMethod = method;
-          _selectedLibretaClienteForPayment = null;
-          var sectionEl = document.getElementById('paymentFiadoSection');
-          if (sectionEl) { sectionEl.classList.remove('hidden'); }
-          if (document.getElementById('paymentClientName')) document.getElementById('paymentClientName').value = '';
-          if (document.getElementById('paymentWhatsapp')) document.getElementById('paymentWhatsapp').value = '';
-          _cargarClientesPickerPago('paymentFiadoClientesList', 'paymentClientName', 'paymentWhatsapp');
-          lucide.createIcons();
-          return;
-        }
-        var errEl = document.getElementById('paymentWhatsappErr');
-        if (errEl) errEl.classList.add('hidden');
+        _selectedLibretaClienteForPayment = null;
         completeSaleWithMethod(method, '', '');
         if (document.getElementById('cartClientName')) document.getElementById('cartClientName').value = '';
       };
