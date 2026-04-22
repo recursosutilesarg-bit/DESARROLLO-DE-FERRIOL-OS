@@ -417,7 +417,7 @@
               <i data-lucide="banknote" class="w-5 h-5 text-[#86efac]"></i>
               Cierre de caja
             </h2>
-            <p class="text-sm text-white/70 mb-4">Al cerrar caja se guarda el resumen del día y se reinician los totales para empezar el día siguiente.</p>
+            <p class="text-sm text-white/70 mb-4">Al cerrar caja se guarda el resumen del día y se reinician los totales para el día siguiente. El <strong class="text-white/90">total</strong> es dinero que entró (efectivo, tarjeta, transferencia y cobros de libreta); el fiado en cuenta no suma hasta que cobrás en la libreta.</p>
             <div id="cajaSummary" class="space-y-4 mb-6">
               <div class="flex justify-between py-3 border-b border-white/10">
                 <span>Efectivo</span><span id="cajaEfectivo" class="font-bold">$0</span>
@@ -429,7 +429,10 @@
                 <span>Transferencia</span><span id="cajaTransf" class="font-bold">$0</span>
               </div>
               <div class="flex justify-between py-3 border-b border-white/10">
-                <span>Fiado</span><span id="cajaFiado" class="font-bold">$0</span>
+                <span>Cobro libreta</span><span id="cajaCobroLibreta" class="font-bold">$0</span>
+              </div>
+              <div class="flex justify-between py-3 border-b border-white/10">
+                <span>Fiado (cuenta)</span><span id="cajaFiado" class="font-bold">$0</span>
               </div>
               <div class="flex justify-between py-3 border-b border-white/10">
                 <span>Transferir pendiente</span><span id="cajaTransfPend" class="font-bold">$0</span>

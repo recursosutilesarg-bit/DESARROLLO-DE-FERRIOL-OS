@@ -3,7 +3,7 @@
     // ——— Supabase: pegá tu Project URL y anon key acá ———
     // Si el panel Super no muestra usuarios: ejecutá supabase_rls_super_profiles.sql en SQL Editor.
     // Si ves 400 en products o caja: ejecutá supabase-fix-products-caja.sql en SQL Editor (columnas + índice único en caja).
-    // Si usás "Transferir pendiente", agregá en caja: ALTER TABLE caja ADD COLUMN IF NOT EXISTS transferencia_pendiente numeric DEFAULT 0;
+    // Si usás "Transferir pendiente" o cobros de libreta: ALTER TABLE caja ADD COLUMN IF NOT EXISTS transferencia_pendiente numeric DEFAULT 0; ADD COLUMN IF NOT EXISTS cobro_libreta numeric DEFAULT 0;
     // Para historial de ventas y clientes, creá en Supabase (SQL Editor) estas tablas:
     // CREATE TABLE ventas ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE, fecha_hora timestamptz NOT NULL DEFAULT now(), total numeric NOT NULL DEFAULT 0, metodo_pago text, cliente_nombre text, items jsonb DEFAULT '[]'::jsonb, created_at timestamptz DEFAULT now() );
     // ALTER TABLE ventas ENABLE ROW LEVEL SECURITY; CREATE POLICY "ventas_policy" ON ventas FOR ALL USING (auth.uid() = user_id);
@@ -102,7 +102,7 @@
       start.setHours(0, 0, 0, 0);
       var rangeStart = start.toISOString();
       var rangeEnd = end.toISOString();
-      var methodLabels = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia', fiado: 'Fiado', transferencia_pendiente: 'Transf. pendiente' };
+      var methodLabels = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia', fiado: 'Fiado', transferencia_pendiente: 'Transf. pendiente', cobro_libreta: 'Cobro libreta' };
       var _r = await supabaseClient.from('ventas').select('id, fecha_hora, total, metodo_pago, cliente_nombre, items').eq('user_id', currentUser.id).gte('fecha_hora', rangeStart).lte('fecha_hora', rangeEnd).order('fecha_hora', { ascending: false });
       var list = _r.data || [];
       if (_r.error) {
@@ -120,7 +120,7 @@
     }
 
     let currentUser = null;
-    let _dataCache = { products: {}, ventas: { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 }, transacciones: 0, deudores: [], lastCierreDate: null };
+    let _dataCache = { products: {}, ventas: { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 }, transacciones: 0, deudores: [], lastCierreDate: null };
 
     const STORAGE_KEY_PREFIX = 'ferriol_data_';
     const LAST_QUICK_PAYMENT_KEY = 'ferriol_last_quick_payment';
@@ -142,7 +142,7 @@
       try {
         localStorage.setItem(key, JSON.stringify({
           products: _dataCache.products || {},
-          ventas: _dataCache.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 },
+          ventas: _dataCache.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 },
           transacciones: _dataCache.transacciones || 0,
           deudores: _dataCache.deudores || [],
           lastCierreDate: _dataCache.lastCierreDate || null,
@@ -172,11 +172,15 @@
           }
           _dataCache = {
             products: productsFinal,
-            ventas: caja ? { efectivo: Number(caja.efectivo), tarjeta: Number(caja.tarjeta), transferencia: Number(caja.transferencia), fiado: Number(caja.fiado), transferencia_pendiente: Number(caja.transferencia_pendiente || 0) } : { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 },
+            ventas: caja ? { efectivo: Number(caja.efectivo), tarjeta: Number(caja.tarjeta), transferencia: Number(caja.transferencia), fiado: Number(caja.fiado), transferencia_pendiente: Number(caja.transferencia_pendiente || 0), cobro_libreta: Number(caja.cobro_libreta || 0) } : { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 },
             transacciones: caja ? (caja.transacciones || 0) : 0,
             deudores: _dataCache.deudores || [],
             lastCierreDate: (prevLocal && prevLocal.lastCierreDate) ? prevLocal.lastCierreDate : (_dataCache.lastCierreDate || null)
           };
+          var _hoyStr = new Date().toISOString().slice(0, 10);
+          if (prevLocal && prevLocal.lastCierreDate === _hoyStr && prevLocal.ventas && prevLocal.ventas.cobro_libreta) {
+            _dataCache.ventas.cobro_libreta = Number(prevLocal.ventas.cobro_libreta) || 0;
+          }
           restoreTodayFromLocalStorage();
           saveToLocalStorage();
           return;
@@ -185,7 +189,8 @@
       var local = loadFromLocalStorage();
       if (local) {
         _dataCache.products = local.products || {};
-        _dataCache.ventas = local.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 };
+        _dataCache.ventas = local.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 };
+        if (_dataCache.ventas.cobro_libreta == null) _dataCache.ventas.cobro_libreta = 0;
         _dataCache.transacciones = local.transacciones || 0;
         _dataCache.deudores = local.deudores || [];
         _dataCache.lastCierreDate = local.lastCierreDate || null;
@@ -241,13 +246,22 @@
         if (updates.ventas !== undefined || updates.transacciones !== undefined) {
           const v = updates.ventas || _dataCache.ventas;
           const t = updates.transacciones !== undefined ? updates.transacciones : _dataCache.transacciones;
+          var fiadoSum = 0, tpSum = 0;
+          if (typeof state !== 'undefined' && state.transaccionesList && Array.isArray(state.transaccionesList)) {
+            state.transaccionesList.forEach(function (tr) {
+              var tot = Number(tr.total) || 0;
+              if (tr.method === 'fiado') fiadoSum += tot;
+              else if (tr.method === 'transferencia_pendiente') tpSum += tot;
+            });
+          }
           const cajaRow = {
             user_id: uid,
             efectivo: Number(v.efectivo) || 0,
             tarjeta: Number(v.tarjeta) || 0,
             transferencia: Number(v.transferencia) || 0,
-            fiado: Number(v.fiado) || 0,
-            transferencia_pendiente: Number(v.transferencia_pendiente) || 0,
+            fiado: fiadoSum,
+            transferencia_pendiente: tpSum,
+            cobro_libreta: Number(v.cobro_libreta) || 0,
             transacciones: Number(t) || 0
           };
           var cajaEx = await supabaseClient.from('caja').select('user_id').eq('user_id', uid).maybeSingle();
@@ -259,21 +273,22 @@
               transferencia: cajaRow.transferencia,
               fiado: cajaRow.fiado,
               transferencia_pendiente: cajaRow.transferencia_pendiente,
+              cobro_libreta: cajaRow.cobro_libreta,
               transacciones: cajaRow.transacciones
             }).eq('user_id', uid);
             if (up.error) console.warn('caja (update):', up.error.message || up.error);
           } else {
             var ins = await supabaseClient.from('caja').insert(cajaRow);
-            if (ins.error) console.warn('caja (insert):', ins.error.message || ins.error, '— Si falta una columna, en Supabase: ALTER TABLE caja ADD COLUMN IF NOT EXISTS transferencia_pendiente numeric DEFAULT 0;');
+            if (ins.error) console.warn('caja (insert):', ins.error.message || ins.error, '— Si falta columna: ALTER TABLE caja ADD COLUMN IF NOT EXISTS transferencia_pendiente numeric DEFAULT 0; ADD COLUMN IF NOT EXISTS cobro_libreta numeric DEFAULT 0;');
           }
         }
       } catch (e) { console.warn('Supabase save failed, data saved in this device (localStorage):', e); }
     }
 
     function getData() {
-      if (!currentUser?.id) return { products: {}, ventas: { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 }, transacciones: 0, deudores: [], lastCierreDate: null };
+      if (!currentUser?.id) return { products: {}, ventas: { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 }, transacciones: 0, deudores: [], lastCierreDate: null };
       const d = _dataCache;
-      d.ventas = d.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 };
+      d.ventas = d.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 };
       d.deudores = d.deudores || [];
       return d;
     }
@@ -282,7 +297,7 @@
       var today = new Date().toISOString().slice(0, 10);
       var last = _dataCache.lastCierreDate;
       if (last && last !== today) {
-        _dataCache.ventas = { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 };
+        _dataCache.ventas = { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 };
         _dataCache.transacciones = 0;
         state.transaccionesList = [];
         _dataCache.lastCierreDate = today;
@@ -627,8 +642,10 @@
         }
       }
       const d = getData();
-      d.ventas = d.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 };
-      d.ventas[method] = (d.ventas[method] || 0) + total;
+      d.ventas = d.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 };
+      if (method !== 'fiado' && method !== 'transferencia_pendiente') {
+        d.ventas[method] = (d.ventas[method] || 0) + total;
+      }
       d.transacciones = (d.transacciones || 0) + 1;
       state.cart.forEach(item => {
         if (d.products[item.codigo]) d.products[item.codigo].stock -= item.cant;
@@ -673,30 +690,52 @@
         try {
           var res = await supabaseClient.from('ventas').select('id, fecha_hora, total, metodo_pago, items').eq('user_id', currentUser.id).gte('fecha_hora', range.start).lte('fecha_hora', range.end);
           if (!res.error && res.data && res.data.length > 0) {
-            var efectivo = 0, tarjeta = 0, transferencia = 0, fiado = 0, transferencia_pendiente = 0, total = 0, ganancia = 0;
+            var efectivo = 0, tarjeta = 0, transferencia = 0, fiado = 0, transferencia_pendiente = 0, cobroLibreta = 0;
+            var totalIngresos = 0;
+            var ganancia = 0;
             res.data.forEach(function (v) {
               var t = Number(v.total) || 0;
-              total += t;
               var metodo = (v.metodo_pago || '').toLowerCase().replace(/\s/g, '_');
-              if (metodo === 'efectivo') efectivo += t;
-              else if (metodo === 'tarjeta') tarjeta += t;
-              else if (metodo === 'transferencia') transferencia += t;
-              else if (metodo === 'fiado') fiado += t;
-              else if (metodo === 'transferencia_pendiente') transferencia_pendiente += t;
-              else efectivo += t;
+              if (metodo === 'fiado') {
+                fiado += t;
+              } else if (metodo === 'transferencia_pendiente') {
+                transferencia_pendiente += t;
+              } else if (metodo === 'cobro_libreta') {
+                cobroLibreta += t;
+                totalIngresos += t;
+              } else if (metodo === 'efectivo') {
+                efectivo += t;
+                totalIngresos += t;
+              } else if (metodo === 'tarjeta') {
+                tarjeta += t;
+                totalIngresos += t;
+              } else if (metodo === 'transferencia') {
+                transferencia += t;
+                totalIngresos += t;
+              } else {
+                efectivo += t;
+                totalIngresos += t;
+              }
               (v.items || []).forEach(function (i) {
                 var costo = i.costo != null ? Number(i.costo) : 0;
                 ganancia += ((Number(i.precio) || 0) - costo) * (i.cant || 0);
               });
             });
-            return { total, efectivo, tarjeta, transferencia, fiado, transferencia_pendiente, ganancia, count: res.data.length };
+            return { total: totalIngresos, efectivo, tarjeta, transferencia, fiado, transferencia_pendiente, cobro_libreta: cobroLibreta, ganancia, count: res.data.length };
           }
         } catch (_) {}
       }
       var d = getData();
       var ventas = d.ventas || {};
-      var fiado = ventas.fiado || 0, transfPend = ventas.transferencia_pendiente || 0;
-      var total = (ventas.efectivo || 0) + (ventas.tarjeta || 0) + (ventas.transferencia || 0) + fiado + transfPend;
+      var fiado = 0;
+      var transfPend = 0;
+      (state.transaccionesList || []).forEach(function (t) {
+        var tot = Number(t.total) || 0;
+        if (t.method === 'fiado') fiado += tot;
+        else if (t.method === 'transferencia_pendiente') transfPend += tot;
+      });
+      var cobroLibretaL = ventas.cobro_libreta || 0;
+      var total = (ventas.efectivo || 0) + (ventas.tarjeta || 0) + (ventas.transferencia || 0) + cobroLibretaL;
       var ganancia = (state.transaccionesList || []).reduce(function (sum, t) {
         return sum + (t.items || []).reduce(function (s, i) {
           var costo = i.costo != null ? Number(i.costo) : 0;
@@ -706,7 +745,7 @@
           return s + (Number.isFinite(g) ? g : 0);
         }, 0);
       }, 0);
-      return { total, efectivo: ventas.efectivo || 0, tarjeta: ventas.tarjeta || 0, transferencia: ventas.transferencia || 0, fiado, transferencia_pendiente: transfPend, ganancia, count: d.transacciones || 0 };
+      return { total, efectivo: ventas.efectivo || 0, tarjeta: ventas.tarjeta || 0, transferencia: ventas.transferencia || 0, fiado, transferencia_pendiente: transfPend, cobro_libreta: cobroLibretaL, ganancia, count: d.transacciones || 0 };
     }
     async function updateDashboard() {
       checkMidnightReset();
@@ -716,6 +755,8 @@
       document.getElementById('cajaEfectivo').textContent = '$' + m.efectivo.toLocaleString('es-AR');
       document.getElementById('cajaTarjeta').textContent = '$' + m.tarjeta.toLocaleString('es-AR');
       document.getElementById('cajaTransf').textContent = '$' + m.transferencia.toLocaleString('es-AR');
+      var cajaCobroLibretaEl = document.getElementById('cajaCobroLibreta');
+      if (cajaCobroLibretaEl) cajaCobroLibretaEl.textContent = '$' + (m.cobro_libreta || 0).toLocaleString('es-AR');
       document.getElementById('cajaFiado').textContent = '$' + m.fiado.toLocaleString('es-AR');
       var cajaTransfPendEl = document.getElementById('cajaTransfPend');
       if (cajaTransfPendEl) cajaTransfPendEl.textContent = '$' + m.transferencia_pendiente.toLocaleString('es-AR');
@@ -724,16 +765,17 @@
       if (cajaUtilidadEl) cajaUtilidadEl.textContent = '$' + Math.round(m.ganancia).toLocaleString('es-AR');
       var resumenEl = document.getElementById('resumenDiaTexto');
       var resumenVentasEl = document.getElementById('resumenDiaVentas');
-      if (resumenEl) resumenEl.textContent = 'Entraron $' + m.total.toLocaleString('es-AR');
-      if (resumenVentasEl) resumenVentasEl.textContent = m.count + ' ventas';
+      if (resumenEl) resumenEl.textContent = 'Ingresos de caja $' + m.total.toLocaleString('es-AR');
+      if (resumenVentasEl) resumenVentasEl.textContent = m.count + ' movimientos';
       var porMetodoEl = document.getElementById('resumenDiaPorMetodo');
       if (porMetodoEl) {
         var methods = [
           { key: 'efectivo', label: 'Efectivo', icon: 'banknote', color: 'text-green-400', bg: 'bg-green-500/20' },
           { key: 'tarjeta', label: 'Tarjeta', icon: 'credit-card', color: 'text-blue-400', bg: 'bg-blue-500/20' },
           { key: 'transferencia', label: 'Transf.', icon: 'smartphone', color: 'text-cyan-400', bg: 'bg-cyan-500/20' },
-          { key: 'fiado', label: 'Fiado', icon: 'user-check', color: 'text-amber-400', bg: 'bg-amber-500/20' },
-          { key: 'transferencia_pendiente', label: 'Pend.', icon: 'clock', color: 'text-orange-400', bg: 'bg-orange-500/20' }
+          { key: 'cobro_libreta', label: 'Cobro libreta', icon: 'wallet', color: 'text-emerald-300', bg: 'bg-emerald-500/20' },
+          { key: 'fiado', label: 'Fiado (cuenta)', icon: 'user-check', color: 'text-amber-400', bg: 'bg-amber-500/20' },
+          { key: 'transferencia_pendiente', label: 'Pend. (cuenta)', icon: 'clock', color: 'text-orange-400', bg: 'bg-orange-500/20' }
         ];
         porMetodoEl.innerHTML = methods.map(function (x) {
           var val = m[x.key] || 0;
@@ -750,7 +792,7 @@
       var content = document.getElementById('detalleVentaModalContent');
       if (!content || !v) return;
       var fmt = (s) => s ? new Date(s).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : '—';
-      var methodLabels = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia', fiado: 'Fiado', transferencia_pendiente: 'Transf. pend.' };
+      var methodLabels = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia', fiado: 'Fiado', transferencia_pendiente: 'Transf. pend.', cobro_libreta: 'Cobro libreta' };
       var items = (v.items || []).map(function (i) {
         var subtotal = (i.precio || 0) * (i.cant || 0);
         return '<li class="flex justify-between py-1 border-b border-white/10">' +
@@ -961,8 +1003,10 @@
         }
       }
       var d = getData();
-      d.ventas = d.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 };
-      d.ventas[method] = (d.ventas[method] || 0) + total;
+      d.ventas = d.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 };
+      if (method !== 'fiado' && method !== 'transferencia_pendiente') {
+        d.ventas[method] = (d.ventas[method] || 0) + total;
+      }
       d.transacciones = (d.transacciones || 0) + 1;
       d.lastCierreDate = new Date().toISOString().slice(0, 10);
       setData(d);
@@ -1333,7 +1377,7 @@
     }
     function openTransaccionesModal() {
       const list = state.transaccionesList || [];
-      const methodLabels = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia', fiado: 'Fiado', transferencia_pendiente: 'Transf. pendiente' };
+      const methodLabels = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia', fiado: 'Fiado', transferencia_pendiente: 'Transf. pendiente', cobro_libreta: 'Cobro libreta' };
       const el = document.getElementById('transaccionesList');
       if (list.length === 0) {
         el.innerHTML = '<p class="text-white/60 py-4 text-center">Aún no hay transacciones hoy.</p>';
@@ -1381,7 +1425,7 @@
     };
     document.getElementById('transaccionesOverlay').onclick = () => document.getElementById('closeTransacciones').click();
 
-    const methodLabels = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia', fiado: 'Fiado', transferencia_pendiente: 'Transf. pend.' };
+    const methodLabels = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia', fiado: 'Fiado', transferencia_pendiente: 'Transf. pend.', cobro_libreta: 'Cobro libreta' };
     function getHistorialRange(filter) {
       const now = new Date();
       const start = new Date(now);
@@ -1725,30 +1769,28 @@
     // Generar ticket digital
     document.getElementById('generateTicket').onclick = async () => {
       const d = getData();
+      const mT = await getMetricasDelDia();
       const v = d.ventas || {};
-      const fiado = v.fiado || 0;
-      const transfPend = v.transferencia_pendiente || 0;
-      const total = (v.efectivo || 0) + (v.tarjeta || 0) + (v.transferencia || 0) + fiado + transfPend;
-      var utilidadDiaTicket = (state.transaccionesList || []).reduce(function (sum, t) {
-        return sum + (t.items || []).reduce(function (s, i) {
-          var costo = i.costo != null ? Number(i.costo) : 0;
-          return s + (i.precio - costo) * (i.cant || 0);
-        }, 0);
-      }, 0);
+      const totalIngresos = mT.total;
+      const cobroLib = mT.cobro_libreta || 0;
+      const fiado = mT.fiado || 0;
+      const transfPend = mT.transferencia_pendiente || 0;
+      const utilidadDiaTicket = Math.round(mT.ganancia || 0);
       const t = document.getElementById('ticketContent');
       t.classList.remove('hidden');
       document.getElementById('ticketFecha').textContent = new Date().toLocaleString('es-AR');
       document.getElementById('ticketBody').innerHTML = `
-        <p>Efectivo: $${(v.efectivo || 0).toLocaleString('es-AR')}</p>
-        <p>Tarjeta: $${(v.tarjeta || 0).toLocaleString('es-AR')}</p>
-        <p>Transferencia: $${(v.transferencia || 0).toLocaleString('es-AR')}</p>
-        <p>Fiado: $${fiado.toLocaleString('es-AR')}</p>
-        <p>Transf. pendiente: $${transfPend.toLocaleString('es-AR')}</p>
-        <p>Cant. ventas: ${d.transacciones || 0}</p>
-        <p class="text-green-400">Ganancia del día (precio − costo): $${Math.round(utilidadDiaTicket).toLocaleString('es-AR')}</p>
+        <p>Efectivo: $${(mT.efectivo || 0).toLocaleString('es-AR')}</p>
+        <p>Tarjeta: $${(mT.tarjeta || 0).toLocaleString('es-AR')}</p>
+        <p>Transferencia: $${(mT.transferencia || 0).toLocaleString('es-AR')}</p>
+        <p>Cobro libreta: $${cobroLib.toLocaleString('es-AR')}</p>
+        <p class="text-white/60 text-sm">Fiado (cuenta, no ingreso hasta cobrar): $${fiado.toLocaleString('es-AR')}</p>
+        <p class="text-white/60 text-sm">Transf. pendiente: $${transfPend.toLocaleString('es-AR')}</p>
+        <p>Cant. movimientos: ${d.transacciones || 0}</p>
+        <p class="text-green-400">Ganancia del día (precio − costo): $${utilidadDiaTicket.toLocaleString('es-AR')}</p>
       `;
-      document.getElementById('ticketTotal').textContent = `TOTAL facturado: $${total.toLocaleString('es-AR')}`;
-      const texto = `FERRIOL OS - Cierre de Caja\n${new Date().toLocaleString('es-AR')}\n\nEfectivo: $${(v.efectivo || 0).toLocaleString('es-AR')}\nTarjeta: $${(v.tarjeta || 0).toLocaleString('es-AR')}\nTransferencia: $${(v.transferencia || 0).toLocaleString('es-AR')}\nFiado: $${fiado.toLocaleString('es-AR')}\nTransf. pendiente: $${transfPend.toLocaleString('es-AR')}\nCant. ventas: ${d.transacciones || 0}\nGanancia del día (precio − costo): $${Math.round(utilidadDiaTicket).toLocaleString('es-AR')}\n\nTOTAL facturado: $${total.toLocaleString('es-AR')}`;
+      document.getElementById('ticketTotal').textContent = `Ingresos de caja: $${totalIngresos.toLocaleString('es-AR')}`;
+      const texto = `FERRIOL OS - Cierre de Caja\n${new Date().toLocaleString('es-AR')}\n\nEfectivo: $${(mT.efectivo || 0).toLocaleString('es-AR')}\nTarjeta: $${(mT.tarjeta || 0).toLocaleString('es-AR')}\nTransferencia: $${(mT.transferencia || 0).toLocaleString('es-AR')}\nCobro libreta: $${cobroLib.toLocaleString('es-AR')}\n— Fiado (cuenta): $${fiado.toLocaleString('es-AR')}\n— Transf. pendiente: $${transfPend.toLocaleString('es-AR')}\nCant. movimientos: ${d.transacciones || 0}\nGanancia del día (precio − costo): $${utilidadDiaTicket.toLocaleString('es-AR')}\n\nIngresos de caja: $${totalIngresos.toLocaleString('es-AR')}`;
       if (navigator.share) {
         try {
           await navigator.share({
@@ -1799,7 +1841,7 @@
         } catch (_) {}
       }
       var d = getData();
-      d.ventas = { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 };
+      d.ventas = { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 };
       d.transacciones = 0;
       d.lastCierreDate = new Date().toISOString().slice(0, 10);
       state.transaccionesList = [];
@@ -2439,6 +2481,47 @@
           }
           throw lastErr;
         }
+        var ventaItems = items.map(function (it, idx) {
+          var m = Number(it.monto) || 0;
+          return {
+            nombre: ((it.descripcion || '') + '').trim() || 'Cuenta libreta',
+            codigo: '_libreta_' + String(it.id != null ? it.id : idx),
+            precio: m,
+            cant: 1,
+            costo: m
+          };
+        });
+        var fechaHoraCobro = new Date().toISOString();
+        var clienteNombreCobro = (_libretalClienteActual.nombre || '').trim() || null;
+        state.transaccionesList.push({
+          id: Date.now(),
+          method: 'cobro_libreta',
+          client: clienteNombreCobro || '—',
+          items: ventaItems,
+          total: total,
+          fechaHora: fechaHoraCobro
+        });
+        try {
+          var ventaCobroRes = await supabaseClient.from('ventas').insert({
+            user_id: currentUser.id,
+            fecha_hora: fechaHoraCobro,
+            total: total,
+            metodo_pago: 'cobro_libreta',
+            cliente_nombre: clienteNombreCobro,
+            items: ventaItems
+          });
+          if (ventaCobroRes.error) throw ventaCobroRes.error;
+        } catch (errV) {
+          console.warn('Venta cobro libreta no guardada en la nube:', errV && errV.message);
+          if (typeof showScanToast === 'function') showScanToast('Cuenta saldada. Revisá conexión para el historial de ventas.', false);
+        }
+        var dCobro = getData();
+        dCobro.ventas = dCobro.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 };
+        dCobro.ventas.cobro_libreta = (dCobro.ventas.cobro_libreta || 0) + total;
+        dCobro.transacciones = (dCobro.transacciones || 0) + 1;
+        dCobro.lastCierreDate = new Date().toISOString().slice(0, 10);
+        setData(dCobro);
+        try { await updateDashboard(); } catch (_) {}
         _libretalCuentaUltimoMonto = total;
         _libretalCuentaUltimoItems = items.map(function (it) {
           return {
@@ -3320,16 +3403,24 @@ async function showApp() {
       }
       const newId = data?.user?.id;
       const trialEndsAt = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().slice(0, 19) + 'Z';
-      if (newId) {
-        await supabaseClient.from('profiles').upsert({
-          id: newId,
-          email: email,
-          role: 'kiosquero',
-          active: true,
-          kiosco_name: kioscoName || null,
-          trial_ends_at: trialEndsAt,
-          phone: phone || null
-        }, { onConflict: 'id' });
+      if (!newId) {
+        errEl.textContent = 'Registro recibido. Si tu proyecto pide confirmar el email, abrí el enlace del correo (y spam) antes de iniciar sesión. Después usá el mismo email y contraseña.';
+        errEl.classList.add('show');
+        return;
+      }
+      var upProf = await supabaseClient.from('profiles').upsert({
+        id: newId,
+        email: email,
+        role: 'kiosquero',
+        active: true,
+        kiosco_name: kioscoName || null,
+        trial_ends_at: trialEndsAt,
+        phone: phone || null
+      }, { onConflict: 'id' });
+      if (upProf.error) {
+        errEl.textContent = 'Usuario registrado, pero el perfil no se guardó: ' + (upProf.error.message || '') + ' Usá «Volver al inicio de sesión» e intentá entrar con el mismo email y contraseña. Si no entrás, revisá en Supabase la tabla profiles (columna phone, políticas RLS).';
+        errEl.classList.add('show');
+        return;
       }
       document.getElementById('signUpBox').classList.add('hidden');
       document.getElementById('signUpSuccessBox').classList.remove('hidden');
@@ -3341,7 +3432,7 @@ async function showApp() {
       currentUser = null;
       state.cart = [];
       state.transaccionesList = [];
-      _dataCache = { products: {}, ventas: { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 }, transacciones: 0, deudores: [], lastCierreDate: null };
+      _dataCache = { products: {}, ventas: { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 }, transacciones: 0, deudores: [], lastCierreDate: null };
       document.getElementById('appWrap').classList.add('hidden');
       document.getElementById('loginScreen').classList.remove('hidden');
       document.getElementById('loginPassword').value = '';
@@ -3384,7 +3475,7 @@ async function showApp() {
         userId: currentUser.id,
         kioscoName: currentUser.kioscoName || '',
         products: d.products || {},
-        ventas: d.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 },
+        ventas: d.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 },
         transacciones: d.transacciones || 0,
         clientes: clientesExport,
         lastCierreDate: d.lastCierreDate || null,
@@ -4072,12 +4163,38 @@ async function showApp() {
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session?.user) return;
         const uid = session.user.id;
-        const { data: profile, error: profileErr } = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
-        if (profileErr) {
-          console.error('Error 500 en profiles:', profileErr);
+        let { data: profile, error: profileErr } = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
+        if (profileErr && profileErr.code !== 'PGRST116') {
+          console.error('Error al leer profiles:', profileErr);
+          var loginErrInit = document.getElementById('loginErr');
+          if (loginErrInit) {
+            loginErrInit.textContent = 'Error al leer tu perfil. Revisá conexión o políticas RLS en Supabase (tabla profiles).';
+            loginErrInit.classList.add('show');
+          }
           return;
         }
-        if (!profile) return;
+        if (!profile) {
+          var trialEndsInit = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().slice(0, 19) + 'Z';
+          var insProf = await supabaseClient.from('profiles').insert({
+            id: uid,
+            email: session.user.email,
+            role: 'kiosquero',
+            active: true,
+            trial_ends_at: trialEndsInit
+          });
+          if (insProf.error) {
+            console.error('Perfil ausente y no se pudo crear:', insProf.error);
+            var loginErrIns = document.getElementById('loginErr');
+            if (loginErrIns) {
+              loginErrIns.textContent = 'Tu usuario existe pero falta el perfil. Revisá en Supabase la tabla profiles (RLS: permitir INSERT/SELECT propio id) o contactá al administrador.';
+              loginErrIns.classList.add('show');
+            }
+            return;
+          }
+          var rProf = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
+          profile = rProf.data;
+          if (!profile) return;
+        }
         if (profile.role === 'kiosquero' && !profile.active) {
           try {
             await loadAdminContact();
