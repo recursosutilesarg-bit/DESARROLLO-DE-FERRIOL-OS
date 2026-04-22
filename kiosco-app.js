@@ -1137,6 +1137,7 @@
     }
     function closeAllModals() {
       document.getElementById('ventasProductosModal') && (function () { var m = document.getElementById('ventasProductosModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
+      document.getElementById('ventasCobradasModal') && (function () { var m = document.getElementById('ventasCobradasModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
       document.getElementById('transaccionesModal') && (function () { var m = document.getElementById('transaccionesModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
       document.getElementById('paymentModal') && (function () { var m = document.getElementById('paymentModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
       document.getElementById('cobroRapidoModal') && (function () { var m = document.getElementById('cobroRapidoModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
@@ -1411,8 +1412,73 @@
       if (!state._restoringFromHistory) pushHistoryExtra({ modal: 'transacciones' });
       lucide.createIcons();
     }
+    function openVentasCobradasModal() {
+      const raw = state.transaccionesList || [];
+      const cobradas = raw.filter(function (t) {
+        return t.method !== 'fiado' && t.method !== 'transferencia_pendiente';
+      });
+      var fiadoHoy = 0;
+      var pendHoy = 0;
+      raw.forEach(function (t) {
+        var tot = Number(t.total) || 0;
+        if (t.method === 'fiado') fiadoHoy += tot;
+        else if (t.method === 'transferencia_pendiente') pendHoy += tot;
+      });
+      const methodLabels = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia', fiado: 'Fiado', transferencia_pendiente: 'Transf. pendiente', cobro_libreta: 'Cobro libreta' };
+      const listEl = document.getElementById('ventasCobradasList');
+      const footEl = document.getElementById('ventasCobradasFooter');
+      if (listEl) {
+        if (cobradas.length === 0) {
+          listEl.innerHTML = '<p class="text-white/60 py-4 text-center">Aún no hay ventas cobradas hoy en este dispositivo.</p>';
+        } else {
+          const fmt = (s) => s ? new Date(s).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : '';
+          listEl.innerHTML = cobradas.slice().reverse().map(function (t) {
+            return '<div class="glass rounded-xl p-4 border border-white/10">' +
+              '<div class="flex justify-between items-start mb-2">' +
+              '<span class="px-2 py-0.5 rounded text-xs bg-[#22c55e]/25 text-[#86efac]">' + (methodLabels[t.method] || t.method) + '</span>' +
+              '<span class="font-bold text-[#f87171]">$' + Number(t.total).toLocaleString('es-AR') + '</span></div>' +
+              '<p class="text-white/40 text-[10px] mb-1">' + fmt(t.fechaHora) + '</p>' +
+              '<p class="text-white/60 text-xs mb-2">Cliente: ' + String(t.client || '—').replace(/</g, '&lt;') + '</p>' +
+              '<ul class="space-y-1 text-xs">' +
+              (t.items || []).map(function (i) {
+                return '<li>' + String(i.nombre || '—').replace(/</g, '&lt;') + ' x ' + (i.cant || 0) + ' — $' + (Number(i.precio) * (i.cant || 0)).toLocaleString('es-AR') + '</li>';
+              }).join('') +
+              '</ul></div>';
+          }).join('');
+        }
+      }
+      if (footEl) {
+        var parts = [];
+        if (fiadoHoy > 0) {
+          parts.push('<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-xl bg-amber-500/15 border border-amber-400/30 px-3 py-2">' +
+            '<span class="text-amber-100/90">Fiado en cuenta hoy: <strong>$' + fiadoHoy.toLocaleString('es-AR') + '</strong></span>' +
+            '<button type="button" class="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-500/30 text-amber-100 border border-amber-400/40 touch-target" onclick="document.getElementById(\'closeVentasCobradas\').click();window._goToCajaLibreta && window._goToCajaLibreta();">Ver libreta</button></div>');
+        }
+        if (pendHoy > 0) {
+          parts.push('<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-xl bg-orange-500/15 border border-orange-400/30 px-3 py-2">' +
+            '<span class="text-orange-100/90">Transf. pendiente hoy: <strong>$' + pendHoy.toLocaleString('es-AR') + '</strong></span>' +
+            '<button type="button" class="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg bg-orange-500/30 text-orange-100 border border-orange-400/40 touch-target" onclick="document.getElementById(\'closeVentasCobradas\').click();window._goToCajaLibreta && window._goToCajaLibreta();">Ver libreta</button></div>');
+        }
+        if (parts.length === 0) {
+          footEl.innerHTML = '<p class="text-white/40 text-center py-1">Sin fiado ni transf. pendiente registrados hoy.</p>';
+        } else {
+          footEl.innerHTML = parts.join('');
+        }
+      }
+      var modal = document.getElementById('ventasCobradasModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+      if (!state._restoringFromHistory) pushHistoryExtra({ modal: 'ventasCobradas' });
+      lucide.createIcons();
+    }
     document.getElementById('btnVentasCard').onclick = openVentasProductosModal;
     document.getElementById('btnTransCard').onclick = openTransaccionesModal;
+    var btnVentasCobradasHoy = document.getElementById('btnVentasCobradasHoy');
+    if (btnVentasCobradasHoy) btnVentasCobradasHoy.onclick = openVentasCobradasModal;
+    var btnProductosVendidosHoy = document.getElementById('btnProductosVendidosHoy');
+    if (btnProductosVendidosHoy) btnProductosVendidosHoy.onclick = openVentasProductosModal;
     document.getElementById('closeVentasProductos').onclick = () => {
       document.getElementById('ventasProductosModal').classList.add('hidden');
       document.getElementById('ventasProductosModal').classList.remove('flex');
@@ -1433,6 +1499,17 @@
       }
     };
     document.getElementById('transaccionesOverlay').onclick = () => document.getElementById('closeTransacciones').click();
+    document.getElementById('closeVentasCobradas').onclick = function () {
+      var m = document.getElementById('ventasCobradasModal');
+      if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+      if (!state._restoringFromHistory && history.state && history.state.modal === 'ventasCobradas') {
+        var nv = Object.assign({}, history.state);
+        delete nv.modal;
+        history.replaceState(nv, '', location.href);
+      }
+    };
+    var ventasCobradasOv = document.getElementById('ventasCobradasOverlay');
+    if (ventasCobradasOv) ventasCobradasOv.onclick = function () { document.getElementById('closeVentasCobradas').click(); };
 
     const methodLabels = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia', fiado: 'Fiado', transferencia_pendiente: 'Transf. pend.', cobro_libreta: 'Cobro libreta' };
     function getHistorialRange(filter) {
