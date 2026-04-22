@@ -2408,6 +2408,7 @@
     window._elegirClienteDesdePrompt = async function (clienteId) {
       window._cerrarFiadoPrompt();
       await _agregarItemsDesdePago(clienteId);
+      if (typeof showPanel === 'function') showPanel('caja');
       await window._verClienteLibreta(clienteId);
       window._switchCajaTab('libreta-cliente');
     };
@@ -2447,6 +2448,7 @@
         var nuevoId = res.data.id;
         window._cerrarFiadoPrompt();
         await _agregarItemsDesdePago(nuevoId);
+        if (typeof showPanel === 'function') showPanel('caja');
         await window._verClienteLibreta(nuevoId);
         window._switchCajaTab('libreta-cliente');
       } catch (e) {
