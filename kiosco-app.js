@@ -2331,7 +2331,11 @@
     window._cerrarFiadoPrompt = function () {
       var p = document.getElementById('libretalFiadoPrompt');
       if (p) { p.classList.add('hidden'); p.style.display = ''; }
+    };
+
+    window._omitirFiadoPrompt = function () {
       _libretalDesdePago = null;
+      window._cerrarFiadoPrompt();
     };
 
     // ── Picker de cliente al cobrar con fiado ────────────────────
