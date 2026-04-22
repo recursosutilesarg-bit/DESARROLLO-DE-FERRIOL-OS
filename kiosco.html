@@ -252,19 +252,22 @@
             <button type="button" id="closeRenovarModal" class="w-full mt-3 py-2.5 rounded-xl border border-white/20 text-white/80 text-sm touch-target">Cerrar</button>
           </div>
         </div>
-        <!-- Resumen del día: entraron + ventas + chips por método -->
+        <!-- Ventas del día: fuera del bloque de resumen / cobro rápido -->
+        <div class="kiosquero-only mb-5 space-y-2">
+          <button type="button" id="btnVentasDelDia" onclick="window._openVentasDelDia && window._openVentasDelDia()" class="w-full py-2.5 px-3 rounded-xl border border-[#22c55e]/35 bg-[#22c55e]/10 hover:bg-[#22c55e]/18 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-[#86efac] active:scale-[0.99]">
+            <i data-lucide="clipboard-list" class="w-4 h-4 shrink-0"></i>
+            Ventas del día
+          </button>
+          <p class="text-[10px] text-white/35 text-center sm:text-left px-0.5">Solo operaciones cobradas en caja; fiado y transf. pendiente se ven en la libreta.</p>
+        </div>
+        <!-- Resumen del día: entraron + ventas + chips por método + cobro rápido -->
         <div id="dashboardResumenDia" class="glass rounded-2xl p-4 sm:p-5 slide-up kiosquero-only border border-[#22c55e]/30">
           <div class="min-w-0">
             <p class="text-sm text-white/60 mb-0.5">Resumen del día</p>
             <p id="resumenDiaTexto" class="text-2xl sm:text-3xl font-bold text-[#86efac]">Entraron $0</p>
             <p id="resumenDiaVentas" class="text-sm text-white/50 mt-1">0 ventas</p>
             <div id="resumenDiaPorMetodo" class="flex flex-wrap gap-1.5 mt-2"></div>
-            <button type="button" id="btnVentasDelDia" onclick="window._openVentasDelDia && window._openVentasDelDia()" class="w-full mt-3 py-2.5 px-3 rounded-xl border border-[#22c55e]/35 bg-[#22c55e]/10 hover:bg-[#22c55e]/18 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-[#86efac] active:scale-[0.99]">
-              <i data-lucide="clipboard-list" class="w-4 h-4 shrink-0"></i>
-              Ventas del día
-            </button>
-            <p class="text-[10px] text-white/35 mt-1.5 text-center sm:text-left">Solo operaciones cobradas en caja; fiado y transf. pendiente se ven en la libreta.</p>
-            <button type="button" id="btnCobroRapido" onclick="window._abrirCobroRapido && window._abrirCobroRapido()" class="w-full mt-3 py-2.5 px-4 rounded-xl border border-[#22c55e]/40 bg-[#22c55e]/08 hover:bg-[#22c55e]/14 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-[#86efac] active:scale-[0.99]">
+            <button type="button" id="btnCobroRapido" onclick="window._abrirCobroRapido && window._abrirCobroRapido()" class="w-full mt-5 py-2.5 px-4 rounded-xl border border-[#22c55e]/40 bg-[#22c55e]/08 hover:bg-[#22c55e]/14 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-[#86efac] active:scale-[0.99]">
               <i data-lucide="zap" class="w-4 h-4 shrink-0"></i>
               Cobro rápido
             </button>
