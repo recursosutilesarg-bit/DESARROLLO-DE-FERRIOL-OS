@@ -2352,8 +2352,22 @@
       var htmlPend = pendientes.map(_libretaItemRowHtml).join('');
       var htmlPag = '';
       if (pagados.length) {
+        var grouped = _libretaGroupPagadosForHistorial(pagados);
+        var htmlBloques = grouped.grupos.map(function (g) {
+          var fLabel = g.fechaSort > 0
+            ? new Date(g.fechaSort).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+            : 'sin fecha';
+          var gid = String(g.grupoId || '').replace(/\\/g, '').replace(/'/g, '');
+          var head = '<div class="libreta-cobro-bloque-head flex items-center justify-between gap-2 px-3 py-2 bg-white/5 border-b border-white/10">' +
+            '<span class="text-xs text-white/70 min-w-0">Cobro · ' + fLabel + ' · <strong class="text-[#86efac]">$' + Math.round(g.total).toLocaleString('es-AR') + '</strong></span>' +
+            '<button type="button" onclick="event.stopPropagation();window._libretaCompartirCobroHistorial(\'' + gid + '\')" class="shrink-0 text-[11px] px-2.5 py-1.5 rounded-lg bg-[#25d366]/25 text-[#86efac] touch-target font-semibold">Ticket</button>' +
+            '</div>';
+          var rows = g.items.map(_libretaItemRowHtml).join('');
+          return '<div class="libreta-cobro-bloque rounded-xl border border-white/10 overflow-hidden mb-2">' + head + rows + '</div>';
+        }).join('');
+        var htmlSueltos = grouped.sueltos.map(_libretaItemRowHtml).join('');
         htmlPag = '<details class="libreta-historial-details"><summary class="libreta-historial-summary touch-target">Cobrados (' + pagados.length + ')</summary>' +
-          pagados.map(_libretaItemRowHtml).join('') + '</details>';
+          htmlBloques + htmlSueltos + '</details>';
       }
       if (pendientes.length === 0) {
         el.innerHTML = '<p class="text-white/40 text-center py-3 text-sm">Sin deuda pendiente.</p>' + htmlPag;
@@ -2474,6 +2488,46 @@
 
     var _libretalCuentaItemsCache = null;
     var _libretalCuentaUltimoMonto = 0;
+    var _libretalCuentaUltimoItems = null;
+
+    function _libretaNewCobroGrupoId() {
+      if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0;
+        var v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
+    function _libretaGroupPagadosForHistorial(pagados) {
+      var byGrupo = new Map();
+      var sinGrupo = [];
+      pagados.forEach(function (i) {
+        var g = i.cobro_grupo_id;
+        if (!g) { sinGrupo.push(i); return; }
+        if (!byGrupo.has(g)) byGrupo.set(g, []);
+        byGrupo.get(g).push(i);
+      });
+      var grupos = Array.from(byGrupo.entries()).map(function (entry) {
+        var arr = entry[1];
+        var total = arr.reduce(function (s, x) { return s + Number(x.monto || 0); }, 0);
+        var fechas = arr.map(function (x) { return x.fecha_hora ? new Date(x.fecha_hora).getTime() : 0; });
+        var fmax = Math.max.apply(null, fechas.length ? fechas : [0]);
+        arr.sort(function (a, b) {
+          var ta = a.fecha_hora ? new Date(a.fecha_hora).getTime() : 0;
+          var tb = b.fecha_hora ? new Date(b.fecha_hora).getTime() : 0;
+          return tb - ta;
+        });
+        return { grupoId: entry[0], items: arr, total: total, fechaSort: fmax };
+      });
+      grupos.sort(function (a, b) { return b.fechaSort - a.fechaSort; });
+      sinGrupo.sort(function (a, b) {
+        var ta = a.fecha_hora ? new Date(a.fecha_hora).getTime() : 0;
+        var tb = b.fecha_hora ? new Date(b.fecha_hora).getTime() : 0;
+        return tb - ta;
+      });
+      return { grupos: grupos, sueltos: sinGrupo };
+    }
 
     function _libretaBuildMsgPendiente(cliente, items) {
       var total = items.reduce(function (s, i) { return s + Number(i.monto || 0); }, 0);
@@ -2501,6 +2555,25 @@
         + '👤 Cliente: *' + (cliente.nombre || '') + '*\n'
         + '💵 Monto cobrado: *$' + Math.round(montoPagado).toLocaleString('es-AR') + '*\n'
         + '📅 ' + hoy + '\n\n'
+        + 'Gracias por tu pago.\n'
+        + '_' + negocio + '_';
+    }
+
+    function _libretaBuildMsgComprobanteDetalle(cliente, items, montoTotal) {
+      var negocio = (currentUser && currentUser.kioscoName) ? currentUser.kioscoName : 'El negocio';
+      var ahora = new Date().toLocaleString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      var detalle = items.map(function (item) {
+        var d = item.descripcion || '';
+        var m = Math.round(Number(item.monto || 0)).toLocaleString('es-AR');
+        var fh = item.fecha_hora ? new Date(item.fecha_hora).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+        return '• ' + d + ' — $' + m + (fh ? ' (' + fh + ')' : '');
+      }).join('\n');
+      return '✅ *COMPROBANTE DE COBRO*\n'
+        + '👤 Cliente: *' + (cliente.nombre || '') + '*\n'
+        + '📅 ' + ahora + '\n\n'
+        + '🛒 *Detalle saldado:*\n'
+        + detalle + '\n\n'
+        + '💵 *Total cobrado: $' + Math.round(montoTotal).toLocaleString('es-AR') + '*\n\n'
         + 'Gracias por tu pago.\n'
         + '_' + negocio + '_';
     }
@@ -2579,10 +2652,38 @@
       if (!items || !items.length) return;
       var total = items.reduce(function (s, i) { return s + Number(i.monto || 0); }, 0);
       if (!confirm('¿Confirmás que cobraste $' + Math.round(total).toLocaleString('es-AR') + ' y querés saldar la cuenta?')) return;
+      var ids = items.map(function (i) { return i.id; }).filter(Boolean);
+      if (!ids.length) return;
+      var cobroGrupoId = _libretaNewCobroGrupoId();
       try {
-        var res = await supabaseClient.from('libreta_items').update({ pagado: true }).eq('cliente_id', _libretalClienteActual.id).eq('user_id', currentUser.id).eq('pagado', false);
-        if (res.error) throw res.error;
+        var chunkSize = 80;
+        var lastErr = null;
+        for (var c = 0; c < ids.length; c += chunkSize) {
+          var chunk = ids.slice(c, c + chunkSize);
+          var res = await supabaseClient.from('libreta_items').update({ pagado: true, cobro_grupo_id: cobroGrupoId })
+            .eq('cliente_id', _libretalClienteActual.id)
+            .eq('user_id', currentUser.id)
+            .eq('pagado', false)
+            .in('id', chunk);
+          if (res.error) { lastErr = res.error; break; }
+        }
+        if (lastErr) {
+          var msg = (lastErr.message || '').toLowerCase();
+          if (msg.indexOf('cobro_grupo') !== -1 || msg.indexOf('schema cache') !== -1 || lastErr.code === 'PGRST204') {
+            alert('Para agrupar cada cobro como ticket ejecutá en Supabase → SQL:\n\nALTER TABLE libreta_items ADD COLUMN IF NOT EXISTS cobro_grupo_id text;\n');
+            throw lastErr;
+          }
+          throw lastErr;
+        }
         _libretalCuentaUltimoMonto = total;
+        _libretalCuentaUltimoItems = items.map(function (it) {
+          return {
+            descripcion: it.descripcion,
+            monto: it.monto,
+            fecha_hora: it.fecha_hora,
+            tipo: it.tipo
+          };
+        });
         await renderLibretaItems(_libretalClienteActual.id);
         document.getElementById('libretalCuentaFooterPendiente').classList.add('hidden');
         var exito = document.getElementById('libretalCuentaFooterExito');
@@ -2605,8 +2706,40 @@
 
     window._libretaCuentaCompartirComprobante = function () {
       if (!_libretalClienteActual) return;
+      var ultItems = _libretalCuentaUltimoItems;
+      if (ultItems && ultItems.length) {
+        var t = ultItems.reduce(function (s, i) { return s + Number(i.monto || 0); }, 0);
+        var msgDet = _libretaBuildMsgComprobanteDetalle(_libretalClienteActual, ultItems, t);
+        _libretaAbrirWhatsAppConTexto(_libretalClienteActual.telefono, msgDet);
+        return;
+      }
       var msg = _libretaBuildMsgComprobante(_libretalClienteActual, _libretalCuentaUltimoMonto);
       _libretaAbrirWhatsAppConTexto(_libretalClienteActual.telefono, msg);
+    };
+
+    window._libretaCompartirCobroHistorial = async function (grupoId) {
+      if (!_libretalClienteActual || !grupoId || !supabaseClient || !currentUser?.id) return;
+      try {
+        var res = await supabaseClient.from('libreta_items')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .eq('cliente_id', _libretalClienteActual.id)
+          .eq('cobro_grupo_id', grupoId)
+          .eq('pagado', true)
+          .order('fecha_hora', { ascending: false });
+        if (res.error) throw res.error;
+        var rows = res.data || [];
+        if (!rows.length) {
+          if (typeof showScanToast === 'function') showScanToast('No hay datos de ese cobro', true);
+          return;
+        }
+        var tot = rows.reduce(function (s, i) { return s + Number(i.monto || 0); }, 0);
+        var msg = _libretaBuildMsgComprobanteDetalle(_libretalClienteActual, rows, tot);
+        _libretaAbrirWhatsAppConTexto(_libretalClienteActual.telefono, msg);
+      } catch (e) {
+        console.error(e);
+        if (typeof showScanToast === 'function') showScanToast('No se pudo armar el ticket', true);
+      }
     };
 
     window._cerrarModalLibreta = function (id) {

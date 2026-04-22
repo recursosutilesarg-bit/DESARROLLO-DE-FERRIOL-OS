@@ -1273,6 +1273,14 @@ body[data-panel="inventory"] #panel-inventory {
   background: rgba(239,68,68,0.15);
 }
 
+.libreta-cobro-bloque {
+  margin-bottom: 0.5rem;
+}
+
+.libreta-cobro-bloque .libreta-detalle-row:last-child {
+  border-bottom: none;
+}
+
 #libretalFiadoPrompt .relative {
   max-height: 85vh;
   overflow-y: auto;
