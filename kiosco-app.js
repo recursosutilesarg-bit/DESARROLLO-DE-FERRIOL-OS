@@ -962,24 +962,36 @@
         .sort(function (a, b) { return b.cant - a.cant; })
         .slice(0, maxItems || 8);
     }
+    var _frequentProductsRenderKey = '';
+
     function renderFrequentProducts() {
       var wrap = document.getElementById('dashboardFrecuentesWrap');
       var cont = document.getElementById('dashboardFrecuentes');
       if (!wrap || !cont) return;
       var frequent = getFrequentProductsToday(8);
       if (frequent.length === 0) {
+        _frequentProductsRenderKey = '';
         wrap.classList.add('hidden');
         return;
       }
-      wrap.classList.remove('hidden');
       var prods = getData().products || {};
+      var renderKey = frequent.map(function (p) {
+        var prod = prods[p.codigo];
+        var stock = prod ? prod.stock : 0;
+        return (p.codigo || '') + ':' + p.cant + ':' + stock + ':' + (prod ? prod.precio : '');
+      }).join('|');
+      wrap.classList.remove('hidden');
+      if (renderKey === _frequentProductsRenderKey && cont.querySelector('.freq-product-btn')) {
+        return;
+      }
+      _frequentProductsRenderKey = renderKey;
       cont.innerHTML = frequent.map(function (p) {
         var prod = prods[p.codigo];
         var nombre = (prod && prod.nombre) ? prod.nombre : p.nombre;
         var precio = prod ? prod.precio : 0;
         var stock = prod ? prod.stock : 0;
         var disabled = stock <= 0 ? ' opacity-50 pointer-events-none' : '';
-        return '<button type="button" class="freq-product-btn flex-shrink-0 glass rounded-xl px-4 py-3 border border-white/10 hover:border-[#dc2626]/50 active:scale-95 touch-target text-left min-w-0 max-w-[140px]' + disabled + '" data-codigo="' + (p.codigo || '').replace(/"/g, '&quot;') + '" title="Agregar al carrito"><p class="font-medium truncate text-sm">' + (nombre || '').replace(/</g, '&lt;') + '</p><p class="text-[#f87171] text-xs mt-0.5">$' + (precio || 0).toLocaleString('es-AR') + '</p></button>';
+        return '<button type="button" class="freq-product-btn flex-shrink-0 glass rounded-xl px-4 py-3 border border-white/10 hover:border-[#22c55e]/50 active:opacity-90 touch-target text-left min-w-0 max-w-[140px]' + disabled + '" data-codigo="' + (p.codigo || '').replace(/"/g, '&quot;') + '" title="Agregar al carrito"><p class="font-medium truncate text-sm leading-snug">' + (nombre || '').replace(/</g, '&lt;') + '</p><p class="text-[#86efac] text-xs mt-1 leading-none tabular-nums">$' + (precio || 0).toLocaleString('es-AR') + '</p></button>';
       }).join('');
       cont.querySelectorAll('.freq-product-btn').forEach(function (btn) {
         btn.onclick = function () {
@@ -987,7 +999,6 @@
           if (codigo) addToCart(codigo);
         };
       });
-      lucide.createIcons();
     }
 
     function updateCobroRapidoLista() {
