@@ -1392,19 +1392,18 @@
     document.getElementById('cobroRapidoAtajoBtn').onclick = function () {
       var lastMethod = '';
       try { lastMethod = localStorage.getItem(LAST_QUICK_PAYMENT_KEY) || 'efectivo'; } catch (_) { lastMethod = 'efectivo'; }
-      var clientName = (document.getElementById('cobroRapidoCliente') && document.getElementById('cobroRapidoCliente').value) ? document.getElementById('cobroRapidoCliente').value.trim() : '';
-      var whatsappRaw = (document.getElementById('cobroRapidoWhatsapp') && document.getElementById('cobroRapidoWhatsapp').value) ? document.getElementById('cobroRapidoWhatsapp').value.trim() : '';
-      var whatsappDigits = (whatsappRaw || '').replace(/\D/g, '');
       if (lastMethod === 'fiado' || lastMethod === 'transferencia_pendiente') {
-        document.getElementById('cobroRapidoWhatsappWrap').classList.remove('hidden');
-        if (whatsappDigits.length < 8) {
-          document.getElementById('cobroRapidoWhatsappErr').textContent = 'Ingresá el número de WhatsApp (mín. 8 dígitos) para poder cobrar después.';
-          document.getElementById('cobroRapidoWhatsappErr').classList.remove('hidden');
-          return;
-        }
+        _pendingPaymentMethod = lastMethod;
+        _selectedLibretaClienteForPayment = null;
+        var sectionEl = document.getElementById('cobroRapidoFiadoSection');
+        if (sectionEl) sectionEl.classList.remove('hidden');
+        if (document.getElementById('cobroRapidoCliente')) document.getElementById('cobroRapidoCliente').value = '';
+        if (document.getElementById('cobroRapidoWhatsapp')) document.getElementById('cobroRapidoWhatsapp').value = '';
+        _cargarClientesPickerPago('cobroRapidoFiadoClientesList', 'cobroRapidoCliente', 'cobroRapidoWhatsapp');
+        lucide.createIcons();
+        return;
       }
-      document.getElementById('cobroRapidoWhatsappErr').classList.add('hidden');
-      completeQuickSale(lastMethod, clientName, whatsappRaw || whatsappDigits).catch(function (err) {
+      completeQuickSale(lastMethod, '', '').catch(function (err) {
         console.warn('Cobro rápido (atajo):', err && err.message ? err.message : err);
       });
     };
