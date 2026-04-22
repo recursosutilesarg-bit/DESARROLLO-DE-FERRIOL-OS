@@ -1365,7 +1365,7 @@
     function openVentasProductosModal() {
       const list = state.transaccionesList || [];
       const agg = {};
-      list.forEach(t => t.items.forEach(it => {
+      list.forEach(t => (t.items || []).forEach(it => {
         const k = it.codigo;
         if (!agg[k]) agg[k] = { nombre: it.nombre, codigo: it.codigo, cant: 0 };
         agg[k].cant += it.cant;
@@ -1404,7 +1404,7 @@
             <p class="text-white/40 text-[10px] mb-1">${fmt(t.fechaHora)}</p>
             <p class="text-white/60 text-xs mb-2">Cliente: ${t.client || '—'}</p>
             <ul class="space-y-1 text-xs">
-              ${t.items.map(i => `<li>${i.nombre} x ${i.cant} — $${(i.precio * i.cant).toLocaleString('es-AR')}</li>`).join('')}
+              ${(t.items || []).map(i => `<li>${i.nombre} x ${i.cant} — $${(i.precio * i.cant).toLocaleString('es-AR')}</li>`).join('')}
             </ul>
           </div>
         `).join('');
@@ -1473,10 +1473,15 @@
         modal.classList.add('flex');
       }
       if (!state._restoringFromHistory) pushHistoryExtra({ modal: 'ventasCobradas' });
-      lucide.createIcons();
+      try {
+        if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+      } catch (_) {}
     }
-    document.getElementById('btnVentasCard').onclick = openVentasProductosModal;
-    document.getElementById('btnTransCard').onclick = openTransaccionesModal;
+    window._openVentasDelDia = openVentasCobradasModal;
+    var btnVentasCardEl = document.getElementById('btnVentasCard');
+    if (btnVentasCardEl) btnVentasCardEl.onclick = openVentasProductosModal;
+    var btnTransCardEl = document.getElementById('btnTransCard');
+    if (btnTransCardEl) btnTransCardEl.onclick = openTransaccionesModal;
     var btnVentasDelDia = document.getElementById('btnVentasDelDia');
     if (btnVentasDelDia) btnVentasDelDia.onclick = openVentasCobradasModal;
     document.getElementById('closeVentasProductos').onclick = () => {

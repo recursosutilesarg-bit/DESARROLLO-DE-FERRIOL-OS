@@ -259,7 +259,7 @@
             <p id="resumenDiaTexto" class="text-2xl sm:text-3xl font-bold text-[#86efac]">Entraron $0</p>
             <p id="resumenDiaVentas" class="text-sm text-white/50 mt-1">0 ventas</p>
             <div id="resumenDiaPorMetodo" class="flex flex-wrap gap-1.5 mt-2"></div>
-            <button type="button" id="btnVentasDelDia" class="w-full mt-3 py-2.5 px-3 rounded-xl border border-[#22c55e]/35 bg-[#22c55e]/10 hover:bg-[#22c55e]/18 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-[#86efac] active:scale-[0.99]">
+            <button type="button" id="btnVentasDelDia" onclick="window._openVentasDelDia && window._openVentasDelDia()" class="w-full mt-3 py-2.5 px-3 rounded-xl border border-[#22c55e]/35 bg-[#22c55e]/10 hover:bg-[#22c55e]/18 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-[#86efac] active:scale-[0.99]">
               <i data-lucide="clipboard-list" class="w-4 h-4 shrink-0"></i>
               Ventas del día
             </button>
@@ -1440,7 +1440,7 @@
   </div>
   </div><!-- /#appWrap -->
   <script src="kiosco-config.js"></script>
-  <script defer src="kiosco-app.js?v=20260422l"></script>
+  <script defer src="kiosco-app.js?v=20260422m"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>
