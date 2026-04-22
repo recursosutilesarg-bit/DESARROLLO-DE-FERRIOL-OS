@@ -2209,13 +2209,13 @@
         var tipoLabel = item.tipo === 'transferencia_pendiente' ? 'Transf.' : 'Fiado';
         var pagadoStyle = item.pagado ? 'opacity-40' : '';
         var itemJson = JSON.stringify({ id: item.id, descripcion: item.descripcion || '', monto: monto, tipo: item.tipo || 'fiado', fecha_hora: item.fecha_hora || '', comentario: item.comentario || '', pagado: !!item.pagado }).replace(/"/g,'&quot;');
+        var coment = item.comentario ? '<i data-lucide="message-circle" class="w-3 h-3 inline-block ml-1 opacity-50"></i>' : '';
         return '<div class="libreta-detalle-row ' + pagadoStyle + '" onclick="window._abrirItemDetalle(\'' + item.id + '\')">' +
-          '<div class="libreta-detalle-info">' +
-          '<span class="libreta-detalle-desc' + (item.pagado ? ' line-through' : '') + '">' + desc + '</span>' +
-          '<span class="libreta-detalle-meta">' + fecha + (item.comentario ? ' · 💬' : '') + ' · ' + tipoLabel + '</span>' +
-          '</div>' +
-          '<span class="libreta-detalle-monto ' + (item.pagado ? 'text-green-400' : 'text-amber-400') + '">$' + Math.round(monto).toLocaleString('es-AR') + '</span>' +
+          '<span class="libreta-detalle-desc' + (item.pagado ? ' line-through opacity-50' : '') + '">' + desc + coment + '</span>' +
+          '<div class="flex items-center gap-2 shrink-0">' +
+          '<span class="libreta-detalle-monto ' + (item.pagado ? 'text-green-400' : 'text-[#4ade80]') + '">$' + Math.round(monto).toLocaleString('es-AR') + '</span>' +
           (!item.pagado ? '<button onclick="event.stopPropagation();window._eliminarItemLibreta(\'' + item.id + '\')" class="libreta-detalle-del touch-target"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' : '') +
+          '</div>' +
           '</div>';
       }).join('');
       lucide.createIcons();
