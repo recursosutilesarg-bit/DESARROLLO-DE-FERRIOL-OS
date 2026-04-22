@@ -2116,7 +2116,7 @@
       if (!supabaseClient || !currentUser?.id) return [];
       try {
         var q = supabaseClient.from('libreta_items')
-          .select('id, descripcion, monto, tipo, fecha_hora, pagado, comentario')
+          .select('*')
           .eq('user_id', currentUser.id)
           .eq('cliente_id', clienteId)
           .order('fecha_hora', { ascending: false });
@@ -2533,7 +2533,12 @@
         .eq('id', itemId)
         .eq('user_id', currentUser.id);
       if (btn) { btn.disabled = false; btn.textContent = 'Guardar comentario'; }
-      if (!res.error) {
+      if (res.error) {
+        console.error('guardarComentario error:', res.error);
+        if (res.error.message && res.error.message.includes('comentario')) {
+          alert('Para usar comentarios ejecutá este SQL en Supabase:\n\nALTER TABLE libreta_items ADD COLUMN IF NOT EXISTS comentario text DEFAULT \'\';');
+        }
+      } else {
         window._cerrarItemDetalle();
         if (_libretalClienteActual) renderLibretaItems(_libretalClienteActual.id);
         if (typeof showScanToast === 'function') showScanToast('Comentario guardado', false);
