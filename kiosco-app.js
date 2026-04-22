@@ -360,11 +360,26 @@
       cobroRapidoItems: [],  // [{ nombre, precio, costo }] para una sola venta con varios productos
       transaccionesList: [],  // { id, method, client, items: [{ nombre, codigo, precio, cant }], total }
       currentPanel: 'dashboard',
+      cajaTab: 'hub',
       _restoringFromHistory: false,
+      _suppressCajaHistoryPush: false,
       historialTab: 'ventas',
       historialFilter: 'hoy',
       superSection: 'negocios'  // negocios | ajustes | notificaciones | mas
     };
+
+    function currentHistoryBase() {
+      return {
+        panel: state.currentPanel,
+        cajaTab: state.currentPanel === 'caja' ? state.cajaTab : undefined
+      };
+    }
+
+    function pushHistoryExtra(extra) {
+      if (state._restoringFromHistory) return;
+      history.pushState(Object.assign({}, currentHistoryBase(), extra || {}), '', location.href);
+    }
+
 
     function roundToNearest100(x) {
       if (typeof x !== 'number' || isNaN(x)) return 0;
@@ -494,6 +509,7 @@
       const panel = document.getElementById('productDetailPanel');
       panel.classList.remove('hidden');
       panel.classList.add('flex');
+      if (!state._restoringFromHistory) pushHistoryExtra({ overlay: 'productDetailPanel' });
       lucide.createIcons();
     }
 
@@ -501,6 +517,11 @@
       const panel = document.getElementById('productDetailPanel');
       panel.classList.add('hidden');
       panel.classList.remove('flex');
+      if (!state._restoringFromHistory && history.state && history.state.overlay === 'productDetailPanel') {
+        var n = Object.assign({}, history.state);
+        delete n.overlay;
+        history.replaceState(n, '', location.href);
+      }
     }
 
     function openEditProduct(codigo) {
@@ -622,12 +643,17 @@
       var we = document.getElementById('paymentWhatsappErr'); if (we) we.classList.add('hidden');
       document.getElementById('paymentModal').classList.remove('hidden');
       document.getElementById('paymentModal').classList.add('flex');
-      if (!state._restoringFromHistory) history.pushState({ panel: state.currentPanel, modal: 'payment' }, '', location.href);
+      if (!state._restoringFromHistory) pushHistoryExtra({ modal: 'payment' });
       lucide.createIcons();
     }
     function closePaymentModal() {
       document.getElementById('paymentModal').classList.add('hidden');
       document.getElementById('paymentModal').classList.remove('flex');
+      if (!state._restoringFromHistory && history.state && history.state.modal === 'payment') {
+        var n = Object.assign({}, history.state);
+        delete n.modal;
+        history.replaceState(n, '', location.href);
+      }
     }
     async function completeSaleWithMethod(method, clientName, whatsapp) {
       const total = state.cart.reduce((a, i) => a + i.precio * i.cant, 0);
@@ -1046,7 +1072,7 @@
       updateCobroRapidoLista();
       document.getElementById('cobroRapidoModal').classList.remove('hidden');
       document.getElementById('cobroRapidoModal').classList.add('flex');
-      if (!state._restoringFromHistory) history.pushState({ panel: state.currentPanel, modal: 'cobroRapido' }, '', location.href);
+      if (!state._restoringFromHistory) pushHistoryExtra({ modal: 'cobroRapido' });
       setTimeout(function () { document.getElementById('cobroRapidoMonto').focus(); }, 100);
       lucide.createIcons();
     }
@@ -1070,6 +1096,11 @@
       return Number.isFinite(c) && c >= 0 ? c : 0;
     }
     function closeCobroRapidoModal() {
+      if (!state._restoringFromHistory && history.state && history.state.modal === 'cobroRapido') {
+        var n = Object.assign({}, history.state);
+        delete n.modal;
+        history.replaceState(n, '', location.href);
+      }
       document.getElementById('cobroRapidoModal').classList.add('hidden');
       document.getElementById('cobroRapidoModal').classList.remove('flex');
     }
@@ -1179,11 +1210,16 @@
     function openCart() {
       document.getElementById('cartDrawer').classList.remove('hidden');
       document.getElementById('cartDrawer').classList.add('flex');
-      if (!state._restoringFromHistory) history.pushState({ panel: state.currentPanel, modal: 'cart' }, '', location.href);
+      if (!state._restoringFromHistory) pushHistoryExtra({ modal: 'cart' });
       setTimeout(() => document.getElementById('cartPanel').classList.add('translate-x-0'), 10);
     }
 
     function closeCart() {
+      if (!state._restoringFromHistory && history.state && history.state.modal === 'cart') {
+        var n = Object.assign({}, history.state);
+        delete n.modal;
+        history.replaceState(n, '', location.href);
+      }
       document.getElementById('cartPanel').classList.remove('translate-x-0');
       setTimeout(() => {
         document.getElementById('cartDrawer').classList.add('hidden');
@@ -1250,7 +1286,7 @@
         if (!adminContact.whatsappList || adminContact.whatsappList.length === 0) { alert('El administrador aún no configuró su WhatsApp.'); return; }
         document.getElementById('renovarModal').classList.remove('hidden');
         document.getElementById('renovarModal').classList.add('flex');
-        if (!state._restoringFromHistory) history.pushState({ panel: state.currentPanel, modal: 'renovar' }, '', location.href);
+        if (!state._restoringFromHistory) pushHistoryExtra({ modal: 'renovar' });
         lucide.createIcons();
       });
     });
@@ -1259,6 +1295,11 @@
     function closeRenovarModal() {
       var m = document.getElementById('renovarModal');
       if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+      if (!state._restoringFromHistory && history.state && history.state.modal === 'renovar') {
+        var n = Object.assign({}, history.state);
+        delete n.modal;
+        history.replaceState(n, '', location.href);
+      }
     }
     function closeAllModals() {
       document.getElementById('ventasProductosModal') && (function () { var m = document.getElementById('ventasProductosModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
@@ -1273,7 +1314,31 @@
       if (cartPanel) cartPanel.classList.remove('translate-x-0');
       if (cartDrawer) { cartDrawer.classList.add('hidden'); cartDrawer.classList.remove('flex'); }
     }
-    function showPanel(name) {
+
+    function closeAllOverlays() {
+      closeAllModals();
+      if (typeof closeProductDetail === 'function') closeProductDetail();
+      var pm = document.getElementById('productModal');
+      if (pm) { pm.classList.add('hidden'); pm.classList.remove('flex'); }
+      var cm = document.getElementById('clienteModal');
+      if (cm) { cm.classList.add('hidden'); cm.classList.remove('flex'); }
+      var nk = document.getElementById('newKiosqueroModal');
+      if (nk) { nk.classList.add('hidden'); nk.classList.remove('flex'); }
+      var sud = document.getElementById('superUserDetailModal');
+      if (sud) { sud.classList.add('hidden'); sud.classList.remove('flex'); }
+      if (typeof window._cerrarModalLibreta === 'function') {
+        window._cerrarModalLibreta('libretalNuevoClienteModal');
+        window._cerrarModalLibreta('libretalNuevoItemModal');
+        window._cerrarModalLibreta('libretalEditarClienteModal');
+      }
+      if (typeof window._cerrarItemDetalle === 'function') window._cerrarItemDetalle();
+      if (typeof window._cerrarCuentaLibreta === 'function') window._cerrarCuentaLibreta();
+      if (typeof window._cerrarFiadoPrompt === 'function') window._cerrarFiadoPrompt();
+      var terms = document.getElementById('termsModal');
+      if (terms) { terms.classList.add('hidden'); terms.classList.remove('flex'); }
+    }
+
+    function showPanel(name, cajaTabOverride) {
       if (name !== 'scanner') window._scanForProductCode = false;
       state.currentPanel = name;
       document.body.setAttribute('data-panel', name);
@@ -1305,9 +1370,13 @@
       if (name === 'scanner') {
         if (typeof window._startScannerCamera === 'function') window._startScannerCamera();
         if (typeof window._stopScannerInterval === 'function') window._stopScannerInterval();
-        // No hacer focus en manualCode: en móvil abre el teclado y tapa el escáner. El teclado se abre solo al tocar la casilla "Código manual".
       } else if (typeof window._stopScannerInterval === 'function') window._stopScannerInterval();
-      if (name === 'caja') window._switchCajaTab('hub');
+      if (name === 'caja') {
+        state._suppressCajaHistoryPush = true;
+        var ctab = cajaTabOverride != null && cajaTabOverride !== '' ? cajaTabOverride : 'hub';
+        window._switchCajaTab(ctab);
+        state._suppressCajaHistoryPush = false;
+      }
       if (name === 'historial') {
         switchHistorialTab('ventas');
         renderHistorial(state.historialFilter || 'hoy');
@@ -1316,15 +1385,23 @@
       lucide.createIcons();
     }
     function goToPanel(name) {
-      if (!state._restoringFromHistory) history.pushState({ panel: name }, '', location.href);
       showPanel(name);
+      if (!state._restoringFromHistory) {
+        history.pushState({
+          panel: state.currentPanel,
+          cajaTab: state.currentPanel === 'caja' ? state.cajaTab : undefined
+        }, '', location.href);
+      }
     }
     window.addEventListener('popstate', function (e) {
       state._restoringFromHistory = true;
-      closeAllModals();
+      closeAllOverlays();
       var s = e.state;
-      if (s && s.panel) showPanel(s.panel);
-      else showPanel('dashboard');
+      if (s && s.panel) {
+        showPanel(s.panel, s.cajaTab != null && s.cajaTab !== '' ? s.cajaTab : undefined);
+      } else {
+        showPanel('dashboard');
+      }
       state._restoringFromHistory = false;
     });
     document.querySelectorAll('[data-nav]').forEach(btn => {
@@ -1462,7 +1539,7 @@
       }
       document.getElementById('ventasProductosModal').classList.remove('hidden');
       document.getElementById('ventasProductosModal').classList.add('flex');
-      if (!state._restoringFromHistory) history.pushState({ panel: state.currentPanel, modal: 'ventasProductos' }, '', location.href);
+      if (!state._restoringFromHistory) pushHistoryExtra({ modal: 'ventasProductos' });
       lucide.createIcons();
     }
     function openTransaccionesModal() {
@@ -1489,7 +1566,7 @@
       }
       document.getElementById('transaccionesModal').classList.remove('hidden');
       document.getElementById('transaccionesModal').classList.add('flex');
-      if (!state._restoringFromHistory) history.pushState({ panel: state.currentPanel, modal: 'transacciones' }, '', location.href);
+      if (!state._restoringFromHistory) pushHistoryExtra({ modal: 'transacciones' });
       lucide.createIcons();
     }
     document.getElementById('btnVentasCard').onclick = openVentasProductosModal;
@@ -1497,11 +1574,21 @@
     document.getElementById('closeVentasProductos').onclick = () => {
       document.getElementById('ventasProductosModal').classList.add('hidden');
       document.getElementById('ventasProductosModal').classList.remove('flex');
+      if (!state._restoringFromHistory && history.state && history.state.modal === 'ventasProductos') {
+        var nv = Object.assign({}, history.state);
+        delete nv.modal;
+        history.replaceState(nv, '', location.href);
+      }
     };
     document.getElementById('ventasProductosOverlay').onclick = () => document.getElementById('closeVentasProductos').click();
     document.getElementById('closeTransacciones').onclick = () => {
       document.getElementById('transaccionesModal').classList.add('hidden');
       document.getElementById('transaccionesModal').classList.remove('flex');
+      if (!state._restoringFromHistory && history.state && history.state.modal === 'transacciones') {
+        var nt = Object.assign({}, history.state);
+        delete nt.modal;
+        history.replaceState(nt, '', location.href);
+      }
     };
     document.getElementById('transaccionesOverlay').onclick = () => document.getElementById('closeTransacciones').click();
 
@@ -2277,6 +2364,7 @@
       document.getElementById('libretalEditTel').value = _libretalClienteActual.telefono || '';
       var m = document.getElementById('libretalEditarClienteModal');
       if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+      if (!state._restoringFromHistory) pushHistoryExtra({ overlay: 'libretalEditarClienteModal' });
       lucide.createIcons();
       setTimeout(function () { var n = document.getElementById('libretalEditNombre'); if (n) n.focus(); }, 100);
     };
@@ -2312,6 +2400,7 @@
       if (el) el.value = ''; if (tel) tel.value = ''; if (err) err.classList.add('hidden');
       var m = document.getElementById('libretalNuevoClienteModal');
       m.classList.remove('hidden'); m.classList.add('flex');
+      if (!state._restoringFromHistory) pushHistoryExtra({ overlay: 'libretalNuevoClienteModal' });
       lucide.createIcons();
       setTimeout(function () { if (el) el.focus(); }, 100);
     };
@@ -2344,6 +2433,7 @@
       if (sub) sub.textContent = 'Cliente: ' + _libretalClienteActual.nombre;
       var modal = document.getElementById('libretalNuevoItemModal');
       modal.classList.remove('hidden'); modal.classList.add('flex');
+      if (!state._restoringFromHistory) pushHistoryExtra({ overlay: 'libretalNuevoItemModal' });
       lucide.createIcons();
       setTimeout(function () { if (el) el.focus(); }, 100);
     };
@@ -2455,12 +2545,18 @@
       document.getElementById('libretalCuentaFooterExito').classList.add('hidden');
       var modal = document.getElementById('libretalCuentaModal');
       if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+      if (!state._restoringFromHistory) pushHistoryExtra({ overlay: 'libretalCuentaModal' });
       lucide.createIcons();
     };
 
     window._cerrarCuentaLibreta = function () {
       var modal = document.getElementById('libretalCuentaModal');
       if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+      if (!state._restoringFromHistory && history.state && history.state.overlay === 'libretalCuentaModal') {
+        var n = Object.assign({}, history.state);
+        delete n.overlay;
+        history.replaceState(n, '', location.href);
+      }
       _libretalCuentaItemsCache = null;
     };
 
@@ -2509,6 +2605,11 @@
     window._cerrarModalLibreta = function (id) {
       var m = document.getElementById(id);
       if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+      if (!state._restoringFromHistory && history.state && history.state.overlay === id) {
+        var n = Object.assign({}, history.state);
+        delete n.overlay;
+        history.replaceState(n, '', location.href);
+      }
     };
 
     // ── Prompt post-pago fiado ──────────────────────────────────
@@ -2522,6 +2623,7 @@
       }
       var prompt = document.getElementById('libretalFiadoPrompt');
       if (prompt) { prompt.classList.remove('hidden'); prompt.style.display = 'flex'; }
+      if (!state._restoringFromHistory) pushHistoryExtra({ overlay: 'libretalFiadoPrompt' });
       var result = await loadLibretaClientes();
       var clientes = (result && result.ok) ? result.data : [];
       if (listEl) {
@@ -2544,6 +2646,11 @@
     window._cerrarFiadoPrompt = function () {
       var p = document.getElementById('libretalFiadoPrompt');
       if (p) { p.classList.add('hidden'); p.style.display = ''; }
+      if (!state._restoringFromHistory && history.state && history.state.overlay === 'libretalFiadoPrompt') {
+        var n = Object.assign({}, history.state);
+        delete n.overlay;
+        history.replaceState(n, '', location.href);
+      }
     };
 
     window._omitirFiadoPrompt = function () {
@@ -2695,12 +2802,18 @@
       document.getElementById('itemDetalleComentario').value = item.comentario || '';
       var modal = document.getElementById('libretalItemDetalleModal');
       modal.classList.remove('hidden'); modal.classList.add('flex');
+      if (!state._restoringFromHistory) pushHistoryExtra({ overlay: 'libretalItemDetalleModal' });
       lucide.createIcons();
     };
 
     window._cerrarItemDetalle = function () {
       var modal = document.getElementById('libretalItemDetalleModal');
       if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+      if (!state._restoringFromHistory && history.state && history.state.overlay === 'libretalItemDetalleModal') {
+        var n = Object.assign({}, history.state);
+        delete n.overlay;
+        history.replaceState(n, '', location.href);
+      }
       _itemDetalleActual = null;
     };
 
@@ -2764,6 +2877,13 @@
     // ── Actualizar _switchCajaTab para libreta ──────────────────
     var _switchCajaTabOrig = window._switchCajaTab;
     window._switchCajaTab = function (tab) {
+      var prevTab = state.cajaTab;
+      state.cajaTab = tab;
+      function maybePushCajaHistory() {
+        if (!state._restoringFromHistory && !state._suppressCajaHistoryPush && state.currentPanel === 'caja' && prevTab !== tab) {
+          history.pushState({ panel: 'caja', cajaTab: tab }, '', location.href);
+        }
+      }
       var libretalSubs = ['caja-sub-libreta', 'caja-sub-libreta-cliente'];
       libretalSubs.forEach(function (id) { var el = document.getElementById(id); if (el) el.classList.add('hidden'); });
       if (tab === 'libreta') {
@@ -2775,6 +2895,7 @@
         if (el) el.classList.remove('hidden');
         renderLibretaClientes();
         lucide.createIcons();
+        maybePushCajaHistory();
         return;
       }
       if (tab === 'libreta-cliente') {
@@ -2786,9 +2907,11 @@
         var el = document.getElementById('caja-sub-libreta-cliente');
         if (el) el.classList.remove('hidden');
         lucide.createIcons();
+        maybePushCajaHistory();
         return;
       }
       _switchCajaTabOrig(tab);
+      maybePushCajaHistory();
     };
     // ============================================================
 
