@@ -2205,18 +2205,17 @@
       el.innerHTML = items.map(function (item) {
         var desc = (item.descripcion || '').replace(/</g,'&lt;');
         var monto = Number(item.monto || 0);
-        var fecha = item.fecha_hora ? new Date(item.fecha_hora).toLocaleString('es-AR', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
+        var fecha = item.fecha_hora ? new Date(item.fecha_hora).toLocaleString('es-AR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
         var tipoLabel = item.tipo === 'transferencia_pendiente' ? 'Transf.' : 'Fiado';
-        var pagadoStyle = item.pagado ? 'opacity-50 line-through' : '';
-        return '<div class="flex items-start gap-2 py-2 border-b border-white/5 last:border-0 ' + pagadoStyle + '">' +
-          '<div class="flex-1 min-w-0">' +
-          '<p class="text-sm font-medium">' + desc + '</p>' +
-          '<p class="text-xs text-white/40">' + fecha + ' · <span class="text-white/50">' + tipoLabel + '</span></p>' +
+        var pagadoStyle = item.pagado ? 'opacity-40' : '';
+        return '<div class="libreta-detalle-row ' + pagadoStyle + '">' +
+          '<div class="libreta-detalle-info">' +
+          '<span class="libreta-detalle-desc' + (item.pagado ? ' line-through' : '') + '">' + desc + '</span>' +
+          '<span class="libreta-detalle-meta">' + fecha + ' · ' + tipoLabel + '</span>' +
           '</div>' +
-          '<div class="shrink-0 flex items-center gap-2">' +
-          '<span class="font-bold text-sm ' + (item.pagado ? 'text-green-400' : 'text-amber-400') + '">$' + Math.round(monto).toLocaleString('es-AR') + '</span>' +
-          (!item.pagado ? '<button onclick="window._eliminarItemLibreta(\'' + item.id + '\')" class="p-1 rounded-lg hover:bg-red-500/20 touch-target" title="Eliminar"><i data-lucide="trash-2" class="w-3.5 h-3.5 text-red-400/60"></i></button>' : '') +
-          '</div></div>';
+          '<span class="libreta-detalle-monto ' + (item.pagado ? 'text-green-400' : 'text-amber-400') + '">$' + Math.round(monto).toLocaleString('es-AR') + '</span>' +
+          (!item.pagado ? '<button onclick="window._eliminarItemLibreta(\'' + item.id + '\')" class="libreta-detalle-del touch-target"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' : '') +
+          '</div>';
       }).join('');
       lucide.createIcons();
     }

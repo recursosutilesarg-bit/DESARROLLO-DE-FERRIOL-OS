@@ -34,7 +34,7 @@
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="kiosco.css">
+  <link rel="stylesheet" href="kiosco.css?v=20260421b">
 </head>
 <body class="relative">
   <!-- Banner instalar como app (PWA) — visible al abrir el link -->
@@ -609,48 +609,38 @@
       </div>
 
       <!-- Sub-vista: Detalle de cliente en libreta -->
-      <div id="caja-sub-libreta-cliente" class="hidden">
-        <div class="caja-subview-header">
+      <div id="caja-sub-libreta-cliente" class="hidden libreta-fullscreen">
+        <!-- Topbar: volver + nombre + total -->
+        <div class="libreta-topbar">
           <button onclick="window._switchCajaTab('libreta')" class="caja-back-btn touch-target">
-            <i data-lucide="chevron-left" class="w-5 h-5"></i> Libreta
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+          </button>
+          <div class="flex-1 min-w-0">
+            <p id="libretalClienteNombre" class="font-bold text-sm truncate leading-tight">Cliente</p>
+            <p id="libretalClienteTel" class="text-xs text-white/40 truncate leading-tight"></p>
+          </div>
+          <div class="text-right shrink-0">
+            <p class="text-xs text-white/40">Adeudado</p>
+            <p id="libretalClienteTotal" class="font-bold text-sm text-amber-400">$0</p>
+          </div>
+        </div>
+
+        <!-- Barra de acciones compacta -->
+        <div class="flex gap-2 px-3 py-2 border-b border-white/07">
+          <button id="libretalBtnWhatsApp" onclick="window._enviarTicketWhatsApp()" class="btn-glow rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs font-semibold touch-target flex-1 justify-center">
+            <i data-lucide="message-circle" class="w-3.5 h-3.5"></i> WhatsApp
+          </button>
+          <button onclick="window._abrirNuevoItemLibreta()" class="btn-neomorphic rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs font-semibold touch-target flex-1 justify-center">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Agregar ítem
+          </button>
+          <button onclick="window._marcarLibretaPagada()" class="rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs font-semibold touch-target border border-green-500/40 text-green-400">
+            <i data-lucide="check" class="w-3.5 h-3.5"></i> Cobrado
           </button>
         </div>
-        <div class="p-4 space-y-4">
-          <!-- Cabecera del cliente -->
-          <div class="glass rounded-2xl p-4 flex items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-[#22c55e]/20 flex items-center justify-center shrink-0">
-                <i data-lucide="user" class="w-5 h-5 text-[#86efac]"></i>
-              </div>
-              <div>
-                <p id="libretalClienteNombre" class="font-bold text-base">Cliente</p>
-                <p id="libretalClienteTel" class="text-xs text-white/50"></p>
-              </div>
-            </div>
-            <div class="text-right shrink-0">
-              <p class="text-xs text-white/50">Total adeudado</p>
-              <p id="libretalClienteTotal" class="font-bold text-lg text-amber-400">$0</p>
-            </div>
-          </div>
-          <!-- Acciones del cliente -->
-          <div class="flex gap-2 flex-wrap">
-            <button id="libretalBtnWhatsApp" onclick="window._enviarTicketWhatsApp()" class="btn-glow rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm font-semibold touch-target flex-1">
-              <i data-lucide="message-circle" class="w-4 h-4"></i> Ticket WhatsApp
-            </button>
-            <button onclick="window._abrirNuevoItemLibreta()" class="btn-neomorphic rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm font-semibold touch-target flex-1">
-              <i data-lucide="plus" class="w-4 h-4"></i> Agregar ítem
-            </button>
-            <button onclick="window._marcarLibretaPagada()" class="rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm font-semibold touch-target border border-green-500/40 text-green-400 hover:bg-green-500/10 transition-colors">
-              <i data-lucide="check" class="w-4 h-4"></i> Cobrado
-            </button>
-          </div>
-          <!-- Lista de ítems -->
-          <div class="glass rounded-2xl p-4">
-            <h3 class="font-semibold text-sm text-white/70 mb-3">Detalle de compras</h3>
-            <div id="libretalItemsList" class="space-y-2 text-sm">
-              <p class="text-white/40 text-center py-4">Sin ítems registrados.</p>
-            </div>
-          </div>
+
+        <!-- Lista de ítems edge-to-edge -->
+        <div id="libretalItemsList" class="libreta-items-list">
+          <p class="text-white/40 text-center py-8 text-sm">Sin ítems registrados.</p>
         </div>
       </div>
 
@@ -1379,7 +1369,7 @@
   </div>
   </div><!-- /#appWrap -->
   <script src="kiosco-config.js"></script>
-  <script defer src="kiosco-app.js"></script>
-  <script defer src="kiosco-pwa.js"></script>
+  <script defer src="kiosco-app.js?v=20260421b"></script>
+  <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>
