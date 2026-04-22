@@ -1,5 +1,5 @@
 // Service Worker — Ferriol OS PWA
-const CACHE_NAME = 'ferriol-os-v3';
+const CACHE_NAME = 'ferriol-os-v4';
 const ASSETS = [
   './kiosco.html',
   './manifest.json',
