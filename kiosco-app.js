@@ -916,6 +916,8 @@
       try { lastMethod = localStorage.getItem(LAST_QUICK_PAYMENT_KEY) || ''; } catch (_) {}
       if (lastMethod) document.querySelectorAll('.quick-payment-option').forEach(function (el) { if (el.dataset.quickPayment === lastMethod) el.classList.add('ring-2', 'ring-[#dc2626]'); });
       updateCobroRapidoLista();
+      var crDet = document.querySelector('#cobroRapidoModal details');
+      if (crDet) crDet.removeAttribute('open');
       document.getElementById('cobroRapidoModal').classList.remove('hidden');
       document.getElementById('cobroRapidoModal').classList.add('flex');
       if (!state._restoringFromHistory) pushHistoryExtra({ modal: 'cobroRapido' });
