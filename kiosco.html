@@ -431,8 +431,10 @@
               <div class="flex justify-between py-3 border-b border-white/10">
                 <span>Cobro libreta</span><span id="cajaCobroLibreta" class="font-bold">$0</span>
               </div>
-              <div class="flex justify-between py-3 border-b border-white/10">
-                <span>Fiado (cuenta)</span><span id="cajaFiado" class="font-bold">$0</span>
+              <div class="flex justify-between items-center gap-2 py-3 border-b border-white/10">
+                <span class="flex items-center gap-2 min-w-0">Fiado (cuenta)
+                  <button type="button" onclick="window._goToCajaLibreta && window._goToCajaLibreta()" class="shrink-0 text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-lg bg-amber-500/25 text-amber-200 border border-amber-400/40 touch-target active:scale-95" title="Abrir libreta">Libreta</button>
+                </span><span id="cajaFiado" class="font-bold">$0</span>
               </div>
               <div class="flex justify-between py-3 border-b border-white/10">
                 <span>Transferir pendiente</span><span id="cajaTransfPend" class="font-bold">$0</span>

@@ -774,13 +774,19 @@
           { key: 'tarjeta', label: 'Tarjeta', icon: 'credit-card', color: 'text-blue-400', bg: 'bg-blue-500/20' },
           { key: 'transferencia', label: 'Transf.', icon: 'smartphone', color: 'text-cyan-400', bg: 'bg-cyan-500/20' },
           { key: 'cobro_libreta', label: 'Cobro libreta', icon: 'wallet', color: 'text-emerald-300', bg: 'bg-emerald-500/20' },
-          { key: 'fiado', label: 'Fiado (cuenta)', icon: 'user-check', color: 'text-amber-400', bg: 'bg-amber-500/20' },
-          { key: 'transferencia_pendiente', label: 'Pend. (cuenta)', icon: 'clock', color: 'text-orange-400', bg: 'bg-orange-500/20' }
+          { key: 'fiado', label: 'Fiado (cuenta)', icon: 'user-check', color: 'text-amber-400', bg: 'bg-amber-500/20', libreta: true },
+          { key: 'transferencia_pendiente', label: 'Pend. (cuenta)', icon: 'clock', color: 'text-orange-400', bg: 'bg-orange-500/20', libreta: true }
         ];
         porMetodoEl.innerHTML = methods.map(function (x) {
           var val = m[x.key] || 0;
           if (val === 0) return '';
-          return '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium ' + x.bg + ' ' + x.color + '"><i data-lucide="' + x.icon + '" class="w-3 h-3"></i>' + x.label + ' $' + val.toLocaleString('es-AR') + '</span>';
+          var inner = '<i data-lucide="' + x.icon + '" class="w-3 h-3 shrink-0"></i><span>' + x.label + ' $' + val.toLocaleString('es-AR') + '</span>';
+          if (x.libreta) inner += '<i data-lucide="chevron-right" class="w-3 h-3 shrink-0 opacity-70"></i>';
+          var baseCls = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium ' + x.bg + ' ' + x.color;
+          if (x.libreta) {
+            return '<button type="button" class="' + baseCls + ' touch-target active:scale-[0.97] hover:brightness-110 border-0 cursor-pointer" title="Abrir libreta de fiado" aria-label="Abrir libreta de fiado" onclick="window._goToCajaLibreta && window._goToCajaLibreta()">' + inner + '</button>';
+          }
+          return '<span class="' + baseCls + '">' + inner + '</span>';
         }).filter(Boolean).join('');
         try {
           if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
@@ -1216,8 +1222,8 @@
       if (name === 'clientes') loadClientes().then(renderClientes);
       lucide.createIcons();
     }
-    function goToPanel(name) {
-      showPanel(name);
+    function goToPanel(name, cajaTabOpt) {
+      showPanel(name, cajaTabOpt);
       if (!state._restoringFromHistory) {
         history.pushState({
           panel: state.currentPanel,
@@ -1225,6 +1231,9 @@
         }, '', location.href);
       }
     }
+    window._goToCajaLibreta = function () {
+      goToPanel('caja', 'libreta');
+    };
     window.addEventListener('popstate', function (e) {
       state._restoringFromHistory = true;
       closeAllOverlays();
