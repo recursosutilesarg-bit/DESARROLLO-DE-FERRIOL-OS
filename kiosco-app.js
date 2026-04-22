@@ -975,8 +975,6 @@
         return;
       }
       if (emptyEl) emptyEl.classList.add('hidden');
-      var atajoWrap = document.getElementById('cobroRapidoAtajoWrap');
-      if (atajoWrap) atajoWrap.classList.add('hidden');
       var total = items.reduce(function (s, it) { return s + (it.precio || 0); }, 0);
       listEl.innerHTML = items.map(function (it, i) {
         var nombre = (it.nombre || 'Item').replace(/</g, '&lt;').replace(/"/g, '&quot;');
@@ -984,19 +982,6 @@
         return '<div class="flex items-center justify-between gap-1.5 py-1 px-2 rounded-lg bg-white/10"><span class="text-xs text-white truncate flex-1">' + nombre + ' <span class="text-white/60">$' + precio + '</span></span><button type="button" class="cobro-rapido-quitar shrink-0 p-1 rounded text-red-300 hover:bg-red-500/20 touch-target text-sm" data-index="' + i + '" aria-label="Quitar">×</button></div>';
       }).join('');
       if (totalEl) { totalEl.classList.remove('hidden'); totalEl.textContent = 'Total: $' + total; }
-      var atajoWrap = document.getElementById('cobroRapidoAtajoWrap');
-      var atajoLabel = document.getElementById('cobroRapidoAtajoLabel');
-      if (atajoWrap && atajoLabel) {
-        var lastMethod = '';
-        try { lastMethod = localStorage.getItem(LAST_QUICK_PAYMENT_KEY) || 'efectivo'; } catch (_) { lastMethod = 'efectivo'; }
-        if (lastMethod === 'fiado' || lastMethod === 'transferencia_pendiente') {
-          atajoWrap.classList.add('hidden');
-        } else {
-          atajoWrap.classList.remove('hidden');
-          var labels = { efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia' };
-          atajoLabel.textContent = 'Cobrar con ' + (labels[lastMethod] || 'Efectivo');
-        }
-      }
       listEl.querySelectorAll('.cobro-rapido-quitar').forEach(function (btn) {
         btn.onclick = function () {
           var idx = parseInt(btn.dataset.index, 10);
@@ -1384,14 +1369,6 @@
       state.cobroRapidoItems.push({ nombre: productName, precio: amount, costo: costo });
       document.getElementById('cobroRapidoMonto').value = '';
       updateCobroRapidoLista();
-    };
-    document.getElementById('cobroRapidoAtajoBtn').onclick = function () {
-      var lastMethod = '';
-      try { lastMethod = localStorage.getItem(LAST_QUICK_PAYMENT_KEY) || 'efectivo'; } catch (_) { lastMethod = 'efectivo'; }
-      _selectedLibretaClienteForPayment = null;
-      completeQuickSale(lastMethod, '', '').catch(function (err) {
-        console.warn('Cobro rápido (atajo):', err && err.message ? err.message : err);
-      });
     };
     document.querySelectorAll('.quick-payment-option').forEach(function (btn) {
       btn.onclick = function () {
