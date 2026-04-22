@@ -393,18 +393,45 @@
       return { label: 'Stock Alto', class: 'status-alto' };
     }
 
+    // Beep tipo supermercado: tono agudo corto (escáner / producto agregado)
     function playBeep() {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.frequency.value = 1200;
-      osc.type = 'sine';
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.1);
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(1850, ctx.currentTime);
+        osc.frequency.setValueAtTime(1950, ctx.currentTime + 0.04);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.12);
+        osc.onended = function () { ctx.close(); };
+      } catch (_) {}
+    }
+
+    // Beep de cobro exitoso: doble tono ascendente (como caja registradora)
+    function playBeepCobro() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        function tone(freq, start, duration) {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.22, ctx.currentTime + start);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + duration);
+          osc.start(ctx.currentTime + start);
+          osc.stop(ctx.currentTime + start + duration);
+        }
+        tone(880, 0, 0.12);
+        tone(1320, 0.13, 0.18);
+        setTimeout(function () { ctx.close(); }, 500);
+      } catch (_) {}
     }
 
     function renderInventory() {
@@ -658,6 +685,7 @@
       updateDashboard();
       closePaymentModal();
       closeCart();
+      if (typeof playBeepCobro === 'function') playBeepCobro();
       showScanToast('¡Venta registrada! $' + total.toLocaleString('es-AR'), false);
       if (method === 'fiado' || method === 'transferencia_pendiente') {
         var preseleccionado = _selectedLibretaClienteForPayment;
@@ -1120,7 +1148,7 @@
       state.cobroRapidoItems = [];
       try { localStorage.setItem(LAST_QUICK_PAYMENT_KEY, method); } catch (_) {}
       closeCobroRapidoModal();
-      if (typeof playBeep === 'function') playBeep();
+      if (typeof playBeepCobro === 'function') playBeepCobro();
       if (typeof showScanToast === 'function') showScanToast('Cobro registrado', false);
       if (method === 'fiado' || method === 'transferencia_pendiente') {
         var preseleccionadoQ = _selectedLibretaClienteForPayment;
