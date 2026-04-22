@@ -2456,20 +2456,37 @@
     };
 
     async function _agregarItemsDesdePago(clienteId) {
-      if (!_libretalDesdePago || !supabaseClient || !currentUser?.id) return;
+      if (!clienteId) { console.warn('Libreta: clienteId vacío'); return; }
+      if (!_libretalDesdePago) { console.warn('Libreta: _libretalDesdePago es null'); return; }
+      if (!supabaseClient || !currentUser?.id) { console.warn('Libreta: sin conexión o usuario'); return; }
       var tipo = _libretalDesdePago.tipo || 'fiado';
+      // Normalizar el tipo para que coincida con el CHECK de la tabla
+      if (tipo !== 'fiado' && tipo !== 'transferencia_pendiente') tipo = 'fiado';
       var items = _libretalDesdePago.items || [];
       var fechaHora = new Date().toISOString();
+      var errores = 0;
       for (var i = 0; i < items.length; i++) {
         var it = items[i];
-        var desc = (it.nombre || 'Ítem') + (it.cant > 1 ? ' x' + it.cant : '');
+        var desc = (it.nombre || 'Ítem') + (Number(it.cant) > 1 ? ' x' + it.cant : '');
         var monto = Number(it.precio || 0) * Number(it.cant || 1);
         if (monto <= 0) continue;
-        try {
-          await supabaseClient.from('libreta_items').insert({ user_id: currentUser.id, cliente_id: clienteId, descripcion: desc, monto: monto, tipo: tipo, fecha_hora: fechaHora });
-        } catch (_) {}
+        var res = await supabaseClient.from('libreta_items').insert({
+          user_id: currentUser.id,
+          cliente_id: clienteId,
+          descripcion: desc,
+          monto: monto,
+          tipo: tipo,
+          fecha_hora: fechaHora
+        });
+        if (res.error) {
+          console.error('Libreta insert error:', res.error);
+          errores++;
+        }
       }
       _libretalDesdePago = null;
+      if (errores > 0 && typeof showScanToast === 'function') {
+        showScanToast('Error al guardar en la libreta. Revisá el SQL en Supabase.', true);
+      }
     }
 
     // ── Actualizar _switchCajaTab para libreta ──────────────────
