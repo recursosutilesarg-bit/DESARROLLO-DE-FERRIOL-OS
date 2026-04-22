@@ -2116,7 +2116,7 @@
       if (!supabaseClient || !currentUser?.id) return [];
       try {
         var q = supabaseClient.from('libreta_items')
-          .select('id, descripcion, monto, tipo, fecha_hora, pagado')
+          .select('id, descripcion, monto, tipo, fecha_hora, pagado, comentario')
           .eq('user_id', currentUser.id)
           .eq('cliente_id', clienteId)
           .order('fecha_hora', { ascending: false });
@@ -2208,13 +2208,14 @@
         var fecha = item.fecha_hora ? new Date(item.fecha_hora).toLocaleString('es-AR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
         var tipoLabel = item.tipo === 'transferencia_pendiente' ? 'Transf.' : 'Fiado';
         var pagadoStyle = item.pagado ? 'opacity-40' : '';
-        return '<div class="libreta-detalle-row ' + pagadoStyle + '">' +
+        var itemJson = JSON.stringify({ id: item.id, descripcion: item.descripcion || '', monto: monto, tipo: item.tipo || 'fiado', fecha_hora: item.fecha_hora || '', comentario: item.comentario || '', pagado: !!item.pagado }).replace(/"/g,'&quot;');
+        return '<div class="libreta-detalle-row ' + pagadoStyle + '" onclick="window._abrirItemDetalle(\'' + item.id + '\')">' +
           '<div class="libreta-detalle-info">' +
           '<span class="libreta-detalle-desc' + (item.pagado ? ' line-through' : '') + '">' + desc + '</span>' +
-          '<span class="libreta-detalle-meta">' + fecha + ' · ' + tipoLabel + '</span>' +
+          '<span class="libreta-detalle-meta">' + fecha + (item.comentario ? ' · 💬' : '') + ' · ' + tipoLabel + '</span>' +
           '</div>' +
           '<span class="libreta-detalle-monto ' + (item.pagado ? 'text-green-400' : 'text-amber-400') + '">$' + Math.round(monto).toLocaleString('es-AR') + '</span>' +
-          (!item.pagado ? '<button onclick="window._eliminarItemLibreta(\'' + item.id + '\')" class="libreta-detalle-del touch-target"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' : '') +
+          (!item.pagado ? '<button onclick="event.stopPropagation();window._eliminarItemLibreta(\'' + item.id + '\')" class="libreta-detalle-del touch-target"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' : '') +
           '</div>';
       }).join('');
       lucide.createIcons();
@@ -2484,6 +2485,58 @@
       } catch (e) {
         if (errEl) { errEl.textContent = 'Error: ' + (e.message || 'intente de nuevo.'); errEl.classList.remove('hidden'); }
         if (btnEl) { btnEl.disabled = false; btnEl.textContent = 'Crear y agregar'; }
+      }
+    };
+
+    var _itemDetalleActual = null;
+
+    window._abrirItemDetalle = async function (itemId) {
+      if (!_libretalClienteActual) return;
+      var items = await loadLibretaItems(_libretalClienteActual.id, false);
+      var item = items.find(function (i) { return i.id === itemId; });
+      if (!item) return;
+      _itemDetalleActual = item;
+      document.getElementById('itemDetalleId').value = item.id;
+      document.getElementById('itemDetalleDesc').textContent = item.descripcion || '';
+      var monto = Number(item.monto || 0);
+      document.getElementById('itemDetalleMonto').textContent = '$' + Math.round(monto).toLocaleString('es-AR');
+      var tipoLabel = item.tipo === 'transferencia_pendiente' ? 'Transferencia pendiente' : 'Fiado';
+      document.getElementById('itemDetalleMeta').textContent = tipoLabel + (item.pagado ? ' · Cobrado' : ' · Pendiente');
+      var fechaHora = item.fecha_hora ? new Date(item.fecha_hora) : null;
+      if (fechaHora) {
+        var fechaStr = fechaHora.toLocaleDateString('es-AR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+        var horaStr = fechaHora.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('itemDetalleFechaHora').textContent = fechaStr + ' ' + horaStr;
+      } else {
+        document.getElementById('itemDetalleFechaHora').textContent = 'Sin fecha';
+      }
+      document.getElementById('itemDetalleComentario').value = item.comentario || '';
+      var modal = document.getElementById('libretalItemDetalleModal');
+      modal.classList.remove('hidden'); modal.classList.add('flex');
+      lucide.createIcons();
+    };
+
+    window._cerrarItemDetalle = function () {
+      var modal = document.getElementById('libretalItemDetalleModal');
+      if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+      _itemDetalleActual = null;
+    };
+
+    window._guardarComentarioItem = async function () {
+      var itemId = document.getElementById('itemDetalleId').value;
+      var comentario = (document.getElementById('itemDetalleComentario').value || '').trim();
+      if (!itemId || !supabaseClient || !currentUser?.id) return;
+      var btn = document.querySelector('#libretalItemDetalleModal .btn-glow');
+      if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
+      var res = await supabaseClient.from('libreta_items')
+        .update({ comentario: comentario })
+        .eq('id', itemId)
+        .eq('user_id', currentUser.id);
+      if (btn) { btn.disabled = false; btn.textContent = 'Guardar comentario'; }
+      if (!res.error) {
+        window._cerrarItemDetalle();
+        if (_libretalClienteActual) renderLibretaItems(_libretalClienteActual.id);
+        if (typeof showScanToast === 'function') showScanToast('Comentario guardado', false);
       }
     };
 
