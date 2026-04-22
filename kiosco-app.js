@@ -2158,14 +2158,17 @@
         el.innerHTML = datos.map(function (d) {
           var c = d.cliente;
           var total = d.total;
-          var badge = total > 0
-            ? '<span class="text-amber-400 font-bold text-sm">$' + Math.round(total).toLocaleString('es-AR') + '</span>'
-            : '<span class="text-green-400 text-sm font-medium">Al día ✓</span>';
-          return '<button onclick="window._verClienteLibreta(\'' + c.id + '\')" class="libreta-cliente-row w-full glass rounded-xl px-4 py-3.5 border border-white/10 flex items-center gap-3 hover:border-[#22c55e]/40 transition-all active:scale-[0.98] touch-target">' +
-            '<div class="w-9 h-9 rounded-xl bg-[#22c55e]/20 flex items-center justify-center shrink-0"><i data-lucide="user" class="w-4 h-4 text-[#86efac]"></i></div>' +
-            '<div class="flex-1 text-left min-w-0"><p class="font-semibold text-sm truncate">' + (c.nombre || '').replace(/</g,'&lt;') + '</p>' +
-            (c.telefono ? '<p class="text-xs text-white/40 truncate">' + c.telefono + '</p>' : '') + '</div>' +
-            badge + '<i data-lucide="chevron-right" class="w-4 h-4 text-white/30 shrink-0"></i></button>';
+          var montoStr = total > 0
+            ? '<span class="libreta-item-deuda text-amber-400">$' + Math.round(total).toLocaleString('es-AR') + '</span>'
+            : '<span class="libreta-item-deuda text-green-400 text-xs">Al día</span>';
+          return '<button onclick="window._verClienteLibreta(\'' + c.id + '\')" class="libreta-item-row w-full touch-target">' +
+            '<div class="libreta-item-icon"><i data-lucide="user" class="w-4 h-4 text-[#86efac]"></i></div>' +
+            '<div class="libreta-item-info">' +
+            '<span class="libreta-item-nombre">' + (c.nombre || '').replace(/</g,'&lt;') + '</span>' +
+            (c.telefono ? '<span class="libreta-item-tel">' + c.telefono + '</span>' : '') +
+            '</div>' +
+            montoStr +
+            '<i data-lucide="chevron-right" class="w-4 h-4 text-white/30 shrink-0"></i></button>';
         }).join('');
         lucide.createIcons();
       } catch (e) {

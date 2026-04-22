@@ -589,25 +589,22 @@
       </div>
 
       <!-- Sub-vista: Libreta de fiado — lista de clientes -->
-      <div id="caja-sub-libreta" class="hidden">
-        <div class="caja-subview-header">
+      <div id="caja-sub-libreta" class="hidden libreta-fullscreen">
+        <!-- Topbar compacta igual que productos -->
+        <div class="libreta-topbar">
           <button onclick="window._switchCajaTab('hub')" class="caja-back-btn touch-target">
-            <i data-lucide="chevron-left" class="w-5 h-5"></i> Caja
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+          </button>
+          <span class="font-semibold text-sm flex items-center gap-1.5">
+            <i data-lucide="notebook-pen" class="w-4 h-4 text-[#86efac]"></i> Libreta de fiado
+          </span>
+          <button onclick="window._abrirNuevoClienteLibreta()" class="btn-glow rounded-xl px-3 py-1.5 flex items-center gap-1 text-sm font-semibold touch-target">
+            <i data-lucide="user-plus" class="w-4 h-4"></i> Nuevo
           </button>
         </div>
-        <div class="p-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <h2 class="font-bold text-lg flex items-center gap-2">
-              <i data-lucide="notebook-pen" class="w-5 h-5 text-[#86efac]"></i>
-              Libreta de fiado
-            </h2>
-            <button onclick="window._abrirNuevoClienteLibreta()" class="btn-glow rounded-xl px-3 py-2 flex items-center gap-1.5 text-sm font-semibold touch-target">
-              <i data-lucide="user-plus" class="w-4 h-4"></i> Nuevo cliente
-            </button>
-          </div>
-          <div id="libretalClientesList" class="space-y-2">
-            <p class="text-white/50 text-center py-8">Cargando...</p>
-          </div>
+        <!-- Lista edge-to-edge sin padding lateral -->
+        <div id="libretalClientesList">
+          <p class="text-white/50 text-center py-8">Cargando...</p>
         </div>
       </div>
 
