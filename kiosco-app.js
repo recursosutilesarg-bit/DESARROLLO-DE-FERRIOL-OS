@@ -1431,7 +1431,7 @@
       const footEl = document.getElementById('ventasCobradasFooter');
       if (listEl) {
         if (cobradas.length === 0) {
-          listEl.innerHTML = '<p class="text-white/60 py-4 text-center">Aún no hay ventas cobradas hoy en este dispositivo.</p>';
+          listEl.innerHTML = '<p class="text-white/60 py-4 text-center">Aún no hay ventas del día (caja) en este dispositivo.</p>';
         } else {
           const fmt = (s) => s ? new Date(s).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : '';
           listEl.innerHTML = cobradas.slice().reverse().map(function (t) {
@@ -1477,10 +1477,8 @@
     }
     document.getElementById('btnVentasCard').onclick = openVentasProductosModal;
     document.getElementById('btnTransCard').onclick = openTransaccionesModal;
-    var btnVentasCobradasHoy = document.getElementById('btnVentasCobradasHoy');
-    if (btnVentasCobradasHoy) btnVentasCobradasHoy.onclick = openVentasCobradasModal;
-    var btnProductosVendidosHoy = document.getElementById('btnProductosVendidosHoy');
-    if (btnProductosVendidosHoy) btnProductosVendidosHoy.onclick = openVentasProductosModal;
+    var btnVentasDelDia = document.getElementById('btnVentasDelDia');
+    if (btnVentasDelDia) btnVentasDelDia.onclick = openVentasCobradasModal;
     document.getElementById('closeVentasProductos').onclick = () => {
       document.getElementById('ventasProductosModal').classList.add('hidden');
       document.getElementById('ventasProductosModal').classList.remove('flex');

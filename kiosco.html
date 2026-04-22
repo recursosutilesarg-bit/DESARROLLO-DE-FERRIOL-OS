@@ -259,17 +259,11 @@
             <p id="resumenDiaTexto" class="text-2xl sm:text-3xl font-bold text-[#86efac]">Entraron $0</p>
             <p id="resumenDiaVentas" class="text-sm text-white/50 mt-1">0 ventas</p>
             <div id="resumenDiaPorMetodo" class="flex flex-wrap gap-1.5 mt-2"></div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3 w-full">
-              <button type="button" id="btnVentasCobradasHoy" class="w-full py-2.5 px-3 rounded-xl border border-[#22c55e]/35 bg-[#22c55e]/10 hover:bg-[#22c55e]/18 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-[#86efac] active:scale-[0.99]">
-                <i data-lucide="clipboard-list" class="w-4 h-4 shrink-0"></i>
-                Ventas cobradas
-              </button>
-              <button type="button" id="btnProductosVendidosHoy" class="w-full py-2.5 px-3 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-white/90 active:scale-[0.99]">
-                <i data-lucide="package" class="w-4 h-4 shrink-0 text-[#86efac]"></i>
-                Productos vendidos
-              </button>
-            </div>
-            <p class="text-[10px] text-white/35 mt-1.5 text-center sm:text-left">Cobradas: solo caja. Productos: todo lo vendido hoy (incluye fiado).</p>
+            <button type="button" id="btnVentasDelDia" class="w-full mt-3 py-2.5 px-3 rounded-xl border border-[#22c55e]/35 bg-[#22c55e]/10 hover:bg-[#22c55e]/18 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-[#86efac] active:scale-[0.99]">
+              <i data-lucide="clipboard-list" class="w-4 h-4 shrink-0"></i>
+              Ventas del día
+            </button>
+            <p class="text-[10px] text-white/35 mt-1.5 text-center sm:text-left">Solo operaciones cobradas en caja; fiado y transf. pendiente se ven en la libreta.</p>
             <button type="button" id="btnCobroRapido" onclick="window._abrirCobroRapido && window._abrirCobroRapido()" class="w-full mt-3 py-2.5 px-4 rounded-xl border border-[#22c55e]/40 bg-[#22c55e]/08 hover:bg-[#22c55e]/14 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-[#86efac] active:scale-[0.99]">
               <i data-lucide="zap" class="w-4 h-4 shrink-0"></i>
               Cobro rápido
@@ -1341,15 +1335,15 @@
     </div>
   </div>
 
-  <!-- Modal Ventas cobradas (sin fiado ni transf. pendiente) -->
+  <!-- Modal Ventas del día (solo cobradas en caja) -->
   <div id="ventasCobradasModal" class="fixed inset-0 z-[64] hidden items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="ventasCobradasOverlay"></div>
     <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md max-h-[85vh] flex flex-col scale-in">
       <h3 class="font-bold text-lg mb-1 flex items-center gap-2">
         <i data-lucide="clipboard-list" class="w-5 h-5 text-[#86efac]"></i>
-        Ventas cobradas (hoy)
+        Ventas del día
       </h3>
-      <p class="text-xs text-white/50 mb-3">Solo efectivo, tarjeta, transferencia y cobro de libreta. Fiado y transf. pendiente van a la libreta.</p>
+      <p class="text-xs text-white/50 mb-3">Efectivo, tarjeta, transferencia y cobro de libreta. Fiado y transf. pendiente: libreta.</p>
       <div id="ventasCobradasList" class="flex-1 overflow-y-auto space-y-4 text-sm min-h-0"></div>
       <div id="ventasCobradasFooter" class="mt-3 pt-3 border-t border-white/10 space-y-2 text-xs shrink-0"></div>
       <button id="closeVentasCobradas" class="mt-4 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cerrar</button>
