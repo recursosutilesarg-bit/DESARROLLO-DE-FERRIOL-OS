@@ -2327,7 +2327,7 @@
         listEl.innerHTML = '<p class="text-white/40 text-sm text-center py-3">Cargando clientes...</p>';
       }
       var prompt = document.getElementById('libretalFiadoPrompt');
-      if (prompt) { prompt.classList.remove('hidden'); prompt.classList.add('flex'); }
+      if (prompt) { prompt.classList.remove('hidden'); prompt.style.display = 'flex'; }
       var result = await loadLibretaClientes();
       var clientes = (result && result.ok) ? result.data : [];
       if (listEl) {
@@ -2349,7 +2349,7 @@
 
     window._cerrarFiadoPrompt = function () {
       var p = document.getElementById('libretalFiadoPrompt');
-      p.classList.add('hidden'); p.classList.remove('flex');
+      if (p) { p.classList.add('hidden'); p.style.display = ''; }
       _libretalDesdePago = null;
     };
 

@@ -707,28 +707,31 @@
       </div>
     </div>
 
-    <!-- Prompt post-pago: agregar a libreta de fiado -->
-    <div id="libretalFiadoPrompt" class="fixed inset-0 z-[80] hidden items-end justify-center">
-      <div class="absolute inset-0 bg-black/40" onclick="window._cerrarFiadoPrompt()"></div>
-      <div class="relative glass-strong rounded-t-3xl p-5 w-full max-w-md mx-auto pb-safe">
-        <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>
-        <h3 class="font-bold text-base mb-1 flex items-center gap-2">
-          <i data-lucide="book-open" class="w-4 h-4 text-[#86efac]"></i>
-          ¿A quién fue el fiado?
-        </h3>
-        <p class="text-sm text-white/50 mb-3">Seleccioná un cliente o creá una cuenta nueva.</p>
-
-        <!-- Lista de clientes existentes -->
-        <div id="libretalPromptClientesList" class="max-h-44 overflow-y-auto space-y-2 mb-3"></div>
-
-        <!-- Botón nuevo cliente -->
-        <button onclick="window._abrirNuevoClienteDesdePrompt()" class="w-full btn-neomorphic rounded-xl py-2.5 text-sm font-medium touch-target flex items-center justify-center gap-2 mb-2">
-          <i data-lucide="user-plus" class="w-4 h-4"></i> Nuevo cliente
+    <!-- Prompt post-pago: agregar a libreta de fiado (pantalla completa) -->
+    <div id="libretalFiadoPrompt" class="fixed inset-0 z-[80] hidden flex-col" style="background:linear-gradient(135deg,#052e16 0%,#064e3b 100%);">
+      <!-- Header -->
+      <div class="flex items-center gap-3 px-5 pt-5 pb-4 border-b border-white/10">
+        <div class="w-10 h-10 rounded-2xl bg-[#22c55e]/20 flex items-center justify-center shrink-0">
+          <i data-lucide="book-open" class="w-5 h-5 text-[#86efac]"></i>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-bold text-lg leading-tight">¿A quién fue el fiado?</h3>
+          <p class="text-sm text-white/50">Seleccioná un cliente de la libreta</p>
+        </div>
+        <button onclick="window._cerrarFiadoPrompt()" class="w-9 h-9 rounded-xl glass flex items-center justify-center touch-target shrink-0">
+          <i data-lucide="x" class="w-4 h-4 text-white/60"></i>
         </button>
+      </div>
+
+      <!-- Lista de clientes (ocupa todo el espacio disponible) -->
+      <div id="libretalPromptClientesList" class="flex-1 overflow-y-auto px-4 py-3 space-y-2"></div>
+
+      <!-- Footer: nuevo cliente + omitir -->
+      <div class="px-4 pb-safe pt-3 border-t border-white/10 space-y-2">
 
         <!-- Formulario inline para nuevo cliente (oculto por defecto) -->
-        <div id="libretalPromptNuevoForm" class="hidden space-y-2 mb-3">
-          <p class="text-xs text-white/50 font-medium uppercase tracking-wide mb-1">Datos del nuevo cliente</p>
+        <div id="libretalPromptNuevoForm" class="hidden space-y-2 mb-2">
+          <p class="text-xs text-white/50 font-medium uppercase tracking-wide">Nuevo cliente</p>
           <input id="libretalPromptNombre" type="text" placeholder="Nombre *" class="input-field w-full rounded-xl px-4 py-2.5 text-sm" />
           <input id="libretalPromptTel" type="tel" placeholder="Teléfono (opcional)" class="input-field w-full rounded-xl px-4 py-2.5 text-sm" />
           <p id="libretalPromptErr" class="text-red-400 text-xs hidden"></p>
@@ -738,6 +741,9 @@
           </div>
         </div>
 
+        <button onclick="window._abrirNuevoClienteDesdePrompt()" class="w-full btn-neomorphic rounded-xl py-3 text-sm font-medium touch-target flex items-center justify-center gap-2">
+          <i data-lucide="user-plus" class="w-4 h-4"></i> Nuevo cliente
+        </button>
         <button onclick="window._cerrarFiadoPrompt()" class="w-full text-sm text-white/35 py-2 touch-target">Omitir / No registrar</button>
       </div>
     </div>
