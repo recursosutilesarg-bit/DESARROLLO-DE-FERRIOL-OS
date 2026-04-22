@@ -1092,12 +1092,21 @@
     <div class="relative glass-strong rounded-2xl p-6 w-full max-w-sm scale-in max-h-[90vh] overflow-y-auto">
       <h3 class="font-bold text-lg mb-2 text-center">¿Cómo cobra?</h3>
       <p class="text-sm text-white/60 text-center mb-2">Elegí el método de pago</p>
-      <input type="text" id="paymentClientName" placeholder="Cliente (opcional)" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
-      <div id="paymentWhatsappWrap" class="hidden mb-4">
-        <label class="block text-xs text-white/70 mb-1">WhatsApp (obligatorio para cobrar después)</label>
-        <input type="tel" id="paymentWhatsapp" placeholder="Ej: 54911 1234-5678" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
-        <p id="paymentWhatsappErr" class="text-red-300 text-xs mt-1 hidden">Ingresá el número de WhatsApp para poder cobrar después.</p>
+      <!-- Sección fiado: aparece al elegir Fiado o Transf. pendiente -->
+      <div id="paymentFiadoSection" class="hidden mb-3 pt-3 border-t border-white/10">
+        <p class="text-xs text-[#86efac] font-semibold mb-2 flex items-center gap-1.5">
+          <i data-lucide="book-open" class="w-3.5 h-3.5"></i> ¿A quién fue el fiado?
+        </p>
+        <div id="paymentFiadoClientesList" class="max-h-36 overflow-y-auto space-y-1.5 mb-1"></div>
+        <p class="text-xs text-white/40 text-center my-2">— o escribí el nombre —</p>
+        <input type="text" id="paymentClientName" placeholder="Nombre (opcional)" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+        <input type="tel" id="paymentWhatsapp" placeholder="WhatsApp (opcional)" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm mb-1 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+        <p id="paymentWhatsappErr" class="text-red-300 text-xs mb-2 hidden"></p>
+        <button onclick="window._confirmarPagoFiado()" class="w-full btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target flex items-center justify-center gap-2 mt-1">
+          <i data-lucide="check" class="w-4 h-4"></i> Confirmar cobro
+        </button>
       </div>
+      <div id="paymentWhatsappWrap" class="hidden"></div>
       <div class="grid grid-cols-2 gap-3">
         <button data-payment="efectivo" class="payment-option glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#22c55e]/50 active:scale-[0.98] touch-target transition-all">
           <i data-lucide="banknote" class="w-8 h-8 text-[#86efac]"></i>
@@ -1159,12 +1168,21 @@
       <button type="button" id="cobroRapidoAgregarBtn" class="w-full btn-neomorphic rounded-xl py-2.5 font-medium flex items-center justify-center gap-2 touch-target mb-3">
         <i data-lucide="plus" class="w-4 h-4"></i> Agregar producto
       </button>
-      <input type="text" id="cobroRapidoCliente" placeholder="Cliente (opcional)" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
-      <div id="cobroRapidoWhatsappWrap" class="hidden mb-3">
-        <label class="block text-xs text-white/70 mb-1">WhatsApp</label>
-        <input type="tel" id="cobroRapidoWhatsapp" placeholder="Ej: 54911 1234-5678" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
-        <p id="cobroRapidoWhatsappErr" class="text-red-300 text-xs mt-1 hidden">Ingresá WhatsApp.</p>
+      <!-- Sección fiado cobro rápido -->
+      <div id="cobroRapidoFiadoSection" class="hidden mb-3 pt-3 border-t border-white/10">
+        <p class="text-xs text-[#86efac] font-semibold mb-2 flex items-center gap-1.5">
+          <i data-lucide="book-open" class="w-3.5 h-3.5"></i> ¿A quién fue el fiado?
+        </p>
+        <div id="cobroRapidoFiadoClientesList" class="max-h-36 overflow-y-auto space-y-1.5 mb-1"></div>
+        <p class="text-xs text-white/40 text-center my-2">— o escribí el nombre —</p>
+        <input type="text" id="cobroRapidoCliente" placeholder="Nombre (opcional)" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+        <input type="tel" id="cobroRapidoWhatsapp" placeholder="WhatsApp (opcional)" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm mb-1 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+        <p id="cobroRapidoWhatsappErr" class="text-red-300 text-xs mb-2 hidden"></p>
+        <button onclick="window._confirmarCobroRapidoFiado()" class="w-full btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target flex items-center justify-center gap-2 mt-1">
+          <i data-lucide="check" class="w-4 h-4"></i> Confirmar cobro
+        </button>
       </div>
+      <div id="cobroRapidoWhatsappWrap" class="hidden"></div>
       <p class="text-sm text-white/60 text-center mb-2">¿Cómo cobra?</p>
       <div class="grid grid-cols-2 gap-2 mb-4">
         <button type="button" data-quick-payment="efectivo" class="quick-payment-option glass rounded-xl p-4 flex flex-col items-center gap-1 border border-white/10 hover:border-[#22c55e]/50 touch-target transition-all active:scale-[0.98]">

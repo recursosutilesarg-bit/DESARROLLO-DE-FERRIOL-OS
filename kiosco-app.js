@@ -591,11 +591,12 @@
 
     function openPaymentModal() {
       if (state.cart.length === 0) return;
-      const cartClient = document.getElementById('cartClientName');
-      const paymentClient = document.getElementById('paymentClientName');
-      if (cartClient && paymentClient) paymentClient.value = cartClient.value.trim();
-      document.getElementById('paymentWhatsappWrap').classList.remove('hidden');
-      document.getElementById('paymentWhatsapp').value = '';
+      _pendingPaymentMethod = null;
+      _selectedLibretaClienteForPayment = null;
+      var fiadoSection = document.getElementById('paymentFiadoSection');
+      if (fiadoSection) fiadoSection.classList.add('hidden');
+      if (document.getElementById('paymentClientName')) document.getElementById('paymentClientName').value = '';
+      if (document.getElementById('paymentWhatsapp')) document.getElementById('paymentWhatsapp').value = '';
       var we = document.getElementById('paymentWhatsappErr'); if (we) we.classList.add('hidden');
       document.getElementById('paymentModal').classList.remove('hidden');
       document.getElementById('paymentModal').classList.add('flex');
@@ -664,7 +665,17 @@
       closeCart();
       showScanToast('¡Venta registrada! $' + total.toLocaleString('es-AR'), false);
       if (method === 'fiado' || method === 'transferencia_pendiente') {
-        setTimeout(function () { if (typeof window._mostrarFiadoPrompt === 'function') window._mostrarFiadoPrompt(items, total, method); }, 400);
+        var preseleccionado = _selectedLibretaClienteForPayment;
+        _selectedLibretaClienteForPayment = null;
+        if (preseleccionado && preseleccionado.id) {
+          setTimeout(async function () {
+            _libretalDesdePago = { items: items, total: total, tipo: method };
+            await _agregarItemsDesdePago(preseleccionado.id);
+            if (typeof showScanToast === 'function') showScanToast('Agregado a la cuenta de ' + (preseleccionado.nombre || 'cliente'), false);
+          }, 300);
+        } else {
+          setTimeout(function () { if (typeof window._mostrarFiadoPrompt === 'function') window._mostrarFiadoPrompt(items, total, method); }, 400);
+        }
       }
     }
     function completeSale() {
@@ -999,11 +1010,13 @@
     window._abrirCobroRapido = function () { openCobroRapidoModal(); };
     function openCobroRapidoModal() {
       state.cobroRapidoItems = [];
+      _pendingPaymentMethod = null;
+      _selectedLibretaClienteForPayment = null;
       document.getElementById('cobroRapidoMonto').value = '';
       var margenEl = document.getElementById('cobroRapidoMargen'); if (margenEl) margenEl.value = '';
-      document.getElementById('cobroRapidoCliente').value = '';
+      if (document.getElementById('cobroRapidoCliente')) document.getElementById('cobroRapidoCliente').value = '';
       document.getElementById('cobroRapidoOtroNombre').value = '';
-      var crw = document.getElementById('cobroRapidoWhatsappWrap'); if (crw) crw.classList.add('hidden');
+      var crfs = document.getElementById('cobroRapidoFiadoSection'); if (crfs) crfs.classList.add('hidden');
       document.getElementById('cobroRapidoWhatsapp').value = '';
       var crwe = document.getElementById('cobroRapidoWhatsappErr'); if (crwe) crwe.classList.add('hidden');
       document.querySelectorAll('.quick-payment-option').forEach(function (el) { el.classList.remove('ring-2', 'ring-[#dc2626]'); });
@@ -1129,7 +1142,17 @@
       if (typeof playBeep === 'function') playBeep();
       if (typeof showScanToast === 'function') showScanToast('Cobro registrado', false);
       if (method === 'fiado' || method === 'transferencia_pendiente') {
-        setTimeout(function () { if (typeof window._mostrarFiadoPrompt === 'function') window._mostrarFiadoPrompt(items, total, method); }, 400);
+        var preseleccionadoQ = _selectedLibretaClienteForPayment;
+        _selectedLibretaClienteForPayment = null;
+        if (preseleccionadoQ && preseleccionadoQ.id) {
+          setTimeout(async function () {
+            _libretalDesdePago = { items: items, total: total, tipo: method };
+            await _agregarItemsDesdePago(preseleccionadoQ.id);
+            if (typeof showScanToast === 'function') showScanToast('Agregado a la cuenta de ' + (preseleccionadoQ.nombre || 'cliente'), false);
+          }, 300);
+        } else {
+          setTimeout(function () { if (typeof window._mostrarFiadoPrompt === 'function') window._mostrarFiadoPrompt(items, total, method); }, 400);
+        }
       }
     }
 
@@ -1388,19 +1411,20 @@
     document.querySelectorAll('.quick-payment-option').forEach(function (btn) {
       btn.onclick = function () {
         var method = btn.dataset.quickPayment;
-        var clientName = document.getElementById('cobroRapidoCliente').value.trim();
-        var whatsappRaw = (document.getElementById('cobroRapidoWhatsapp') && document.getElementById('cobroRapidoWhatsapp').value) ? document.getElementById('cobroRapidoWhatsapp').value.trim() : '';
-        var whatsappDigits = (whatsappRaw || '').replace(/\D/g, '');
         if (method === 'fiado' || method === 'transferencia_pendiente') {
-          document.getElementById('cobroRapidoWhatsappWrap').classList.remove('hidden');
-          if (whatsappDigits.length < 8) {
-            document.getElementById('cobroRapidoWhatsappErr').textContent = 'Ingresá el número de WhatsApp (mín. 8 dígitos) para poder cobrar después.';
-            document.getElementById('cobroRapidoWhatsappErr').classList.remove('hidden');
-            return;
-          }
+          _pendingPaymentMethod = method;
+          _selectedLibretaClienteForPayment = null;
+          var sectionEl = document.getElementById('cobroRapidoFiadoSection');
+          if (sectionEl) sectionEl.classList.remove('hidden');
+          if (document.getElementById('cobroRapidoCliente')) document.getElementById('cobroRapidoCliente').value = '';
+          if (document.getElementById('cobroRapidoWhatsapp')) document.getElementById('cobroRapidoWhatsapp').value = '';
+          _cargarClientesPickerPago('cobroRapidoFiadoClientesList', 'cobroRapidoCliente', 'cobroRapidoWhatsapp');
+          lucide.createIcons();
+          return;
         }
-        document.getElementById('cobroRapidoWhatsappErr').classList.add('hidden');
-        completeQuickSale(method, clientName, whatsappRaw || whatsappDigits).catch(function (err) {
+        var errEl = document.getElementById('cobroRapidoWhatsappErr');
+        if (errEl) errEl.classList.add('hidden');
+        completeQuickSale(method, '', '').catch(function (err) {
           console.warn('Cobro rápido:', err && err.message ? err.message : err);
         });
       };
@@ -1720,23 +1744,21 @@
     document.querySelectorAll('[data-payment]').forEach(btn => {
       btn.onclick = () => {
         const method = btn.dataset.payment;
-        const client = document.getElementById('paymentClientName')?.value?.trim() || '';
-        const whatsappRaw = document.getElementById('paymentWhatsapp')?.value?.trim() || '';
-        const whatsappDigits = (whatsappRaw || '').replace(/\D/g, '');
         if (method === 'fiado' || method === 'transferencia_pendiente') {
-          document.getElementById('paymentWhatsappWrap').classList.remove('hidden');
-          if (whatsappDigits.length < 8) {
-            var errEl = document.getElementById('paymentWhatsappErr');
-            if (errEl) { errEl.textContent = 'Ingresá el número de WhatsApp (mín. 8 dígitos) para poder cobrar después.'; errEl.classList.remove('hidden'); }
-            document.getElementById('paymentWhatsapp').focus();
-            return;
-          }
+          _pendingPaymentMethod = method;
+          _selectedLibretaClienteForPayment = null;
+          var sectionEl = document.getElementById('paymentFiadoSection');
+          if (sectionEl) { sectionEl.classList.remove('hidden'); }
+          if (document.getElementById('paymentClientName')) document.getElementById('paymentClientName').value = '';
+          if (document.getElementById('paymentWhatsapp')) document.getElementById('paymentWhatsapp').value = '';
+          _cargarClientesPickerPago('paymentFiadoClientesList', 'paymentClientName', 'paymentWhatsapp');
+          lucide.createIcons();
+          return;
         }
-        document.getElementById('paymentWhatsappErr').classList.add('hidden');
-        completeSaleWithMethod(method, client, whatsappRaw || whatsappDigits);
-        document.getElementById('paymentClientName').value = '';
-        document.getElementById('paymentWhatsapp').value = '';
-        document.getElementById('cartClientName').value = '';
+        var errEl = document.getElementById('paymentWhatsappErr');
+        if (errEl) errEl.classList.add('hidden');
+        completeSaleWithMethod(method, '', '');
+        if (document.getElementById('cartClientName')) document.getElementById('cartClientName').value = '';
       };
     });
 
@@ -2106,6 +2128,8 @@
     // ============================================================
     var _libretalClienteActual = null; // { id, nombre, telefono }
     var _libretalDesdePago = null;     // { items, total, tipo } — datos del pago post-venta
+    var _selectedLibretaClienteForPayment = null; // cliente de libreta preseleccionado al cobrar
+    var _pendingPaymentMethod = null;             // método fiado/transf_pendiente en curso
 
     async function loadLibretaClientes() {
       if (!supabaseClient || !currentUser?.id) return { ok: false, data: [], sinTabla: false };
@@ -2370,6 +2394,73 @@
       var p = document.getElementById('libretalFiadoPrompt');
       p.classList.add('hidden'); p.classList.remove('flex');
       _libretalDesdePago = null;
+    };
+
+    // ── Picker de cliente al cobrar con fiado ────────────────────
+    async function _cargarClientesPickerPago(listElId, nameInputId, waInputId) {
+      var listEl = document.getElementById(listElId);
+      if (!listEl) return;
+      listEl.innerHTML = '<p class="text-white/40 text-xs text-center py-2">Cargando...</p>';
+      var result = await loadLibretaClientes();
+      var clientes = (result && result.ok) ? result.data : [];
+      _selectedLibretaClienteForPayment = null;
+      if (clientes.length === 0) {
+        listEl.innerHTML = '<p class="text-white/40 text-xs text-center py-2">Sin clientes en la libreta aún. Escribí el nombre abajo.</p>';
+      } else {
+        listEl.innerHTML = clientes.map(function (c) {
+          var safeName = (c.nombre || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+          var safeTel = (c.telefono || '').replace(/'/g, "\\'");
+          return '<button type="button" id="clientePicker_' + c.id + '" ' +
+            'onclick="window._elegirClienteParaPago(\'' + c.id + '\',\'' + safeName + '\',\'' + safeTel + '\',\'' + nameInputId + '\',\'' + waInputId + '\')" ' +
+            'class="cliente-picker-btn w-full glass rounded-lg px-3 py-2 flex items-center gap-2 border border-white/10 hover:border-[#22c55e]/40 touch-target active:scale-[0.98] transition-all text-left">' +
+            '<i data-lucide="user" class="w-3.5 h-3.5 text-[#86efac] shrink-0"></i>' +
+            '<span class="text-sm flex-1 truncate">' + (c.nombre || '').replace(/</g, '&lt;') + '</span>' +
+            (c.telefono ? '<span class="text-xs text-white/40 shrink-0">' + c.telefono + '</span>' : '') +
+            '</button>';
+        }).join('');
+        lucide.createIcons();
+      }
+    }
+
+    window._elegirClienteParaPago = function (clienteId, nombre, telefono, nameInputId, waInputId) {
+      _selectedLibretaClienteForPayment = { id: clienteId, nombre: nombre, telefono: telefono };
+      var nameEl = document.getElementById(nameInputId);
+      if (nameEl) nameEl.value = nombre;
+      var waEl = document.getElementById(waInputId);
+      if (waEl && telefono) waEl.value = telefono;
+      document.querySelectorAll('.cliente-picker-btn').forEach(function (b) {
+        b.classList.remove('border-[#22c55e]', 'bg-[#22c55e]/10');
+        b.classList.add('border-white/10');
+      });
+      var sel = document.getElementById('clientePicker_' + clienteId);
+      if (sel) { sel.classList.remove('border-white/10'); sel.classList.add('border-[#22c55e]', 'bg-[#22c55e]/10'); }
+    };
+
+    window._confirmarPagoFiado = function () {
+      var method = _pendingPaymentMethod;
+      if (!method) return;
+      var client = (document.getElementById('paymentClientName') && document.getElementById('paymentClientName').value) ? document.getElementById('paymentClientName').value.trim() : '';
+      var whatsappRaw = (document.getElementById('paymentWhatsapp') && document.getElementById('paymentWhatsapp').value) ? document.getElementById('paymentWhatsapp').value.trim() : '';
+      var errEl = document.getElementById('paymentWhatsappErr');
+      if (errEl) errEl.classList.add('hidden');
+      _pendingPaymentMethod = null;
+      completeSaleWithMethod(method, client, whatsappRaw);
+      if (document.getElementById('paymentClientName')) document.getElementById('paymentClientName').value = '';
+      if (document.getElementById('paymentWhatsapp')) document.getElementById('paymentWhatsapp').value = '';
+      if (document.getElementById('cartClientName')) document.getElementById('cartClientName').value = '';
+    };
+
+    window._confirmarCobroRapidoFiado = function () {
+      var method = _pendingPaymentMethod;
+      if (!method) return;
+      var clientName = (document.getElementById('cobroRapidoCliente') && document.getElementById('cobroRapidoCliente').value) ? document.getElementById('cobroRapidoCliente').value.trim() : '';
+      var whatsappRaw = (document.getElementById('cobroRapidoWhatsapp') && document.getElementById('cobroRapidoWhatsapp').value) ? document.getElementById('cobroRapidoWhatsapp').value.trim() : '';
+      var errEl = document.getElementById('cobroRapidoWhatsappErr');
+      if (errEl) errEl.classList.add('hidden');
+      _pendingPaymentMethod = null;
+      completeQuickSale(method, clientName, whatsappRaw).catch(function (err) {
+        console.warn('Cobro rápido fiado:', err && err.message ? err.message : err);
+      });
     };
 
     window._elegirClienteDesdePrompt = async function (clienteId) {
