@@ -1139,7 +1139,7 @@
     }
     function closeAllModals() {
       document.getElementById('ventasProductosModal') && (function () { var m = document.getElementById('ventasProductosModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
-      document.getElementById('ventasCobradasModal') && (function () { var m = document.getElementById('ventasCobradasModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
+      document.getElementById('ventasCobradasModal') && (function () { var m = document.getElementById('ventasCobradasModal'); m.classList.add('hidden'); })();
       document.getElementById('transaccionesModal') && (function () { var m = document.getElementById('transaccionesModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
       document.getElementById('paymentModal') && (function () { var m = document.getElementById('paymentModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
       document.getElementById('cobroRapidoModal') && (function () { var m = document.getElementById('cobroRapidoModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
@@ -1431,10 +1431,10 @@
       const footEl = document.getElementById('ventasCobradasFooter');
       if (listEl) {
         if (cobradas.length === 0) {
-          listEl.innerHTML = '<div class="ventas-cuaderno ventas-cuaderno--empty">Aún no hay ventas del día (caja) en este dispositivo.</div>';
+          listEl.innerHTML = '<div class="ventas-dia-empty">Aún no hay ventas del día (caja) en este dispositivo.</div>';
         } else {
           const fmt = (s) => s ? new Date(s).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : '';
-          var blocksHtml = cobradas.slice().reverse().map(function (t) {
+          listEl.innerHTML = cobradas.slice().reverse().map(function (t) {
             var meta = fmt(t.fechaHora) + ' · ' + (methodLabels[t.method] || t.method);
             var items = t.items || [];
             var itemsHtml = items.map(function (i) {
@@ -1442,14 +1442,13 @@
               var cant = i.cant || 0;
               var sub = Number(i.precio) * cant;
               var etiqueta = cant > 1 ? nombre + ' ×' + cant : nombre;
-              return '<div class="ventas-cuaderno-line"><span class="truncate min-w-0">' + etiqueta + '</span><span class="ventas-cuaderno-monto">$' + sub.toLocaleString('es-AR') + '</span></div>';
+              return '<div class="ventas-dia-row"><span class="ventas-dia-name">' + etiqueta + '</span><span class="ventas-dia-monto">$' + sub.toLocaleString('es-AR') + '</span></div>';
             }).join('');
             if (!itemsHtml) {
-              itemsHtml = '<div class="ventas-cuaderno-line"><span class="truncate min-w-0">Venta</span><span class="ventas-cuaderno-monto">$' + Number(t.total).toLocaleString('es-AR') + '</span></div>';
+              itemsHtml = '<div class="ventas-dia-row"><span class="ventas-dia-name">Venta</span><span class="ventas-dia-monto">$' + Number(t.total).toLocaleString('es-AR') + '</span></div>';
             }
-            return '<div class="ventas-cuaderno-bloque"><div class="ventas-cuaderno-meta">' + meta.replace(/</g, '&lt;') + '</div>' + itemsHtml + '</div>';
+            return '<div class="ventas-dia-meta-row">' + meta.replace(/</g, '&lt;') + '</div>' + itemsHtml;
           }).join('');
-          listEl.innerHTML = '<div class="ventas-cuaderno">' + blocksHtml + '</div>';
         }
       }
       if (footEl) {
@@ -1471,10 +1470,7 @@
         }
       }
       var modal = document.getElementById('ventasCobradasModal');
-      if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-      }
+      if (modal) modal.classList.remove('hidden');
       if (!state._restoringFromHistory) pushHistoryExtra({ modal: 'ventasCobradas' });
       try {
         if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
@@ -1509,7 +1505,7 @@
     document.getElementById('transaccionesOverlay').onclick = () => document.getElementById('closeTransacciones').click();
     document.getElementById('closeVentasCobradas').onclick = function () {
       var m = document.getElementById('ventasCobradasModal');
-      if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+      if (m) m.classList.add('hidden');
       if (!state._restoringFromHistory && history.state && history.state.modal === 'ventasCobradas') {
         var nv = Object.assign({}, history.state);
         delete nv.modal;

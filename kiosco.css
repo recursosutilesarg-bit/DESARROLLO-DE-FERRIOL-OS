@@ -1318,80 +1318,126 @@ body[data-panel="inventory"] #panel-inventory {
   }
 }
 
-/* Lista "Ventas del día": hoja de cuaderno con renglones */
-#ventasCobradasModal .ventas-cuaderno-list {
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  border-radius: 0.45rem;
+/* Modal Ventas del día: pantalla completa, renglones compactos borde a borde (como lista de productos) */
+#ventasCobradasModal .ventas-dia-sheet {
+  background: linear-gradient(165deg, #020b05 0%, #052e16 48%, #041208 100%);
+  padding-bottom: max(0.65rem, env(safe-area-inset-bottom, 0));
 }
 
-#ventasCobradasModal .ventas-cuaderno {
-  --cuaderno-line: 1.35rem;
-  font-family: "Caveat", cursive;
-  font-size: 1.2rem;
-  font-weight: 600;
-  line-height: var(--cuaderno-line);
-  color: #1e293b;
-  background-color: #faf6e8;
-  background-image:
-    linear-gradient(
-      90deg,
-      transparent 0,
-      transparent 10px,
-      rgba(200, 90, 90, 0.45) 10px,
-      rgba(200, 90, 90, 0.45) 12px,
-      transparent 12px
-    ),
-    repeating-linear-gradient(
-      transparent 0,
-      transparent calc(var(--cuaderno-line) - 1px),
-      rgba(90, 120, 190, 0.2) calc(var(--cuaderno-line) - 1px),
-      rgba(90, 120, 190, 0.2) var(--cuaderno-line)
-    );
-  background-size: 100% 100%, 100% var(--cuaderno-line);
-  background-attachment: local, local;
-  box-shadow: inset 0 0 0 1px rgba(30, 41, 59, 0.08), 0 1px 3px rgba(0, 0, 0, 0.12);
-  border-radius: 0.4rem;
-  padding: 0.4rem 0.55rem 0.55rem 0.85rem;
-  min-height: 3.5rem;
-}
-
-#ventasCobradasModal .ventas-cuaderno--empty {
+#ventasCobradasModal .ventas-dia-topbar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-weight: 500;
-  color: #64748b;
-  font-size: 1.35rem;
-  padding: 1.25rem 0.75rem;
-}
-
-#ventasCobradasModal .ventas-cuaderno-bloque + .ventas-cuaderno-bloque {
-  margin-top: 0.15rem;
-  padding-top: 0.2rem;
-  border-top: 1px dashed rgba(90, 120, 190, 0.28);
-}
-
-#ventasCobradasModal .ventas-cuaderno-meta {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #64748b;
-  line-height: var(--cuaderno-line);
-  padding-bottom: 0.05rem;
-  margin-bottom: 0.05rem;
-}
-
-#ventasCobradasModal .ventas-cuaderno-line {
-  display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  gap: 0.45rem;
-  min-height: var(--cuaderno-line);
-  font-size: 1.15rem;
+  gap: 0.75rem;
+  padding: 0.55rem 1rem;
+  padding-top: max(0.55rem, env(safe-area-inset-top, 0));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
 }
 
-#ventasCobradasModal .ventas-cuaderno-line .ventas-cuaderno-monto {
-  font-variant-numeric: tabular-nums;
+#ventasCobradasModal .ventas-dia-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  min-width: 0;
+}
+
+#ventasCobradasModal .ventas-dia-hint {
+  margin: 0;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.4);
+  padding: 0.3rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   flex-shrink: 0;
-  color: #0f172a;
+}
+
+#ventasCobradasModal .ventas-dia-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+#ventasCobradasModal .ventas-dia-meta-row {
+  padding: 0.28rem 1rem;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.38);
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.12);
+}
+
+#ventasCobradasModal .ventas-dia-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.38rem 1rem;
+  min-height: 36px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  -webkit-tap-highlight-color: transparent;
+}
+
+#ventasCobradasModal .ventas-dia-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+#ventasCobradasModal .ventas-dia-monto {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #86efac;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+#ventasCobradasModal .ventas-dia-empty {
+  padding: 2rem 1.25rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.48);
+}
+
+#ventasCobradasModal .ventas-dia-footer {
+  flex-shrink: 0;
+  padding: 0.5rem 1rem;
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0) + 0.35rem);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.72rem;
+}
+
+@media (min-width: 768px) {
+  #ventasCobradasModal .ventas-dia-row {
+    padding: 0.45rem 1.5rem;
+    min-height: 40px;
+  }
+  #ventasCobradasModal .ventas-dia-meta-row {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  #ventasCobradasModal .ventas-dia-name {
+    font-size: 0.88rem;
+  }
+  #ventasCobradasModal .ventas-dia-monto {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 767px) {
+  #ventasCobradasModal .ventas-dia-row {
+    min-height: 44px;
+  }
 }
