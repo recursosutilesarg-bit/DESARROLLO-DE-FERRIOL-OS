@@ -34,7 +34,7 @@
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="kiosco.css?v=20260422f">
+  <link rel="stylesheet" href="kiosco.css?v=20260422g">
 </head>
 <body class="relative">
   <!-- Banner instalar como app (PWA) — visible al abrir el link -->
@@ -602,6 +602,10 @@
             <i data-lucide="user-plus" class="w-4 h-4"></i> Nuevo
           </button>
         </div>
+        <div class="flex gap-2 px-3 py-2 border-b border-white/07">
+          <button type="button" id="libretalFiltroDeuda" onclick="window._setLibretaFiltroLista('deuda')" class="libreta-filtro-chip flex-1 rounded-xl py-2 text-xs font-semibold touch-target border border-white/15">Con deuda</button>
+          <button type="button" id="libretalFiltroTodos" onclick="window._setLibretaFiltroLista('todos')" class="libreta-filtro-chip flex-1 rounded-xl py-2 text-xs font-semibold touch-target border border-white/15">Todos</button>
+        </div>
         <!-- Lista edge-to-edge sin padding lateral -->
         <div id="libretalClientesList">
           <p class="text-white/50 text-center py-8">Cargando...</p>
@@ -615,9 +619,14 @@
           <button onclick="window._switchCajaTab('libreta')" class="caja-back-btn touch-target">
             <i data-lucide="chevron-left" class="w-5 h-5"></i>
           </button>
-          <div class="flex-1 min-w-0">
-            <p id="libretalClienteNombre" class="font-bold text-sm truncate leading-tight">Cliente</p>
-            <p id="libretalClienteTel" class="text-xs text-white/40 truncate leading-tight"></p>
+          <div class="flex-1 min-w-0 flex items-start gap-1">
+            <div class="min-w-0 flex-1">
+              <p id="libretalClienteNombre" class="font-bold text-sm truncate leading-tight">Cliente</p>
+              <p id="libretalClienteTel" class="text-xs text-white/40 truncate leading-tight"></p>
+            </div>
+            <button type="button" onclick="window._abrirEditarClienteLibreta()" class="shrink-0 rounded-lg p-2 border border-white/15 text-white/70 hover:text-white hover:border-[#22c55e]/40 touch-target" title="Editar cliente">
+              <i data-lucide="pencil" class="w-4 h-4"></i>
+            </button>
           </div>
           <div class="text-right shrink-0">
             <p class="text-xs text-white/40">Adeudado</p>
@@ -662,6 +671,29 @@
         <div class="flex gap-2 mt-5">
           <button onclick="window._cerrarModalLibreta('libretalNuevoClienteModal')" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cancelar</button>
           <button onclick="window._guardarNuevoClienteLibreta()" class="flex-1 btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target">Guardar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Editar cliente en libreta -->
+    <div id="libretalEditarClienteModal" class="fixed inset-0 z-[97] hidden items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="window._cerrarModalLibreta('libretalEditarClienteModal')"></div>
+      <div class="relative glass-strong rounded-2xl p-5 w-full max-w-sm scale-in">
+        <h3 class="font-bold text-lg mb-4 text-center">Editar cliente</h3>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs text-white/60 mb-1">Nombre</label>
+            <input type="text" id="libretalEditNombre" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+          </div>
+          <div>
+            <label class="block text-xs text-white/60 mb-1">WhatsApp</label>
+            <input type="tel" id="libretalEditTel" placeholder="Ej: 549111234567" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+          </div>
+        </div>
+        <p id="libretalEditClienteErr" class="text-red-300 text-xs mt-2 hidden"></p>
+        <div class="flex gap-2 mt-5">
+          <button onclick="window._cerrarModalLibreta('libretalEditarClienteModal')" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cancelar</button>
+          <button onclick="window._guardarEditarClienteLibreta()" class="flex-1 btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target">Guardar</button>
         </div>
       </div>
     </div>
@@ -1432,7 +1464,7 @@
   </div>
   </div><!-- /#appWrap -->
   <script src="kiosco-config.js"></script>
-  <script defer src="kiosco-app.js?v=20260422f"></script>
+  <script defer src="kiosco-app.js?v=20260422g"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>
