@@ -9,9 +9,8 @@
     // ALTER TABLE ventas ENABLE ROW LEVEL SECURITY; CREATE POLICY "ventas_policy" ON ventas FOR ALL USING (auth.uid() = user_id);
     // CREATE TABLE clientes ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE, nombre text, telefono text, email text, direccion text, notas text, created_at timestamptz DEFAULT now() );
     // ALTER TABLE clientes ENABLE ROW LEVEL SECURITY; CREATE POLICY "clientes_policy" ON clientes FOR ALL USING (auth.uid() = user_id);
-    // Saldos a cobrar (fiado / transf. pendiente) — para no perder datos al cambiar de dispositivo:
-    // CREATE TABLE saldos_acobrar ( id text NOT NULL, user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE, client_name text, whatsapp text, items jsonb DEFAULT '[]'::jsonb, total numeric DEFAULT 0, method text, paid boolean DEFAULT false, created_at timestamptz DEFAULT now(), PRIMARY KEY (user_id, id) );
-    // ALTER TABLE saldos_acobrar ENABLE ROW LEVEL SECURITY; CREATE POLICY "saldos_acobrar_policy" ON saldos_acobrar FOR ALL USING (auth.uid() = user_id);
+    // Fiados y cuentas corrientes: Caja → Libreta (libreta_clientes / libreta_items en Supabase).
+    // Tabla legacy saldos_acobrar: ya no la usa la app; podés ignorarla o borrarla en Supabase si no la necesitás.
     // Notificaciones del admin a los kiosqueros:
     // CREATE TABLE notifications ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now(), message text NOT NULL );
     // ALTER TABLE notifications ENABLE ROW LEVEL SECURITY; CREATE POLICY "notifications_select" ON notifications FOR SELECT TO authenticated USING (true); CREATE POLICY "notifications_insert" ON notifications FOR INSERT TO authenticated WITH CHECK (true);
@@ -22,11 +21,9 @@
     // SELECT (exportar):
     //   CREATE POLICY "super_select_products" ON products FOR SELECT USING ((SELECT role FROM profiles WHERE id = auth.uid()) = 'super');
     //   CREATE POLICY "super_select_clientes" ON clientes FOR SELECT USING ((SELECT role FROM profiles WHERE id = auth.uid()) = 'super');
-    //   CREATE POLICY "super_select_saldos" ON saldos_acobrar FOR SELECT USING ((SELECT role FROM profiles WHERE id = auth.uid()) = 'super');
     // INSERT y DELETE (importar/restaurar):
     //   CREATE POLICY "super_all_products" ON products FOR ALL USING ((SELECT role FROM profiles WHERE id = auth.uid()) = 'super');
     //   CREATE POLICY "super_all_clientes" ON clientes FOR ALL USING ((SELECT role FROM profiles WHERE id = auth.uid()) = 'super');
-    //   CREATE POLICY "super_all_saldos" ON saldos_acobrar FOR ALL USING ((SELECT role FROM profiles WHERE id = auth.uid()) = 'super');
     // (Si ya tenés "super_select_*", podés agregar solo las de ALL para no duplicar.)
     var _cfg = window.FERRIOL_CONFIG || {};
     const SUPABASE_URL = _cfg.SUPABASE_URL || '';
@@ -66,18 +63,6 @@
       a.download = filename;
       a.click();
       URL.revokeObjectURL(a.href);
-    }
-    function exportDeudoresCSV() {
-      var list = _dataCache.saldosACobrar || [];
-      var header = 'Cliente;Estado;Fecha;Método;Total;WhatsApp;Productos';
-      var rows = list.map(function (s) {
-        var estado = s.paid ? 'Cobrado' : 'Pendiente';
-        var fecha = (s.createdAt ? new Date(s.createdAt).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : '—');
-        var productos = (s.items || []).map(function (i) { return (i.nombre || '') + ' x' + (i.cant || 0) + ' $' + (i.precio || 0); }).join(' | ');
-        return escapeCSV(s.clientName || '') + ';' + escapeCSV(estado) + ';' + escapeCSV(fecha) + ';' + escapeCSV(s.method === 'fiado' ? 'Fiado' : 'Transf. pendiente') + ';' + (s.total || 0) + ';' + escapeCSV(s.whatsapp || '') + ';' + escapeCSV(productos);
-      });
-      var csv = header + '\r\n' + rows.join('\r\n');
-      downloadCSV('historial_deudores_' + new Date().toISOString().slice(0, 10) + '.csv', csv);
     }
     function exportProductosCSV() {
       var prods = getData().products || {};
@@ -135,7 +120,7 @@
     }
 
     let currentUser = null;
-    let _dataCache = { products: {}, ventas: { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 }, transacciones: 0, deudores: [], saldosACobrar: [], lastCierreDate: null };
+    let _dataCache = { products: {}, ventas: { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 }, transacciones: 0, deudores: [], lastCierreDate: null };
 
     const STORAGE_KEY_PREFIX = 'ferriol_data_';
     const LAST_QUICK_PAYMENT_KEY = 'ferriol_last_quick_payment';
@@ -160,7 +145,6 @@
           ventas: _dataCache.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 },
           transacciones: _dataCache.transacciones || 0,
           deudores: _dataCache.deudores || [],
-          saldosACobrar: _dataCache.saldosACobrar || [],
           lastCierreDate: _dataCache.lastCierreDate || null,
           transaccionesList: (typeof state !== 'undefined' && state.transaccionesList) ? state.transaccionesList : []
         }));
@@ -177,23 +161,6 @@
             supabaseClient.from('products').select('*').eq('user_id', uid),
             supabaseClient.from('caja').select('*').eq('user_id', uid).maybeSingle()
           ]);
-          var saldosList = [];
-          try {
-            var saldosRes = await supabaseClient.from('saldos_acobrar').select('*').eq('user_id', uid).order('created_at', { ascending: false });
-            if (saldosRes.data && Array.isArray(saldosRes.data)) {
-              saldosList = saldosRes.data.map(s => ({
-                id: s.id,
-                clientName: s.client_name || '',
-                whatsapp: s.whatsapp || '',
-                items: s.items || [],
-                total: Number(s.total) || 0,
-                method: s.method || 'fiado',
-                paid: !!s.paid,
-                createdAt: s.created_at || null
-              }));
-            }
-          } catch (_) {}
-          if (saldosList.length === 0 && prevLocal && prevLocal.saldosACobrar && prevLocal.saldosACobrar.length > 0) saldosList = prevLocal.saldosACobrar;
           const products = {};
           (prodsRes.data || []).forEach(p => {
             products[p.codigo] = { nombre: p.nombre, codigo: p.codigo, precio: p.precio, stock: p.stock, stockInicial: p.stock_inicial || p.stock, costo: p.costo != null ? Number(p.costo) : 0 };
@@ -208,7 +175,6 @@
             ventas: caja ? { efectivo: Number(caja.efectivo), tarjeta: Number(caja.tarjeta), transferencia: Number(caja.transferencia), fiado: Number(caja.fiado), transferencia_pendiente: Number(caja.transferencia_pendiente || 0) } : { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 },
             transacciones: caja ? (caja.transacciones || 0) : 0,
             deudores: _dataCache.deudores || [],
-            saldosACobrar: saldosList,
             lastCierreDate: (prevLocal && prevLocal.lastCierreDate) ? prevLocal.lastCierreDate : (_dataCache.lastCierreDate || null)
           };
           restoreTodayFromLocalStorage();
@@ -222,7 +188,6 @@
         _dataCache.ventas = local.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 };
         _dataCache.transacciones = local.transacciones || 0;
         _dataCache.deudores = local.deudores || [];
-        _dataCache.saldosACobrar = local.saldosACobrar || [];
         _dataCache.lastCierreDate = local.lastCierreDate || null;
         var today = new Date().toISOString().slice(0, 10);
         if (local.transaccionesList && Array.isArray(local.transaccionesList) && local.lastCierreDate === today && state) state.transaccionesList = local.transaccionesList;
@@ -302,35 +267,14 @@
             if (ins.error) console.warn('caja (insert):', ins.error.message || ins.error, '— Si falta una columna, en Supabase: ALTER TABLE caja ADD COLUMN IF NOT EXISTS transferencia_pendiente numeric DEFAULT 0;');
           }
         }
-        if (updates.saldosACobrar !== undefined) {
-          var list = updates.saldosACobrar || [];
-          await supabaseClient.from('saldos_acobrar').delete().eq('user_id', uid);
-          if (list.length > 0) {
-            var rows = list.map(function (s) {
-              return {
-                user_id: uid,
-                id: String(s.id || ''),
-                client_name: s.clientName || '',
-                whatsapp: s.whatsapp || '',
-                items: s.items || [],
-                total: Number(s.total) || 0,
-                method: s.method || 'fiado',
-                paid: !!s.paid,
-                created_at: s.createdAt || new Date().toISOString()
-              };
-            });
-            await supabaseClient.from('saldos_acobrar').insert(rows);
-          }
-        }
       } catch (e) { console.warn('Supabase save failed, data saved in this device (localStorage):', e); }
     }
 
     function getData() {
-      if (!currentUser?.id) return { products: {}, ventas: { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 }, transacciones: 0, deudores: [], saldosACobrar: [], lastCierreDate: null };
+      if (!currentUser?.id) return { products: {}, ventas: { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 }, transacciones: 0, deudores: [], lastCierreDate: null };
       const d = _dataCache;
       d.ventas = d.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 };
       d.deudores = d.deudores || [];
-      d.saldosACobrar = d.saldosACobrar || [];
       return d;
     }
 
@@ -363,7 +307,6 @@
       cajaTab: 'hub',
       _restoringFromHistory: false,
       _suppressCajaHistoryPush: false,
-      historialTab: 'ventas',
       historialFilter: 'hoy',
       superSection: 'negocios'  // negocios | ajustes | notificaciones | mas
     };
@@ -667,20 +610,6 @@
         total,
         fechaHora
       });
-      if (method === 'fiado' || method === 'transferencia_pendiente') {
-        var list = _dataCache.saldosACobrar || [];
-        list.push({
-          id: Date.now() + '_' + Math.random().toString(36).slice(2),
-          clientName: (clientName || '').trim() || 'Cliente',
-          whatsapp: (whatsapp || '').trim() || '',
-          items: [...items],
-          total: total,
-          method: method,
-          paid: false,
-          createdAt: fechaHora
-        });
-        _dataCache.saldosACobrar = list;
-      }
       if (supabaseClient && currentUser?.id) {
         try {
           var ventaRes = await supabaseClient.from('ventas').insert({
@@ -815,135 +744,7 @@
           if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
         } catch (_) {}
       }
-      renderSaldosACobrar();
       renderFrequentProducts();
-    }
-    function renderSaldosACobrar() {
-      var list = (_dataCache.saldosACobrar || []).filter(function (s) { return !s.paid; });
-      var listEl = document.getElementById('saldosACobrarList');
-      var emptyEl = document.getElementById('saldosACobrarEmpty');
-      if (!listEl) return;
-      if (list.length === 0) {
-        listEl.innerHTML = '';
-        if (emptyEl) { emptyEl.classList.remove('hidden'); }
-        return;
-      }
-      if (emptyEl) emptyEl.classList.add('hidden');
-      var methodLabels = { fiado: 'Fiado', transferencia_pendiente: 'Transf. pendiente' };
-      listEl.innerHTML = list.map(function (s) {
-        var itemsText = (s.items || []).map(function (i) { return (i.nombre || '') + ' x' + (i.cant || 0) + ' $' + (i.precio || 0).toLocaleString('es-AR'); }).join(', ');
-        var tel = (s.whatsapp || '').replace(/\D/g, '');
-        var msg = (currentUser && currentUser.whatsappMessage) ? currentUser.whatsappMessage : DEFAULT_WHATSAPP;
-        msg = msg.replace(/\{cliente\}/gi, s.clientName || 'Cliente').replace(/\{monto\}/gi, (s.total || 0));
-        var waUrl = tel.length >= 8 ? ('https://wa.me/' + tel + '?text=' + encodeURIComponent(msg)) : '#';
-        return '<div class="glass rounded-xl p-4 border border-white/10" data-saldo-id="' + (s.id || '').replace(/"/g, '&quot;') + '">' +
-          '<div class="flex justify-between items-start gap-2 flex-wrap">' +
-          '<div class="min-w-0 flex-1">' +
-          '<p class="font-medium truncate">' + (s.clientName || 'Cliente').replace(/</g, '&lt;') + '</p>' +
-          '<p class="text-xs text-white/60 mt-0.5">' + (methodLabels[s.method] || s.method) + (s.whatsapp ? ' · ' + s.whatsapp.replace(/</g, '&lt;') : '') + '</p>' +
-          '<p class="text-xs text-white/50 mt-1 truncate" title="' + itemsText.replace(/"/g, '&quot;') + '">' + itemsText.replace(/</g, '&lt;').slice(0, 60) + (itemsText.length > 60 ? '…' : '') + '</p>' +
-          '<p class="font-semibold text-[#f87171] mt-1">$' + (s.total || 0).toLocaleString('es-AR') + '</p>' +
-          '</div>' +
-          '<div class="flex gap-2 shrink-0">' +
-          (tel.length >= 8 ? '<a href="' + waUrl + '" target="_blank" rel="noopener" class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target inline-flex items-center gap-1" title="Enviar WhatsApp"><i data-lucide="message-circle" class="w-4 h-4"></i></a>' : '') +
-          '<button type="button" class="saldo-pagar-btn btn-glow rounded-xl py-2 px-3 text-sm font-medium touch-target" data-id="' + (s.id || '').replace(/"/g, '&quot;') + '">Pagado</button>' +
-          '</div></div></div></div>';
-      }).join('');
-      listEl.querySelectorAll('.saldo-pagar-btn').forEach(function (btn) {
-        btn.onclick = function () {
-          var id = btn.dataset.id;
-          var list = _dataCache.saldosACobrar || [];
-          var idx = list.findIndex(function (x) { return x.id === id; });
-          if (idx >= 0) { list[idx].paid = true; setData({ saldosACobrar: list }); renderSaldosACobrar(); updateDashboard(); if (document.getElementById('panel-historial') && !document.getElementById('panel-historial').classList.contains('hidden') && state.historialTab === 'deudores') renderDeudoresPanel(); }
-        };
-      });
-      lucide.createIcons();
-    }
-    var methodLabelsDeudores = { fiado: 'Fiado', transferencia_pendiente: 'Transf. pendiente' };
-    function renderDeudoresPanel() {
-      var list = _dataCache.saldosACobrar || [];
-      var pendientes = list.filter(function (s) { return !s.paid; });
-      var cobrados = list.filter(function (s) { return s.paid; });
-      var pendientesEl = document.getElementById('deudoresPendientesList');
-      var cobradosEl = document.getElementById('deudoresCobradosList');
-      var pendientesEmpty = document.getElementById('deudoresPendientesEmpty');
-      var cobradosEmpty = document.getElementById('deudoresCobradosEmpty');
-      if (pendientesEl) {
-        if (pendientes.length === 0) {
-          pendientesEl.innerHTML = '';
-          if (pendientesEmpty) pendientesEmpty.classList.remove('hidden');
-        } else {
-          if (pendientesEmpty) pendientesEmpty.classList.add('hidden');
-          var msg = (currentUser && currentUser.whatsappMessage) ? currentUser.whatsappMessage : DEFAULT_WHATSAPP;
-          pendientesEl.innerHTML = pendientes.map(function (s) {
-            var nombre = (s.clientName || '').trim() || 'Sin nombre';
-            nombre = nombre.replace(/</g, '&lt;');
-            var tel = (s.whatsapp || '').replace(/\D/g, '');
-            var waMsg = msg.replace(/\{cliente\}/gi, s.clientName || 'Cliente').replace(/\{monto\}/gi, (s.total || 0));
-            var waUrl = tel.length >= 8 ? ('https://wa.me/' + tel + '?text=' + encodeURIComponent(waMsg)) : '#';
-            return '<div class="flex items-center justify-between gap-2 py-2 px-2 rounded-lg border border-white/10 hover:bg-white/5" data-saldo-id="' + (s.id || '').replace(/"/g, '&quot;') + '">' +
-              '<div class="min-w-0 flex-1 flex items-center gap-2">' +
-              '<span class="font-medium truncate">' + nombre + '</span>' +
-              '<span class="font-semibold text-[#f87171] shrink-0">$' + (s.total || 0).toLocaleString('es-AR') + '</span>' +
-              '</div>' +
-              '<div class="flex gap-1 shrink-0">' +
-              (tel.length >= 8 ? '<a href="' + waUrl + '" target="_blank" rel="noopener" class="btn-neomorphic rounded-lg p-1.5 touch-target inline-flex" title="WhatsApp"><i data-lucide="message-circle" class="w-4 h-4"></i></a>' : '') +
-              '<button type="button" class="deudor-pagar-btn btn-glow rounded-lg py-1.5 px-2 text-xs font-medium touch-target" data-id="' + (s.id || '').replace(/"/g, '&quot;') + '">Pagado</button>' +
-              '</div></div>';
-          }).join('');
-          pendientesEl.querySelectorAll('.deudor-pagar-btn').forEach(function (btn) {
-            btn.onclick = function () {
-              var id = btn.dataset.id;
-              var arr = _dataCache.saldosACobrar || [];
-              var idx = arr.findIndex(function (x) { return x.id === id; });
-              if (idx >= 0) { arr[idx].paid = true; setData({ saldosACobrar: arr }); renderSaldosACobrar(); updateDashboard(); renderDeudoresPanel(); }
-            };
-          });
-        }
-      }
-      if (cobradosEl) {
-        if (cobrados.length === 0) {
-          cobradosEl.innerHTML = '';
-          if (cobradosEmpty) cobradosEmpty.classList.remove('hidden');
-        } else {
-          if (cobradosEmpty) cobradosEmpty.classList.add('hidden');
-          cobradosEl.innerHTML = cobrados.map(function (s) {
-            var nombre = (s.clientName || '').trim() || 'Sin nombre';
-            nombre = nombre.replace(/</g, '&lt;');
-            return '<button type="button" class="deudor-cobrado-card w-full text-left flex items-center justify-between gap-2 py-2 px-2 rounded-lg border border-white/10 hover:bg-white/5 active:bg-[#dc2626]/20 touch-target transition-colors" data-saldo-id="' + (s.id || '').replace(/"/g, '&quot;') + '">' +
-              '<span class="font-medium truncate">' + nombre + '</span>' +
-              '<span class="font-semibold text-green-400 shrink-0">$' + (s.total || 0).toLocaleString('es-AR') + '</span>' +
-              '</button>';
-          }).join('');
-          cobradosEl.querySelectorAll('.deudor-cobrado-card').forEach(function (btn) {
-            btn.onclick = function () {
-              var id = btn.dataset.saldoId;
-              var saldo = (_dataCache.saldosACobrar || []).find(function (x) { return x.id === id; });
-              if (saldo) openDetalleDeudorModal(saldo);
-            };
-          });
-        }
-      }
-      lucide.createIcons();
-    }
-    function openDetalleDeudorModal(saldo) {
-      var content = document.getElementById('detalleDeudorModalContent');
-      if (!content) return;
-      var fecha = (saldo.createdAt ? new Date(saldo.createdAt).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : '—');
-      var items = (saldo.items || []).map(function (i) {
-        var subtotal = (i.precio || 0) * (i.cant || 0);
-        return '<li class="flex justify-between py-1 border-b border-white/10">' +
-          '<span>' + (i.nombre || '—').replace(/</g, '&lt;') + ' x ' + (i.cant || 0) + '</span>' +
-          '<span>$' + subtotal.toLocaleString('es-AR') + '</span></li>';
-      }).join('');
-      content.innerHTML = '<p><span class="text-white/50">Cliente:</span> ' + (saldo.clientName || '—').replace(/</g, '&lt;') + '</p>' +
-        '<p><span class="text-white/50">Fecha:</span> ' + fecha + '</p>' +
-        '<p><span class="text-white/50">Método:</span> ' + (methodLabelsDeudores[saldo.method] || saldo.method) + '</p>' +
-        '<p><span class="text-white/50">Total:</span> <strong class="text-[#f87171]">$' + (saldo.total || 0).toLocaleString('es-AR') + '</strong></p>' +
-        '<div class="pt-2"><p class="text-white/70 mb-2">Productos:</p><ul class="space-y-0">' + items + '</ul></div>';
-      document.getElementById('detalleDeudorModal').classList.remove('hidden');
-      document.getElementById('detalleDeudorModal').classList.add('flex');
-      lucide.createIcons();
     }
     function openDetalleVentaModal(v) {
       var content = document.getElementById('detalleVentaModalContent');
@@ -968,9 +769,6 @@
     document.getElementById('detalleVentaModalClose').onclick = function () { document.getElementById('detalleVentaModal').classList.add('hidden'); document.getElementById('detalleVentaModal').classList.remove('flex'); };
     document.getElementById('detalleVentaModalCloseBtn').onclick = function () { document.getElementById('detalleVentaModal').classList.add('hidden'); document.getElementById('detalleVentaModal').classList.remove('flex'); };
     document.getElementById('detalleVentaModalOverlay').onclick = function () { document.getElementById('detalleVentaModal').classList.add('hidden'); document.getElementById('detalleVentaModal').classList.remove('flex'); };
-    document.getElementById('detalleDeudorModalClose').onclick = function () { document.getElementById('detalleDeudorModal').classList.add('hidden'); document.getElementById('detalleDeudorModal').classList.remove('flex'); };
-    document.getElementById('detalleDeudorModalCloseBtn').onclick = function () { document.getElementById('detalleDeudorModal').classList.add('hidden'); document.getElementById('detalleDeudorModal').classList.remove('flex'); };
-    document.getElementById('detalleDeudorModalOverlay').onclick = function () { document.getElementById('detalleDeudorModal').classList.add('hidden'); document.getElementById('detalleDeudorModal').classList.remove('flex'); };
     function getFrequentProductsToday(maxItems) {
       var list = state.transaccionesList || [];
       var agg = {};
@@ -1138,20 +936,6 @@
         };
       });
       var fechaHora = new Date().toISOString();
-      if (method === 'fiado' || method === 'transferencia_pendiente') {
-        var list = _dataCache.saldosACobrar || [];
-        list.push({
-          id: Date.now() + '_' + Math.random().toString(36).slice(2),
-          clientName: (clientName || '').trim() || 'Cliente',
-          whatsapp: (whatsapp || '').trim() || '',
-          items: items,
-          total: total,
-          method: method,
-          paid: false,
-          createdAt: fechaHora
-        });
-        _dataCache.saldosACobrar = list;
-      }
       state.transaccionesList.push({
         id: Date.now(),
         method: method,
@@ -1308,7 +1092,6 @@
       document.getElementById('cobroRapidoModal') && (function () { var m = document.getElementById('cobroRapidoModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
       document.getElementById('renovarModal') && (function () { var m = document.getElementById('renovarModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
       document.getElementById('detalleVentaModal') && (function () { var m = document.getElementById('detalleVentaModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
-      document.getElementById('detalleDeudorModal') && (function () { var m = document.getElementById('detalleDeudorModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
       var cartPanel = document.getElementById('cartPanel');
       var cartDrawer = document.getElementById('cartDrawer');
       if (cartPanel) cartPanel.classList.remove('translate-x-0');
@@ -1384,7 +1167,6 @@
         state._suppressCajaHistoryPush = false;
       }
       if (name === 'historial') {
-        switchHistorialTab('ventas');
         renderHistorial(state.historialFilter || 'hoy');
       }
       if (name === 'clientes') loadClientes().then(renderClientes);
@@ -1715,24 +1497,6 @@
       var btn = document.getElementById('historialFiltroBtn');
       if (dd && !dd.classList.contains('hidden') && btn && !dd.contains(e.target) && !btn.contains(e.target)) dd.classList.add('hidden');
     });
-    function switchHistorialTab(tabName) {
-      state.historialTab = tabName;
-      var ventasWrap = document.getElementById('historialVentasWrap');
-      var deudoresWrap = document.getElementById('historialDeudoresWrap');
-      document.querySelectorAll('.historial-tab-btn').forEach(function (btn) {
-        var isActive = btn.dataset.tab === tabName;
-        btn.className = 'historial-tab-btn px-3 py-1.5 rounded-xl text-sm font-medium transition-all touch-target ' + (isActive ? 'bg-[#dc2626]/30 border border-[#dc2626]/50' : 'glass border border-white/10');
-      });
-      if (ventasWrap) ventasWrap.classList.toggle('hidden', tabName !== 'ventas');
-      if (deudoresWrap) deudoresWrap.classList.toggle('hidden', tabName !== 'deudores');
-      if (tabName === 'ventas') renderHistorial(state.historialFilter || 'hoy');
-      if (tabName === 'deudores') renderDeudoresPanel();
-      lucide.createIcons();
-    }
-    document.querySelectorAll('.historial-tab-btn').forEach(function (btn) {
-      btn.onclick = function () { switchHistorialTab(btn.dataset.tab); };
-    });
-
     let clientesCache = [];
     async function loadClientes() {
       if (!supabaseClient || !currentUser?.id) return [];
@@ -3055,7 +2819,6 @@
     };
     // ============================================================
 
-    document.getElementById('exportDeudoresCSVBtn').onclick = function () { exportDeudoresCSV(); lucide.createIcons(); };
     document.getElementById('exportProductosCSVBtn').onclick = function () { exportProductosCSV(); lucide.createIcons(); };
     document.getElementById('exportVentasCSVBtn').onclick = function () { exportVentasCSV().then(function () { lucide.createIcons(); }); };
     document.getElementById('exportClientesCSVBtn').onclick = function () { exportClientesCSV().then(function () { lucide.createIcons(); }); };
@@ -3578,7 +3341,7 @@ async function showApp() {
       currentUser = null;
       state.cart = [];
       state.transaccionesList = [];
-      _dataCache = { products: {}, ventas: { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 }, transacciones: 0, deudores: [] };
+      _dataCache = { products: {}, ventas: { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 }, transacciones: 0, deudores: [], lastCierreDate: null };
       document.getElementById('appWrap').classList.add('hidden');
       document.getElementById('loginScreen').classList.remove('hidden');
       document.getElementById('loginPassword').value = '';
@@ -3623,7 +3386,6 @@ async function showApp() {
         products: d.products || {},
         ventas: d.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0 },
         transacciones: d.transacciones || 0,
-        saldosACobrar: d.saldosACobrar || [],
         clientes: clientesExport,
         lastCierreDate: d.lastCierreDate || null,
         transaccionesList: (state && state.transaccionesList) ? state.transaccionesList : []
@@ -3635,7 +3397,7 @@ async function showApp() {
       a.click();
       URL.revokeObjectURL(a.href);
       var msg = document.getElementById('backupMessage');
-      if (msg) { msg.textContent = 'Copia exportada (productos, clientes, deudas). Guardá el archivo en un lugar seguro.'; msg.classList.remove('hidden'); msg.className = 'text-sm mt-2 text-green-400'; setTimeout(function () { msg.classList.add('hidden'); }, 4000); }
+      if (msg) { msg.textContent = 'Copia exportada (productos, clientes, caja del día). Guardá el archivo en un lugar seguro.'; msg.classList.remove('hidden'); msg.className = 'text-sm mt-2 text-green-400'; setTimeout(function () { msg.classList.add('hidden'); }, 4000); }
       lucide.createIcons();
     }
     function importBackup(file) {
@@ -3649,7 +3411,6 @@ async function showApp() {
           if (backup.products && typeof backup.products === 'object') _dataCache.products = backup.products;
           if (backup.ventas && typeof backup.ventas === 'object') _dataCache.ventas = backup.ventas;
           if (backup.transacciones !== undefined) _dataCache.transacciones = backup.transacciones;
-          if (backup.saldosACobrar && Array.isArray(backup.saldosACobrar)) _dataCache.saldosACobrar = backup.saldosACobrar;
           if (backup.lastCierreDate !== undefined) _dataCache.lastCierreDate = backup.lastCierreDate;
           if (backup.transaccionesList && Array.isArray(backup.transaccionesList) && state) state.transaccionesList = backup.transaccionesList;
           if (backup.clientes && Array.isArray(backup.clientes) && supabaseClient && currentUser.id) {
@@ -3661,11 +3422,10 @@ async function showApp() {
             clientesCache = backup.clientes.map(function (c, i) { return { id: c.id || '', nombre: c.nombre, telefono: c.telefono, email: c.email, direccion: c.direccion, notas: c.notas }; });
           }
           saveToLocalStorage();
-          setData({ products: _dataCache.products, ventas: _dataCache.ventas, transacciones: _dataCache.transacciones, saldosACobrar: _dataCache.saldosACobrar, lastCierreDate: _dataCache.lastCierreDate });
-          if (msgEl) { msgEl.textContent = 'Datos restaurados (productos, clientes, deudas). Recargá la página si no ves los cambios.'; msgEl.classList.remove('hidden'); msgEl.className = 'text-sm mt-2 text-green-400'; setTimeout(function () { msgEl.classList.add('hidden'); }, 5000); }
+          setData({ products: _dataCache.products, ventas: _dataCache.ventas, transacciones: _dataCache.transacciones, lastCierreDate: _dataCache.lastCierreDate });
+          if (msgEl) { msgEl.textContent = 'Datos restaurados (productos, clientes, caja). Recargá la página si no ves los cambios.'; msgEl.classList.remove('hidden'); msgEl.className = 'text-sm mt-2 text-green-400'; setTimeout(function () { msgEl.classList.add('hidden'); }, 5000); }
           renderInventory();
           updateDashboard();
-          renderSaldosACobrar();
           if (typeof loadClientes === 'function') loadClientes().then(function () { if (typeof renderClientes === 'function') renderClientes(); });
         } catch (e) {
           if (msgEl) { msgEl.textContent = 'Error: ' + (e.message || 'archivo no válido'); msgEl.classList.remove('hidden'); msgEl.className = 'text-sm mt-2 text-red-400'; }
@@ -4059,7 +3819,6 @@ async function showApp() {
           var uid = u.id;
           var products = {};
           var clientes = [];
-          var saldosACobrar = [];
           try {
             var pRes = await supabaseClient.from('products').select('*').eq('user_id', uid);
             if (!pRes.error && pRes.data) pRes.data.forEach(function (p) { products[p.codigo] = { nombre: p.nombre, codigo: p.codigo, precio: p.precio, stock: p.stock, stockInicial: p.stock_inicial || p.stock, costo: p.costo != null ? Number(p.costo) : 0 }; });
@@ -4068,11 +3827,7 @@ async function showApp() {
             var cRes = await supabaseClient.from('clientes').select('id, nombre, telefono, email, direccion, notas').eq('user_id', uid);
             if (!cRes.error && cRes.data) clientes = cRes.data;
           } catch (_) {}
-          try {
-            var sRes = await supabaseClient.from('saldos_acobrar').select('*').eq('user_id', uid);
-            if (!sRes.error && sRes.data) saldosACobrar = sRes.data.map(function (s) { return { id: s.id, clientName: s.client_name || '', whatsapp: s.whatsapp || '', items: s.items || [], total: Number(s.total) || 0, method: s.method || 'fiado', paid: !!s.paid, createdAt: s.created_at }; });
-          } catch (_) {}
-          backup.users.push({ userId: uid, email: u.email || '', kioscoName: u.kiosco_name || '', products: products, clientes: clientes, saldosACobrar: saldosACobrar });
+          backup.users.push({ userId: uid, email: u.email || '', kioscoName: u.kiosco_name || '', products: products, clientes: clientes });
         }
         var blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
         var a = document.createElement('a');
@@ -4082,7 +3837,7 @@ async function showApp() {
         URL.revokeObjectURL(a.href);
         if (msgEl) { msgEl.textContent = 'Copia exportada: ' + backup.users.length + ' usuario(s). Guardá el archivo en un lugar seguro.'; msgEl.className = 'text-xs mt-2 text-green-400'; setTimeout(function () { msgEl.classList.add('hidden'); }, 6000); }
       } catch (e) {
-        if (msgEl) { msgEl.textContent = 'Error: ' + (e.message || 'No se pudo exportar. Revisá que las políticas RLS permitan al admin leer productos, clientes y saldos_acobrar de otros usuarios.'); msgEl.className = 'text-xs mt-2 text-amber-300'; }
+        if (msgEl) { msgEl.textContent = 'Error: ' + (e.message || 'No se pudo exportar. Revisá que las políticas RLS permitan al admin leer productos y clientes de otros usuarios.'); msgEl.className = 'text-xs mt-2 text-amber-300'; }
       }
       if (btn) btn.disabled = false;
       lucide.createIcons();
@@ -4121,14 +3876,6 @@ async function showApp() {
                   return existingPairs.indexOf(key) === -1;
                 }).map(function (c) { return { user_id: uid, nombre: c.nombre || null, telefono: c.telefono || null, email: c.email || null, direccion: c.direccion || null, notas: c.notas || null }; });
                 if (cToInsert.length) await supabaseClient.from('clientes').insert(cToInsert);
-              }
-              if (u.saldosACobrar && u.saldosACobrar.length) {
-                var existingS = await supabaseClient.from('saldos_acobrar').select('id').eq('user_id', uid);
-                var existingIds = (existingS.data || []).map(function (r) { return r.id; });
-                var sToInsert = u.saldosACobrar.filter(function (s) { return existingIds.indexOf(String(s.id || '')) === -1; }).map(function (s) {
-                  return { user_id: uid, id: String(s.id || ''), client_name: s.clientName || '', whatsapp: s.whatsapp || '', items: s.items || [], total: Number(s.total) || 0, method: s.method || 'fiado', paid: !!s.paid, created_at: s.createdAt || new Date().toISOString() };
-                });
-                if (sToInsert.length) await supabaseClient.from('saldos_acobrar').insert(sToInsert);
               }
               ok++;
             } catch (e) {
