@@ -776,8 +776,8 @@ textarea:focus-visible {
 
 /* ===== PANEL PRODUCTOS: PANTALLA COMPLETA ===== */
 
-/* Ocultar el header principal en todos los paneles salvo Inicio */
-body[data-panel]:not([data-panel="dashboard"]) #mainHeader {
+/* Ocultar el header principal en todos los paneles salvo Inicio y Admin (super necesita cerrar sesión) */
+body[data-panel]:not([data-panel="dashboard"]):not([data-panel="super"]) #mainHeader {
   display: none !important;
 }
 
