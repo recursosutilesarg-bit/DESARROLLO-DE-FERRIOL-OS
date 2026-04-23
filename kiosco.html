@@ -1106,8 +1106,10 @@
           </h2>
           <p class="text-xs text-white/50 mb-4">Registrá el cobro cuando el cliente o socio transferenció; al verificar se generan líneas en el libro según <span class="text-white/70">PLAN-COMPENSACIONES-FERRIOL.md</span>. Las ventas por <strong class="text-white/75">alta definitiva de kiosco</strong> (tras la prueba) se registran desde el detalle del negocio. SQL: <code class="text-[#86efac]">supabase-ferriol-kiosco-definitive-trial.sql</code>.</p>
           <div id="ferriolCompanyReceivableBox" class="rounded-xl border border-cyan-500/35 bg-cyan-500/10 p-4 mb-4 text-sm">
-            <h3 class="font-semibold text-cyan-100 mb-1 flex items-center gap-2"><i data-lucide="building-2" class="w-4 h-4"></i> Empresa · 20% licencia kiosco (pendiente de cobro)</h3>
+            <h3 class="font-semibold text-cyan-100 mb-1 flex items-center gap-2"><i data-lucide="building-2" class="w-4 h-4"></i> Empresa · saldos automáticos (pendientes)</h3>
             <p id="ferriolCompanyReceivableText" class="text-xs text-white/70">—</p>
+            <p class="text-xs text-white/45 mt-2">Los cargos mensuales (licencia kiosco 20/80 y cuota socios según plan) se generan el <strong class="text-white/60">día 1</strong> si tenés <code class="text-cyan-200/80">pg_cron</code> en Supabase. Ejecutá antes <code class="text-cyan-200/80">supabase-ferriol-monthly-auto.sql</code>.</p>
+            <button type="button" id="ferriolBtnRunMonthlyAccrual" class="mt-2 btn-neomorphic rounded-xl py-2 px-3 text-xs font-semibold touch-target">Generar cargos del mes (manual)</button>
           </div>
           <div class="rounded-xl border border-white/15 bg-white/5 p-4 mb-4 space-y-3">
             <h3 class="font-semibold text-sm text-white/90">Nuevo cobro pendiente</h3>
