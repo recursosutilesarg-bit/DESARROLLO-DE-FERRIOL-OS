@@ -253,6 +253,35 @@ body::before {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Subtítulo bajo el título: para admin, actúa como interruptor Admin ↔ Negocio */
+button.header-sub {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  line-height: 1.35;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button.header-sub.header-sub--toggle {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.35);
+  text-underline-offset: 3px;
+  touch-action: manipulation;
+}
+
+button.header-sub.header-sub--toggle:hover {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+button.header-sub.header-sub--toggle:active {
+  opacity: 0.9;
+}
+
 .header-gradient {
   background: linear-gradient(
     105deg,

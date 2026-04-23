@@ -323,7 +323,8 @@
       _restoringFromHistory: false,
       _suppressCajaHistoryPush: false,
       historialFilter: 'hoy',
-      superSection: 'negocios'  // negocios | ajustes | notificaciones | mas
+      superSection: 'negocios',  // negocios | ajustes | notificaciones | mas
+      superUiMode: 'admin'  // admin | negocio — solo si role === 'super'
     };
 
     function currentHistoryBase() {
@@ -1174,7 +1175,72 @@
       if (terms) { terms.classList.add('hidden'); terms.classList.remove('flex'); }
     }
 
+    function applyAppShell() {
+      if (!currentUser) return;
+      var isSuper = currentUser.role === 'super';
+      var uiNegocio = isSuper && state.superUiMode === 'negocio';
+      var asKiosquero = !isSuper || uiNegocio;
+      document.querySelectorAll('.kiosquero-only').forEach(function (el) {
+        if (el.id === 'navKiosquero') return;
+        el.style.display = asKiosquero ? '' : 'none';
+      });
+      var navK = document.getElementById('navKiosquero');
+      if (navK) navK.classList.toggle('hidden', !asKiosquero);
+      document.querySelectorAll('.super-only').forEach(function (el) {
+        if (!isSuper) {
+          el.style.display = 'none';
+          return;
+        }
+        if (el.id === 'navSuperBottom') return;
+        if (el.id === 'logoutBtn') {
+          el.style.display = 'inline-flex';
+          return;
+        }
+        el.style.display = uiNegocio ? 'none' : (el.tagName === 'BUTTON' ? 'inline-flex' : 'block');
+      });
+      var navS = document.getElementById('navSuperBottom');
+      if (navS) {
+        if (!isSuper || uiNegocio) navS.classList.add('hidden');
+        else if (state.currentPanel === 'super') navS.classList.remove('hidden');
+      }
+      var ht = document.getElementById('headerTitle');
+      var subEl = document.getElementById('headerSub');
+      if (ht) {
+        if (isSuper && !uiNegocio) {
+          ht.textContent = 'FERRIOL OS';
+          if (subEl) {
+            subEl.textContent = 'Administración';
+            subEl.classList.add('header-sub--toggle');
+            subEl.title = 'Tocá para usar la app como negocio (misma cuenta)';
+            subEl.setAttribute('aria-label', 'Cambiar a modo negocio');
+          }
+        } else if (isSuper && uiNegocio) {
+          ht.textContent = currentUser.kioscoName || 'Ferriol OS';
+          if (subEl) {
+            subEl.textContent = 'Modo negocio';
+            subEl.classList.add('header-sub--toggle');
+            subEl.title = 'Tocá para volver al panel de administración';
+            subEl.setAttribute('aria-label', 'Volver a administración');
+          }
+        } else {
+          ht.textContent = currentUser.kioscoName || 'Ferriol OS';
+          if (subEl) {
+            subEl.classList.remove('header-sub--toggle');
+            subEl.removeAttribute('title');
+            subEl.removeAttribute('aria-label');
+            if (currentUser.trialEndsAt && new Date(currentUser.trialEndsAt) > new Date()) subEl.textContent = 'Sistema de prueba';
+            else subEl.textContent = 'Sistema Premium';
+          }
+        }
+      }
+    }
+
     function showPanel(name, cajaTabOverride) {
+      if (name === 'super' && currentUser && currentUser.role === 'super' && state.superUiMode === 'negocio') {
+        state.superUiMode = 'admin';
+        try { sessionStorage.setItem('ferriol_super_ui', 'admin'); } catch (_) {}
+        applyAppShell();
+      }
       if (name !== 'scanner') window._scanForProductCode = false;
       state.currentPanel = name;
       document.body.setAttribute('data-panel', name);
@@ -3313,38 +3379,47 @@ async function showApp() {
     const isSuper = currentUser && currentUser.role === 'super';
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('appWrap').classList.remove('hidden');
-    document.querySelectorAll('.kiosquero-only').forEach(el => el.style.display = isSuper ? 'none' : '');
-    document.querySelectorAll('.super-only').forEach(el => {
-      el.style.display = isSuper ? (el.tagName === 'BUTTON' ? 'inline-flex' : 'block') : 'none';
-    });
-    document.getElementById('navKiosquero').classList.toggle('hidden', isSuper);
-    var navSuperBottom = document.getElementById('navSuperBottom');
-    if (navSuperBottom) navSuperBottom.classList.toggle('hidden', !isSuper);
-    document.getElementById('headerTitle').textContent = (!isSuper && currentUser.kioscoName) ? currentUser.kioscoName : 'FERRIOL OS';
-    var subEl = document.getElementById('headerSub');
-    if (subEl) {
-      if (isSuper) subEl.textContent = 'Administración';
-      else if (currentUser.trialEndsAt && new Date(currentUser.trialEndsAt) > new Date()) subEl.textContent = 'Sistema de prueba';
-      else subEl.textContent = 'Sistema Premium';
-    }
-
     if (isSuper) {
-        goToPanel('super');
-        lucide.createIcons();
+      try {
+        var _su = sessionStorage.getItem('ferriol_super_ui');
+        state.superUiMode = (_su === 'negocio') ? 'negocio' : 'admin';
+      } catch (_) {
+        state.superUiMode = 'admin';
+      }
     } else {
-        if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
-        window._trialCountdownInterval = setInterval(updateTrialCountdown, 1000);
-        await initData(); // <--- AHORA EL 'await' SÍ FUNCIONA
-        renderInventory();
-        updateCartUI();
-        updateDashboard();
-        state._restoringFromHistory = true;
-        showPanel('dashboard');
-        state._restoringFromHistory = false;
-        history.replaceState({ panel: 'dashboard', root: true }, '', location.href);
-        lucide.createIcons();
+      state.superUiMode = 'admin';
     }
-} // <--- ASEGURATE DE QUE ESTA LLAVE CIERRE TODO EL BLOQUE
+    applyAppShell();
+
+    if (isSuper && state.superUiMode === 'negocio') {
+      if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
+      window._trialCountdownInterval = setInterval(updateTrialCountdown, 1000);
+      await initData();
+      renderInventory();
+      updateCartUI();
+      updateDashboard();
+      state._restoringFromHistory = true;
+      showPanel('dashboard');
+      state._restoringFromHistory = false;
+      history.replaceState({ panel: 'dashboard', root: true }, '', location.href);
+      lucide.createIcons();
+    } else if (isSuper) {
+      goToPanel('super');
+      lucide.createIcons();
+    } else {
+      if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
+      window._trialCountdownInterval = setInterval(updateTrialCountdown, 1000);
+      await initData();
+      renderInventory();
+      updateCartUI();
+      updateDashboard();
+      state._restoringFromHistory = true;
+      showPanel('dashboard');
+      state._restoringFromHistory = false;
+      history.replaceState({ panel: 'dashboard', root: true }, '', location.href);
+      lucide.createIcons();
+    }
+}
 
     async function doLogin() {
       const email = document.getElementById('loginEmail').value.trim();
@@ -3644,6 +3719,8 @@ async function showApp() {
     function doLogout() {
       if (supabaseClient) supabaseClient.auth.signOut();
       currentUser = null;
+      state.superUiMode = 'admin';
+      try { sessionStorage.removeItem('ferriol_super_ui'); } catch (_) {}
       state.cart = [];
       state.transaccionesList = [];
       _dataCache = { products: {}, ventas: { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 }, transacciones: 0, deudores: [], lastCierreDate: null };
@@ -3654,6 +3731,41 @@ async function showApp() {
     document.getElementById('logoutBtn').onclick = doLogout;
     var logoutConfigEl = document.getElementById('logoutBtnConfig');
     if (logoutConfigEl) logoutConfigEl.onclick = doLogout;
+    window._superIrModoNegocio = async function () {
+      if (!currentUser || currentUser.role !== 'super') return;
+      state.superUiMode = 'negocio';
+      try { sessionStorage.setItem('ferriol_super_ui', 'negocio'); } catch (_) {}
+      applyAppShell();
+      if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
+      window._trialCountdownInterval = setInterval(updateTrialCountdown, 1000);
+      await initData();
+      renderInventory();
+      updateCartUI();
+      updateDashboard();
+      state._restoringFromHistory = true;
+      showPanel('dashboard');
+      state._restoringFromHistory = false;
+      history.replaceState({ panel: 'dashboard', root: true }, '', location.href);
+      applyAppShell();
+      lucide.createIcons();
+    };
+    window._superIrModoAdmin = function () {
+      if (!currentUser || currentUser.role !== 'super') return;
+      if (window._trialCountdownInterval) { clearInterval(window._trialCountdownInterval); window._trialCountdownInterval = null; }
+      state.superUiMode = 'admin';
+      try { sessionStorage.setItem('ferriol_super_ui', 'admin'); } catch (_) {}
+      goToPanel('super');
+      applyAppShell();
+      lucide.createIcons();
+    };
+    var headerSubBtn = document.getElementById('headerSub');
+    if (headerSubBtn) {
+      headerSubBtn.addEventListener('click', function () {
+        if (!currentUser || currentUser.role !== 'super') return;
+        if (state.superUiMode === 'negocio') window._superIrModoAdmin();
+        else window._superIrModoNegocio();
+      });
+    }
 
     function fillConfigForm() {
       if (!currentUser || currentUser.role === 'super') return;

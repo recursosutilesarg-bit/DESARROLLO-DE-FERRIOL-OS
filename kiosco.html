@@ -34,7 +34,7 @@
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="kiosco.css?v=20260422q">
+  <link rel="stylesheet" href="kiosco.css?v=20260422s">
 </head>
 <body class="relative">
   <!-- Banner instalar como app (PWA) — visible al abrir el link -->
@@ -151,9 +151,9 @@
         <div class="w-10 h-10 rounded-xl btn-glow flex items-center justify-center">
           <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
         </div>
-        <div>
+        <div class="min-w-0">
           <h1 class="font-bold text-lg tracking-tight" id="headerTitle">Ferriol OS</h1>
-          <p class="text-xs text-white/80" id="headerSub">Sistema Premium</p>
+          <button type="button" id="headerSub" class="header-sub text-xs text-white/80 text-left max-w-[70vw] sm:max-w-md truncate">Sistema Premium</button>
         </div>
       </div>
       <div class="flex items-center gap-2">
@@ -1478,7 +1478,7 @@
   </div>
   </div><!-- /#appWrap -->
   <script src="kiosco-config.js"></script>
-  <script defer src="kiosco-app.js?v=20260422p"></script>
+  <script defer src="kiosco-app.js?v=20260422s"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>
