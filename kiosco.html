@@ -211,6 +211,10 @@
           <i data-lucide="store" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Negocios</span>
         </button>
+        <button data-super-section="cobros" class="super-nav-btn super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Cobros y comisiones">
+          <i data-lucide="banknote" class="w-5 h-5 shrink-0"></i>
+          <span class="truncate w-full text-center">Cobros</span>
+        </button>
         <button data-super-section="notificaciones" class="super-nav-btn super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Notificaciones">
           <i data-lucide="bell" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Avisos</span>
@@ -985,24 +989,14 @@
             <label class="block text-sm text-white/70 mb-2">Nombre del negocio</label>
             <input type="text" id="configKioscoName" placeholder="Ej: Mi Negocio" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
           </div>
-          <div id="configNetworkBlock" class="rounded-xl border border-[#22c55e]/30 bg-[#22c55e]/08 p-4 hidden">
-            <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-[#86efac]">
-              <i data-lucide="share-2" class="w-4 h-4"></i>
-              Tu red · código de referido
+          <div id="kioscoLicensePaymentBlock" class="kiosquero-only rounded-xl border border-[#22c55e]/30 bg-[#22c55e]/08 p-4 mb-4">
+            <h3 class="font-semibold mb-2 flex items-center gap-2 text-sm text-[#86efac]">
+              <i data-lucide="landmark" class="w-4 h-4"></i>
+              Licencia Ferriol OS (pago por transferencia)
             </h3>
-            <p class="text-xs text-white/55 mb-3">Un solo código; dos enlaces según a quién invitás: negocio que use el sistema en el local, o persona que se sume como vendedor de la red.</p>
-            <p class="text-xs text-white/50 mb-1">Tu código</p>
-            <p id="configReferralCodeDisplay" class="text-lg font-bold font-mono tracking-wider text-amber-200 mb-3">—</p>
-            <label class="block text-xs text-white/50 mb-1">Invitar negocio (kiosco / almacén)</label>
-            <div class="flex flex-col sm:flex-row gap-2 mb-3">
-              <input type="text" id="configReferralLinkKiosco" readonly class="flex-1 glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
-              <button type="button" id="btnCopyReferralLinkKiosco" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold shrink-0 touch-target">Copiar</button>
-            </div>
-            <label class="block text-xs text-white/50 mb-1">Invitar vendedor (membresía red)</label>
-            <div class="flex flex-col sm:flex-row gap-2">
-              <input type="text" id="configReferralLinkSocio" readonly class="flex-1 glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
-              <button type="button" id="btnCopyReferralLinkSocio" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold shrink-0 touch-target">Copiar</button>
-            </div>
+            <p id="kioscoLicensePriceHint" class="text-sm text-white/75 mb-2"></p>
+            <p class="text-xs text-white/55 mb-2">Transferí el importe y enviá el comprobante según las instrucciones del administrador.</p>
+            <pre id="kioscoTransferInfoText" class="text-xs whitespace-pre-wrap text-white/90 glass rounded-lg p-3 border border-white/15 max-h-48 overflow-y-auto font-sans"></pre>
           </div>
           <div>
             <label class="block text-sm text-white/70 mb-2">Mensaje de cobro por WhatsApp (usá <code class="text-[#86efac]">{cliente}</code> y <code class="text-[#86efac]">{monto}</code>)</label>
@@ -1083,6 +1077,7 @@
           </div>
           <p class="text-xs text-white/50 mb-2 super-only super-main-only">Directorio completo del sistema. Filtrá «Sin referidor» para ver cuentas sin admin/referidor y asignalas desde el detalle del usuario.</p>
           <p id="superPartnerNetInfo" class="hidden text-sm text-white/75 mb-3 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-2"></p>
+          <div id="superPartnerCommissionsCard" class="hidden mb-3 rounded-xl border border-emerald-500/35 bg-emerald-500/10 px-3 py-2 text-sm"></div>
           <div class="flex flex-wrap gap-2 mb-4">
             <button type="button" id="btnOpenNewKiosqueroModal" class="btn-glow rounded-xl py-3 px-5 font-semibold flex items-center justify-center gap-2 touch-target">
               <i data-lucide="user-plus" class="w-5 h-5"></i> Agregar negocio
@@ -1102,6 +1097,41 @@
           <div id="superUsersList" class="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
             <!-- Lista por JS -->
           </div>
+        </div>
+        <!-- Sección Cobros (solo super): transferencias + verificar → mlm_ledger -->
+        <div id="super-section-cobros" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto super-only super-main-only" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+          <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
+            <i data-lucide="banknote" class="w-5 h-5 text-[#86efac]"></i>
+            Cobros (transferencia)
+          </h2>
+          <p class="text-xs text-white/50 mb-4">Registrá el cobro cuando el cliente o socio transferenció; al verificar se generan líneas en el libro según <span class="text-white/70">PLAN-COMPENSACIONES-FERRIOL.md</span>. Ejecutá <code class="text-[#86efac]">supabase-ferriol-payments.sql</code> en Supabase.</p>
+          <div class="rounded-xl border border-white/15 bg-white/5 p-4 mb-4 space-y-3">
+            <h3 class="font-semibold text-sm text-white/90">Nuevo cobro pendiente</h3>
+            <label class="block text-xs text-white/60">Tipo</label>
+            <select id="ferriolNewPayType" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
+              <option value="kit_inicial">Kit vendedor ($ 60.000)</option>
+              <option value="kiosco_licencia">Licencia kiosco — mes ($ 9.900)</option>
+              <option value="vendor_mantenimiento">Cuota mantenimiento vendedor ($ 20.000)</option>
+            </select>
+            <label class="block text-xs text-white/60">Email de quien paga (perfil existente)</label>
+            <input type="email" id="ferriolNewPayPayerEmail" placeholder="socio@ejemplo.com" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
+            <label class="block text-xs text-white/60">Vendedor ejecutor (email) — obligatorio para kit y licencia kiosco</label>
+            <input type="email" id="ferriolNewPaySellerEmail" placeholder="vendedor@ejemplo.com" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
+            <label class="block text-xs text-white/60">Monto ARS</label>
+            <input type="number" id="ferriolNewPayAmount" min="1" step="1" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
+            <div id="ferriolNewPayPeriodWrap" class="hidden">
+              <label class="block text-xs text-white/60">Mes de la cuota (mantenimiento vendedor)</label>
+              <input type="month" id="ferriolNewPayPeriod" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
+            </div>
+            <label class="block text-xs text-white/60">Nota (opcional: Nº operación)</label>
+            <input type="text" id="ferriolNewPayNote" placeholder="Ej. transferencia 12/04" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
+            <p id="ferriolNewPayErr" class="text-xs text-red-300 hidden"></p>
+            <button type="button" id="ferriolBtnCreatePayment" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold touch-target w-full sm:w-auto">Registrar pendiente</button>
+          </div>
+          <h3 class="font-semibold text-sm mb-2">Pendientes de verificar</h3>
+          <div id="ferriolPaymentsPendingList" class="space-y-2 max-h-[40vh] overflow-y-auto text-sm mb-6"></div>
+          <h3 class="font-semibold text-sm mb-2">Últimos verificados</h3>
+          <div id="ferriolPaymentsVerifiedList" class="space-y-2 max-h-[30vh] overflow-y-auto text-xs text-white/80"></div>
         </div>
         <!-- Sección Ajustes -->
         <div id="super-section-ajustes" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
@@ -1124,6 +1154,14 @@
             <div>
               <label class="block text-xs text-white/70 mb-1">Contraseña para quitar usuarios (opcional)</label>
               <input type="password" id="adminDeletePassword" placeholder="Al quitar un negocio se pedirá esta contraseña" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+            </div>
+            <div class="border-t border-white/10 pt-4 mt-4">
+              <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
+                <i data-lucide="landmark" class="w-4 h-4 text-[#86efac]"></i>
+                Datos de transferencia (kioscos y socios)
+              </h3>
+              <p class="text-xs text-white/50 mb-2">Se muestra en Configuración del kiosquero. Una línea por CBU/alias/concepto.</p>
+              <textarea id="adminTransferInfo" rows="5" placeholder="Titular, CBU, alias, instrucciones..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm resize-y mb-2"></textarea>
             </div>
             <div class="border-t border-white/10 pt-4 mt-4">
               <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">

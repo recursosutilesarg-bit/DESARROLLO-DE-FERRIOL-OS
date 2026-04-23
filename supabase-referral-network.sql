@@ -48,3 +48,5 @@ GRANT EXECUTE ON FUNCTION public.resolve_referral_code(text) TO authenticated;
 -- 6) Promover un usuario a líder de red (acceso limitado: solo ve su árbol de referidos):
 -- UPDATE profiles SET role = 'partner' WHERE email = 'socio@ejemplo.com';
 -- Los administradores globales mantienen role = 'super' (acceso total a la app).
+
+-- 7) Fundación MLM (tablas de ledger, plan, columnas extra en profiles): ejecutá supabase-mlm-foundation.sql cuando quieras dejar lista la base sin activar aún la app.

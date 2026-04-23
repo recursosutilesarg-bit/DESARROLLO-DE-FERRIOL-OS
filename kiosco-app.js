@@ -15,8 +15,8 @@
     // CREATE TABLE notifications ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now(), message text NOT NULL );
     // ALTER TABLE notifications ENABLE ROW LEVEL SECURITY; CREATE POLICY "notifications_select" ON notifications FOR SELECT TO authenticated USING (true); CREATE POLICY "notifications_insert" ON notifications FOR INSERT TO authenticated WITH CHECK (true);
     // Recordatorios de fin de prueba (mensajes por día + ventana): guardá en app_settings una fila key = 'trial_reminder_config', value = JSON, ej. {"windowDays":5,"messages":{"5":"...","4":"..."}}. Placeholders en textos: {dias}, {dias_restantes}, {nombre}, {negocio}.
-    // Red de referidos / MLM: ejecutá supabase-referral-network.sql (sponsor_id, referral_code, función resolve_referral_code). Rol profiles.role = 'partner' = líder con lista filtrada; 'super' = administración global.
-    // Enlaces de invitación: ?ref=CÓDIGO&nicho=kiosco (alta negocio → role kiosquero) | ?ref=CÓDIGO&nicho=socio (membresía vendedor → role partner). Aliases: nicho=vendedor|red|membresia, membresia=1, tipo=...
+    // Red de referidos: solo role 'partner' o 'super' tienen código y enlaces (kiosquero no refiere). SQL: supabase-referral-network.sql, supabase-mlm-foundation.sql, supabase-ferriol-payments.sql (cobros + RPC ferriol_verify_payment). Objeto FerriolMlm en este archivo.
+    // Enlaces: ?ref=CÓDIGO&nicho=kiosco (alta negocio) | ?ref=CÓDIGO&nicho=socio (membresía vendedor). Aliases: nicho=vendedor|red|membresia, membresia=1, tipo=...
     // Historial de cierres de caja (facturación y ganancia por día):
     // CREATE TABLE cierres_caja ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE, fecha date NOT NULL, fecha_cierre timestamptz NOT NULL DEFAULT now(), total_facturado numeric NOT NULL DEFAULT 0, ganancia numeric NOT NULL DEFAULT 0, created_at timestamptz DEFAULT now() );
     // ALTER TABLE cierres_caja ENABLE ROW LEVEL SECURITY; CREATE POLICY "cierres_caja_policy" ON cierres_caja FOR ALL USING (auth.uid() = user_id);
@@ -184,6 +184,196 @@
         });
       }
       return seen;
+    }
+
+    /** Estructura MLM en cliente: utilidades y nombres de tablas para motor de comisiones futuro (sin escritura aún). */
+    var FerriolMlm = (function () {
+      var TABLE_LEDGER = 'mlm_ledger';
+      var TABLE_PLAN = 'mlm_plan_config';
+      var EVENT = {
+        membership_sale: 'membership_sale',
+        renewal: 'renewal',
+        subscription: 'subscription',
+        manual_adjustment: 'manual_adjustment'
+      };
+      var LEDGER_STATUS = {
+        pending: 'pending',
+        approved: 'approved',
+        paid: 'paid',
+        void: 'void'
+      };
+      function uplineUserIds(allProfiles, userId, maxDepth) {
+        var cap = maxDepth == null ? 64 : Math.max(0, maxDepth);
+        var byId = {};
+        (allProfiles || []).forEach(function (p) { if (p && p.id) byId[p.id] = p; });
+        var out = [];
+        var cur = byId[userId];
+        var n = 0;
+        while (cur && cur.sponsor_id && n < cap) {
+          var sp = byId[cur.sponsor_id];
+          if (!sp) break;
+          out.push(sp.id);
+          cur = sp;
+          n++;
+        }
+        return out;
+      }
+      function directReferralUserIds(allProfiles, sponsorId) {
+        if (!sponsorId) return [];
+        return (allProfiles || []).filter(function (p) { return p && p.sponsor_id === sponsorId; }).map(function (p) { return p.id; });
+      }
+      return {
+        TABLE_LEDGER: TABLE_LEDGER,
+        TABLE_PLAN: TABLE_PLAN,
+        EVENT: EVENT,
+        LEDGER_STATUS: LEDGER_STATUS,
+        uplineUserIds: uplineUserIds,
+        directReferralUserIds: directReferralUserIds,
+        downlineTreeIds: getPartnerDownlineUserIdSet
+      };
+    })();
+    try { if (typeof window !== 'undefined') window.FerriolMlm = FerriolMlm; } catch (_) {}
+
+    /** Montos orientativos (alineados a mlm_plan_config compensation_v1 y PLAN-COMPENSACIONES-FERRIOL.md) */
+    var FERRIOL_PLAN_AMOUNTS = { kit: 60000, kioscoMonthly: 9900, vendorMonthly: 20000 };
+
+    function ferriolMonthInputToPeriodDate(monthStr) {
+      if (!monthStr || String(monthStr).length < 7) return null;
+      var p = String(monthStr).slice(0, 7).split('-');
+      if (p.length !== 2) return null;
+      return p[0] + '-' + p[1] + '-01';
+    }
+    async function ferriolResolveProfileIdByEmail(email) {
+      if (!supabaseClient) return null;
+      var e = String(email || '').trim().toLowerCase();
+      if (!e) return null;
+      var r = await supabaseClient.from('profiles').select('id').eq('email', e).maybeSingle();
+      if (r.data && r.data.id) return r.data.id;
+      var r2 = await supabaseClient.from('profiles').select('id').ilike('email', e).limit(1);
+      if (!r2.error && r2.data && r2.data.length && r2.data[0].id) return r2.data[0].id;
+      return null;
+    }
+    function ferriolSyncNewPaymentFormDefaults() {
+      var sel = document.getElementById('ferriolNewPayType');
+      var amt = document.getElementById('ferriolNewPayAmount');
+      var wrap = document.getElementById('ferriolNewPayPeriodWrap');
+      var perIn = document.getElementById('ferriolNewPayPeriod');
+      if (!sel || !amt) return;
+      var t = sel.value;
+      if (t === 'kit_inicial') amt.value = String(FERRIOL_PLAN_AMOUNTS.kit);
+      else if (t === 'kiosco_licencia') amt.value = String(FERRIOL_PLAN_AMOUNTS.kioscoMonthly);
+      else amt.value = String(FERRIOL_PLAN_AMOUNTS.vendorMonthly);
+      if (wrap) wrap.classList.toggle('hidden', t !== 'vendor_mantenimiento');
+      if (perIn && t === 'vendor_mantenimiento' && !perIn.value) {
+        var d = new Date();
+        perIn.value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+      }
+    }
+    async function loadPartnerCommissionsCard() {
+      var el = document.getElementById('superPartnerCommissionsCard');
+      if (!el) return;
+      if (!supabaseClient || !currentUser || currentUser.role !== 'partner') {
+        el.classList.add('hidden');
+        el.innerHTML = '';
+        return;
+      }
+      try {
+        var res = await supabaseClient.from('mlm_ledger').select('created_at, amount, event_type, status, depth').eq('beneficiary_user_id', currentUser.id).order('created_at', { ascending: false }).limit(25);
+        if (res.error) throw res.error;
+        var rows = res.data || [];
+        var sum = rows.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
+        el.classList.remove('hidden');
+        el.innerHTML = '<p class="font-semibold text-emerald-200/90 mb-1 flex items-center gap-2"><i data-lucide="coins" class="w-4 h-4"></i> Tus comisiones (sistema)</p>' +
+          '<p class="text-xs text-white/55 mb-2">Suma movimientos listados: <strong>$ ' + sum.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> ARS</p>' +
+          (rows.length === 0 ? '<p class="text-xs text-white/50">Sin acreditaciones aún. Cuando un admin verifique un cobro, aparecerán aquí.</p>' :
+            '<ul class="text-xs space-y-1 max-h-40 overflow-y-auto">' + rows.map(function (r) {
+              return '<li class="border-b border-white/10 pb-1">' + String(r.created_at || '').slice(0, 10) + ' · $' + Number(r.amount).toLocaleString('es-AR', { minimumFractionDigits: 2 }) + ' · ' + String(r.event_type || '') + ' · ' + String(r.status || '') + '</li>';
+            }).join('') + '</ul>');
+      } catch (e) {
+        el.classList.remove('hidden');
+        el.innerHTML = '<p class="text-xs text-amber-200">Comisiones: ejecutá supabase-ferriol-payments.sql o revisá RLS en mlm_ledger.</p>';
+      }
+      lucide.createIcons();
+    }
+    async function loadKioscoLicensePaymentInfo() {
+      var block = document.getElementById('kioscoLicensePaymentBlock');
+      var pre = document.getElementById('kioscoTransferInfoText');
+      var priceEl = document.getElementById('kioscoLicensePriceHint');
+      if (!block || !currentUser) return;
+      var show = currentUser.role === 'kiosquero' || (currentUser.role === 'super' && state.superUiMode === 'negocio');
+      block.style.display = show ? '' : 'none';
+      if (!show) return;
+      if (priceEl) priceEl.textContent = 'Valor mensual orientativo: $ ' + FERRIOL_PLAN_AMOUNTS.kioscoMonthly.toLocaleString('es-AR') + ' ARS (confirmá con tu administrador).';
+      if (!pre) return;
+      if (!supabaseClient) {
+        pre.textContent = 'Configurá Supabase para ver datos de pago.';
+        return;
+      }
+      try {
+        var r = await supabaseClient.from('app_settings').select('value').eq('key', 'ferriol_transfer_info').maybeSingle();
+        pre.textContent = (r.data && r.data.value) ? String(r.data.value) : 'El administrador cargará los datos de cuenta en Panel admin → Ajustes.';
+      } catch (_) {
+        pre.textContent = 'No se pudieron cargar los datos de transferencia.';
+      }
+    }
+    async function renderSuperCobrosSection() {
+      if (!supabaseClient || !currentUser || currentUser.role !== 'super') return;
+      var pendingEl = document.getElementById('ferriolPaymentsPendingList');
+      var verifiedEl = document.getElementById('ferriolPaymentsVerifiedList');
+      if (!pendingEl || !verifiedEl) return;
+      pendingEl.innerHTML = '<p class="text-white/50 text-xs">Cargando…</p>';
+      verifiedEl.innerHTML = '';
+      try {
+        var cache = window._ferriolAllProfilesCache || [];
+        if (!cache.length) {
+          var pr = await supabaseClient.from('profiles').select('id, email, kiosco_name').limit(800);
+          if (!pr.error && pr.data) {
+            window._ferriolAllProfilesCache = pr.data;
+            cache = pr.data;
+          }
+        }
+        var res = await supabaseClient.from('ferriol_payments').select('id, created_at, payment_type, amount, status, payer_user_id, seller_user_id, period_month, external_note').order('created_at', { ascending: false }).limit(80);
+        if (res.error) throw res.error;
+        var rows = res.data || [];
+        var byId = {};
+        cache.forEach(function (p) { if (p && p.id) byId[p.id] = p; });
+        function emailOf(uid) {
+          var p = byId[uid];
+          return p ? (p.email || uid.slice(0, 8)) : String(uid || '').slice(0, 8);
+        }
+        var pend = rows.filter(function (r) { return r.status === 'pending'; });
+        var ver = rows.filter(function (r) { return r.status === 'verified'; }).slice(0, 20);
+        if (pend.length === 0) pendingEl.innerHTML = '<p class="text-white/50 text-xs">No hay cobros pendientes.</p>';
+        else {
+          pendingEl.innerHTML = pend.map(function (r) {
+            return '<div class="glass rounded-lg p-3 border border-amber-500/30">' +
+              '<p class="font-medium">' + r.payment_type + ' · $' + Number(r.amount).toLocaleString('es-AR') + '</p>' +
+              '<p class="text-xs text-white/60">Paga: ' + emailOf(r.payer_user_id) + (r.seller_user_id ? ' · Vendedor: ' + emailOf(r.seller_user_id) : '') + (r.period_month ? ' · Mes: ' + String(r.period_month).slice(0, 7) : '') + '</p>' +
+              (r.external_note ? '<p class="text-xs text-white/45">' + String(r.external_note).replace(/</g, '&lt;') + '</p>' : '') +
+              '<button type="button" class="ferriol-verify-pay mt-2 btn-glow rounded-lg py-1.5 px-3 text-xs font-semibold touch-target" data-id="' + r.id + '">Verificar y liquidar</button></div>';
+          }).join('');
+          pendingEl.querySelectorAll('.ferriol-verify-pay').forEach(function (btn) {
+            btn.onclick = async function () {
+              var pid = btn.dataset.id;
+              if (!confirm('¿Confirmás que la transferencia está acreditada? Se generarán comisiones en mlm_ledger.')) return;
+              var rpc = await supabaseClient.rpc('ferriol_verify_payment', { p_payment_id: pid });
+              if (rpc.error) { alert('Error: ' + (rpc.error.message || '')); return; }
+              var out = rpc.data;
+              if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+              if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo verificar.'); return; }
+              alert('Listo. Comisiones registradas.');
+              renderSuperCobrosSection();
+              lucide.createIcons();
+            };
+          });
+        }
+        verifiedEl.innerHTML = ver.length === 0 ? '<p class="text-white/45">—</p>' : ver.map(function (r) {
+          return '<div class="border-b border-white/10 py-1">' + String(r.created_at || '').slice(0, 16) + ' · ' + r.payment_type + ' · $' + Number(r.amount).toLocaleString('es-AR') + ' · ' + emailOf(r.payer_user_id) + '</div>';
+        }).join('');
+      } catch (e) {
+        pendingEl.innerHTML = '<p class="text-red-300 text-xs">Error o falta la tabla. Ejecutá supabase-ferriol-payments.sql. ' + (e.message || '') + '</p>';
+      }
+      lucide.createIcons();
     }
 
     const DEFAULT_WHATSAPP = 'Hola {cliente}, te recordamos que tenés un saldo de ${monto} en nuestro kiosco. ¡Gracias!';
@@ -1530,6 +1720,7 @@
       if (headerAjustesBtn) headerAjustesBtn.classList.toggle('active', state.superSection === 'ajustes');
       var headerNotifBtn = document.getElementById('headerSuperNotifBtn');
       if (headerNotifBtn) headerNotifBtn.classList.toggle('active', state.superSection === 'notificaciones');
+      if (state.superSection === 'cobros' && currentUser && currentUser.role === 'super') renderSuperCobrosSection();
       lucide.createIcons();
     }
     var headerAjustesBtnEl = document.getElementById('headerSuperAjustesBtn');
@@ -3600,10 +3791,6 @@ async function showApp() {
       window._trialCountdownInterval = setInterval(updateTrialCountdown, 1000);
       await loadAdminContact();
       await initData();
-      if (supabaseClient && currentUser && currentUser.id) {
-        var rcS = await ensureUserReferralCode(currentUser.id);
-        if (rcS) currentUser.referralCode = rcS;
-      }
       renderInventory();
       updateCartUI();
       updateDashboard();
@@ -3616,10 +3803,6 @@ async function showApp() {
       goToPanel('super');
       lucide.createIcons();
     } else if (isPartner) {
-      if (supabaseClient && currentUser.id) {
-        var rcP = await ensureUserReferralCode(currentUser.id);
-        if (rcP) currentUser.referralCode = rcP;
-      }
       goToPanel('super');
       lucide.createIcons();
     } else {
@@ -3627,10 +3810,6 @@ async function showApp() {
       window._trialCountdownInterval = setInterval(updateTrialCountdown, 1000);
       await loadAdminContact();
       await initData();
-      if (supabaseClient && currentUser && currentUser.role === 'kiosquero') {
-        var rc = await ensureUserReferralCode(currentUser.id);
-        if (rc) currentUser.referralCode = rc;
-      }
       renderInventory();
       updateCartUI();
       updateDashboard();
@@ -3706,9 +3885,10 @@ async function showApp() {
             errEl.classList.add('show');
             return;
           }
+        } else if (supabaseClient && (profile.role === 'partner' || profile.role === 'super')) {
           await ensureUserReferralCode(uid);
-          var r2 = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
-          if (r2.data) profile = r2.data;
+          var r3 = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
+          if (r3.data) profile = r3.data;
         }
         if ((profile.role === 'kiosquero' || profile.role === 'partner') && !profile.active) {
           try {
@@ -3962,7 +4142,7 @@ async function showApp() {
         errEl.classList.add('show');
         return;
       }
-      await ensureUserReferralCode(newId);
+      if (newRole === 'partner') await ensureUserReferralCode(newId);
       try { sessionStorage.removeItem('ferriol_signup_ref'); sessionStorage.removeItem('ferriol_signup_nicho'); } catch (_) {}
       document.getElementById('signUpBox').classList.add('hidden');
       document.getElementById('signUpSuccessBox').classList.remove('hidden');
@@ -4020,34 +4200,13 @@ async function showApp() {
       });
     }
 
-    async function fillConfigNetworkSection() {
-      var block = document.getElementById('configNetworkBlock');
-      if (!block || !currentUser) return;
-      var asNegocio = currentUser.role === 'kiosquero' || (currentUser.role === 'super' && state.superUiMode === 'negocio');
-      if (!asNegocio) { block.classList.add('hidden'); return; }
-      block.classList.remove('hidden');
-      var code = currentUser.referralCode || '';
-      if (!code && supabaseClient) {
-        code = await ensureUserReferralCode(currentUser.id) || '';
-        if (code) currentUser.referralCode = code;
-      }
-      var disp = document.getElementById('configReferralCodeDisplay');
-      if (disp) disp.textContent = code || '—';
-      var lk = ferriolReferralInviteUrl(code, 'kiosco');
-      var ls = ferriolReferralInviteUrl(code, 'socio');
-      var linkK = document.getElementById('configReferralLinkKiosco');
-      var linkS = document.getElementById('configReferralLinkSocio');
-      if (linkK) linkK.value = lk;
-      if (linkS) linkS.value = ls;
-      lucide.createIcons();
-    }
     function fillConfigForm() {
       if (!currentUser) return;
       var asNegocio = currentUser.role === 'kiosquero' || (currentUser.role === 'super' && state.superUiMode === 'negocio');
       if (!asNegocio) return;
       document.getElementById('configKioscoName').value = currentUser.kioscoName || '';
       document.getElementById('configWhatsappMsg').value = currentUser.whatsappMessage || DEFAULT_WHATSAPP;
-      fillConfigNetworkSection();
+      loadKioscoLicensePaymentInfo();
     }
     async function saveConfig() {
       if (!currentUser) return;
@@ -4063,10 +4222,6 @@ async function showApp() {
       document.getElementById('headerTitle').textContent = kioscoName || 'Ferriol OS';
     }
     document.getElementById('saveConfig').onclick = () => saveConfig();
-    var btnCopyK = document.getElementById('btnCopyReferralLinkKiosco');
-    if (btnCopyK) btnCopyK.onclick = function () { copyTextToClipboard((document.getElementById('configReferralLinkKiosco') || {}).value, 'Enlace para negocios copiado.'); };
-    var btnCopyS = document.getElementById('btnCopyReferralLinkSocio');
-    if (btnCopyS) btnCopyS.onclick = function () { copyTextToClipboard((document.getElementById('configReferralLinkSocio') || {}).value, 'Enlace para vendedores copiado.'); };
     var btnCopyFK = document.getElementById('btnSuperFounderCopyKiosco');
     if (btnCopyFK) btnCopyFK.onclick = function () { copyTextToClipboard((document.getElementById('superFounderLinkKiosco') || {}).value, 'Enlace para negocios copiado.'); };
     var btnCopyFS = document.getElementById('btnSuperFounderCopySocio');
@@ -4532,12 +4687,13 @@ async function showApp() {
     async function renderSuper() {
       if (!supabaseClient) return;
       try {
-        const { data: settingsRows } = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4', 'admin_delete_password', 'trial_reminder_config']);
+        const { data: settingsRows } = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4', 'admin_delete_password', 'trial_reminder_config', 'ferriol_transfer_info']);
         var whatsappInput = document.getElementById('adminContactWhatsapp');
         var whatsapp2Input = document.getElementById('adminContactWhatsapp2');
         var whatsapp3Input = document.getElementById('adminContactWhatsapp3');
         var whatsapp4Input = document.getElementById('adminContactWhatsapp4');
         var deletePwdInput = document.getElementById('adminDeletePassword');
+        var transferInfoTa = document.getElementById('adminTransferInfo');
         var trialCfgParsed = { windowDays: 5, messages: {} };
         if (settingsRows) {
           settingsRows.forEach(function (r) {
@@ -4546,6 +4702,7 @@ async function showApp() {
             if (r.key === 'admin_whatsapp_3' && whatsapp3Input) whatsapp3Input.value = r.value || '';
             if (r.key === 'admin_whatsapp_4' && whatsapp4Input) whatsapp4Input.value = r.value || '';
             if (r.key === 'admin_delete_password' && deletePwdInput) deletePwdInput.value = r.value || '';
+            if (r.key === 'ferriol_transfer_info' && transferInfoTa) transferInfoTa.value = r.value || '';
             if (r.key === 'trial_reminder_config') trialCfgParsed = parseTrialReminderConfigValue(r.value || '');
           });
         }
@@ -4683,6 +4840,7 @@ async function showApp() {
           netInfoEl.textContent = '';
         }
       }
+      await loadPartnerCommissionsCard();
       lucide.createIcons();
     }
     function renderSuperListFromSearch() {
@@ -4749,12 +4907,14 @@ async function showApp() {
           msgObj[String(d)] = ta ? String(ta.value || '').trim() : '';
         }
         var trialReminderJson = JSON.stringify({ windowDays: winDays, messages: msgObj });
+        var transferInfo = (document.getElementById('adminTransferInfo') && document.getElementById('adminTransferInfo').value != null) ? String(document.getElementById('adminTransferInfo').value || '') : '';
         await supabaseClient.from('app_settings').upsert([
           { key: 'admin_whatsapp', value: whatsapp },
           { key: 'admin_whatsapp_2', value: whatsapp2 },
           { key: 'admin_whatsapp_3', value: whatsapp3 },
           { key: 'admin_whatsapp_4', value: whatsapp4 },
           { key: 'admin_delete_password', value: deletePwd },
+          { key: 'ferriol_transfer_info', value: transferInfo },
           { key: 'trial_reminder_config', value: trialReminderJson }
         ], { onConflict: 'key' });
         adminContact.whatsapp = whatsapp;
@@ -5038,6 +5198,65 @@ async function showApp() {
     document.getElementById('btnOpenNewKiosqueroModal').onclick = openNewKiosqueroModal;
     var btnExportDir = document.getElementById('btnExportDirectorioCSV');
     if (btnExportDir) btnExportDir.onclick = function () { exportSuperDirectorioCSV(); };
+    var ferriolPayTypeEl = document.getElementById('ferriolNewPayType');
+    if (ferriolPayTypeEl) {
+      ferriolPayTypeEl.addEventListener('change', ferriolSyncNewPaymentFormDefaults);
+      ferriolSyncNewPaymentFormDefaults();
+    }
+    var ferriolBtnCreate = document.getElementById('ferriolBtnCreatePayment');
+    if (ferriolBtnCreate) ferriolBtnCreate.onclick = async function () {
+      var errEl = document.getElementById('ferriolNewPayErr');
+      if (errEl) { errEl.classList.add('hidden'); errEl.textContent = ''; }
+      if (!supabaseClient || !currentUser || currentUser.role !== 'super') return;
+      var type = (document.getElementById('ferriolNewPayType') || {}).value;
+      var payerEm = (document.getElementById('ferriolNewPayPayerEmail') || {}).value || '';
+      var sellerEm = (document.getElementById('ferriolNewPaySellerEmail') || {}).value || '';
+      var amt = parseFloat(String((document.getElementById('ferriolNewPayAmount') || {}).value || ''), 10);
+      var note = (document.getElementById('ferriolNewPayNote') || {}).value || '';
+      if (!type || !payerEm || !amt || amt <= 0) {
+        if (errEl) { errEl.textContent = 'Completá tipo, email de quien paga y monto.'; errEl.classList.remove('hidden'); }
+        return;
+      }
+      var payerId = await ferriolResolveProfileIdByEmail(payerEm);
+      if (!payerId) {
+        if (errEl) { errEl.textContent = 'No hay perfil con ese email (debe existir y coincidir exacto en minúsculas si así está en Supabase).'; errEl.classList.remove('hidden'); }
+        return;
+      }
+      var sellerId = null;
+      if (type === 'kit_inicial' || type === 'kiosco_licencia') {
+        sellerId = await ferriolResolveProfileIdByEmail(sellerEm);
+        if (!sellerId) {
+          if (errEl) { errEl.textContent = 'Indicá el email del vendedor ejecutor (perfil existente).'; errEl.classList.remove('hidden'); }
+          return;
+        }
+      }
+      var periodMonth = null;
+      if (type === 'vendor_mantenimiento') {
+        var m = (document.getElementById('ferriolNewPayPeriod') || {}).value;
+        periodMonth = ferriolMonthInputToPeriodDate(m);
+        if (!periodMonth) {
+          if (errEl) { errEl.textContent = 'Elegí el mes de la cuota.'; errEl.classList.remove('hidden'); }
+          return;
+        }
+      }
+      var ins = await supabaseClient.from('ferriol_payments').insert({
+        payment_type: type,
+        amount: amt,
+        payer_user_id: payerId,
+        seller_user_id: sellerId,
+        period_month: periodMonth,
+        status: 'pending',
+        external_note: note || null,
+        created_by: currentUser.id
+      });
+      if (ins.error) {
+        if (errEl) { errEl.textContent = ins.error.message || 'No se pudo registrar.'; errEl.classList.remove('hidden'); }
+        return;
+      }
+      alert('Cobro pendiente registrado. Cuando acredite la transferencia, tocá Verificar.');
+      if (state.superSection === 'cobros') renderSuperCobrosSection();
+      lucide.createIcons();
+    };
     document.getElementById('newKiosqueroModalClose').onclick = closeNewKiosqueroModal;
     document.getElementById('newKiosqueroModalOverlay').onclick = closeNewKiosqueroModal;
     setupPasswordToggle('showNewKiosqueroPwd', 'newKiosqueroPassword');
@@ -5078,7 +5297,6 @@ async function showApp() {
         var patch = { kiosco_name: kioscoName || '' };
         if (currentUser && currentUser.role === 'partner') patch.sponsor_id = currentUser.id;
         await supabaseClient.from('profiles').update(patch).eq('id', newId);
-        await ensureUserReferralCode(newId);
       }
       msgEl.textContent = 'Kiosquero creado. Ya puede iniciar sesión con ese email y contraseña.';
       msgEl.classList.remove('hidden');
@@ -5140,9 +5358,11 @@ async function showApp() {
           var rProf = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
           profile = rProf.data;
           if (!profile) return;
+        }
+        if (profile && supabaseClient && (profile.role === 'partner' || profile.role === 'super')) {
           await ensureUserReferralCode(uid);
-          var rProf2 = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
-          if (rProf2.data) profile = rProf2.data;
+          var rEns = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
+          if (rEns.data) profile = rEns.data;
         }
         if ((profile.role === 'kiosquero' || profile.role === 'partner') && !profile.active) {
           try {
