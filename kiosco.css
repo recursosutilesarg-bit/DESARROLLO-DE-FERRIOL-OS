@@ -1470,3 +1470,60 @@ body[data-panel="inventory"] #panel-inventory {
     min-height: 44px;
   }
 }
+
+/* Banner cuenta regresiva prueba — modo urgente (últimos N días) */
+.trial-countdown-banner--urgent {
+  border-color: rgba(245, 158, 11, 0.55) !important;
+  box-shadow:
+    0 0 0 1px rgba(245, 158, 11, 0.25),
+    0 12px 40px rgba(245, 158, 11, 0.18),
+    0 0 48px rgba(34, 197, 94, 0.12);
+  animation: trial-banner-pulse 2.4s ease-in-out infinite;
+}
+.trial-countdown-banner--urgent .trial-countdown-banner-glow {
+  opacity: 1;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(245, 158, 11, 0.22), transparent 55%);
+}
+.trial-countdown-banner--urgent .trial-countdown-icon-wrap {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.45);
+  animation: trial-icon-nudge 1.8s ease-in-out infinite;
+}
+.trial-countdown-banner--urgent .trial-countdown-days-pill {
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.25);
+  border-color: rgba(251, 191, 36, 0.5);
+  box-shadow: 0 0 28px rgba(245, 158, 11, 0.35);
+}
+.trial-countdown-banner--urgent .trial-renovar-btn {
+  animation: trial-renovar-glow 2s ease-in-out infinite;
+}
+@keyframes trial-banner-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.25), 0 12px 40px rgba(245, 158, 11, 0.15); }
+  50% { box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.35), 0 16px 48px rgba(245, 158, 11, 0.28); }
+}
+@keyframes trial-icon-nudge {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+@keyframes trial-renovar-glow {
+  0%, 100% { filter: brightness(1); box-shadow: 0 8px 28px rgba(34, 197, 94, 0.35); }
+  50% { filter: brightness(1.08); box-shadow: 0 10px 36px rgba(251, 191, 36, 0.45); }
+}
+@keyframes trial-notif-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.98);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(2px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.trial-reminder-notif {
+  animation: trial-notif-drop 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}

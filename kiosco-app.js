@@ -14,6 +14,7 @@
     // Notificaciones del admin a los kiosqueros:
     // CREATE TABLE notifications ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now(), message text NOT NULL );
     // ALTER TABLE notifications ENABLE ROW LEVEL SECURITY; CREATE POLICY "notifications_select" ON notifications FOR SELECT TO authenticated USING (true); CREATE POLICY "notifications_insert" ON notifications FOR INSERT TO authenticated WITH CHECK (true);
+    // Recordatorios de fin de prueba (mensajes por día + ventana): guardá en app_settings una fila key = 'trial_reminder_config', value = JSON, ej. {"windowDays":5,"messages":{"5":"...","4":"..."}}. Placeholders en textos: {dias}, {dias_restantes}, {nombre}, {negocio}.
     // Historial de cierres de caja (facturación y ganancia por día):
     // CREATE TABLE cierres_caja ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE, fecha date NOT NULL, fecha_cierre timestamptz NOT NULL DEFAULT now(), total_facturado numeric NOT NULL DEFAULT 0, ganancia numeric NOT NULL DEFAULT 0, created_at timestamptz DEFAULT now() );
     // ALTER TABLE cierres_caja ENABLE ROW LEVEL SECURITY; CREATE POLICY "cierres_caja_policy" ON cierres_caja FOR ALL USING (auth.uid() = user_id);
@@ -1087,6 +1088,9 @@
       const endsAt = currentUser.trialEndsAt;
       if (!endsAt) {
         banner.classList.add('hidden');
+        banner.classList.remove('trial-countdown-banner--urgent');
+        var st = document.getElementById('trialCountdownSubtext');
+        if (st) { st.textContent = ''; st.classList.add('hidden'); }
         var subEl = document.getElementById('headerSub');
         if (subEl && currentUser.role === 'kiosquero') subEl.textContent = 'Sistema Premium';
         return;
@@ -1096,6 +1100,9 @@
       const msLeft = end - now;
       if (msLeft <= 0) {
         banner.classList.add('hidden');
+        banner.classList.remove('trial-countdown-banner--urgent');
+        var st0 = document.getElementById('trialCountdownSubtext');
+        if (st0) { st0.textContent = ''; st0.classList.add('hidden'); }
         if (supabaseClient && currentUser && currentUser.id && !currentUser._trialBlockTriggered) {
           currentUser._trialBlockTriggered = true;
           supabaseClient.from('profiles').update({ active: false }).eq('id', currentUser.id).then(function () {
@@ -1108,9 +1115,25 @@
         return;
       }
       const daysLeft = Math.ceil(msLeft / (24 * 60 * 60 * 1000));
+      const win = getTrialReminderWindowDays();
+      const inReminderWindow = daysLeft >= 1 && daysLeft <= win;
       banner.classList.remove('hidden');
+      banner.classList.toggle('trial-countdown-banner--urgent', inReminderWindow);
       daysEl.textContent = daysLeft;
       textEl.textContent = daysLeft === 1 ? 'Último día de prueba' : (daysLeft + ' días de prueba restantes');
+      var subTxt = document.getElementById('trialCountdownSubtext');
+      if (subTxt) {
+        if (inReminderWindow) {
+          var cfg = window._trialReminderConfig || { messages: {} };
+          var custom = (cfg.messages && (cfg.messages[String(daysLeft)] != null ? cfg.messages[String(daysLeft)] : cfg.messages[daysLeft])) || '';
+          var line = applyTrialReminderTokens(custom, daysLeft, currentUser.kioscoName);
+          subTxt.textContent = line;
+          subTxt.classList.remove('hidden');
+        } else {
+          subTxt.textContent = '';
+          subTxt.classList.add('hidden');
+        }
+      }
       var subEl = document.getElementById('headerSub');
       if (subEl) subEl.textContent = 'Sistema de prueba';
     }
@@ -1350,6 +1373,17 @@
       };
     });
 
+    function closeNotifDropdown() {
+      var dd = document.getElementById('notifDropdown');
+      if (!dd) return;
+      var wasOpen = !dd.classList.contains('hidden');
+      dd.classList.add('hidden');
+      if (wasOpen) {
+        markTrialReminderAcknowledged();
+        renderNotificationsMerged();
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
     document.getElementById('notifBtn').addEventListener('click', function (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -1358,22 +1392,21 @@
         dd.classList.remove('hidden');
         loadNotifications().then(function () {
           setNotifLastRead();
-          var countEl = document.getElementById('notifCount');
-          if (countEl) { countEl.classList.add('hidden'); countEl.textContent = '0'; }
+          renderNotificationsMerged();
         });
         if (typeof playBeep === 'function') playBeep();
-      } else dd.classList.add('hidden');
+      } else closeNotifDropdown();
       lucide.createIcons();
     });
     document.getElementById('notifBtn').addEventListener('touchend', function (e) {
       e.preventDefault();
       document.getElementById('notifBtn').click();
     }, { passive: false });
-    document.getElementById('notifDropdownClose').onclick = function () { document.getElementById('notifDropdown').classList.add('hidden'); lucide.createIcons(); };
+    document.getElementById('notifDropdownClose').onclick = function () { closeNotifDropdown(); };
     document.addEventListener('click', function (e) {
       var dd = document.getElementById('notifDropdown');
       var btn = document.getElementById('notifBtn');
-      if (dd && !dd.classList.contains('hidden') && btn && !dd.contains(e.target) && !btn.contains(e.target)) dd.classList.add('hidden');
+      if (dd && !dd.classList.contains('hidden') && btn && !dd.contains(e.target) && !btn.contains(e.target)) closeNotifDropdown();
     });
     // Carrito
     document.getElementById('cartBtn').onclick = openCart;
@@ -3394,6 +3427,7 @@ async function showApp() {
     if (isSuper && state.superUiMode === 'negocio') {
       if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
       window._trialCountdownInterval = setInterval(updateTrialCountdown, 1000);
+      await loadAdminContact();
       await initData();
       renderInventory();
       updateCartUI();
@@ -3409,6 +3443,7 @@ async function showApp() {
     } else {
       if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
       window._trialCountdownInterval = setInterval(updateTrialCountdown, 1000);
+      await loadAdminContact();
       await initData();
       renderInventory();
       updateCartUI();
@@ -3861,6 +3896,123 @@ async function showApp() {
       if (text) url += '?text=' + encodeURIComponent(text);
       return url;
     }
+    function parseTrialReminderConfigValue(val) {
+      var def = { windowDays: 5, messages: {} };
+      if (!val || typeof val !== 'string') return def;
+      try {
+        var j = JSON.parse(val);
+        if (j && typeof j === 'object') {
+          def.windowDays = Math.min(30, Math.max(1, parseInt(j.windowDays, 10) || 5));
+          if (j.messages && typeof j.messages === 'object') def.messages = j.messages;
+        }
+      } catch (_) {}
+      return def;
+    }
+    async function loadTrialReminderConfigFromSupabase() {
+      window._trialReminderConfig = { windowDays: 5, messages: {} };
+      if (!supabaseClient) return;
+      try {
+        var r = await supabaseClient.from('app_settings').select('value').eq('key', 'trial_reminder_config').maybeSingle();
+        if (r.data && r.data.value) window._trialReminderConfig = parseTrialReminderConfigValue(r.data.value);
+      } catch (_) {}
+    }
+    function getTrialReminderWindowDays() {
+      var c = window._trialReminderConfig || {};
+      return Math.min(30, Math.max(1, parseInt(c.windowDays, 10) || 5));
+    }
+    function defaultTrialReminderBody(dLeft) {
+      if (dLeft === 1) return '¡Queda 1 día para renovar! Evitá quedarte sin acceso a Ferriol OS.';
+      return 'Quedan ' + dLeft + ' días para renovar tu plan. Mantené tu negocio activo sin interrupciones.';
+    }
+    function applyTrialReminderTokens(text, dLeft, kioscoName) {
+      var t = (text || '').trim();
+      if (!t) t = defaultTrialReminderBody(dLeft);
+      var nombre = (kioscoName || '').trim() || 'tu negocio';
+      return t
+        .replace(/\{dias\}/gi, String(dLeft))
+        .replace(/\{dias_restantes\}/gi, String(dLeft))
+        .replace(/\{nombre\}/gi, nombre)
+        .replace(/\{negocio\}/gi, nombre);
+    }
+    function trialReminderAckStorageKey(userId, trialEndsAt, dLeft) {
+      var norm = String(trialEndsAt || '').replace(/[^0-9a-zA-Z]/g, '').slice(0, 24);
+      return 'ferriol_trial_remind_ack_' + userId + '_' + norm + '_' + dLeft;
+    }
+    function buildTrialReminderSyntheticNotification() {
+      if (!currentUser || currentUser.role !== 'kiosquero' || !currentUser.trialEndsAt) return null;
+      var endsAt = currentUser.trialEndsAt;
+      var end = new Date(endsAt);
+      var now = new Date();
+      var msLeft = end - now;
+      if (msLeft <= 0) return null;
+      var dLeft = Math.ceil(msLeft / (24 * 60 * 60 * 1000));
+      var win = getTrialReminderWindowDays();
+      if (dLeft < 1 || dLeft > win) return null;
+      try {
+        if (localStorage.getItem(trialReminderAckStorageKey(currentUser.id, endsAt, dLeft))) return null;
+      } catch (_) {}
+      var cfg = window._trialReminderConfig || { messages: {} };
+      var custom = (cfg.messages && (cfg.messages[String(dLeft)] != null ? cfg.messages[String(dLeft)] : cfg.messages[dLeft])) || '';
+      var body = applyTrialReminderTokens(custom, dLeft, currentUser.kioscoName);
+      var head = dLeft === 1 ? 'Queda 1 día para renovar' : ('Quedan ' + dLeft + ' días para renovar');
+      return {
+        id: '__ferriol_trial_' + dLeft + '_' + String(endsAt).slice(0, 16),
+        created_at: new Date().toISOString(),
+        message: head + '\n' + body,
+        _trialSynthetic: true,
+        _trialDLeft: dLeft
+      };
+    }
+    function markTrialReminderAcknowledged() {
+      if (!currentUser || currentUser.role !== 'kiosquero' || !currentUser.trialEndsAt) return;
+      var endsAt = currentUser.trialEndsAt;
+      var end = new Date(endsAt);
+      var msLeft = end - new Date();
+      if (msLeft <= 0) return;
+      var dLeft = Math.ceil(msLeft / (24 * 60 * 60 * 1000));
+      var win = getTrialReminderWindowDays();
+      if (dLeft < 1 || dLeft > win) return;
+      try {
+        localStorage.setItem(trialReminderAckStorageKey(currentUser.id, endsAt, dLeft), '1');
+      } catch (_) {}
+    }
+    function readTrialReminderMessagesFromDom() {
+      var map = {};
+      document.querySelectorAll('#trialReminderMsgsContainer textarea[data-trial-msg-day]').forEach(function (ta) {
+        var k = ta.getAttribute('data-trial-msg-day');
+        if (k) map[k] = ta.value;
+      });
+      return map;
+    }
+    function fillTrialReminderAdminFields(cfg, preservedMap) {
+      var container = document.getElementById('trialReminderMsgsContainer');
+      var winInput = document.getElementById('trialReminderWindowDays');
+      if (!container || !winInput) return;
+      var w = Math.min(30, Math.max(1, parseInt(winInput.value, 10) || (cfg && cfg.windowDays) || 5));
+      winInput.value = String(w);
+      var msgs = (cfg && cfg.messages) || {};
+      var pres = preservedMap || {};
+      container.innerHTML = '';
+      for (var d = w; d >= 1; d--) {
+        var sk = String(d);
+        var wrap = document.createElement('div');
+        wrap.className = 'mb-3';
+        var lab = document.createElement('label');
+        lab.className = 'block text-xs text-white/70 mb-1';
+        lab.innerHTML = 'Mensaje si quedan <strong>' + d + '</strong> ' + (d === 1 ? 'día' : 'días') + ' <span class="text-white/40 font-normal">(opcional)</span>';
+        var ta = document.createElement('textarea');
+        ta.rows = 2;
+        ta.setAttribute('data-trial-msg-day', sk);
+        ta.className = 'w-full glass rounded-xl px-3 py-2 border border-white/20 text-white text-sm placeholder-white/35 focus:outline-none focus:ring-2 focus:ring-[#22c55e] resize-y min-h-[3.5rem]';
+        ta.placeholder = 'Ej: Aprovechá hoy para renovar y seguir con stock, caja y libreta sin cortes.';
+        var v = pres[sk] != null ? pres[sk] : (msgs[sk] != null ? msgs[sk] : (msgs[d] != null ? msgs[d] : ''));
+        ta.value = typeof v === 'string' ? v : String(v || '');
+        wrap.appendChild(lab);
+        wrap.appendChild(ta);
+        container.appendChild(wrap);
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
     async function loadAdminContact() {
       if (!supabaseClient) return;
       try {
@@ -3877,6 +4029,7 @@ async function showApp() {
         adminContact.whatsappList = list;
         adminContact.whatsapp = list[0] || '';
       } catch (_) {}
+      await loadTrialReminderConfigFromSupabase();
     }
     function fillRenovarWhatsAppLinks() {
       var container = document.getElementById('renovarWhatsAppLinks');
@@ -4072,12 +4225,13 @@ async function showApp() {
     async function renderSuper() {
       if (!supabaseClient) return;
       try {
-        const { data: settingsRows } = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4', 'admin_delete_password']);
+        const { data: settingsRows } = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4', 'admin_delete_password', 'trial_reminder_config']);
         var whatsappInput = document.getElementById('adminContactWhatsapp');
         var whatsapp2Input = document.getElementById('adminContactWhatsapp2');
         var whatsapp3Input = document.getElementById('adminContactWhatsapp3');
         var whatsapp4Input = document.getElementById('adminContactWhatsapp4');
         var deletePwdInput = document.getElementById('adminDeletePassword');
+        var trialCfgParsed = { windowDays: 5, messages: {} };
         if (settingsRows) {
           settingsRows.forEach(function (r) {
             if (r.key === 'admin_whatsapp' && whatsappInput) whatsappInput.value = r.value || '';
@@ -4085,8 +4239,13 @@ async function showApp() {
             if (r.key === 'admin_whatsapp_3' && whatsapp3Input) whatsapp3Input.value = r.value || '';
             if (r.key === 'admin_whatsapp_4' && whatsapp4Input) whatsapp4Input.value = r.value || '';
             if (r.key === 'admin_delete_password' && deletePwdInput) deletePwdInput.value = r.value || '';
+            if (r.key === 'trial_reminder_config') trialCfgParsed = parseTrialReminderConfigValue(r.value || '');
           });
         }
+        window._superTrialReminderEditCache = trialCfgParsed;
+        var winDaysInput = document.getElementById('trialReminderWindowDays');
+        if (winDaysInput) winDaysInput.value = String(trialCfgParsed.windowDays);
+        fillTrialReminderAdminFields(trialCfgParsed, null);
         if (superFilterState !== 'todos') {
           document.querySelectorAll('.super-filter-btn').forEach(function (b) {
             b.className = 'super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border touch-target ' + (b.dataset.filter === superFilterState ? 'border-[#dc2626]/50 bg-[#dc2626]/30' : 'border-white/20 glass');
@@ -4202,15 +4361,25 @@ async function showApp() {
       const msgEl = document.getElementById('adminContactMsg');
       if (!supabaseClient) return;
       try {
+        var winEl = document.getElementById('trialReminderWindowDays');
+        var winDays = Math.min(30, Math.max(1, parseInt(winEl && winEl.value, 10) || 5));
+        var msgObj = {};
+        for (var d = winDays; d >= 1; d--) {
+          var ta = document.querySelector('#trialReminderMsgsContainer textarea[data-trial-msg-day="' + d + '"]');
+          msgObj[String(d)] = ta ? String(ta.value || '').trim() : '';
+        }
+        var trialReminderJson = JSON.stringify({ windowDays: winDays, messages: msgObj });
         await supabaseClient.from('app_settings').upsert([
           { key: 'admin_whatsapp', value: whatsapp },
           { key: 'admin_whatsapp_2', value: whatsapp2 },
           { key: 'admin_whatsapp_3', value: whatsapp3 },
           { key: 'admin_whatsapp_4', value: whatsapp4 },
-          { key: 'admin_delete_password', value: deletePwd }
+          { key: 'admin_delete_password', value: deletePwd },
+          { key: 'trial_reminder_config', value: trialReminderJson }
         ], { onConflict: 'key' });
         adminContact.whatsapp = whatsapp;
         adminContact.whatsappList = [whatsapp, whatsapp2, whatsapp3, whatsapp4].filter(Boolean);
+        window._superTrialReminderEditCache = parseTrialReminderConfigValue(trialReminderJson);
         msgEl.textContent = 'Ajustes guardados.';
         msgEl.classList.remove('hidden');
         setTimeout(() => msgEl.classList.add('hidden'), 3000);
@@ -4220,6 +4389,15 @@ async function showApp() {
       }
       lucide.createIcons();
     };
+    (function setupTrialReminderWindowDaysListener() {
+      var el = document.getElementById('trialReminderWindowDays');
+      if (!el) return;
+      el.addEventListener('change', function () {
+        var preserved = readTrialReminderMessagesFromDom();
+        var base = window._superTrialReminderEditCache || { windowDays: 5, messages: {} };
+        fillTrialReminderAdminFields(base, preserved);
+      });
+    })();
     async function exportAllUsersBackup() {
       if (!currentUser || currentUser.role !== 'super' || !supabaseClient) return;
       var msgEl = document.getElementById('adminBackupAllMsg');
@@ -4356,36 +4534,57 @@ async function showApp() {
         localStorage.setItem(key, latest ? new Date(latest).toISOString() : new Date().toISOString());
       } catch (_) {}
     }
+    function renderNotificationsMerged() {
+      var notifSince = (currentUser && currentUser.created_at) ? new Date(currentUser.created_at).getTime() : 0;
+      var visible = (notificationsCache || []).filter(function (n) { return n.created_at && new Date(n.created_at).getTime() >= notifSince; });
+      var trialSynth = buildTrialReminderSyntheticNotification();
+      var rows = visible.slice();
+      if (trialSynth) rows.unshift(trialSynth);
+      var lastRead = getNotifLastRead();
+      var unread = rows.filter(function (n) {
+        if (n._trialSynthetic) return true;
+        return new Date(n.created_at).getTime() > lastRead;
+      });
+      var listEl = document.getElementById('notifList');
+      var emptyEl = document.getElementById('notifEmpty');
+      var countEl = document.getElementById('notifCount');
+      if (listEl) {
+        if (rows.length === 0) {
+          listEl.innerHTML = '';
+          if (emptyEl) emptyEl.classList.remove('hidden');
+        } else {
+          if (emptyEl) emptyEl.classList.add('hidden');
+          listEl.innerHTML = rows.map(function (n) {
+            var fecha = n.created_at ? new Date(n.created_at).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : '';
+            var extraClass = n._trialSynthetic ? ' trial-reminder-notif border-amber-400/45 bg-gradient-to-br from-amber-500/15 to-orange-500/08 shadow-[0_8px_28px_rgba(245,158,11,0.12)]' : '';
+            var msgRaw = n.message || '';
+            var inner;
+            if (n._trialSynthetic) {
+              var parts = msgRaw.split('\n');
+              var head = parts.shift() || '';
+              var body = parts.join('\n');
+              var safeHead = head.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+              var safeBody = body.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+              inner = '<p class="text-white/95 text-sm leading-snug"><span class="font-bold text-amber-200">' + safeHead + '</span><br><span class="text-white/88">' + safeBody + '</span></p>';
+            } else {
+              inner = '<p class="text-white/90 text-sm">' + msgRaw.replace(/</g, '&lt;').replace(/\n/g, '<br>') + '</p>';
+            }
+            return '<div class="glass rounded-xl p-3 border border-white/10' + extraClass + '">' + inner + '<p class="text-white/50 text-xs mt-1">' + fecha + '</p></div>';
+          }).join('');
+        }
+      }
+      if (countEl) {
+        if (unread.length > 0) { countEl.textContent = unread.length > 99 ? '99+' : unread.length; countEl.classList.remove('hidden'); }
+        else countEl.classList.add('hidden');
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
     async function loadNotifications() {
       if (!supabaseClient) return;
       try {
         var res = await supabaseClient.from('notifications').select('id, created_at, message').order('created_at', { ascending: false }).limit(50);
         notificationsCache = (res.data || []);
-        var notifSince = (currentUser && currentUser.created_at) ? new Date(currentUser.created_at).getTime() : 0;
-        var visible = notificationsCache.filter(function (n) { return n.created_at && new Date(n.created_at).getTime() >= notifSince; });
-        var lastRead = getNotifLastRead();
-        var unread = visible.filter(function (n) { return new Date(n.created_at).getTime() > lastRead; });
-        var listEl = document.getElementById('notifList');
-        var emptyEl = document.getElementById('notifEmpty');
-        var countEl = document.getElementById('notifCount');
-        if (listEl) {
-          if (visible.length === 0) {
-            listEl.innerHTML = '';
-            if (emptyEl) emptyEl.classList.remove('hidden');
-          } else {
-            if (emptyEl) emptyEl.classList.add('hidden');
-            listEl.innerHTML = visible.map(function (n) {
-              var fecha = n.created_at ? new Date(n.created_at).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : '';
-              var msg = (n.message || '').replace(/</g, '&lt;').replace(/\n/g, '<br>');
-              return '<div class="glass rounded-xl p-3 border border-white/10"><p class="text-white/90 text-sm">' + msg + '</p><p class="text-white/50 text-xs mt-1">' + fecha + '</p></div>';
-            }).join('');
-          }
-        }
-        if (countEl) {
-          if (unread.length > 0) { countEl.textContent = unread.length > 99 ? '99+' : unread.length; countEl.classList.remove('hidden'); }
-          else countEl.classList.add('hidden');
-        }
-        lucide.createIcons();
+        renderNotificationsMerged();
       } catch (_) {}
     }
     document.getElementById('sendNotificationBtn').onclick = async function () {
