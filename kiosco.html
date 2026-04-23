@@ -302,16 +302,26 @@
           </div>
         </div>
         <!-- Cuenta regresiva prueba -->
-        <div id="trialCountdownBanner" class="glass rounded-2xl p-4 slide-up kiosquero-only hidden border border-[#22c55e]/40">
-          <div class="flex items-center justify-between gap-3 flex-wrap">
-            <div class="flex items-center gap-2 flex-1 min-w-0">
-              <i data-lucide="clock" class="w-5 h-5 text-[#86efac] shrink-0"></i>
-              <span id="trialCountdownText" class="font-medium">15 días de prueba restantes</span>
+        <div id="trialCountdownBanner" class="trial-countdown-banner glass rounded-2xl p-4 sm:p-5 slide-up kiosquero-only hidden border border-[#22c55e]/40 relative overflow-hidden">
+          <div class="trial-countdown-banner-glow pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300"></div>
+          <div class="relative flex flex-col gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+              <div class="flex items-start gap-3 flex-1 min-w-0">
+                <div class="trial-countdown-icon-wrap flex items-center justify-center rounded-2xl w-12 h-12 sm:w-14 sm:h-14 shrink-0 bg-[#22c55e]/25 border border-[#22c55e]/35">
+                  <i data-lucide="clock" class="w-6 h-6 sm:w-7 sm:h-7 text-[#86efac] shrink-0"></i>
+                </div>
+                <div class="min-w-0 flex-1 pt-0.5">
+                  <p id="trialCountdownText" class="font-semibold text-white text-base sm:text-lg leading-snug">15 días de prueba restantes</p>
+                  <p id="trialCountdownSubtext" class="text-sm text-amber-200/95 mt-1.5 leading-snug hidden"></p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 w-full sm:w-auto shrink-0 sm:ml-auto">
+                <span id="trialCountdownDays" class="trial-countdown-days-pill px-4 py-2 rounded-2xl bg-[#22c55e]/35 text-[#86efac] font-black text-xl sm:text-2xl tabular-nums shrink-0 border border-[#22c55e]/45 shadow-[0_0_24px_rgba(34,197,94,0.2)]">15</span>
+                <button type="button" id="trialRenovarBtn" class="trial-renovar-btn flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 rounded-2xl py-3 px-5 text-sm sm:text-base font-bold touch-target shrink-0 bg-gradient-to-br from-[#22c55e] to-[#15803d] hover:from-[#4ade80] hover:to-[#22c55e] text-white shadow-lg shadow-[#22c55e]/35 border border-white/20 active:scale-[0.98]">
+                  <i data-lucide="refresh-cw" class="w-5 h-5"></i> Renovar ahora
+                </button>
+              </div>
             </div>
-            <span id="trialCountdownDays" class="px-3 py-1 rounded-full bg-[#22c55e]/30 text-[#86efac] font-bold text-lg shrink-0">15</span>
-            <button type="button" id="trialRenovarBtn" class="w-full sm:w-auto mt-2 sm:mt-0 inline-flex items-center justify-center gap-2 rounded-xl py-2.5 px-4 text-sm font-medium touch-target shrink-0 bg-green-600 hover:bg-green-500 text-white">
-              <i data-lucide="refresh-cw" class="w-4 h-4"></i> Renovar
-            </button>
           </div>
         </div>
       </div>
@@ -1054,6 +1064,16 @@
             <div>
               <label class="block text-xs text-white/70 mb-1">Contraseña para quitar usuarios (opcional)</label>
               <input type="password" id="adminDeletePassword" placeholder="Al quitar un negocio se pedirá esta contraseña" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+            </div>
+            <div class="border-t border-white/10 pt-4 mt-4">
+              <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
+                <i data-lucide="bell-ring" class="w-4 h-4 text-amber-300"></i>
+                Avisos de renovación (prueba)
+              </h3>
+              <p class="text-xs text-white/50 mb-3">Cada kiosquero verá en la campana un aviso por cada día que le quede dentro de la ventana (ej. “quedan 5… 4… 3… días”). Podés editar el texto de cada día. Placeholders: <span class="text-white/70">{dias}</span>, <span class="text-white/70">{nombre}</span> (nombre del negocio).</p>
+              <label class="block text-xs text-white/70 mb-1">Días antes del vencimiento para avisar (1–30)</label>
+              <input type="number" id="trialReminderWindowDays" min="1" max="30" value="5" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+              <div id="trialReminderMsgsContainer" class="space-y-1 max-h-[40vh] overflow-y-auto pr-1"></div>
             </div>
             <button type="button" id="saveAdminContact" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold">Guardar ajustes</button>
             <p id="adminContactMsg" class="text-xs mt-2 text-green-300 hidden"></p>
