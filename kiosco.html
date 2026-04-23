@@ -1104,7 +1104,11 @@
             <i data-lucide="banknote" class="w-5 h-5 text-[#86efac]"></i>
             Cobros (transferencia)
           </h2>
-          <p class="text-xs text-white/50 mb-4">Registrá el cobro cuando el cliente o socio transferenció; al verificar se generan líneas en el libro según <span class="text-white/70">PLAN-COMPENSACIONES-FERRIOL.md</span>. Ejecutá <code class="text-[#86efac]">supabase-ferriol-payments.sql</code> en Supabase.</p>
+          <p class="text-xs text-white/50 mb-4">Registrá el cobro cuando el cliente o socio transferenció; al verificar se generan líneas en el libro según <span class="text-white/70">PLAN-COMPENSACIONES-FERRIOL.md</span>. Las ventas por <strong class="text-white/75">alta definitiva de kiosco</strong> (tras la prueba) se registran desde el detalle del negocio. SQL: <code class="text-[#86efac]">supabase-ferriol-kiosco-definitive-trial.sql</code>.</p>
+          <div id="ferriolCompanyReceivableBox" class="rounded-xl border border-cyan-500/35 bg-cyan-500/10 p-4 mb-4 text-sm">
+            <h3 class="font-semibold text-cyan-100 mb-1 flex items-center gap-2"><i data-lucide="building-2" class="w-4 h-4"></i> Empresa · 20% licencia kiosco (pendiente de cobro)</h3>
+            <p id="ferriolCompanyReceivableText" class="text-xs text-white/70">—</p>
+          </div>
           <div class="rounded-xl border border-white/15 bg-white/5 p-4 mb-4 space-y-3">
             <h3 class="font-semibold text-sm text-white/90">Nuevo cobro pendiente</h3>
             <label class="block text-xs text-white/60">Tipo</label>
@@ -1162,6 +1166,15 @@
               </h3>
               <p class="text-xs text-white/50 mb-2">Se muestra en Configuración del kiosquero. Una línea por CBU/alias/concepto.</p>
               <textarea id="adminTransferInfo" rows="5" placeholder="Titular, CBU, alias, instrucciones..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm resize-y mb-2"></textarea>
+            </div>
+            <div class="border-t border-white/10 pt-4 mt-4">
+              <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
+                <i data-lucide="calendar-clock" class="w-4 h-4 text-cyan-300"></i>
+                Período de prueba (estrategia)
+              </h3>
+              <p class="text-xs text-white/50 mb-2">Días de prueba al registrarse un <strong class="text-white/75">kiosco</strong> o <strong class="text-white/75">socio</strong>. Solo afecta <strong class="text-white/75">nuevos</strong> registros; no modifica cuentas existentes.</p>
+              <label class="block text-xs text-white/70 mb-1">Duración en días (1–365)</label>
+              <input type="number" id="adminTrialDurationDays" min="1" max="365" value="15" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-2">
             </div>
             <div class="border-t border-white/10 pt-4 mt-4">
               <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">

@@ -237,6 +237,16 @@
     /** Montos orientativos (alineados a mlm_plan_config compensation_v1 y PLAN-COMPENSACIONES-FERRIOL.md) */
     var FERRIOL_PLAN_AMOUNTS = { kit: 60000, kioscoMonthly: 9900, vendorMonthly: 20000 };
 
+    async function getTrialDurationDays() {
+      if (!supabaseClient) return 15;
+      try {
+        var r = await supabaseClient.from('app_settings').select('value').eq('key', 'trial_duration_days').maybeSingle();
+        var n = parseInt(r.data && r.data.value, 10);
+        if (!isNaN(n) && n >= 1 && n <= 365) return n;
+      } catch (_) {}
+      return 15;
+    }
+
     function ferriolMonthInputToPeriodDate(monthStr) {
       if (!monthStr || String(monthStr).length < 7) return null;
       var p = String(monthStr).slice(0, 7).split('-');
@@ -278,20 +288,34 @@
         return;
       }
       try {
-        var res = await supabaseClient.from('mlm_ledger').select('created_at, amount, event_type, status, depth').eq('beneficiary_user_id', currentUser.id).order('created_at', { ascending: false }).limit(25);
+        var res = await supabaseClient.from('mlm_ledger').select('created_at, amount, event_type, status, depth').eq('beneficiary_user_id', currentUser.id).order('created_at', { ascending: false }).limit(40);
         if (res.error) throw res.error;
         var rows = res.data || [];
-        var sum = rows.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
+        var pendPay = rows.filter(function (r) { return r.event_type === 'vendor_payable_company' && r.status === 'pending'; });
+        var pendComm = rows.filter(function (r) { return r.event_type === 'sale_commission' && r.status === 'pending'; });
+        var sumPay = pendPay.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
+        var sumComm = pendComm.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
+        function rowLine(r) {
+          return '<li class="border-b border-white/10 pb-1">' + String(r.created_at || '').slice(0, 10) + ' · $' + Number(r.amount).toLocaleString('es-AR', { minimumFractionDigits: 2 }) + ' · ' + String(r.event_type || '') + ' · ' + String(r.status || '') + '</li>';
+        }
         el.classList.remove('hidden');
-        el.innerHTML = '<p class="font-semibold text-emerald-200/90 mb-1 flex items-center gap-2"><i data-lucide="coins" class="w-4 h-4"></i> Tus comisiones (sistema)</p>' +
-          '<p class="text-xs text-white/55 mb-2">Suma movimientos listados: <strong>$ ' + sum.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> ARS</p>' +
-          (rows.length === 0 ? '<p class="text-xs text-white/50">Sin acreditaciones aún. Cuando un admin verifique un cobro, aparecerán aquí.</p>' :
-            '<ul class="text-xs space-y-1 max-h-40 overflow-y-auto">' + rows.map(function (r) {
-              return '<li class="border-b border-white/10 pb-1">' + String(r.created_at || '').slice(0, 10) + ' · $' + Number(r.amount).toLocaleString('es-AR', { minimumFractionDigits: 2 }) + ' · ' + String(r.event_type || '') + ' · ' + String(r.status || '') + '</li>';
-            }).join('') + '</ul>');
+        el.innerHTML = '<p class="font-semibold text-emerald-200/90 mb-2 flex items-center gap-2"><i data-lucide="wallet" class="w-4 h-4"></i> Tu cuenta con Ferriol (libro)</p>' +
+          '<div class="text-xs space-y-2 mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2 py-2">' +
+          '<p class="text-amber-100/95 font-medium">20% licencia kiosco · aportar a la empresa (pendiente)</p>' +
+          '<p class="text-white/80">Total pendiente: <strong>$ ' + sumPay.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> ARS</p>' +
+          (pendPay.length === 0 ? '<p class="text-white/45">Nada pendiente en esta categoría.</p>' : '<ul class="space-y-1 max-h-24 overflow-y-auto">' + pendPay.map(rowLine).join('') + '</ul>') +
+          '</div>' +
+          '<div class="text-xs space-y-2 mb-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2 py-2">' +
+          '<p class="text-emerald-100/95 font-medium">Tu comisión de venta (80% · pendiente de acreditación)</p>' +
+          '<p class="text-white/80">Total pendiente: <strong>$ ' + sumComm.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> ARS</p>' +
+          (pendComm.length === 0 ? '<p class="text-white/45">Nada pendiente; cuando el admin verifique cobros o liquide, verás movimientos.</p>' : '<ul class="space-y-1 max-h-24 overflow-y-auto">' + pendComm.map(rowLine).join('') + '</ul>') +
+          '</div>' +
+          '<p class="text-xs text-white/45 mb-1">Otros movimientos recientes</p>' +
+          (rows.length === 0 ? '<p class="text-xs text-white/50">Sin movimientos.</p>' :
+            '<ul class="text-xs space-y-1 max-h-32 overflow-y-auto">' + rows.slice(0, 15).map(rowLine).join('') + '</ul>');
       } catch (e) {
         el.classList.remove('hidden');
-        el.innerHTML = '<p class="text-xs text-amber-200">Comisiones: ejecutá supabase-ferriol-payments.sql o revisá RLS en mlm_ledger.</p>';
+        el.innerHTML = '<p class="text-xs text-amber-200">Libro MLM: ejecutá los SQL de compensaciones o revisá RLS.</p>';
       }
       lucide.createIcons();
     }
@@ -324,6 +348,22 @@
       pendingEl.innerHTML = '<p class="text-white/50 text-xs">Cargando…</p>';
       verifiedEl.innerHTML = '';
       try {
+        var recvEl = document.getElementById('ferriolCompanyReceivableText');
+        if (recvEl) {
+          try {
+            var lr = await supabaseClient.from('mlm_ledger').select('amount').is('beneficiary_user_id', null).eq('status', 'pending').eq('event_type', 'company_reserve').like('idempotency_key', 'kiosdef%:company');
+            if (!lr.error && lr.data && lr.data.length) {
+              var sum20 = lr.data.reduce(function (a, x) { return a + Number(x.amount || 0); }, 0);
+              recvEl.innerHTML = 'Total <strong class="text-cyan-100">20% licencia kiosco</strong> pendiente de cobro (altas definitivas): <strong class="text-cyan-100">$ ' + sum20.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> ARS · ' + lr.data.length + ' partida(s).';
+            } else if (!lr.error) {
+              recvEl.textContent = 'Sin partidas 20% pendientes por ventas “alta definitiva”. Registralas desde el detalle de cada kiosco referido por un socio.';
+            } else {
+              recvEl.textContent = 'No se pudo cargar el resumen. ¿Ejecutaste supabase-ferriol-kiosco-definitive-trial.sql?';
+            }
+          } catch (_) {
+            recvEl.textContent = '—';
+          }
+        }
         var cache = window._ferriolAllProfilesCache || [];
         if (!cache.length) {
           var pr = await supabaseClient.from('profiles').select('id, email, kiosco_name').limit(800);
@@ -3880,7 +3920,8 @@ async function showApp() {
           return;
         }
         if (!profile) {
-          const trialEndsAt = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().slice(0, 19) + 'Z';
+          var trialDaysNew = await getTrialDurationDays();
+          const trialEndsAt = new Date(Date.now() + trialDaysNew * 24 * 60 * 60 * 1000).toISOString().slice(0, 19) + 'Z';
           var sponsorNew = await getSponsorIdForNewKiosqueroProfile();
           const { error: insertErr } = await supabaseClient.from('profiles').insert({ id: uid, email: authData.user.email, role: 'kiosquero', active: true, trial_ends_at: trialEndsAt, sponsor_id: sponsorNew || null });
           if (insertErr) {
@@ -4128,7 +4169,8 @@ async function showApp() {
         return;
       }
       const newId = data?.user?.id;
-      const trialEndsAt = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().slice(0, 19) + 'Z';
+      var trialDaysSign = await getTrialDurationDays();
+      const trialEndsAt = new Date(Date.now() + trialDaysSign * 24 * 60 * 60 * 1000).toISOString().slice(0, 19) + 'Z';
       if (!newId) {
         errEl.textContent = 'Registro recibido. Si tu proyecto pide confirmar el email, abrí el enlace del correo (y spam) antes de iniciar sesión. Después usá el mismo email y contraseña.';
         errEl.classList.add('show');
@@ -4554,6 +4596,20 @@ async function showApp() {
           <button type="button" class="super-detail-save-sponsor w-full py-2.5 rounded-xl text-sm bg-[#22c55e]/25 text-[#86efac] border border-[#22c55e]/50 touch-target font-medium">Guardar referidor</button>
         </div>`;
       }
+      var sponsorIsPartner = false;
+      if (user.sponsor_id && pool && pool.length) {
+        var spRow0 = pool.find(function (x) { return x && x.id === user.sponsor_id; });
+        sponsorIsPartner = !!(spRow0 && spRow0.role === 'partner');
+      }
+      var defSaleHtml = '';
+      if (currentUser && currentUser.role === 'super' && user.role === 'kiosquero' && user.sponsor_id && sponsorIsPartner) {
+        defSaleHtml = `
+        <div class="border-t border-white/10 pt-4 space-y-2">
+          <p class="text-sm font-medium text-cyan-200/95 flex items-center gap-2"><i data-lucide="percent" class="w-4 h-4"></i> Venta licencia kiosco (alta definitiva)</p>
+          <p class="text-xs text-white/55">Cuando el negocio ya pasó la prueba y cerraste la venta con el socio vendedor, registrá una vez la operación: <strong class="text-white/75">20% empresa</strong> y <strong class="text-white/75">80% vendedor</strong> sobre el valor mensual del plan (ver <code class="text-cyan-200/80">mlm_plan_config</code>). El socio verá el 20% como saldo a pagar a la empresa y el 80% como comisión pendiente.</p>
+          <button type="button" class="super-detail-definitive-sale w-full py-2.5 rounded-xl text-sm bg-cyan-500/20 text-cyan-100 border border-cyan-400/45 touch-target font-medium">Registrar venta (20% / 80%)</button>
+        </div>`;
+      }
       var quitarHtml = (currentUser && currentUser.role === 'partner') ? '' : `
             <button type="button" class="super-detail-quitar w-full py-2.5 rounded-xl text-sm bg-red-500/20 text-red-300 border border-red-500/40 touch-target flex items-center justify-center gap-2">
               <i data-lucide="user-minus" class="w-4 h-4"></i> Quitar negocio (pide contraseña admin)
@@ -4569,6 +4625,7 @@ async function showApp() {
           <p><span class="text-white/50">Referido por:</span> ${sponsorLine}</p>
         </div>
         ${assignHtml}
+        ${defSaleHtml}
         <div class="border-t border-white/10 pt-4 space-y-3">
           <div class="flex items-center gap-2 flex-wrap">
             <span class="text-sm text-white/70">Activar/Desactivar:</span>
@@ -4595,6 +4652,21 @@ async function showApp() {
       modal.classList.add('flex');
       lucide.createIcons();
       var u = user;
+      var defSaleBtn = content.querySelector('.super-detail-definitive-sale');
+      if (defSaleBtn) {
+        defSaleBtn.onclick = async function () {
+          if (!supabaseClient) return;
+          if (!confirm('Se registrará en el libro la venta de licencia kiosco para este negocio (20% empresa, 80% del socio vendedor referidor). Solo se puede una vez por kiosco. ¿Continuar?')) return;
+          var rpc = await supabaseClient.rpc('ferriol_register_kiosco_definitive_sale', { p_kiosco_user_id: u.id });
+          if (rpc.error) { alert('Error: ' + (rpc.error.message || '')); return; }
+          var out = rpc.data;
+          if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+          if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo registrar.'); return; }
+          alert('Registrado. Empresa: 20% pendiente de cobro. Socio: 20% a pagar y 80% comisión pendiente (ver panel del socio).');
+          if (state.superSection === 'cobros') renderSuperCobrosSection();
+          openSuperUserDetail(u);
+        };
+      }
       content.querySelector('.super-detail-toggle').onclick = async () => {
         if (!supabaseClient) return;
         const newActive = !u.active;
@@ -4697,13 +4769,14 @@ async function showApp() {
     async function renderSuper() {
       if (!supabaseClient) return;
       try {
-        const { data: settingsRows } = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4', 'admin_delete_password', 'trial_reminder_config', 'ferriol_transfer_info']);
+        const { data: settingsRows } = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4', 'admin_delete_password', 'trial_reminder_config', 'ferriol_transfer_info', 'trial_duration_days']);
         var whatsappInput = document.getElementById('adminContactWhatsapp');
         var whatsapp2Input = document.getElementById('adminContactWhatsapp2');
         var whatsapp3Input = document.getElementById('adminContactWhatsapp3');
         var whatsapp4Input = document.getElementById('adminContactWhatsapp4');
         var deletePwdInput = document.getElementById('adminDeletePassword');
         var transferInfoTa = document.getElementById('adminTransferInfo');
+        var trialDurInput = document.getElementById('adminTrialDurationDays');
         var trialCfgParsed = { windowDays: 5, messages: {} };
         if (settingsRows) {
           settingsRows.forEach(function (r) {
@@ -4713,6 +4786,10 @@ async function showApp() {
             if (r.key === 'admin_whatsapp_4' && whatsapp4Input) whatsapp4Input.value = r.value || '';
             if (r.key === 'admin_delete_password' && deletePwdInput) deletePwdInput.value = r.value || '';
             if (r.key === 'ferriol_transfer_info' && transferInfoTa) transferInfoTa.value = r.value || '';
+            if (r.key === 'trial_duration_days' && trialDurInput) {
+              var td = parseInt(r.value, 10);
+              trialDurInput.value = (!isNaN(td) && td >= 1 && td <= 365) ? String(td) : '15';
+            }
             if (r.key === 'trial_reminder_config') trialCfgParsed = parseTrialReminderConfigValue(r.value || '');
           });
         }
@@ -4918,6 +4995,8 @@ async function showApp() {
         }
         var trialReminderJson = JSON.stringify({ windowDays: winDays, messages: msgObj });
         var transferInfo = (document.getElementById('adminTransferInfo') && document.getElementById('adminTransferInfo').value != null) ? String(document.getElementById('adminTransferInfo').value || '') : '';
+        var trialDurEl = document.getElementById('adminTrialDurationDays');
+        var trialDurSave = Math.min(365, Math.max(1, parseInt(trialDurEl && trialDurEl.value, 10) || 15));
         await supabaseClient.from('app_settings').upsert([
           { key: 'admin_whatsapp', value: whatsapp },
           { key: 'admin_whatsapp_2', value: whatsapp2 },
@@ -4925,6 +5004,7 @@ async function showApp() {
           { key: 'admin_whatsapp_4', value: whatsapp4 },
           { key: 'admin_delete_password', value: deletePwd },
           { key: 'ferriol_transfer_info', value: transferInfo },
+          { key: 'trial_duration_days', value: String(trialDurSave) },
           { key: 'trial_reminder_config', value: trialReminderJson }
         ], { onConflict: 'key' });
         adminContact.whatsapp = whatsapp;
