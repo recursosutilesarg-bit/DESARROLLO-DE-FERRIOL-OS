@@ -15,6 +15,8 @@
     // CREATE TABLE notifications ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now(), message text NOT NULL );
     // ALTER TABLE notifications ENABLE ROW LEVEL SECURITY; CREATE POLICY "notifications_select" ON notifications FOR SELECT TO authenticated USING (true); CREATE POLICY "notifications_insert" ON notifications FOR INSERT TO authenticated WITH CHECK (true);
     // Recordatorios de fin de prueba (mensajes por día + ventana): guardá en app_settings una fila key = 'trial_reminder_config', value = JSON, ej. {"windowDays":5,"messages":{"5":"...","4":"..."}}. Placeholders en textos: {dias}, {dias_restantes}, {nombre}, {negocio}.
+    // Red de referidos / MLM: ejecutá supabase-referral-network.sql (sponsor_id, referral_code, función resolve_referral_code). Rol profiles.role = 'partner' = líder con lista filtrada; 'super' = administración global.
+    // Enlaces de invitación: ?ref=CÓDIGO&nicho=kiosco (alta negocio → role kiosquero) | ?ref=CÓDIGO&nicho=socio (membresía vendedor → role partner). Aliases: nicho=vendedor|red|membresia, membresia=1, tipo=...
     // Historial de cierres de caja (facturación y ganancia por día):
     // CREATE TABLE cierres_caja ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE, fecha date NOT NULL, fecha_cierre timestamptz NOT NULL DEFAULT now(), total_facturado numeric NOT NULL DEFAULT 0, ganancia numeric NOT NULL DEFAULT 0, created_at timestamptz DEFAULT now() );
     // ALTER TABLE cierres_caja ENABLE ROW LEVEL SECURITY; CREATE POLICY "cierres_caja_policy" ON cierres_caja FOR ALL USING (auth.uid() = user_id);
@@ -33,6 +35,156 @@
     const supabaseClient = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase && typeof window.supabase.createClient === 'function')
       ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
       : null;
+
+    (function ferriolCaptureReferralFromUrl() {
+      try {
+        var p = new URLSearchParams(window.location.search);
+        var r = p.get('ref') || p.get('referral') || p.get('codigo');
+        if (r && String(r).trim()) {
+          var c = String(r).trim().toUpperCase().replace(/[^A-Za-z0-9]/g, '').slice(0, 32);
+          if (c) sessionStorage.setItem('ferriol_signup_ref', c);
+        }
+        var nRaw = (p.get('nicho') || p.get('tipo') || '').toLowerCase().trim();
+        if (nRaw === 'socio' || nRaw === 'vendedor' || nRaw === 'red' || nRaw === 'membresia' || p.get('membresia') === '1') {
+          sessionStorage.setItem('ferriol_signup_nicho', 'socio');
+        } else if (nRaw === 'kiosco' || nRaw === 'negocio' || nRaw === 'tienda' || nRaw === 'almacen') {
+          sessionStorage.setItem('ferriol_signup_nicho', 'kiosco');
+        } else if (r && String(r).trim() && !sessionStorage.getItem('ferriol_signup_nicho')) {
+          sessionStorage.setItem('ferriol_signup_nicho', 'kiosco');
+        }
+      } catch (_) {}
+    })();
+
+    function ferriolPublicSignupBaseUrl() {
+      try {
+        if (typeof APP_URL !== 'undefined' && APP_URL && String(APP_URL).indexOf('TU-USUARIO') === -1) {
+          return String(APP_URL).replace(/\/?$/, '/');
+        }
+      } catch (_) {}
+      try {
+        if (typeof window !== 'undefined' && window.location && window.location.href) {
+          return window.location.href.split('#')[0].replace(/\?.*$/, '');
+        }
+      } catch (_) {}
+      return '';
+    }
+    function ferriolReferralInviteUrl(code, nicho) {
+      var base = ferriolPublicSignupBaseUrl() || '';
+      if (!base) base = (typeof window !== 'undefined' && window.location) ? (window.location.origin + '/') : '';
+      var sep = base.indexOf('?') >= 0 ? '&' : '?';
+      return base + sep + 'ref=' + encodeURIComponent(code || '') + '&nicho=' + (nicho === 'socio' ? 'socio' : 'kiosco');
+    }
+    function getSignupNichoFromStorage() {
+      try {
+        return sessionStorage.getItem('ferriol_signup_nicho') === 'socio' ? 'socio' : 'kiosco';
+      } catch (_) { return 'kiosco'; }
+    }
+    function getSelectedSignupNicho() {
+      var rS = document.querySelector('input[name="signUpNicho"][value="socio"]');
+      var rK = document.querySelector('input[name="signUpNicho"][value="kiosco"]');
+      if (rS && rS.checked) return 'socio';
+      if (rK && rK.checked) return 'kiosco';
+      return getSignupNichoFromStorage();
+    }
+    function syncSignUpNichoUI() {
+      var n = getSelectedSignupNicho();
+      try { sessionStorage.setItem('ferriol_signup_nicho', n === 'socio' ? 'socio' : 'kiosco'); } catch (_) {}
+      var hint = document.getElementById('signUpTypeHint');
+      var sub = document.getElementById('signUpLeadLine');
+      var nameIn = document.getElementById('signUpKioscoName');
+      if (hint) {
+        hint.textContent = n === 'socio'
+          ? 'Registro como vendedor/a de la red: membresía para comercializar Ferriol OS. Tu referidor queda registrado en tu perfil.'
+          : 'Registro para usar Ferriol OS en tu kiosco, almacén o comercio de barrio.';
+      }
+      if (sub) sub.textContent = n === 'socio' ? 'Membresía red · vendedor del sistema' : 'Alta de negocio · uso del sistema';
+      if (nameIn) nameIn.placeholder = n === 'socio' ? 'Nombre o equipo comercial (visible en la red)' : 'Nombre del negocio';
+    }
+    function copyTextToClipboard(text, doneMsg) {
+      var t = text || '';
+      if (!t) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(t).then(function () { alert(doneMsg || 'Copiado.'); }).catch(function () { window.prompt('Copiá:', t); });
+      } else window.prompt('Copiá:', t);
+    }
+
+    function isNetworkAdminRole(role) {
+      return role === 'super' || role === 'partner';
+    }
+    function normalizeReferralCode(s) {
+      if (s == null || s === '') return '';
+      return String(s).trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 32);
+    }
+    async function resolveReferralCodeToSponsorId(code) {
+      if (!supabaseClient || !code) return null;
+      var c = normalizeReferralCode(code);
+      if (!c) return null;
+      try {
+        var r = await supabaseClient.rpc('resolve_referral_code', { p_code: c });
+        if (r.error) return null;
+        return r.data || null;
+      } catch (_) { return null; }
+    }
+    async function resolveSponsorForSignup() {
+      var inputEl = document.getElementById('signUpReferralCode');
+      var fromInput = inputEl ? normalizeReferralCode(inputEl.value) : '';
+      var fromStore = '';
+      try { fromStore = normalizeReferralCode(sessionStorage.getItem('ferriol_signup_ref') || ''); } catch (_) {}
+      var code = fromInput || fromStore;
+      if (!code) return { sponsorId: null, error: null };
+      var sponsorId = await resolveReferralCodeToSponsorId(code);
+      if (sponsorId) return { sponsorId: sponsorId, error: null };
+      if (fromInput) return { sponsorId: null, error: 'El código de referido no es válido. Revisalo o dejalo vacío.' };
+      try { sessionStorage.removeItem('ferriol_signup_ref'); } catch (_) {}
+      return { sponsorId: null, error: null };
+    }
+    function randomReferralCodeSegment(len) {
+      var chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+      var s = '';
+      for (var i = 0; i < len; i++) s += chars.charAt(Math.floor(Math.random() * chars.length));
+      return s;
+    }
+    async function ensureUserReferralCode(userId) {
+      if (!supabaseClient || !userId) return null;
+      try {
+        var r = await supabaseClient.from('profiles').select('referral_code').eq('id', userId).maybeSingle();
+        if (r.data && r.data.referral_code) return r.data.referral_code;
+        for (var attempt = 0; attempt < 16; attempt++) {
+          var code = randomReferralCodeSegment(8);
+          var up = await supabaseClient.from('profiles').update({ referral_code: code }).eq('id', userId).is('referral_code', null);
+          if (up.error && String(up.error.message || '').toLowerCase().indexOf('unique') !== -1) continue;
+          var chk = await supabaseClient.from('profiles').select('referral_code').eq('id', userId).maybeSingle();
+          if (chk.data && chk.data.referral_code) return chk.data.referral_code;
+        }
+      } catch (_) {}
+      return null;
+    }
+    async function getSponsorIdForNewKiosqueroProfile() {
+      var fromStore = '';
+      try { fromStore = normalizeReferralCode(sessionStorage.getItem('ferriol_signup_ref') || ''); } catch (_) {}
+      if (!fromStore) return null;
+      var sponsorId = await resolveReferralCodeToSponsorId(fromStore);
+      if (!sponsorId) { try { sessionStorage.removeItem('ferriol_signup_ref'); } catch (_) {} }
+      return sponsorId;
+    }
+    function getPartnerDownlineUserIdSet(allProfiles, partnerId) {
+      var bySponsor = {};
+      allProfiles.forEach(function (p) {
+        if (!p.sponsor_id) return;
+        if (!bySponsor[p.sponsor_id]) bySponsor[p.sponsor_id] = [];
+        bySponsor[p.sponsor_id].push(p.id);
+      });
+      var seen = new Set();
+      var queue = [partnerId];
+      while (queue.length) {
+        var id = queue.shift();
+        var kids = bySponsor[id] || [];
+        kids.forEach(function (kid) {
+          if (!seen.has(kid)) { seen.add(kid); queue.push(kid); }
+        });
+      }
+      return seen;
+    }
 
     const DEFAULT_WHATSAPP = 'Hola {cliente}, te recordamos que tenés un saldo de ${monto} en nuestro kiosco. ¡Gracias!';
 
@@ -1201,8 +1353,10 @@
     function applyAppShell() {
       if (!currentUser) return;
       var isSuper = currentUser.role === 'super';
+      var isPartner = currentUser.role === 'partner';
+      var isNetworkAdmin = isNetworkAdminRole(currentUser.role);
       var uiNegocio = isSuper && state.superUiMode === 'negocio';
-      var asKiosquero = !isSuper || uiNegocio;
+      var asKiosquero = !isNetworkAdmin || uiNegocio;
       document.querySelectorAll('.kiosquero-only').forEach(function (el) {
         if (el.id === 'navKiosquero') return;
         el.style.display = asKiosquero ? '' : 'none';
@@ -1210,7 +1364,11 @@
       var navK = document.getElementById('navKiosquero');
       if (navK) navK.classList.toggle('hidden', !asKiosquero);
       document.querySelectorAll('.super-only').forEach(function (el) {
-        if (!isSuper) {
+        if (!isNetworkAdmin) {
+          el.style.display = 'none';
+          return;
+        }
+        if (isPartner && el.classList.contains('super-main-only')) {
           el.style.display = 'none';
           return;
         }
@@ -1223,7 +1381,7 @@
       });
       var navS = document.getElementById('navSuperBottom');
       if (navS) {
-        if (!isSuper || uiNegocio) navS.classList.add('hidden');
+        if (!isNetworkAdmin || uiNegocio) navS.classList.add('hidden');
         else if (state.currentPanel === 'super') navS.classList.remove('hidden');
       }
       var ht = document.getElementById('headerTitle');
@@ -1245,6 +1403,14 @@
             subEl.title = 'Tocá para volver al panel de administración';
             subEl.setAttribute('aria-label', 'Volver a administración');
           }
+        } else if (isPartner) {
+          ht.textContent = 'FERRIOL OS';
+          if (subEl) {
+            subEl.textContent = 'Tu red · Ferriol';
+            subEl.classList.remove('header-sub--toggle');
+            subEl.removeAttribute('title');
+            subEl.removeAttribute('aria-label');
+          }
         } else {
           ht.textContent = currentUser.kioscoName || 'Ferriol OS';
           if (subEl) {
@@ -1263,6 +1429,9 @@
         state.superUiMode = 'admin';
         try { sessionStorage.setItem('ferriol_super_ui', 'admin'); } catch (_) {}
         applyAppShell();
+      }
+      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'negocios') {
+        switchSuperSection('negocios');
       }
       if (name !== 'scanner') window._scanForProductCode = false;
       state.currentPanel = name;
@@ -3410,6 +3579,8 @@
    // --- Login / Logout / SaaS ---
 async function showApp() {
     const isSuper = currentUser && currentUser.role === 'super';
+    const isPartner = currentUser && currentUser.role === 'partner';
+    const isNetworkAdmin = isNetworkAdminRole(currentUser && currentUser.role);
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('appWrap').classList.remove('hidden');
     if (isSuper) {
@@ -3429,6 +3600,10 @@ async function showApp() {
       window._trialCountdownInterval = setInterval(updateTrialCountdown, 1000);
       await loadAdminContact();
       await initData();
+      if (supabaseClient && currentUser && currentUser.id) {
+        var rcS = await ensureUserReferralCode(currentUser.id);
+        if (rcS) currentUser.referralCode = rcS;
+      }
       renderInventory();
       updateCartUI();
       updateDashboard();
@@ -3440,11 +3615,22 @@ async function showApp() {
     } else if (isSuper) {
       goToPanel('super');
       lucide.createIcons();
+    } else if (isPartner) {
+      if (supabaseClient && currentUser.id) {
+        var rcP = await ensureUserReferralCode(currentUser.id);
+        if (rcP) currentUser.referralCode = rcP;
+      }
+      goToPanel('super');
+      lucide.createIcons();
     } else {
       if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
       window._trialCountdownInterval = setInterval(updateTrialCountdown, 1000);
       await loadAdminContact();
       await initData();
+      if (supabaseClient && currentUser && currentUser.role === 'kiosquero') {
+        var rc = await ensureUserReferralCode(currentUser.id);
+        if (rc) currentUser.referralCode = rc;
+      }
       renderInventory();
       updateCartUI();
       updateDashboard();
@@ -3506,7 +3692,8 @@ async function showApp() {
         }
         if (!profile) {
           const trialEndsAt = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().slice(0, 19) + 'Z';
-          const { error: insertErr } = await supabaseClient.from('profiles').insert({ id: uid, email: authData.user.email, role: 'kiosquero', active: true, trial_ends_at: trialEndsAt });
+          var sponsorNew = await getSponsorIdForNewKiosqueroProfile();
+          const { error: insertErr } = await supabaseClient.from('profiles').insert({ id: uid, email: authData.user.email, role: 'kiosquero', active: true, trial_ends_at: trialEndsAt, sponsor_id: sponsorNew || null });
           if (insertErr) {
             errEl.textContent = 'Error al crear perfil: ' + (insertErr.message || 'creá la tabla profiles y sus políticas RLS');
             errEl.classList.add('show');
@@ -3519,8 +3706,11 @@ async function showApp() {
             errEl.classList.add('show');
             return;
           }
+          await ensureUserReferralCode(uid);
+          var r2 = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
+          if (r2.data) profile = r2.data;
         }
-        if (profile.role === 'kiosquero' && !profile.active) {
+        if ((profile.role === 'kiosquero' || profile.role === 'partner') && !profile.active) {
           try {
             const { data: setData } = await supabaseClient.from('app_settings').select('value').eq('key', 'admin_whatsapp').maybeSingle();
             window._adminWhatsappForContact = (setData && setData.value) ? setData.value : '';
@@ -3557,7 +3747,7 @@ async function showApp() {
           return;
         }
         var userCreatedAt = (authData && authData.user && authData.user.created_at) ? authData.user.created_at : null;
-        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt };
+        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null };
         await showApp();
       } catch (err) {
         console.error('Error en login:', err);
@@ -3620,7 +3810,23 @@ async function showApp() {
       document.getElementById('signUpBox').classList.remove('hidden');
       document.getElementById('signUpSuccessBox').classList.add('hidden');
       document.getElementById('signUpErr').classList.remove('show');
+      var refIn = document.getElementById('signUpReferralCode');
+      if (refIn) {
+        try {
+          var st = normalizeReferralCode(sessionStorage.getItem('ferriol_signup_ref') || '');
+          refIn.value = st || '';
+        } catch (_) { refIn.value = ''; }
+      }
+      var stN = getSignupNichoFromStorage();
+      var rSoc = document.querySelector('input[name="signUpNicho"][value="socio"]');
+      var rKio = document.querySelector('input[name="signUpNicho"][value="kiosco"]');
+      if (stN === 'socio' && rSoc) rSoc.checked = true;
+      else if (rKio) rKio.checked = true;
+      syncSignUpNichoUI();
     };
+    document.querySelectorAll('input[name="signUpNicho"]').forEach(function (inp) {
+      inp.addEventListener('change', syncSignUpNichoUI);
+    });
     document.getElementById('backToLogin').onclick = (e) => {
       e.preventDefault();
       document.getElementById('signUpBox').classList.add('hidden');
@@ -3719,6 +3925,12 @@ async function showApp() {
         errEl.classList.add('show');
         return;
       }
+      var sp = await resolveSponsorForSignup();
+      if (sp.error) {
+        errEl.textContent = sp.error;
+        errEl.classList.add('show');
+        return;
+      }
       const { data, error } = await supabaseClient.auth.signUp({ email, password });
       if (error) {
         errEl.textContent = error.message;
@@ -3732,20 +3944,26 @@ async function showApp() {
         errEl.classList.add('show');
         return;
       }
+      if (sp.sponsorId === newId) sp.sponsorId = null;
+      var signupNicho = getSelectedSignupNicho();
+      var newRole = signupNicho === 'socio' ? 'partner' : 'kiosquero';
       var upProf = await supabaseClient.from('profiles').upsert({
         id: newId,
         email: email,
-        role: 'kiosquero',
+        role: newRole,
         active: true,
         kiosco_name: kioscoName || null,
         trial_ends_at: trialEndsAt,
-        phone: phone || null
+        phone: phone || null,
+        sponsor_id: sp.sponsorId || null
       }, { onConflict: 'id' });
       if (upProf.error) {
         errEl.textContent = 'Usuario registrado, pero el perfil no se guardó: ' + (upProf.error.message || '') + ' Usá «Volver al inicio de sesión» e intentá entrar con el mismo email y contraseña. Si no entrás, revisá en Supabase la tabla profiles (columna phone, políticas RLS).';
         errEl.classList.add('show');
         return;
       }
+      await ensureUserReferralCode(newId);
+      try { sessionStorage.removeItem('ferriol_signup_ref'); sessionStorage.removeItem('ferriol_signup_nicho'); } catch (_) {}
       document.getElementById('signUpBox').classList.add('hidden');
       document.getElementById('signUpSuccessBox').classList.remove('hidden');
       window._lastSignUpEmail = email;
@@ -3802,13 +4020,39 @@ async function showApp() {
       });
     }
 
+    async function fillConfigNetworkSection() {
+      var block = document.getElementById('configNetworkBlock');
+      if (!block || !currentUser) return;
+      var asNegocio = currentUser.role === 'kiosquero' || (currentUser.role === 'super' && state.superUiMode === 'negocio');
+      if (!asNegocio) { block.classList.add('hidden'); return; }
+      block.classList.remove('hidden');
+      var code = currentUser.referralCode || '';
+      if (!code && supabaseClient) {
+        code = await ensureUserReferralCode(currentUser.id) || '';
+        if (code) currentUser.referralCode = code;
+      }
+      var disp = document.getElementById('configReferralCodeDisplay');
+      if (disp) disp.textContent = code || '—';
+      var lk = ferriolReferralInviteUrl(code, 'kiosco');
+      var ls = ferriolReferralInviteUrl(code, 'socio');
+      var linkK = document.getElementById('configReferralLinkKiosco');
+      var linkS = document.getElementById('configReferralLinkSocio');
+      if (linkK) linkK.value = lk;
+      if (linkS) linkS.value = ls;
+      lucide.createIcons();
+    }
     function fillConfigForm() {
-      if (!currentUser || currentUser.role === 'super') return;
+      if (!currentUser) return;
+      var asNegocio = currentUser.role === 'kiosquero' || (currentUser.role === 'super' && state.superUiMode === 'negocio');
+      if (!asNegocio) return;
       document.getElementById('configKioscoName').value = currentUser.kioscoName || '';
       document.getElementById('configWhatsappMsg').value = currentUser.whatsappMessage || DEFAULT_WHATSAPP;
+      fillConfigNetworkSection();
     }
     async function saveConfig() {
-      if (!currentUser || currentUser.role === 'super') return;
+      if (!currentUser) return;
+      var asNegocio = currentUser.role === 'kiosquero' || (currentUser.role === 'super' && state.superUiMode === 'negocio');
+      if (!asNegocio) return;
       const kioscoName = document.getElementById('configKioscoName').value.trim();
       const whatsappMessage = document.getElementById('configWhatsappMsg').value.trim() || DEFAULT_WHATSAPP;
       if (supabaseClient) {
@@ -3819,6 +4063,14 @@ async function showApp() {
       document.getElementById('headerTitle').textContent = kioscoName || 'Ferriol OS';
     }
     document.getElementById('saveConfig').onclick = () => saveConfig();
+    var btnCopyK = document.getElementById('btnCopyReferralLinkKiosco');
+    if (btnCopyK) btnCopyK.onclick = function () { copyTextToClipboard((document.getElementById('configReferralLinkKiosco') || {}).value, 'Enlace para negocios copiado.'); };
+    var btnCopyS = document.getElementById('btnCopyReferralLinkSocio');
+    if (btnCopyS) btnCopyS.onclick = function () { copyTextToClipboard((document.getElementById('configReferralLinkSocio') || {}).value, 'Enlace para vendedores copiado.'); };
+    var btnCopyFK = document.getElementById('btnSuperFounderCopyKiosco');
+    if (btnCopyFK) btnCopyFK.onclick = function () { copyTextToClipboard((document.getElementById('superFounderLinkKiosco') || {}).value, 'Enlace para negocios copiado.'); };
+    var btnCopyFS = document.getElementById('btnSuperFounderCopySocio');
+    if (btnCopyFS) btnCopyFS.onclick = function () { copyTextToClipboard((document.getElementById('superFounderLinkSocio') || {}).value, 'Enlace para vendedores copiado.'); };
 
     async function exportBackup() {
       if (!currentUser?.id) return;
@@ -4104,6 +4356,43 @@ async function showApp() {
       const name = (user.kiosco_name || user.email || 'Sin nombre').replace(/</g, '&lt;');
       const email = (user.email || '').replace(/</g, '&lt;');
       const trialFull = trialLabelFull(user.trial_ends_at);
+      var pool = window._ferriolAllProfilesCache || superUserListCache;
+      var sponsorLine = '—';
+      if (user.sponsor_id) {
+        if (currentUser && user.sponsor_id === currentUser.id) sponsorLine = 'Vos (referidor directo)';
+        else {
+          var spRow = pool.find(function (x) { return x.id === user.sponsor_id; });
+          sponsorLine = spRow ? ((spRow.kiosco_name || spRow.email || '').replace(/</g, '&lt;')) : ('ID ' + String(user.sponsor_id).slice(0, 8) + '…');
+        }
+      }
+      var refCodeEsc = (user.referral_code || '—').replace(/</g, '&lt;');
+      var assignHtml = '';
+      if (currentUser && currentUser.role === 'super') {
+        var poolFull = window._ferriolAllProfilesCache || [];
+        var opts = ['<option value="">— Sin referidor / sin asignar —</option>'];
+        var candidates = poolFull.filter(function (p) { return p.id !== user.id; }).slice().sort(function (a, b) {
+          var ra = (a.role === 'super') ? 0 : (a.role === 'partner') ? 1 : 2;
+          var rb = (b.role === 'super') ? 0 : (b.role === 'partner') ? 1 : 2;
+          if (ra !== rb) return ra - rb;
+          return (a.kiosco_name || a.email || '').localeCompare(b.kiosco_name || b.email || '');
+        });
+        candidates.forEach(function (p) {
+          var lab = '[' + (p.role || 'kiosquero') + '] ' + (p.kiosco_name || p.email || '').slice(0, 36) + (p.email ? (' · ' + p.email) : '');
+          var sel = (user.sponsor_id && p.id === user.sponsor_id) ? ' selected' : '';
+          opts.push('<option value="' + p.id + '"' + sel + '>' + lab.replace(/</g, '&lt;') + '</option>');
+        });
+        assignHtml = `
+        <div class="border-t border-white/10 pt-4 space-y-2">
+          <p class="text-sm font-medium text-[#86efac] flex items-center gap-2"><i data-lucide="git-branch" class="w-4 h-4"></i> Asignar referidor / admin de la red</p>
+          <p class="text-xs text-white/50">Elegí bajo qué cuenta queda este integrante (define equipo MLM y visibilidad para líderes). Los administradores <span class="text-violet-200">super</span> aparecen primero.</p>
+          <select id="superDetailSponsorSelect" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm bg-black/20">${opts.join('')}</select>
+          <button type="button" class="super-detail-save-sponsor w-full py-2.5 rounded-xl text-sm bg-[#22c55e]/25 text-[#86efac] border border-[#22c55e]/50 touch-target font-medium">Guardar referidor</button>
+        </div>`;
+      }
+      var quitarHtml = (currentUser && currentUser.role === 'partner') ? '' : `
+            <button type="button" class="super-detail-quitar w-full py-2.5 rounded-xl text-sm bg-red-500/20 text-red-300 border border-red-500/40 touch-target flex items-center justify-center gap-2">
+              <i data-lucide="user-minus" class="w-4 h-4"></i> Quitar negocio (pide contraseña admin)
+            </button>`;
       title.textContent = name;
       content.innerHTML = `
         <div class="space-y-1 text-sm text-white/80">
@@ -4111,7 +4400,10 @@ async function showApp() {
           <p><span class="text-white/50">Rol:</span> ${(user.role || 'kiosquero').replace(/</g, '&lt;')}</p>
           <p><span class="text-white/50">Estado:</span> <span class="${user.active ? 'text-green-300' : 'text-red-300'}">${user.active ? 'Activo' : 'Inactivo'}</span></p>
           <p><span class="text-white/50">Membresía:</span> <span id="superDetailCountdown" class="${trialFull.expired ? 'text-red-300' : 'text-[#f87171]'}">${trialFull.text}</span></p>
+          <p><span class="text-white/50">Código de referido:</span> ${refCodeEsc}</p>
+          <p><span class="text-white/50">Referido por:</span> ${sponsorLine}</p>
         </div>
+        ${assignHtml}
         <div class="border-t border-white/10 pt-4 space-y-3">
           <div class="flex items-center gap-2 flex-wrap">
             <span class="text-sm text-white/70">Activar/Desactivar:</span>
@@ -4130,9 +4422,7 @@ async function showApp() {
             <button type="button" class="super-detail-email w-full py-2.5 rounded-xl text-sm bg-[#dc2626]/30 text-[#f87171] border border-[#dc2626]/50 touch-target flex items-center justify-center gap-2">
               <i data-lucide="mail" class="w-4 h-4"></i> Cómo cambiar el email (Supabase)
             </button>
-            <button type="button" class="super-detail-quitar w-full py-2.5 rounded-xl text-sm bg-red-500/20 text-red-300 border border-red-500/40 touch-target flex items-center justify-center gap-2">
-              <i data-lucide="user-minus" class="w-4 h-4"></i> Quitar negocio (pide contraseña admin)
-            </button>
+            ${quitarHtml}
           </div>
         </div>
       `;
@@ -4189,7 +4479,24 @@ async function showApp() {
         if (supabaseAuthUrl && confirm(msg)) window.open(supabaseAuthUrl, '_blank');
         else alert(msg);
       };
-      content.querySelector('.super-detail-quitar').onclick = async () => {
+      var saveSponsorBtn = content.querySelector('.super-detail-save-sponsor');
+      if (saveSponsorBtn) saveSponsorBtn.onclick = async function () {
+        if (!supabaseClient) return;
+        var sel = content.querySelector('#superDetailSponsorSelect');
+        var val = sel ? String(sel.value || '').trim() : '';
+        var newSid = val || null;
+        if (newSid === u.id) { alert('No puede ser su propio referidor.'); return; }
+        var { error: errSp } = await supabaseClient.from('profiles').update({ sponsor_id: newSid }).eq('id', u.id);
+        if (errSp) { alert('Error: ' + errSp.message); return; }
+        u.sponsor_id = newSid;
+        var idxAll = (window._ferriolAllProfilesCache || []).findIndex(function (r) { return r.id === u.id; });
+        if (idxAll >= 0) window._ferriolAllProfilesCache[idxAll].sponsor_id = newSid;
+        alert('Referidor actualizado.');
+        openSuperUserDetail(u);
+        renderSuper();
+      };
+      var quitarBtn = content.querySelector('.super-detail-quitar');
+      if (quitarBtn) quitarBtn.onclick = async () => {
         var pwdInput = document.getElementById('adminDeletePassword');
         var storedPwd = (pwdInput && pwdInput.value) ? pwdInput.value : '';
         if (!storedPwd) { alert('Configurá primero la contraseña para quitar usuarios en Ajustes.'); return; }
@@ -4245,18 +4552,34 @@ async function showApp() {
         window._superTrialReminderEditCache = trialCfgParsed;
         var winDaysInput = document.getElementById('trialReminderWindowDays');
         if (winDaysInput) winDaysInput.value = String(trialCfgParsed.windowDays);
-        fillTrialReminderAdminFields(trialCfgParsed, null);
+        if (!currentUser || currentUser.role !== 'partner') fillTrialReminderAdminFields(trialCfgParsed, null);
         if (superFilterState !== 'todos') {
           document.querySelectorAll('.super-filter-btn').forEach(function (b) {
-            b.className = 'super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border touch-target ' + (b.dataset.filter === superFilterState ? 'border-[#dc2626]/50 bg-[#dc2626]/30' : 'border-white/20 glass');
+            var active = b.dataset.filter === superFilterState;
+            var mm = b.classList.contains('super-main-only') ? ' super-only super-main-only' : '';
+            var visual = active ? 'border-[#dc2626]/50 bg-[#dc2626]/30' : (b.dataset.filter === 'sin_referidor' ? 'border-amber-500/40 glass' : 'border-white/20 glass');
+            b.className = 'super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border touch-target' + mm + ' ' + visual;
           });
         }
       } catch (_) {}
-      const { data: allProfiles, error: errProfiles } = await supabaseClient.from('profiles').select('id, email, role, active, kiosco_name, trial_ends_at');
+      const { data: allProfiles, error: errProfiles } = await supabaseClient.from('profiles').select('id, email, role, active, kiosco_name, trial_ends_at, sponsor_id, referral_code');
+      window._ferriolAllProfilesCache = allProfiles || [];
       var list = (allProfiles || []).filter(u => u.id !== currentUser?.id);
+      if (currentUser && currentUser.role === 'partner') {
+        var downIds = getPartnerDownlineUserIdSet(allProfiles || [], currentUser.id);
+        list = list.filter(function (u) { return downIds.has(u.id); });
+      }
       if (superFilterState === 'activos') list = list.filter(u => u.active);
-      if (superFilterState === 'inactivos') list = list.filter(u => !u.active);
+      else if (superFilterState === 'inactivos') list = list.filter(u => !u.active);
+      else if (superFilterState === 'sin_referidor') list = list.filter(function (u) { return !u.sponsor_id; });
       superUserListCache = list.slice();
+      var statsEl = document.getElementById('superDirectoryStats');
+      if (statsEl && currentUser && currentUser.role === 'super') {
+        var totalN = (allProfiles || []).length;
+        var sinRef = (allProfiles || []).filter(function (r) { return !r.sponsor_id; }).length;
+        statsEl.textContent = 'Integrantes en el sistema: ' + totalN + ' · Sin referidor: ' + sinRef;
+        statsEl.classList.remove('hidden');
+      } else if (statsEl) { statsEl.classList.add('hidden'); statsEl.textContent = ''; }
       var searchEl = document.getElementById('superSearchEmail');
       var searchTerm = (searchEl && searchEl.value) ? searchEl.value.trim().toLowerCase() : '';
       if (searchTerm) list = list.filter(function (u) {
@@ -4275,8 +4598,8 @@ async function showApp() {
         lucide.createIcons();
         return;
       }
-      if (list.length === 0 && currentUser?.role === 'super') {
-        var msg = searchTerm ? 'Ningún usuario coincide con la búsqueda.' : (superFilterState === 'activos' ? 'No hay negocios activos.' : superFilterState === 'inactivos' ? 'No hay negocios inactivos.' : 'No hay otros negocios. Agregá uno con el botón de arriba.');
+      if (list.length === 0 && (currentUser?.role === 'super' || currentUser?.role === 'partner')) {
+        var msg = searchTerm ? 'Ningún usuario coincide con la búsqueda.' : (currentUser?.role === 'partner' ? 'No hay negocios en tu red todavía.' : (superFilterState === 'sin_referidor' ? 'No hay integrantes sin referidor. Todo el mundo tiene admin/referidor asignado.' : superFilterState === 'activos' ? 'No hay negocios activos.' : superFilterState === 'inactivos' ? 'No hay negocios inactivos.' : 'No hay otros negocios. Agregá uno con el botón de arriba.'));
         listEl.innerHTML = '<p class="py-6 text-center text-white/70 text-sm">' + msg + '</p>';
         lucide.createIcons();
         return;
@@ -4287,10 +4610,12 @@ async function showApp() {
         const badge = trialFull.expired ? 'Vencida' : trialFull.text;
         const badgeClass = trialFull.expired ? 'bg-red-500/20 text-red-300' : 'bg-[#dc2626]/30 text-[#f87171]';
         const endIso = (u.trial_ends_at || '').replace(/"/g, '&quot;');
+        var rolePill = (u.role === 'super') ? '<span class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-violet-500/30 text-violet-200 border border-violet-400/30 shrink-0">Root</span>' : ((u.role === 'partner') ? '<span class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-cyan-500/25 text-cyan-200 border border-cyan-400/25 shrink-0">Red</span>' : '');
+        var sinRefPill = (!u.sponsor_id && currentUser?.role === 'super') ? '<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-200 border border-amber-400/35 shrink-0">Sin ref.</span>' : '';
         return `
           <button type="button" class="super-user-card w-full text-left glass rounded-xl p-4 flex items-center justify-between gap-3 border border-white/10 hover:border-[#dc2626]/40 active:scale-[0.99] transition-all touch-target" data-id="${u.id}" data-trial-ends-at="${endIso}">
             <div class="flex-1 min-w-0">
-              <p class="font-semibold truncate">${name}</p>
+              <p class="font-semibold truncate flex items-center gap-2 flex-wrap">${name}${rolePill}${sinRefPill}</p>
               <p class="text-xs text-white/50 truncate mt-0.5">${(u.email || '').replace(/</g, '&lt;')}</p>
             </div>
             <div class="flex items-center gap-2 shrink-0">
@@ -4307,6 +4632,57 @@ async function showApp() {
           if (user) openSuperUserDetail(user);
         };
       });
+      var founderBlock = document.getElementById('superFounderLinksBlock');
+      if (founderBlock) {
+        if (currentUser && currentUser.role === 'super') {
+          var fCode = currentUser.referralCode || '';
+          if (!fCode) {
+            fCode = await ensureUserReferralCode(currentUser.id) || '';
+            if (fCode) currentUser.referralCode = fCode;
+          }
+          var fd = document.getElementById('superFounderCodeDisplay');
+          if (fd) fd.textContent = fCode || '—';
+          var fk = document.getElementById('superFounderLinkKiosco');
+          var fs = document.getElementById('superFounderLinkSocio');
+          if (fk) fk.value = fCode ? ferriolReferralInviteUrl(fCode, 'kiosco') : '';
+          if (fs) fs.value = fCode ? ferriolReferralInviteUrl(fCode, 'socio') : '';
+          founderBlock.classList.remove('hidden');
+        } else {
+          founderBlock.classList.add('hidden');
+        }
+      }
+      var netInfoEl = document.getElementById('superPartnerNetInfo');
+      if (netInfoEl) {
+        if (currentUser && currentUser.role === 'partner') {
+          function finishPartnerNetInfo(cc) {
+            var c = cc || '';
+            var cSafe = String(c || '—').replace(/</g, '&lt;').replace(/&/g, '&amp;');
+            netInfoEl.innerHTML = '<p class="text-xs text-white/80 mb-2">Tu código de red: <span class="font-mono font-bold text-amber-200 tracking-wide">' + cSafe + '</span>. Un código, dos enlaces:</p>' +
+              '<div class="space-y-2 text-xs">' +
+              '<div><span class="text-white/55 block mb-1">Negocios (kioscos / almacenes)</span><div class="flex gap-2"><input type="text" id="partnerNetLinkK" readonly class="flex-1 glass rounded-lg px-2 py-1.5 border border-white/20 text-white min-w-0 text-[10px] sm:text-xs" /><button type="button" id="partnerNetBtnK" class="btn-glow shrink-0 px-2 py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold touch-target">Copiar</button></div></div>' +
+              '<div><span class="text-white/55 block mb-1">Vendedores (membresía)</span><div class="flex gap-2"><input type="text" id="partnerNetLinkS" readonly class="flex-1 glass rounded-lg px-2 py-1.5 border border-white/20 text-white min-w-0 text-[10px] sm:text-xs" /><button type="button" id="partnerNetBtnS" class="btn-glow shrink-0 px-2 py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold touch-target">Copiar</button></div></div></div>';
+            var ink = document.getElementById('partnerNetLinkK');
+            var ins = document.getElementById('partnerNetLinkS');
+            if (c && ink) ink.value = ferriolReferralInviteUrl(c, 'kiosco');
+            if (c && ins) ins.value = ferriolReferralInviteUrl(c, 'socio');
+            var bk = document.getElementById('partnerNetBtnK');
+            var bs = document.getElementById('partnerNetBtnS');
+            if (bk) bk.onclick = function () { copyTextToClipboard((document.getElementById('partnerNetLinkK') || {}).value, 'Enlace para negocios copiado.'); };
+            if (bs) bs.onclick = function () { copyTextToClipboard((document.getElementById('partnerNetLinkS') || {}).value, 'Enlace para vendedores copiado.'); };
+            netInfoEl.classList.remove('hidden');
+          }
+          var cShow = currentUser.referralCode;
+          if (!cShow && supabaseClient) {
+            ensureUserReferralCode(currentUser.id).then(function (cc) {
+              if (cc) currentUser.referralCode = cc;
+              finishPartnerNetInfo(cc);
+            });
+          } else finishPartnerNetInfo(cShow);
+        } else {
+          netInfoEl.classList.add('hidden');
+          netInfoEl.textContent = '';
+        }
+      }
       lucide.createIcons();
     }
     function renderSuperListFromSearch() {
@@ -4316,7 +4692,8 @@ async function showApp() {
       var searchTerm = (searchEl && searchEl.value) ? searchEl.value.trim().toLowerCase() : '';
       var list = superUserListCache.slice();
       if (superFilterState === 'activos') list = list.filter(function (u) { return u.active; });
-      if (superFilterState === 'inactivos') list = list.filter(function (u) { return !u.active; });
+      else if (superFilterState === 'inactivos') list = list.filter(function (u) { return !u.active; });
+      else if (superFilterState === 'sin_referidor') list = list.filter(function (u) { return !u.sponsor_id; });
       if (searchTerm) list = list.filter(function (u) {
         var email = (u.email || '').toLowerCase();
         var name = (u.kiosco_name || '').toLowerCase();
@@ -4338,7 +4715,9 @@ async function showApp() {
         var badge = trialFull.expired ? 'Vencida' : trialFull.text;
         var badgeClass = trialFull.expired ? 'bg-red-500/20 text-red-300' : 'bg-[#dc2626]/30 text-[#f87171]';
         var endIso = (u.trial_ends_at || '').replace(/"/g, '&quot;');
-        return '<button type="button" class="super-user-card w-full text-left glass rounded-xl p-4 flex items-center justify-between gap-3 border border-white/10 hover:border-[#dc2626]/40 active:scale-[0.99] transition-all touch-target" data-id="' + u.id + '" data-trial-ends-at="' + endIso + '"><div class="flex-1 min-w-0"><p class="font-semibold truncate">' + name + '</p><p class="text-xs text-white/50 truncate mt-0.5">' + (u.email || '').replace(/</g, '&lt;') + '</p></div><div class="flex items-center gap-2 shrink-0"><span class="super-list-countdown px-2 py-1 rounded-lg text-xs ' + badgeClass + '">' + badge + '</span><i data-lucide="chevron-right" class="w-5 h-5 text-white/40"></i></div></button>';
+        var rolePill = (u.role === 'super') ? '<span class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-violet-500/30 text-violet-200 border border-violet-400/30 shrink-0">Root</span>' : ((u.role === 'partner') ? '<span class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-cyan-500/25 text-cyan-200 border border-cyan-400/25 shrink-0">Red</span>' : '');
+        var sinRefPill = (!u.sponsor_id && currentUser && currentUser.role === 'super') ? '<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-200 border border-amber-400/35 shrink-0">Sin ref.</span>' : '';
+        return '<button type="button" class="super-user-card w-full text-left glass rounded-xl p-4 flex items-center justify-between gap-3 border border-white/10 hover:border-[#dc2626]/40 active:scale-[0.99] transition-all touch-target" data-id="' + u.id + '" data-trial-ends-at="' + endIso + '"><div class="flex-1 min-w-0"><p class="font-semibold truncate flex items-center gap-2 flex-wrap">' + name + rolePill + sinRefPill + '</p><p class="text-xs text-white/50 truncate mt-0.5">' + (u.email || '').replace(/</g, '&lt;') + '</p></div><div class="flex items-center gap-2 shrink-0"><span class="super-list-countdown px-2 py-1 rounded-lg text-xs ' + badgeClass + '">' + badge + '</span><i data-lucide="chevron-right" class="w-5 h-5 text-white/40"></i></div></button>';
       }).join('');
       listEl.querySelectorAll('.super-user-card').forEach(function (btn) {
         btn.onclick = function () {
@@ -4353,6 +4732,7 @@ async function showApp() {
     if (superSearchInput) superSearchInput.addEventListener('input', renderSuperListFromSearch);
     if (superSearchInput) superSearchInput.addEventListener('search', renderSuperListFromSearch);
     document.getElementById('saveAdminContact').onclick = async () => {
+      if (currentUser && currentUser.role === 'partner') return;
       const whatsapp = (document.getElementById('adminContactWhatsapp').value || '').trim().replace(/\D/g, '');
       const whatsapp2 = (document.getElementById('adminContactWhatsapp2').value || '').trim().replace(/\D/g, '');
       const whatsapp3 = (document.getElementById('adminContactWhatsapp3').value || '').trim().replace(/\D/g, '');
@@ -4398,6 +4778,37 @@ async function showApp() {
         fillTrialReminderAdminFields(base, preserved);
       });
     })();
+    async function exportSuperDirectorioCSV() {
+      if (!currentUser || currentUser.role !== 'super' || !supabaseClient) return;
+      try {
+        var res = await supabaseClient.from('profiles').select('id, email, kiosco_name, role, active, referral_code, sponsor_id, trial_ends_at').order('email', { ascending: true });
+        if (res.error) throw res.error;
+        var rows = res.data || [];
+        var byId = {};
+        rows.forEach(function (r) { if (r && r.id) byId[r.id] = r; });
+        var header = 'id;email;kiosco_nombre;rol;activo;codigo_referido;sponsor_id;sponsor_email;sponsor_kiosco;vence_prueba';
+        var body = rows.map(function (r) {
+          var sp = r.sponsor_id ? byId[r.sponsor_id] : null;
+          return [
+            r.id,
+            r.email,
+            r.kiosco_name,
+            r.role,
+            r.active ? 'si' : 'no',
+            r.referral_code || '',
+            r.sponsor_id || '',
+            sp ? (sp.email || '') : '',
+            sp ? (sp.kiosco_name || '') : '',
+            r.trial_ends_at || ''
+          ].map(function (cell) { return escapeCSV(cell == null ? '' : String(cell)); }).join(';');
+        });
+        var csv = header + '\r\n' + body.join('\r\n');
+        downloadCSV('ferriol-directorio-' + new Date().toISOString().slice(0, 10) + '.csv', csv);
+      } catch (e) {
+        alert('No se pudo exportar el directorio: ' + (e.message || e));
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
     async function exportAllUsersBackup() {
       if (!currentUser || currentUser.role !== 'super' || !supabaseClient) return;
       var msgEl = document.getElementById('adminBackupAllMsg');
@@ -4506,7 +4917,10 @@ async function showApp() {
       btn.onclick = function () {
         superFilterState = btn.dataset.filter || 'todos';
         document.querySelectorAll('.super-filter-btn').forEach(function (b) {
-          b.className = 'super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border touch-target ' + (b.dataset.filter === superFilterState ? 'border-[#dc2626]/50 bg-[#dc2626]/30' : 'border-white/20 glass');
+          var active = b.dataset.filter === superFilterState;
+          var mm = b.classList.contains('super-main-only') ? ' super-only super-main-only' : '';
+          var visual = active ? 'border-[#dc2626]/50 bg-[#dc2626]/30' : (b.dataset.filter === 'sin_referidor' ? 'border-amber-500/40 glass' : 'border-white/20 glass');
+          b.className = 'super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border touch-target' + mm + ' ' + visual;
         });
         renderSuper();
       };
@@ -4622,6 +5036,8 @@ async function showApp() {
       lucide.createIcons();
     }
     document.getElementById('btnOpenNewKiosqueroModal').onclick = openNewKiosqueroModal;
+    var btnExportDir = document.getElementById('btnExportDirectorioCSV');
+    if (btnExportDir) btnExportDir.onclick = function () { exportSuperDirectorioCSV(); };
     document.getElementById('newKiosqueroModalClose').onclick = closeNewKiosqueroModal;
     document.getElementById('newKiosqueroModalOverlay').onclick = closeNewKiosqueroModal;
     setupPasswordToggle('showNewKiosqueroPwd', 'newKiosqueroPassword');
@@ -4659,7 +5075,10 @@ async function showApp() {
       }
       const newId = signUpData.user?.id;
       if (newId) {
-        await supabaseClient.from('profiles').update({ kiosco_name: kioscoName || '' }).eq('id', newId);
+        var patch = { kiosco_name: kioscoName || '' };
+        if (currentUser && currentUser.role === 'partner') patch.sponsor_id = currentUser.id;
+        await supabaseClient.from('profiles').update(patch).eq('id', newId);
+        await ensureUserReferralCode(newId);
       }
       msgEl.textContent = 'Kiosquero creado. Ya puede iniciar sesión con ese email y contraseña.';
       msgEl.classList.remove('hidden');
@@ -4700,12 +5119,14 @@ async function showApp() {
         }
         if (!profile) {
           var trialEndsInit = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().slice(0, 19) + 'Z';
+          var sponsorInit = await getSponsorIdForNewKiosqueroProfile();
           var insProf = await supabaseClient.from('profiles').insert({
             id: uid,
             email: session.user.email,
             role: 'kiosquero',
             active: true,
-            trial_ends_at: trialEndsInit
+            trial_ends_at: trialEndsInit,
+            sponsor_id: sponsorInit || null
           });
           if (insProf.error) {
             console.error('Perfil ausente y no se pudo crear:', insProf.error);
@@ -4719,8 +5140,11 @@ async function showApp() {
           var rProf = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
           profile = rProf.data;
           if (!profile) return;
+          await ensureUserReferralCode(uid);
+          var rProf2 = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
+          if (rProf2.data) profile = rProf2.data;
         }
-        if (profile.role === 'kiosquero' && !profile.active) {
+        if ((profile.role === 'kiosquero' || profile.role === 'partner') && !profile.active) {
           try {
             await loadAdminContact();
           } catch (_) {}
@@ -4757,7 +5181,7 @@ async function showApp() {
           return;
         }
         var userCreatedAt = (session && session.user && session.user.created_at) ? session.user.created_at : null;
-        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt };
+        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null };
         await showApp();
       } catch (e) {
         console.error('Error en init:', e);
