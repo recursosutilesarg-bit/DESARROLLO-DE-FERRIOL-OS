@@ -1705,13 +1705,13 @@
       state.superSection = sectionName || 'negocios';
       document.querySelectorAll('#panel-super .super-section').forEach(function (el) {
         el.classList.add('hidden');
-        el.style.display = 'none';
+        el.style.setProperty('display', 'none', 'important');
         el.style.zIndex = '0';
       });
       var section = document.getElementById('super-section-' + state.superSection);
       if (section) {
         section.classList.remove('hidden');
-        section.style.display = 'block';
+        section.style.setProperty('display', 'block', 'important');
         section.style.zIndex = '10';
       }
       document.querySelectorAll('.super-nav-btn').forEach(function (btn) {

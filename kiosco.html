@@ -1048,9 +1048,9 @@
 
     <!-- Panel Admin: secciones al pie (Negocios, Ajustes, Notificaciones, Más) -->
     <section id="panel-super" class="panel hidden">
-      <div class="relative min-h-[50vh] pb-24">
-        <!-- Sección Negocios -->
-        <div id="super-section-negocios" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up relative">
+      <div class="relative isolate min-h-[70vh] pb-24">
+        <!-- Sección Negocios (misma capa absoluta que Cobros/Ajustes para evitar solapamientos) -->
+        <div id="super-section-negocios" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up absolute inset-x-0 top-0 z-0 overflow-y-auto" style="max-height: 85vh; padding-bottom: 6rem;">
           <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
             <i data-lucide="store" class="w-5 h-5 text-[#86efac]"></i>
             Negocios
@@ -1099,7 +1099,7 @@
           </div>
         </div>
         <!-- Sección Cobros (solo super): transferencias + verificar → mlm_ledger -->
-        <div id="super-section-cobros" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto super-only super-main-only" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+        <div id="super-section-cobros" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 z-0 overflow-y-auto super-only super-main-only" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
             <i data-lucide="banknote" class="w-5 h-5 text-[#86efac]"></i>
             Cobros (transferencia)
