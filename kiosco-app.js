@@ -1562,6 +1562,7 @@
           el.style.display = 'none';
           return;
         }
+        if (el.classList.contains('super-section')) return;
         if (el.id === 'navSuperBottom') return;
         if (el.id === 'logoutBtn') {
           el.style.display = 'inline-flex';
@@ -1711,7 +1712,7 @@
       if (section) {
         section.classList.remove('hidden');
         section.style.display = 'block';
-        section.style.zIndex = '1';
+        section.style.zIndex = '10';
       }
       document.querySelectorAll('.super-nav-btn').forEach(function (btn) {
         btn.classList.toggle('active', btn.dataset.superSection === state.superSection);
