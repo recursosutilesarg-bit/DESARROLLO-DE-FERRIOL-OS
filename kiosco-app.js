@@ -1680,6 +1680,7 @@
         renderHistorial(state.historialFilter || 'hoy');
       }
       if (name === 'clientes') loadClientes().then(renderClientes);
+      applyAppShell();
       lucide.createIcons();
     }
     function goToPanel(name, cajaTabOpt) {
