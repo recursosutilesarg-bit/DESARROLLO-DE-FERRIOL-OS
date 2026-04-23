@@ -1572,8 +1572,16 @@
       });
       var navS = document.getElementById('navSuperBottom');
       if (navS) {
-        if (!isNetworkAdmin || uiNegocio) navS.classList.add('hidden');
-        else if (state.currentPanel === 'super') navS.classList.remove('hidden');
+        if (!isNetworkAdmin || uiNegocio) {
+          navS.classList.add('hidden');
+          navS.style.display = 'none';
+        } else if (state.currentPanel === 'super') {
+          navS.classList.remove('hidden');
+          navS.style.display = 'block';
+        } else {
+          navS.classList.add('hidden');
+          navS.style.display = 'none';
+        }
       }
       var ht = document.getElementById('headerTitle');
       var subEl = document.getElementById('headerSub');
