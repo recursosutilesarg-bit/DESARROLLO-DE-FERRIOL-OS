@@ -34,7 +34,7 @@
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="kiosco.css?v=20260424signupfix">
+  <link rel="stylesheet" href="kiosco.css?v=20260424dualform">
 </head>
 <body class="relative">
   <!-- Banner instalar como app (PWA) — visible al abrir el link -->
@@ -123,20 +123,16 @@
             <span class="pwd-label">Ver</span>
           </label>
         </div>
-        <p class="text-xs text-white/60 mb-2">Tipo de cuenta</p>
-        <div class="sign-up-nicho-group" role="radiogroup" aria-label="Tipo de cuenta">
-          <label class="text-sm text-white/90 touch-target leading-snug">
-            <input type="radio" name="signUpNicho" value="kiosco" checked>
-            <span>Quiero probar el sistema</span>
-          </label>
-          <label class="text-sm text-white/90 touch-target leading-snug">
-            <input type="radio" name="signUpNicho" value="socio">
-            <span>Quiero ser distribuidor del sistema</span>
-          </label>
+        <div id="signUpWrapNegocio" class="hidden">
+          <label for="signUpKioscoName" class="block text-xs text-white/60 mb-1">Nombre del negocio</label>
+          <input type="text" id="signUpKioscoName" placeholder="Ej. Kiosco de la esquina" autocomplete="organization" class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white">
         </div>
-        <input type="text" id="signUpKioscoName" placeholder="Nombre del negocio" class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white">
-        <label class="block text-xs text-white/60 mb-1">Código de referido (opcional)</label>
-        <input type="text" id="signUpReferralCode" placeholder="Código" autocomplete="off" class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white uppercase" maxlength="32">
+        <div id="signUpWrapDistribuidor" class="hidden">
+          <label for="signUpNombreApellido" class="block text-xs text-white/60 mb-1">Nombre y apellido</label>
+          <input type="text" id="signUpNombreApellido" placeholder="Como querés que te vea la red" autocomplete="name" class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white">
+          <label for="signUpReferralCode" class="block text-xs text-white/60 mb-1">Código de referido (opcional)</label>
+          <input type="text" id="signUpReferralCode" placeholder="Código" autocomplete="off" class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white uppercase" maxlength="32">
+        </div>
         <div class="mb-4 flex items-start gap-2 sign-up-terms-row">
           <input type="checkbox" id="signUpAcceptTerms" class="shrink-0">
           <label for="signUpAcceptTerms" class="text-sm text-white/80 leading-tight">
@@ -1628,7 +1624,7 @@
   </div>
   </div><!-- /#appWrap -->
   <script src="kiosco-config.js"></script>
-  <script defer src="kiosco-app.js?v=20260424copy"></script>
+  <script defer src="kiosco-app.js?v=20260424dualform"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>

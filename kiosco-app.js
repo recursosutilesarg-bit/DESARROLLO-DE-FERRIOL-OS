@@ -80,19 +80,17 @@
       } catch (_) { return 'kiosco'; }
     }
     function getSelectedSignupNicho() {
-      var rS = document.querySelector('input[name="signUpNicho"][value="socio"]');
-      var rK = document.querySelector('input[name="signUpNicho"][value="kiosco"]');
-      if (rS && rS.checked) return 'socio';
-      if (rK && rK.checked) return 'kiosco';
       return getSignupNichoFromStorage();
     }
     function syncSignUpNichoUI() {
-      var n = getSelectedSignupNicho();
+      var n = getSignupNichoFromStorage();
       try { sessionStorage.setItem('ferriol_signup_nicho', n === 'socio' ? 'socio' : 'kiosco'); } catch (_) {}
       var sub = document.getElementById('signUpLeadLine');
-      var nameIn = document.getElementById('signUpKioscoName');
+      var wrapN = document.getElementById('signUpWrapNegocio');
+      var wrapD = document.getElementById('signUpWrapDistribuidor');
       if (sub) sub.textContent = n === 'socio' ? 'Quiero ser distribuidor del sistema' : 'Quiero probar el sistema';
-      if (nameIn) nameIn.placeholder = n === 'socio' ? 'Tu nombre o equipo' : 'Nombre del negocio';
+      if (wrapN) wrapN.classList.toggle('hidden', n !== 'kiosco');
+      if (wrapD) wrapD.classList.toggle('hidden', n !== 'socio');
     }
     function copyTextToClipboard(text, doneMsg) {
       var t = text || '';
@@ -128,15 +126,19 @@
       if (signUpErr) signUpErr.classList.remove('show');
       var refIn = document.getElementById('signUpReferralCode');
       if (refIn) {
-        try {
-          var st = normalizeReferralCode(sessionStorage.getItem('ferriol_signup_ref') || '');
-          refIn.value = st || '';
-        } catch (_) { refIn.value = ''; }
+        if (nicho === 'socio') {
+          try {
+            var st = normalizeReferralCode(sessionStorage.getItem('ferriol_signup_ref') || '');
+            refIn.value = st || '';
+          } catch (_) { refIn.value = ''; }
+        } else {
+          refIn.value = '';
+        }
       }
-      var rSoc = document.querySelector('input[name="signUpNicho"][value="socio"]');
-      var rKio = document.querySelector('input[name="signUpNicho"][value="kiosco"]');
-      if (nicho === 'socio' && rSoc) rSoc.checked = true;
-      else if (rKio) rKio.checked = true;
+      var kn = document.getElementById('signUpKioscoName');
+      var na = document.getElementById('signUpNombreApellido');
+      if (nicho === 'kiosco' && na) na.value = '';
+      if (nicho === 'socio' && kn) kn.value = '';
       syncSignUpNichoUI();
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
@@ -146,9 +148,6 @@
       if (b1) b1.addEventListener('click', function (e) { e.preventDefault(); openSignUpFlow('kiosco'); });
       var b2 = document.getElementById('signUpBtnSocio');
       if (b2) b2.addEventListener('click', function (e) { e.preventDefault(); openSignUpFlow('socio'); });
-      document.querySelectorAll('input[name="signUpNicho"]').forEach(function (inp) {
-        inp.addEventListener('change', syncSignUpNichoUI);
-      });
     })();
 
     async function resolveReferralCodeToSponsorId(code) {
@@ -4428,10 +4427,26 @@ async function showApp() {
     document.getElementById('doSignUp').onclick = async () => {
       const email = document.getElementById('signUpEmail').value.trim();
       const password = document.getElementById('signUpPassword').value;
-      const kioscoName = document.getElementById('signUpKioscoName').value.trim();
       const phone = document.getElementById('signUpPhone').value.trim();
       const errEl = document.getElementById('signUpErr');
       errEl.classList.remove('show');
+      var signupNicho = getSelectedSignupNicho();
+      var kioscoName = '';
+      if (signupNicho === 'socio') {
+        kioscoName = (document.getElementById('signUpNombreApellido') && document.getElementById('signUpNombreApellido').value.trim()) || '';
+        if (!kioscoName) {
+          errEl.textContent = 'Ingresá tu nombre y apellido.';
+          errEl.classList.add('show');
+          return;
+        }
+      } else {
+        kioscoName = (document.getElementById('signUpKioscoName') && document.getElementById('signUpKioscoName').value.trim()) || '';
+        if (!kioscoName) {
+          errEl.textContent = 'Ingresá el nombre del negocio.';
+          errEl.classList.add('show');
+          return;
+        }
+      }
       if (!document.getElementById('signUpAcceptTerms').checked) {
         errEl.textContent = 'Debés aceptar los Términos y Condiciones para crear la cuenta.';
         errEl.classList.add('show');
@@ -4447,11 +4462,14 @@ async function showApp() {
         errEl.classList.add('show');
         return;
       }
-      var sp = await resolveSponsorForSignup();
-      if (sp.error) {
-        errEl.textContent = sp.error;
-        errEl.classList.add('show');
-        return;
+      var sp = { sponsorId: null, error: null };
+      if (signupNicho === 'socio') {
+        sp = await resolveSponsorForSignup();
+        if (sp.error) {
+          errEl.textContent = sp.error;
+          errEl.classList.add('show');
+          return;
+        }
       }
       const { data, error } = await supabaseClient.auth.signUp({ email, password });
       if (error) {
@@ -4468,7 +4486,6 @@ async function showApp() {
         return;
       }
       if (sp.sponsorId === newId) sp.sponsorId = null;
-      var signupNicho = getSelectedSignupNicho();
       var newRole = signupNicho === 'socio' ? 'partner' : 'kiosquero';
       var upProf = await supabaseClient.from('profiles').upsert({
         id: newId,
