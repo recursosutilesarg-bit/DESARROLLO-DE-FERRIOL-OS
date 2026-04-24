@@ -177,8 +177,8 @@
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <div class="relative kiosquero-only notif-wrap">
-          <button id="notifBtn" class="btn-neomorphic rounded-xl p-2.5 relative transition-all duration-300 hover:scale-105 active:scale-95 touch-target" title="Notificaciones">
+        <div class="relative notif-wrap" id="ferriolNotifHeaderWrap" style="display: none;">
+          <button id="notifBtn" class="btn-neomorphic rounded-xl p-2.5 relative transition-all duration-300 hover:scale-105 active:scale-95 touch-target" title="Avisos de la empresa">
             <i data-lucide="bell" class="w-5 h-5"></i>
             <span id="notifCount" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center hidden">0</span>
           </button>
@@ -1224,13 +1224,13 @@
           </div>
         </div>
         <!-- Sección Notificaciones -->
-        <div id="super-section-notificaciones" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; min-height: 100%; max-height: 85vh;">
+        <div id="super-section-notificaciones" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; min-height: 100%; max-height: 85vh;">
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2">
             <i data-lucide="bell" class="w-5 h-5 text-[#86efac]"></i>
-            Notificaciones
+            Notificaciones (solo empresa)
           </h2>
-          <p class="text-xs text-white/50 mb-3">Enviá un mensaje a todos los negocios. Lo verán en la campana de la app.</p>
-          <label class="block text-sm font-medium text-white/80 mb-2">Mensaje para todos los usuarios</label>
+          <p class="text-xs text-white/50 mb-3">Solo el <strong class="text-white/70">fundador</strong> envía avisos. Los reciben los <strong class="text-white/70">kiosqueros</strong> y los <strong class="text-white/70">administradores de red</strong> en la campana del encabezado. Los socios no pueden enviar mensajes globales.</p>
+          <label class="block text-sm font-medium text-white/80 mb-2">Mensaje global</label>
           <textarea id="adminNotificationMessage" rows="5" placeholder="Ej: Mañana cerramos a las 18 hs. / Recordá cargar stock de..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base resize-y mb-4 min-h-[120px]"></textarea>
           <button type="button" id="sendNotificationBtn" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold flex items-center gap-2 touch-target w-full sm:w-auto">
             <i data-lucide="send" class="w-4 h-4"></i> Enviar a todos
@@ -1626,7 +1626,7 @@
   </div>
   </div><!-- /#appWrap -->
   <script src="kiosco-config.js"></script>
-  <script defer src="kiosco-app.js?v=20260422dayreq"></script>
+  <script defer src="kiosco-app.js?v=20260422notif"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>

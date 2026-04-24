@@ -11,9 +11,9 @@
     // ALTER TABLE clientes ENABLE ROW LEVEL SECURITY; CREATE POLICY "clientes_policy" ON clientes FOR ALL USING (auth.uid() = user_id);
     // Fiados y cuentas corrientes: Caja → Libreta (libreta_clientes / libreta_items en Supabase).
     // Tabla legacy saldos_acobrar: ya no la usa la app; podés ignorarla o borrarla en Supabase si no la necesitás.
-    // Notificaciones del admin a los kiosqueros:
+    // Notificaciones globales: las inserta solo role super (RLS: supabase-ferriol-notifications-rls.sql). Las leen kiosqueros y socios en la campana.
     // CREATE TABLE notifications ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now(), message text NOT NULL );
-    // ALTER TABLE notifications ENABLE ROW LEVEL SECURITY; CREATE POLICY "notifications_select" ON notifications FOR SELECT TO authenticated USING (true); CREATE POLICY "notifications_insert" ON notifications FOR INSERT TO authenticated WITH CHECK (true);
+    // ALTER TABLE notifications ENABLE ROW LEVEL SECURITY; políticas SELECT según tu proyecto + INSERT solo super en el SQL anterior.
     // Recordatorios de fin de prueba (mensajes por día + ventana): guardá en app_settings una fila key = 'trial_reminder_config', value = JSON, ej. {"windowDays":5,"messages":{"5":"...","4":"..."}}. Placeholders en textos: {dias}, {dias_restantes}, {nombre}, {negocio}.
     // Red de referidos: solo role 'partner' o 'super' tienen código y enlaces (kiosquero no refiere). SQL: supabase-referral-network.sql, supabase-mlm-foundation.sql, supabase-ferriol-payments.sql (cobros + RPC ferriol_verify_payment). Solicitudes de días de membresía (socio → empresa): supabase-ferriol-membership-day-requests.sql. Objeto FerriolMlm en este archivo.
     // Enlaces: ?ref=CÓDIGO&nicho=kiosco (alta negocio) | ?ref=CÓDIGO&nicho=socio (membresía vendedor). Aliases: nicho=vendedor|red|membresia, membresia=1, tipo=...
@@ -967,11 +967,20 @@
     function ferriolKiosqueroNotifShell() {
       return !!(currentUser && (currentUser.role === 'kiosquero' || isSuperKioscoPreviewMode()));
     }
+    /** Quién debe ver la campana y recibir avisos globales de la empresa (solo lectura salvo vista fundador). */
+    function ferriolNotificationRecipientShell() {
+      if (!currentUser) return false;
+      if (currentUser.role === 'kiosquero') return true;
+      if (isSuperKioscoPreviewMode()) return true;
+      if (currentUser.role === 'partner') return true;
+      if (currentUser.role === 'super' && isSuperSocioLens()) return true;
+      return false;
+    }
     function ferriolStartNotificationPolling() {
       if (window._ferriolNotifPollInterval) clearInterval(window._ferriolNotifPollInterval);
       window._ferriolNotifPollInterval = setInterval(function () {
         if (document.hidden || !supabaseClient) return;
-        if (!ferriolKiosqueroNotifShell()) return;
+        if (!ferriolNotificationRecipientShell()) return;
         loadNotifications();
       }, 60000);
     }
@@ -998,6 +1007,10 @@
       showPanel('super');
       state._restoringFromHistory = false;
       await renderSuper();
+      if (lens === 'socio') {
+        ferriolStartNotificationPolling();
+        loadNotifications();
+      }
       lucide.createIcons();
     }
 
@@ -1915,6 +1928,10 @@
           navS.style.display = 'none';
         }
       }
+      var notifHdr = document.getElementById('ferriolNotifHeaderWrap');
+      if (notifHdr) {
+        notifHdr.style.display = ferriolNotificationRecipientShell() ? '' : 'none';
+      }
       var ht = document.getElementById('headerTitle');
       var subEl = document.getElementById('headerSub');
       if (ht) {
@@ -2011,7 +2028,8 @@
       if (name === 'dashboard') {
         updateTrialCountdown();
         updateDashboard();
-        if (ferriolKiosqueroNotifShell()) { loadAdminContact(); loadNotifications(); }
+        if (ferriolKiosqueroNotifShell()) loadAdminContact();
+        if (ferriolNotificationRecipientShell()) loadNotifications();
       }
       if (name === 'scanner') {
         if (typeof window._startScannerCamera === 'function') window._startScannerCamera();
@@ -2062,6 +2080,9 @@
       state.superSection = sectionName || 'negocios';
       var reqSuper = state.superSection === 'cobros';
       if (reqSuper && currentUser && (currentUser.role !== 'super' || !isEmpresaLensSuper())) {
+        state.superSection = 'negocios';
+      }
+      if (state.superSection === 'notificaciones' && currentUser && !isEmpresaLensSuper()) {
         state.superSection = 'negocios';
       }
       document.querySelectorAll('#panel-super .super-section').forEach(function (el) {
@@ -4161,12 +4182,15 @@ async function showApp() {
       ferriolStartNotificationPolling();
       lucide.createIcons();
     } else if (isSuper) {
-      ferriolStopNotificationPolling();
+      if (state.superUiMode === 'socio') ferriolStartNotificationPolling();
+      else ferriolStopNotificationPolling();
       goToPanel('super');
+      if (ferriolNotificationRecipientShell()) loadNotifications();
       lucide.createIcons();
     } else if (isPartner) {
-      ferriolStopNotificationPolling();
+      ferriolStartNotificationPolling();
       goToPanel('super');
+      loadNotifications();
       lucide.createIcons();
     } else {
       if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
@@ -5909,7 +5933,7 @@ async function showApp() {
         var data = res.data || [];
         var newRows = data.filter(function (n) { return n.id && !prevIds.has(n.id); });
         notificationsCache = data;
-        if (_ferriolNotifFetchBaselineDone && newRows.length > 0 && ferriolKiosqueroNotifShell()) {
+        if (_ferriolNotifFetchBaselineDone && newRows.length > 0 && ferriolNotificationRecipientShell()) {
           ferriolPlayNotificationChime();
         }
         _ferriolNotifFetchBaselineDone = true;
@@ -5926,7 +5950,7 @@ async function showApp() {
         var err = (await supabaseClient.from('notifications').insert({ message: msg })).error;
         if (err) throw err;
         if (textarea) textarea.value = '';
-        if (msgEl) { msgEl.textContent = 'Enviado a todos los negocios.'; msgEl.classList.remove('hidden'); msgEl.className = 'text-xs mt-2 text-green-300'; setTimeout(function () { msgEl.classList.add('hidden'); }, 4000); }
+        if (msgEl) { msgEl.textContent = 'Enviado: lo verán los kiosqueros y los administradores de red en la campana.'; msgEl.classList.remove('hidden'); msgEl.className = 'text-xs mt-2 text-green-300'; setTimeout(function () { msgEl.classList.add('hidden'); }, 4000); }
       } catch (e) {
         if (msgEl) { msgEl.textContent = 'Error: ' + (e.message || 'Creá la tabla notifications en Supabase (ver comentarios en el código).'); msgEl.classList.remove('hidden'); msgEl.className = 'text-xs mt-2 text-red-300'; }
       }
