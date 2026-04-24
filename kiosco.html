@@ -413,7 +413,7 @@
         </h3>
         <p id="kioscoLicensePriceHint" class="text-sm text-white/75 mb-2"></p>
         <p id="kioscoLicenseSponsorHint" class="text-xs text-white/60 mb-2"></p>
-        <p class="text-xs text-white/55 mb-1">El pago de la licencia lo hacés al <strong class="text-white/75">referidor / administrador</strong> que te dio de alta, usando los datos de cuenta que figuran abajo (los carga el administrador en Ajustes). Enviá el comprobante como te indiquen.</p>
+        <p class="text-xs text-white/55 mb-1">El pago de la licencia lo hacés al <strong class="text-white/75">referidor / administrador</strong> que te dio de alta, usando los datos de cuenta que figuran abajo (los carga el administrador en Ajustes). Enviá el comprobante como te indiquen. Si Ferriol OS te <strong class="text-white/70">reasigna</strong> otro referidor, el nombre arriba y las instrucciones se <strong class="text-white/70">actualizan</strong> con los del nuevo encargo.</p>
         <p class="text-[10px] text-white/45 mb-2">Ese canal es quien centraliza el cobro de tu cuota frente a Ferriol OS.</p>
         <pre id="kioscoTransferInfoText" class="text-xs whitespace-pre-wrap text-white/90 glass rounded-lg p-3 border border-white/15 max-h-48 overflow-y-auto font-sans"></pre>
         <p class="text-[10px] text-white/40 mt-2">En esta app no verás comisiones ni repartos 20/80: eso es gestión de la red comercial, no de tu caja diaria.</p>
@@ -1078,6 +1078,8 @@
           <p class="text-xs text-white/50 mb-2 super-only super-main-only">Directorio completo del sistema. Filtrá «Sin referidor» para ver cuentas sin admin/referidor y asignalas desde el detalle del usuario.</p>
           <p id="superPartnerNetInfo" class="hidden text-sm text-white/75 mb-3 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-2"></p>
           <div id="superPartnerCommissionsCard" class="hidden mb-3 rounded-xl border border-emerald-500/35 bg-emerald-500/10 px-3 py-3 text-sm"></div>
+          <div id="superDayRequestsFounderBox" class="hidden mb-3 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-3 text-sm"></div>
+          <div id="superDayRequestsPartnerBox" class="hidden mb-3 rounded-xl border border-cyan-500/35 bg-cyan-500/08 px-3 py-3 text-sm"></div>
           <div class="flex flex-wrap gap-2 mb-4">
             <button type="button" id="btnOpenNewKiosqueroModal" class="btn-glow rounded-xl py-3 px-5 font-semibold flex items-center justify-center gap-2 touch-target">
               <i data-lucide="user-plus" class="w-5 h-5"></i> Agregar negocio
@@ -1624,7 +1626,7 @@
   </div>
   </div><!-- /#appWrap -->
   <script src="kiosco-config.js"></script>
-  <script defer src="kiosco-app.js?v=20260424dualform"></script>
+  <script defer src="kiosco-app.js?v=20260422dayreq"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>

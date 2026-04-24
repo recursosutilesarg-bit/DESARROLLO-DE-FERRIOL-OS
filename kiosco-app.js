@@ -15,7 +15,7 @@
     // CREATE TABLE notifications ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now(), message text NOT NULL );
     // ALTER TABLE notifications ENABLE ROW LEVEL SECURITY; CREATE POLICY "notifications_select" ON notifications FOR SELECT TO authenticated USING (true); CREATE POLICY "notifications_insert" ON notifications FOR INSERT TO authenticated WITH CHECK (true);
     // Recordatorios de fin de prueba (mensajes por día + ventana): guardá en app_settings una fila key = 'trial_reminder_config', value = JSON, ej. {"windowDays":5,"messages":{"5":"...","4":"..."}}. Placeholders en textos: {dias}, {dias_restantes}, {nombre}, {negocio}.
-    // Red de referidos: solo role 'partner' o 'super' tienen código y enlaces (kiosquero no refiere). SQL: supabase-referral-network.sql, supabase-mlm-foundation.sql, supabase-ferriol-payments.sql (cobros + RPC ferriol_verify_payment). Objeto FerriolMlm en este archivo.
+    // Red de referidos: solo role 'partner' o 'super' tienen código y enlaces (kiosquero no refiere). SQL: supabase-referral-network.sql, supabase-mlm-foundation.sql, supabase-ferriol-payments.sql (cobros + RPC ferriol_verify_payment). Solicitudes de días de membresía (socio → empresa): supabase-ferriol-membership-day-requests.sql. Objeto FerriolMlm en este archivo.
     // Enlaces: ?ref=CÓDIGO&nicho=kiosco (alta negocio) | ?ref=CÓDIGO&nicho=socio (membresía vendedor). Aliases: nicho=vendedor|red|membresia, membresia=1, tipo=...
     // Historial de cierres de caja (facturación y ganancia por día):
     // CREATE TABLE cierres_caja ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE, fecha date NOT NULL, fecha_cierre timestamptz NOT NULL DEFAULT now(), total_facturado numeric NOT NULL DEFAULT 0, ganancia numeric NOT NULL DEFAULT 0, created_at timestamptz DEFAULT now() );
@@ -4396,7 +4396,8 @@ async function showApp() {
       document.getElementById('resetPwdBox').classList.add('hidden');
     };
     (function () {
-      var termsHtml = '<p><strong>1. ACEPTACIÓN.</strong> Al crear una cuenta en Ferriol OS (“el Servicio”) aceptás estos Términos y Condiciones y el Contrato de Servicio. Si no aceptás, no podés usar el Servicio.</p>' +
+      var termsParteI = '<p class="text-white/55 text-xs font-semibold uppercase tracking-wide mb-2">Parte I — Todos los usuarios</p>' +
+        '<p><strong>1. ACEPTACIÓN.</strong> Al crear una cuenta en Ferriol OS (“el Servicio”) aceptás estos Términos y Condiciones y el Contrato de Servicio. Si no aceptás, no podés usar el Servicio.</p>' +
         '<p><strong>2. DESCRIPCIÓN DEL SERVICIO.</strong> Ferriol OS es un sistema de gestión para kioscos y comercios ofrecido “tal cual” (as is). No garantizamos disponibilidad ininterrumpida ni ausencia de errores.</p>' +
         '<p><strong>3. PÉRDIDA DE DATOS — EXENCIÓN DE RESPONSABILIDAD.</strong> Ferriol OS y sus titulares <strong>no se hacen responsables</strong> por ninguna pérdida, corrupción o indisponibilidad de datos (productos, ventas, deudores, configuraciones o cualquier otro dato cargado en el Servicio). El usuario es responsable de realizar copias de seguridad periódicas utilizando las herramientas que ofrece la aplicación. El Servicio no sustituye el respaldo propio de la información crítica del negocio.</p>' +
         '<p><strong>4. DATOS Y PROPIEDAD.</strong> Los datos que el usuario ingresa en el Servicio son de su negocio. Ferriol OS actúa como proveedor del software y de la plataforma. El usuario otorga a Ferriol OS la licencia necesaria para almacenar, procesar y mostrar dichos datos con el fin de prestar el Servicio. Ferriol OS no vende los datos personales o de negocio del usuario a terceros. Los datos generados o alojados en la plataforma están sujetos a la política de uso del Servicio y a la legislación aplicable.</p>' +
@@ -4404,11 +4405,30 @@ async function showApp() {
         '<p><strong>6. LIMITACIÓN DE RESPONSABILIDAD.</strong> En la máxima medida permitida por la ley aplicable, Ferriol OS y sus titulares no serán responsables por daños indirectos, incidentales, especiales, consecuentes o punitivos (incluyendo pérdida de beneficios, datos, clientes o buena voluntad). La responsabilidad total no excederá el monto abonado por el usuario en los últimos 12 meses por el Servicio, o cero si el Servicio fue gratuito.</p>' +
         '<p><strong>7. EXENCIÓN DE GARANTÍAS.</strong> El Servicio se presta “tal cual” y “según disponibilidad”. No ofrecemos garantías de ningún tipo, expresas o implícitas (incluyendo comerciabilidad o idoneidad para un fin determinado).</p>' +
         '<p><strong>8. SUSCRIPCIÓN Y CANCELACIÓN.</strong> La suscripción o período de prueba pueden estar sujetos a condiciones adicionales. Ferriol OS puede modificar, suspender o discontinuar el Servicio o estas condiciones, notificando cuando sea razonable. El usuario puede cerrar su cuenta en cualquier momento.</p>' +
-        '<p><strong>9. JURISDICCIÓN.</strong> Estos términos se rigen por las leyes de la República Argentina. Cualquier controversia será sometida a los tribunales competentes en la República Argentina.</p>' +
-        '<p><strong>10. CONTACTO.</strong> Para consultas sobre estos términos: contactar a Ferriol OS por los canales oficiales indicados en la aplicación.</p>' +
-        '<p class="text-white/60 text-xs mt-4">Última actualización: 2025. Ferriol OS.</p>';
+        '<p><strong>9. CUENTAS DE NEGOCIO (KIOSQUEROS) Y REFERIDOR O DISTRIBUIDOR EN MORA.</strong> Si tu cuenta es de <strong>negocio</strong> que usa el sistema en el local (kiosquero u similar), <strong>no perdés tu cuenta ni tus datos de gestión</strong> solo porque tu referidor o distribuidor deje de pagar su membresía u obligaciones frente a Ferriol OS. La empresa tomará conocimiento del incumplimiento y podrá: <strong>hacerse cargo</strong> de la relación comercial contigo, <strong>reasignarte</strong> otro distribuidor o administrador de red, y aplicar la política operativa vigente. En tu sesión de la aplicación podrán <strong>actualizarse</strong> los datos de referencia y las <strong>instrucciones de pago</strong> correspondientes al <strong>nuevo referidor o administrador</strong> asignado, para que sigas abonando la licencia con claridad. Esto no impide medidas por otras causas (fraude, impago tuyo propio, pedido judicial, etc.).</p>' +
+        '<p><strong>10. JURISDICCIÓN.</strong> Estos términos se rigen por las leyes de la República Argentina. Cualquier controversia será sometida a los tribunales competentes en la República Argentina.</p>' +
+        '<p><strong>11. CONTACTO.</strong> Para consultas sobre estos términos: contactar a Ferriol OS por los canales oficiales indicados en la aplicación.</p>';
+      var termsParteIIDistribuidor = '<p class="text-white/55 text-xs font-semibold uppercase tracking-wide mt-5 mb-2 pt-4 border-t border-white/15">Parte II — Distribuidores / red comercial (membresía y comisiones)</p>' +
+        '<p class="text-white/70 text-xs mb-3">La siguiente parte aplica si tu cuenta tiene rol de <strong>distribuidor, socio comercial o similar</strong> en la red Ferriol OS (incluye comercialización del sistema, referidos y plan de compensaciones). Los montos, plazos y porcentajes concretos se detallan en el <strong>plan de compensaciones</strong>, <strong>tabla de membresía</strong> y comunicaciones oficiales; estos términos describen el marco general.</p>' +
+        '<p><strong>11. MEMBRESÍA, MORA, PAUSA Y BAJA DEL DISTRIBUIDOR.</strong> La membresía u otros cargos de la red son <strong>obligatorios</strong> mientras mantengas activo el rol de distribuidor. Si no abonás en término: (a) ingresás en <strong>mora</strong> y Ferriol OS queda notificada; (b) podrá colocarte en estado de <strong>pausa</strong> (cuenta de distribuidor limitada o suspendida para operar la red: sin nuevos referidos, sin cobro de comisiones pendientes de regularizar, u otras restricciones que defina la política); (c) podrá <strong>retener o congelar</strong> comisiones o créditos a tu favor hasta la regularización; (d) tras el <strong>plazo</strong> que indiquen el plan, el anexo tarifario o una notificación fehaciente, podrá darse por <strong>rescindida</strong> tu participación como distribuidor y darse de <strong>baja</strong> ese rol, <strong>sin perjuicio</strong> de montos adeudados. Luego de la baja, Ferriol OS podrá <strong>reasignar</strong> a los usuarios o afiliados que dependían de vos a <strong>otro distribuidor o a la empresa</strong>, conforme la política publicada.</p>' +
+        '<p><strong>12. NEGOCIOS FINALES (KIOSQUEROS) — CONTINUIDAD Y DATOS DE PAGO.</strong> Las cuentas de negocio que usan el sistema en el local <strong>no se dan de baja</strong> automáticamente porque vos, como distribuidor, estés en mora o pausa (véase también la cláusula 9 de la Parte I). Ferriol OS podrá <strong>asumir</strong> la relación con ese negocio o <strong>reasignarle</strong> otro administrador o distribuidor. Una vez producida la reasignación, en la cuenta del kiosquero podrán mostrarse los <strong>datos de referencia y las instrucciones de pago</strong> del <strong>nuevo</strong> referidor o administrador (nombre, contacto y canal de pago que la plataforma y la política habiliten). Vos podés <strong>perder</strong> derecho a comisiones futuras, visibilidad de la línea y el estatus de patrocinador activo. Ferriol OS no está obligada a mantener beneficios comerciales a tu favor si no regularizás.</p>' +
+        '<p><strong>13. VENTAS, COMISIONES Y LO QUE DEBÉS A LA EMPRESA.</strong> Sobre las ventas de membresías, kits, renovaciones u otros conceptos del plan, podés deber a Ferriol OS <strong>comisiones, fee, retenciones o ajustes</strong> según el plan aprobado. Si no transferís o no acreditás esos importes en plazo: (a) los montos siguen siendo <strong>exigibles</strong>; (b) Ferriol OS podrá <strong>compensar</strong> (saldo neto) con créditos o comisiones a tu favor que figuren en la plataforma; (c) podrá aplicar <strong>intereses moratorios, cargos administrativos o gastos de gestión de cobranza</strong> si así lo prevé el plan o un anexo tarifario; (d) podrá suspender pagos de comisiones hasta regularizar. La falta de pago <strong>no autoriza</strong> retener fondos de terceros que no te pertenezcan; las compensaciones se limitan a <strong>tu relación contractual</strong> con Ferriol OS.</p>' +
+        '<p><strong>14. INTEGRIDAD, FRAUDE Y PENALIDADES.</strong> Está prohibido manipular precios, referidos ficticios, identidades falsas, lavado de operaciones o cualquier conducta que defraudare al sistema o a terceros. Las sanciones pueden incluir, según gravedad: <strong>apercibimiento</strong>; <strong>suspensión temporal</strong> del rol de distribuidor; <strong>baja definitiva</strong> del rol; <strong>descuento o reversión</strong> de comisiones obtenidas indebidamente; <strong>multa o penalidad económica</strong> prevista en el plan; e <strong>inhabilitación</strong> para volver a registrarte como distribuidor. Ferriol OS podrá dar intervención a asesoría legal o organismos competentes ante ilícitos.</p>' +
+        '<p><strong>15. ACEPTACIÓN EXPRESA DE LA PARTE II.</strong> Al registrarte como distribuidor declarás haber leído la Parte II y el plan de compensaciones aplicable. Si no estás de acuerdo, no debés completar el alta con ese rol.</p>';
+      function ferriolTermsHtmlInscribirseEsDistribuidor() {
+        var wrapD = document.getElementById('signUpWrapDistribuidor');
+        var visibleD = wrapD && !wrapD.classList.contains('hidden');
+        var nichoSocio = false;
+        try { nichoSocio = getSignupNichoFromStorage() === 'socio'; } catch (_) {}
+        return visibleD || nichoSocio;
+      }
+      function ferriolBuildTermsHtml() {
+        var footer = '<p class="text-white/60 text-xs mt-4">Última actualización: abril 2026. Ferriol OS. <span class="text-white/45">Revisión legal recomendada antes de publicar en producción.</span></p>';
+        if (ferriolTermsHtmlInscribirseEsDistribuidor()) return termsParteI + termsParteIIDistribuidor + footer;
+        return termsParteI + footer;
+      }
       document.getElementById('openTermsModal').onclick = function () {
-        document.getElementById('termsContent').innerHTML = termsHtml;
+        document.getElementById('termsContent').innerHTML = ferriolBuildTermsHtml();
         document.getElementById('termsModal').classList.remove('hidden');
         document.getElementById('termsModal').classList.add('flex');
       };
@@ -4893,8 +4913,10 @@ async function showApp() {
         }
       }
       var refCodeEsc = (user.referral_code || '—').replace(/</g, '&lt;');
+      var isFounderEmpresa = isEmpresaLensSuper();
+      var isSocioLens = isPartnerLens();
       var assignHtml = '';
-      if (isEmpresaLensSuper()) {
+      if (isFounderEmpresa) {
         var poolFull = window._ferriolAllProfilesCache || [];
         var opts = ['<option value="">— Sin referidor / sin asignar —</option>'];
         var candidates = poolFull.filter(function (p) { return p.id !== user.id; }).slice().sort(function (a, b) {
@@ -4922,7 +4944,7 @@ async function showApp() {
         sponsorIsPartner = !!(spRow0 && spRow0.role === 'partner');
       }
       var defSaleHtml = '';
-      if (isEmpresaLensSuper() && user.role === 'kiosquero' && user.sponsor_id && sponsorIsPartner) {
+      if (isFounderEmpresa && user.role === 'kiosquero' && user.sponsor_id && sponsorIsPartner) {
         defSaleHtml = `
         <div class="border-t border-white/10 pt-4 space-y-2">
           <p class="text-sm font-medium text-cyan-200/95 flex items-center gap-2"><i data-lucide="percent" class="w-4 h-4"></i> Venta licencia kiosco (alta definitiva)</p>
@@ -4930,23 +4952,41 @@ async function showApp() {
           <button type="button" class="super-detail-definitive-sale w-full py-2.5 rounded-xl text-sm bg-cyan-500/20 text-cyan-100 border border-cyan-400/45 touch-target font-medium">Registrar venta (20% / 80%)</button>
         </div>`;
       }
-      var quitarHtml = isPartnerLens() ? '' : `
+      var partnerNetworkControlHtml = '';
+      if (isFounderEmpresa && user.role === 'partner') {
+        var poolNet = window._ferriolAllProfilesCache || [];
+        var directKios = poolNet.filter(function (p) { return p && p.sponsor_id === user.id && p.role === 'kiosquero'; });
+        var directSoc = poolNet.filter(function (p) { return p && p.sponsor_id === user.id && p.role === 'partner'; });
+        var optsBulk = ['<option value="">— Elegí el nuevo referidor / admin —</option>'];
+        poolNet.filter(function (p) { return p && p.id !== user.id; }).slice().sort(function (a, b) {
+          var ra = (a.role === 'super') ? 0 : (a.role === 'partner') ? 1 : 2;
+          var rb = (b.role === 'super') ? 0 : (b.role === 'partner') ? 1 : 2;
+          if (ra !== rb) return ra - rb;
+          return (a.kiosco_name || a.email || '').localeCompare(b.kiosco_name || b.email || '');
+        }).forEach(function (p) {
+          var lab = '[' + (p.role || 'kiosquero') + '] ' + (p.kiosco_name || p.email || '').slice(0, 36) + (p.email ? (' · ' + p.email) : '');
+          optsBulk.push('<option value="' + p.id + '">' + lab.replace(/</g, '&lt;') + '</option>');
+        });
+        partnerNetworkControlHtml = `
+        <div class="border-t border-white/10 pt-4 space-y-3 super-partner-network-control">
+          <p class="text-sm font-medium text-amber-200 flex items-center gap-2"><i data-lucide="git-branch" class="w-4 h-4"></i> Fundador — control de red y penalidades</p>
+          <p class="text-xs text-white/55">Solo el perfil <strong class="text-amber-100/90">fundador</strong> (administrador raíz en vista empresa). Referidos <strong>directos</strong> de este socio: <strong class="text-white/80">${directKios.length}</strong> negocio(s) (kiosquero) y <strong class="text-white/80">${directSoc.length}</strong> socio(s). Los negocios <strong>no se borran</strong> al sancionar al socio: reasignalos a otro admin o a vos.</p>
+          <label class="flex items-center gap-2 text-xs text-white/70 cursor-pointer touch-target py-1">
+            <input type="checkbox" id="superBulkReassignIncludePartners" class="rounded border-white/30 bg-white/10 text-amber-500 shrink-0">
+            <span>Incluir socios directos en la reasignación (además de kiosqueros)</span>
+          </label>
+          <select id="superBulkReassignSponsorSelect" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm bg-black/20">${optsBulk.join('')}</select>
+          <button type="button" class="super-detail-bulk-reassign w-full py-2.5 rounded-xl text-sm bg-amber-500/20 text-amber-100 border border-amber-400/45 touch-target font-medium">Reasignar toda la línea directa</button>
+          <button type="button" class="super-detail-partner-penalty w-full py-2.5 rounded-xl text-sm bg-red-600/25 text-red-200 border border-red-500/50 touch-target font-medium ${user.active ? '' : 'opacity-50 pointer-events-none'}" ${user.active ? '' : 'disabled'}>Penalidad: desactivar acceso del socio</button>
+          <p class="text-[10px] text-white/40">El socio inactivo no puede entrar a la app. Comisiones/libro: gestioná aparte según política. Evitá dejar kiosqueros sin referidor si querés que sigan pagando a alguien de la red.</p>
+        </div>`;
+      }
+      var quitarHtml = isSocioLens ? '' : `
             <button type="button" class="super-detail-quitar w-full py-2.5 rounded-xl text-sm bg-red-500/20 text-red-300 border border-red-500/40 touch-target flex items-center justify-center gap-2">
               <i data-lucide="user-minus" class="w-4 h-4"></i> Quitar negocio (pide contraseña admin)
             </button>`;
-      title.textContent = name;
-      content.innerHTML = `
-        <div class="space-y-1 text-sm text-white/80">
-          <p><span class="text-white/50">Email:</span> ${email || '—'}</p>
-          <p><span class="text-white/50">Rol:</span> ${(user.role || 'kiosquero').replace(/</g, '&lt;')}</p>
-          <p><span class="text-white/50">Estado:</span> <span class="${user.active ? 'text-green-300' : 'text-red-300'}">${user.active ? 'Activo' : 'Inactivo'}</span></p>
-          <p><span class="text-white/50">Membresía:</span> <span id="superDetailCountdown" class="${trialFull.expired ? 'text-red-300' : 'text-[#f87171]'}">${trialFull.text}</span></p>
-          <p><span class="text-white/50">Código de referido:</span> ${refCodeEsc}</p>
-          <p><span class="text-white/50">Referido por:</span> ${sponsorLine}</p>
-        </div>
-        ${assignHtml}
-        ${defSaleHtml}
-        <div class="border-t border-white/10 pt-4 space-y-3">
+      var founderActionsHtml = `
+        <div class="border-t border-white/10 pt-4 space-y-3 super-detail-actions-founder">
           <div class="flex items-center gap-2 flex-wrap">
             <span class="text-sm text-white/70">Activar/Desactivar:</span>
             <button type="button" class="super-detail-toggle toggle-switch ${user.active ? 'active' : ''}" title="${user.active ? 'Desactivar' : 'Activar'}"></button>
@@ -4966,7 +5006,75 @@ async function showApp() {
             </button>
             ${quitarHtml}
           </div>
+        </div>`;
+      var socioKiosqueroActionsHtml = `
+        <div class="border-t border-white/10 pt-4 space-y-3 super-detail-actions-socio-kiosquero">
+          <p class="text-xs text-white/60 leading-relaxed">Los <strong class="text-white/75">administradores de red</strong> no modifican los días de membresía a mano: enviás una <strong class="text-[#86efac]/90">solicitud a la empresa</strong>. Cuando el cliente te paga (ej. licencia <strong class="text-white/75">$ ${FERRIOL_PLAN_AMOUNTS.kioscoMonthly.toLocaleString('es-AR')}</strong>), abonás el <strong class="text-white/75">20%</strong> a Ferriol, completás el formulario y la empresa <strong>aprueba</strong> la carga. Hasta entonces el contador del kiosco no cambia.</p>
+          <div class="rounded-xl border border-emerald-500/35 bg-emerald-500/08 p-3 space-y-2">
+            <p class="text-sm font-medium text-emerald-100/95">Solicitar suma de días</p>
+            <div class="flex flex-wrap items-end gap-2">
+              <label class="text-[10px] text-white/55 block w-full">Días a sumar</label>
+              <input type="number" min="1" max="365" value="30" class="super-detail-req-add-days w-20 px-2 py-2 rounded-lg text-sm bg-white/10 border border-white/20 text-white touch-target">
+            </div>
+            <div>
+              <label class="text-[10px] text-white/55">Monto cobrado al cliente (ARS)</label>
+              <input type="number" min="1" step="1" class="super-detail-req-client-payment w-full glass rounded-lg px-3 py-2 border border-white/20 text-white text-sm" value="${FERRIOL_PLAN_AMOUNTS.kioscoMonthly}">
+            </div>
+            <p class="text-[10px] text-white/50">20% para la empresa: <strong class="text-cyan-200/90 super-detail-req-company-pct">—</strong> ARS (se guarda en la solicitud).</p>
+            <div>
+              <label class="text-[10px] text-white/55">Referencia del pago del 20% a empresa (opcional)</label>
+              <input type="text" class="super-detail-req-company-note w-full glass rounded-lg px-3 py-2 border border-white/20 text-white text-sm" placeholder="Ej. transferencia, fecha, banco">
+            </div>
+            <button type="button" class="super-detail-req-submit-add w-full py-2.5 rounded-xl text-sm bg-green-500/25 text-green-200 border border-green-500/45 touch-target font-medium">Enviar solicitud de suma</button>
+          </div>
+          <div class="rounded-xl border border-red-500/35 bg-red-500/08 p-3 space-y-2">
+            <p class="text-sm font-medium text-red-200/95">Solicitar quita de días</p>
+            <p class="text-[10px] text-white/50">Si hubo un error u otra causa, indicá el motivo. La empresa debe aprobar antes de descontar.</p>
+            <div class="flex flex-wrap items-end gap-2">
+              <label class="text-[10px] text-white/55 block w-full">Días a quitar</label>
+              <input type="number" min="1" max="365" value="1" class="super-detail-req-remove-days w-20 px-2 py-2 rounded-lg text-sm bg-white/10 border border-white/20 text-white touch-target">
+            </div>
+            <div>
+              <label class="text-[10px] text-white/55">Motivo obligatorio</label>
+              <textarea class="super-detail-req-remove-reason w-full glass rounded-lg px-3 py-2 border border-white/20 text-white text-sm min-h-[4rem]" placeholder="Explicá por qué deben descontarse días en este kiosco."></textarea>
+            </div>
+            <button type="button" class="super-detail-req-submit-remove w-full py-2.5 rounded-xl text-sm bg-red-600/25 text-red-200 border border-red-500/45 touch-target font-medium">Enviar solicitud de quita</button>
+          </div>
+          <div class="flex flex-col gap-2 pt-2">
+            <button type="button" class="super-detail-reset w-full py-2.5 rounded-xl text-sm bg-amber-500/20 text-amber-300 border border-amber-500/40 touch-target flex items-center justify-center gap-2">
+              <i data-lucide="key" class="w-4 h-4"></i> Enviar enlace para restablecer contraseña
+            </button>
+          </div>
+        </div>`;
+      var socioPartnerReadOnlyHtml = `
+        <div class="border-t border-white/10 pt-4 space-y-2 super-detail-actions-socio-partner-ro">
+          <p class="text-sm text-amber-100/90 font-medium">Socio de la red</p>
+          <p class="text-xs text-white/55 leading-relaxed">No podés aplicar cambios a otros administradores/socios que referiste. Eso lo gestiona solo el <strong class="text-white/75">fundador</strong> (vista empresa del admin raíz).</p>
+        </div>`;
+      var adminActionsHtml = '';
+      if (isFounderEmpresa) {
+        adminActionsHtml = founderActionsHtml;
+      } else if (isSocioLens && user.role === 'kiosquero') {
+        adminActionsHtml = socioKiosqueroActionsHtml;
+      } else if (isSocioLens && user.role === 'partner') {
+        adminActionsHtml = socioPartnerReadOnlyHtml;
+      } else if (isSocioLens) {
+        adminActionsHtml = socioKiosqueroActionsHtml;
+      }
+      title.textContent = name;
+      content.innerHTML = `
+        <div class="space-y-1 text-sm text-white/80">
+          <p><span class="text-white/50">Email:</span> ${email || '—'}</p>
+          <p><span class="text-white/50">Rol:</span> ${(user.role || 'kiosquero').replace(/</g, '&lt;')}</p>
+          <p><span class="text-white/50">Estado:</span> <span class="${user.active ? 'text-green-300' : 'text-red-300'}">${user.active ? 'Activo' : 'Inactivo'}</span></p>
+          <p><span class="text-white/50">Membresía:</span> <span id="superDetailCountdown" class="${trialFull.expired ? 'text-red-300' : 'text-[#f87171]'}">${trialFull.text}</span></p>
+          <p><span class="text-white/50">Código de referido:</span> ${refCodeEsc}</p>
+          <p><span class="text-white/50">Referido por:</span> ${sponsorLine}</p>
         </div>
+        ${assignHtml}
+        ${defSaleHtml}
+        ${partnerNetworkControlHtml}
+        ${adminActionsHtml}
       `;
       modal.classList.remove('hidden');
       modal.classList.add('flex');
@@ -4987,55 +5095,135 @@ async function showApp() {
           openSuperUserDetail(u);
         };
       }
-      content.querySelector('.super-detail-toggle').onclick = async () => {
-        if (!supabaseClient) return;
-        const newActive = !u.active;
-        await supabaseClient.from('profiles').update({ active: newActive }).eq('id', u.id);
-        u.active = newActive;
-        openSuperUserDetail(u);
-      };
-      content.querySelector('.super-detail-add-days').onclick = async () => {
-        if (!supabaseClient) return;
-        const input = content.querySelector('.super-detail-days-input');
-        const days = Math.max(1, Math.min(365, parseInt(input.value || 30, 10) || 30));
-        const now = new Date();
-        const currentEnd = u.trial_ends_at ? new Date(u.trial_ends_at) : null;
-        const from = (currentEnd && currentEnd > now) ? currentEnd : now;
-        const newEnd = new Date(from);
-        newEnd.setDate(newEnd.getDate() + days);
-        u.trial_ends_at = newEnd.toISOString().slice(0, 19) + 'Z';
-        const { error } = await supabaseClient.from('profiles').update({ trial_ends_at: u.trial_ends_at, active: true }).eq('id', u.id);
-        if (error) { alert('Error: ' + error.message); return; }
-        u.active = true;
-        openSuperUserDetail(u);
-      };
-      content.querySelector('.super-detail-remove-days').onclick = async () => {
-        if (!supabaseClient) return;
-        const input = content.querySelector('.super-detail-days-input');
-        const days = Math.max(1, Math.min(365, parseInt(input.value || 30, 10) || 30));
-        const currentEnd = u.trial_ends_at ? new Date(u.trial_ends_at) : new Date();
-        const newEnd = new Date(currentEnd);
-        newEnd.setDate(newEnd.getDate() - days);
-        u.trial_ends_at = newEnd.toISOString().slice(0, 19) + 'Z';
-        const { error } = await supabaseClient.from('profiles').update({ trial_ends_at: u.trial_ends_at }).eq('id', u.id);
-        if (error) { alert('Error: ' + error.message); return; }
-        openSuperUserDetail(u);
-      };
-      content.querySelector('.super-detail-reset').onclick = async () => {
-        const email = u.email;
-        if (!email) return;
-        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: (typeof APP_URL !== 'undefined' && APP_URL) ? APP_URL : window.location.href });
-        if (error) alert('Error: ' + error.message);
-        else alert('Se envió un correo a ' + email + ' para restablecer la contraseña.');
-      };
-      content.querySelector('.super-detail-email').onclick = () => {
-        const m = (SUPABASE_URL || '').match(/https:\/\/([^.]+)\.supabase\.co/);
-        const projectRef = m ? m[1] : null;
-        const supabaseAuthUrl = projectRef ? 'https://supabase.com/dashboard/project/' + projectRef + '/auth/users' : null;
-        const msg = 'Para cambiar el email:\n\n1. Supabase → Authentication → Users\n2. Buscá: ' + u.email + '\n3. Edit → cambiá el email.\n\n¿Abrir Supabase?';
-        if (supabaseAuthUrl && confirm(msg)) window.open(supabaseAuthUrl, '_blank');
-        else alert(msg);
-      };
+      var togglerEl = content.querySelector('.super-detail-toggle');
+      if (togglerEl) {
+        togglerEl.onclick = async function () {
+          if (!supabaseClient) return;
+          const newActive = !u.active;
+          await supabaseClient.from('profiles').update({ active: newActive }).eq('id', u.id);
+          u.active = newActive;
+          openSuperUserDetail(u);
+        };
+      }
+      var addDaysBtn = content.querySelector('.super-detail-add-days');
+      if (addDaysBtn) {
+        addDaysBtn.onclick = async function () {
+          if (!supabaseClient) return;
+          const input = content.querySelector('.super-detail-days-input');
+          const days = Math.max(1, Math.min(365, parseInt(input && input.value ? input.value : 30, 10) || 30));
+          const now = new Date();
+          const currentEnd = u.trial_ends_at ? new Date(u.trial_ends_at) : null;
+          const from = (currentEnd && currentEnd > now) ? currentEnd : now;
+          const newEnd = new Date(from);
+          newEnd.setDate(newEnd.getDate() + days);
+          u.trial_ends_at = newEnd.toISOString().slice(0, 19) + 'Z';
+          const { error } = await supabaseClient.from('profiles').update({ trial_ends_at: u.trial_ends_at, active: true }).eq('id', u.id);
+          if (error) { alert('Error: ' + error.message); return; }
+          u.active = true;
+          openSuperUserDetail(u);
+        };
+      }
+      var remDaysBtn = content.querySelector('.super-detail-remove-days');
+      if (remDaysBtn) {
+        remDaysBtn.onclick = async function () {
+          if (!supabaseClient) return;
+          const input = content.querySelector('.super-detail-days-input');
+          const days = Math.max(1, Math.min(365, parseInt(input && input.value ? input.value : 30, 10) || 30));
+          const currentEnd = u.trial_ends_at ? new Date(u.trial_ends_at) : new Date();
+          const newEnd = new Date(currentEnd);
+          newEnd.setDate(newEnd.getDate() - days);
+          u.trial_ends_at = newEnd.toISOString().slice(0, 19) + 'Z';
+          const { error } = await supabaseClient.from('profiles').update({ trial_ends_at: u.trial_ends_at }).eq('id', u.id);
+          if (error) { alert('Error: ' + error.message); return; }
+          openSuperUserDetail(u);
+        };
+      }
+      var payInEl = content.querySelector('.super-detail-req-client-payment');
+      var pctDispEl = content.querySelector('.super-detail-req-company-pct');
+      function syncMdrCompanyShare() {
+        if (!payInEl || !pctDispEl) return;
+        var n = parseFloat(String(payInEl.value || '').replace(',', '.'), 10);
+        if (isNaN(n) || n <= 0) { pctDispEl.textContent = '—'; return; }
+        pctDispEl.textContent = String(Math.round(n * 0.2 * 100) / 100);
+      }
+      if (payInEl) {
+        payInEl.addEventListener('input', syncMdrCompanyShare);
+        payInEl.addEventListener('change', syncMdrCompanyShare);
+        syncMdrCompanyShare();
+      }
+      var reqAddBtn = content.querySelector('.super-detail-req-submit-add');
+      if (reqAddBtn) {
+        reqAddBtn.onclick = async function () {
+          if (!supabaseClient || !currentUser) return;
+          var daysIn = content.querySelector('.super-detail-req-add-days');
+          var days = Math.max(1, Math.min(365, parseInt(daysIn && daysIn.value ? daysIn.value : 30, 10) || 30));
+          var pay = parseFloat(String((payInEl && payInEl.value) || '').replace(',', '.'), 10);
+          if (isNaN(pay) || pay <= 0) { alert('Indicá el monto cobrado al cliente.'); return; }
+          var share = Math.round(pay * 0.2 * 100) / 100;
+          var noteEl = content.querySelector('.super-detail-req-company-note');
+          var note = noteEl ? String(noteEl.value || '').trim() : '';
+          if (!confirm('Se enviará la solicitud de +' + days + ' días. La empresa debe aprobarla antes de que cambie el contador del kiosco. ¿Continuar?')) return;
+          var ins = await supabaseClient.from('ferriol_membership_day_requests').insert({
+            requested_by: currentUser.id,
+            kiosquero_user_id: u.id,
+            days_delta: days,
+            client_payment_ars: pay,
+            company_share_ars: share,
+            company_transfer_note: note || null,
+            reason: null
+          });
+          if (ins.error) { alert('Error: ' + ins.error.message + '\n\nSi la tabla no existe, ejecutá supabase-ferriol-membership-day-requests.sql en Supabase.'); return; }
+          alert('Solicitud enviada. Cuando la empresa la apruebe, el kiosquero verá los días actualizados.');
+          renderSuper();
+          document.getElementById('superUserDetailClose').click();
+        };
+      }
+      var reqRemBtn = content.querySelector('.super-detail-req-submit-remove');
+      if (reqRemBtn) {
+        reqRemBtn.onclick = async function () {
+          if (!supabaseClient || !currentUser) return;
+          var dIn = content.querySelector('.super-detail-req-remove-days');
+          var daysRm = Math.max(1, Math.min(365, parseInt(dIn && dIn.value ? dIn.value : 1, 10) || 1));
+          var reasonEl = content.querySelector('.super-detail-req-remove-reason');
+          var reason = reasonEl ? String(reasonEl.value || '').trim() : '';
+          if (reason.length < 5) { alert('El motivo es obligatorio (mínimo 5 caracteres).'); return; }
+          if (!confirm('Se enviará la solicitud de quitar ' + daysRm + ' días. La empresa debe aprobarla. ¿Continuar?')) return;
+          var ins = await supabaseClient.from('ferriol_membership_day_requests').insert({
+            requested_by: currentUser.id,
+            kiosquero_user_id: u.id,
+            days_delta: -daysRm,
+            client_payment_ars: null,
+            company_share_ars: null,
+            company_transfer_note: null,
+            reason: reason
+          });
+          if (ins.error) { alert('Error: ' + ins.error.message + '\n\nSi la tabla no existe, ejecutá supabase-ferriol-membership-day-requests.sql en Supabase.'); return; }
+          alert('Solicitud de quita enviada.');
+          renderSuper();
+          document.getElementById('superUserDetailClose').click();
+        };
+      }
+      var resetPwdBtn = content.querySelector('.super-detail-reset');
+      if (resetPwdBtn) {
+        resetPwdBtn.onclick = async function () {
+          const email = u.email;
+          if (!email) return;
+          const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: (typeof APP_URL !== 'undefined' && APP_URL) ? APP_URL : window.location.href });
+          if (error) alert('Error: ' + error.message);
+          else alert('Se envió un correo a ' + email + ' para restablecer la contraseña.');
+        };
+      }
+      var emailHelpBtn = content.querySelector('.super-detail-email');
+      if (emailHelpBtn) {
+        emailHelpBtn.onclick = function () {
+          const m = (SUPABASE_URL || '').match(/https:\/\/([^.]+)\.supabase\.co/);
+          const projectRef = m ? m[1] : null;
+          const supabaseAuthUrl = projectRef ? 'https://supabase.com/dashboard/project/' + projectRef + '/auth/users' : null;
+          const msg = 'Para cambiar el email:\n\n1. Supabase → Authentication → Users\n2. Buscá: ' + u.email + '\n3. Edit → cambiá el email.\n\n¿Abrir Supabase?';
+          if (supabaseAuthUrl && confirm(msg)) window.open(supabaseAuthUrl, '_blank');
+          else alert(msg);
+        };
+      }
       var saveSponsorBtn = content.querySelector('.super-detail-save-sponsor');
       if (saveSponsorBtn) saveSponsorBtn.onclick = async function () {
         if (!supabaseClient) return;
@@ -5052,6 +5240,54 @@ async function showApp() {
         openSuperUserDetail(u);
         renderSuper();
       };
+      var bulkReassignBtn = content.querySelector('.super-detail-bulk-reassign');
+      if (bulkReassignBtn) {
+        bulkReassignBtn.onclick = async function () {
+          if (!supabaseClient) return;
+          if (u.role !== 'partner') return;
+          var sel = content.querySelector('#superBulkReassignSponsorSelect');
+          var newSid = sel ? String(sel.value || '').trim() : '';
+          if (!newSid) { alert('Elegí el nuevo referidor o administrador de la red.'); return; }
+          if (newSid === u.id) { alert('El nuevo referidor no puede ser el mismo socio.'); return; }
+          var incP = content.querySelector('#superBulkReassignIncludePartners');
+          var poolNet = window._ferriolAllProfilesCache || [];
+          var ids = [];
+          poolNet.forEach(function (p) {
+            if (!p || p.sponsor_id !== u.id) return;
+            if (p.role === 'kiosquero') ids.push(p.id);
+            if (incP && incP.checked && p.role === 'partner') ids.push(p.id);
+          });
+          if (ids.length === 0) {
+            alert('No hay referidos directos para reasignar (revisá el tilde «Incluir socios» si correspondía).');
+            return;
+          }
+          if (!confirm('Se reasignarán ' + ids.length + ' cuenta(s) al nuevo patrocinador. El socio actual conserva su usuario pero ya no figura como referidor de esas cuentas. ¿Continuar?')) return;
+          var { error: errUp } = await supabaseClient.from('profiles').update({ sponsor_id: newSid }).in('id', ids);
+          if (errUp) { alert('Error: ' + errUp.message); return; }
+          ids.forEach(function (id) {
+            var ix = (window._ferriolAllProfilesCache || []).findIndex(function (r) { return r.id === id; });
+            if (ix >= 0) window._ferriolAllProfilesCache[ix].sponsor_id = newSid;
+          });
+          alert('Listo: ' + ids.length + ' cuenta(s) reasignadas.');
+          renderSuper();
+          openSuperUserDetail(u);
+        };
+      }
+      var penaltyPartnerBtn = content.querySelector('.super-detail-partner-penalty');
+      if (penaltyPartnerBtn && u.active) {
+        penaltyPartnerBtn.onclick = async function () {
+          if (!supabaseClient) return;
+          if (!confirm('Penalidad por incumplimiento: ¿desactivar el acceso de este socio?\n\nNo podrá iniciar sesión. Los negocios referidos no se borran: antes o después usá «Reasignar toda la línea directa» si querés otro referidor.')) return;
+          var { error: errPen } = await supabaseClient.from('profiles').update({ active: false }).eq('id', u.id);
+          if (errPen) { alert('Error: ' + errPen.message); return; }
+          u.active = false;
+          var idxP = (window._ferriolAllProfilesCache || []).findIndex(function (r) { return r.id === u.id; });
+          if (idxP >= 0) window._ferriolAllProfilesCache[idxP].active = false;
+          alert('Socio desactivado (penalidad).');
+          renderSuper();
+          openSuperUserDetail(u);
+        };
+      }
       var quitarBtn = content.querySelector('.super-detail-quitar');
       if (quitarBtn) quitarBtn.onclick = async () => {
         var pwdInput = document.getElementById('adminDeletePassword');
@@ -5086,6 +5322,123 @@ async function showApp() {
     document.getElementById('superUserDetailOverlay').onclick = () => { if (superDetailCountdownInterval) clearInterval(superDetailCountdownInterval); superDetailCountdownInterval = null; document.getElementById('superUserDetailClose').click(); };
 
     var superFilterState = 'todos';
+
+    async function renderSuperMembershipDayRequestBanners() {
+      var founderBox = document.getElementById('superDayRequestsFounderBox');
+      var partnerBox = document.getElementById('superDayRequestsPartnerBox');
+      if (founderBox) {
+        founderBox.classList.add('hidden');
+        founderBox.innerHTML = '';
+      }
+      if (partnerBox) {
+        partnerBox.classList.add('hidden');
+        partnerBox.innerHTML = '';
+      }
+      if (!supabaseClient || !currentUser) return;
+      try {
+        if (isEmpresaLensSuper() && founderBox) {
+          var r = await supabaseClient.from('ferriol_membership_day_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false }).limit(50);
+          if (r.error) {
+            founderBox.classList.remove('hidden');
+            founderBox.innerHTML = '<p class="text-xs text-amber-200/90 font-medium mb-1">Membresía · solicitudes de días</p><p class="text-xs text-white/55">No se pudo cargar la cola. Si aún no corrés el SQL en Supabase, ejecutá <code class="text-cyan-200/80">supabase-ferriol-membership-day-requests.sql</code>. Detalle: ' + String(r.error.message || '') + '</p>';
+            return;
+          }
+          var rows = r.data || [];
+          founderBox.classList.remove('hidden');
+          if (rows.length === 0) {
+            founderBox.innerHTML = '<p class="text-xs text-amber-200/90 font-medium mb-1 flex items-center gap-2"><i data-lucide="inbox" class="w-4 h-4"></i> Membresía · solicitudes de días</p><p class="text-xs text-white/55">No hay solicitudes pendientes de administradores de red.</p>';
+            lucide.createIcons();
+            return;
+          }
+          var pool = window._ferriolAllProfilesCache || [];
+          function nameOf(id) {
+            var p = pool.find(function (x) { return x.id === id; });
+            return p ? (p.kiosco_name || p.email || id) : id;
+          }
+          var html = '<p class="text-xs text-amber-200/90 font-medium mb-2 flex items-center gap-2"><i data-lucide="clipboard-list" class="w-4 h-4"></i> Pendientes: carga o quita de días</p><p class="text-[10px] text-white/45 mb-2">Aprobá solo si el administrador ya abonó a la empresa el <strong class="text-white/60">20%</strong> correspondiente al cobro del cliente y los datos coinciden.</p><div class="space-y-2 max-h-[40vh] overflow-y-auto pr-1">';
+          rows.forEach(function (row) {
+            var kname = String(nameOf(row.kiosquero_user_id)).replace(/</g, '&lt;');
+            var reqname = String(nameOf(row.requested_by)).replace(/</g, '&lt;');
+            var sign = row.days_delta > 0 ? '+' : '';
+            var payLine = row.days_delta > 0 && row.client_payment_ars != null ? '<p class="text-[10px] text-white/50">Cobro cliente ARS: ' + row.client_payment_ars + ' · 20% empresa: ' + (row.company_share_ars != null ? row.company_share_ars : '—') + '</p>' : '';
+            var noteLine = row.company_transfer_note ? '<p class="text-[10px] text-cyan-100/80">Ref. pago empresa: ' + String(row.company_transfer_note).replace(/</g, '&lt;') + '</p>' : '';
+            var reasonLine = row.reason ? '<p class="text-[10px] text-red-200/90">Motivo quita: ' + String(row.reason).replace(/</g, '&lt;') + '</p>' : '';
+            html += '<div class="rounded-lg border border-white/15 bg-black/25 p-2 text-xs" data-mdr-id="' + row.id + '">' +
+              '<p class="font-medium text-white/90">' + kname + ' <span class="text-white/50">←</span> ' + reqname + '</p>' +
+              '<p class="text-amber-100/90">' + sign + row.days_delta + ' días</p>' + payLine + noteLine + reasonLine +
+              '<div class="flex flex-wrap gap-2 mt-2">' +
+              '<button type="button" class="ferriol-mdr-approve btn-glow rounded-lg py-1.5 px-3 text-[11px] font-semibold touch-target" data-id="' + row.id + '">Aprobar</button>' +
+              '<button type="button" class="ferriol-mdr-reject rounded-lg py-1.5 px-3 text-[11px] font-semibold touch-target border border-red-400/50 bg-red-500/15 text-red-200" data-id="' + row.id + '">Rechazar</button>' +
+              '</div></div>';
+          });
+          html += '</div>';
+          founderBox.innerHTML = html;
+          founderBox.querySelectorAll('.ferriol-mdr-approve').forEach(function (btn) {
+            btn.onclick = async function () {
+              var id = btn.getAttribute('data-id');
+              if (!id || !confirm('¿Aprobar esta solicitud y aplicar los días en la cuenta del kiosquero?')) return;
+              var rpc = await supabaseClient.rpc('ferriol_approve_membership_day_request', { p_request_id: id, p_approve: true, p_reject_note: null });
+              if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+              var out = rpc.data;
+              if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+              if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo aprobar.'); return; }
+              alert('Listo: los días ya figuran en la membresía del kiosquero.');
+              renderSuper();
+            };
+          });
+          founderBox.querySelectorAll('.ferriol-mdr-reject').forEach(function (btn) {
+            btn.onclick = async function () {
+              var id = btn.getAttribute('data-id');
+              if (!id) return;
+              var note = prompt('Motivo del rechazo (opcional):');
+              if (note === null) return;
+              var rpc = await supabaseClient.rpc('ferriol_approve_membership_day_request', { p_request_id: id, p_approve: false, p_reject_note: note || null });
+              if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+              var out = rpc.data;
+              if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+              if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo rechazar.'); return; }
+              renderSuper();
+            };
+          });
+          lucide.createIcons();
+        }
+        if (isPartnerLens() && !isEmpresaLensSuper() && partnerBox) {
+          var r2 = await supabaseClient.from('ferriol_membership_day_requests').select('*').eq('requested_by', currentUser.id).order('created_at', { ascending: false }).limit(20);
+          if (r2.error) {
+            partnerBox.classList.remove('hidden');
+            partnerBox.innerHTML = '<p class="text-xs text-cyan-100/90 font-medium">Tus solicitudes de días</p><p class="text-[10px] text-white/50">' + String(r2.error.message || '') + '</p>';
+            return;
+          }
+          var rows2 = r2.data || [];
+          partnerBox.classList.remove('hidden');
+          var pool2 = window._ferriolAllProfilesCache || [];
+          function nameOf2(id) {
+            var p = pool2.find(function (x) { return x.id === id; });
+            return p ? (p.kiosco_name || p.email || '') : '';
+          }
+          var h2 = '<p class="text-xs text-cyan-100/90 font-medium mb-2">Tus solicitudes de membresía (días)</p>';
+          if (rows2.length === 0) {
+            h2 += '<p class="text-[10px] text-white/50">Cuando cobrás al cliente, transferí el 20% a la empresa y enviá la solicitud de suma desde el detalle del kiosquero. Hasta que la empresa apruebe, el contador del kiosco no cambia.</p>';
+          } else {
+            h2 += '<div class="space-y-1.5 max-h-[28vh] overflow-y-auto text-[11px]">';
+            rows2.forEach(function (row) {
+              var st = row.status === 'pending' ? 'text-amber-200' : row.status === 'approved' ? 'text-emerald-200' : 'text-red-200/80';
+              var kn = String(nameOf2(row.kiosquero_user_id)).replace(/</g, '&lt;');
+              var dt = row.created_at ? String(row.created_at).slice(0, 10) : '';
+              h2 += '<div class="rounded-lg border border-white/10 bg-black/20 px-2 py-1.5"><span class="' + st + '">' + row.status + '</span> · ' + kn + ' · ' + (row.days_delta > 0 ? '+' : '') + row.days_delta + ' d · ' + dt + '</div>';
+            });
+            h2 += '</div>';
+          }
+          partnerBox.innerHTML = h2;
+        }
+      } catch (_) {
+        if (founderBox && isEmpresaLensSuper()) {
+          founderBox.classList.remove('hidden');
+          founderBox.innerHTML = '<p class="text-xs text-white/60">Solicitudes de días: error al cargar.</p>';
+        }
+      }
+    }
+
     async function renderSuper() {
       if (!supabaseClient) return;
       try {
@@ -5166,6 +5519,7 @@ async function showApp() {
         var msg = searchTerm ? 'Ningún usuario coincide con la búsqueda.' : (isPartnerLens() ? 'No hay negocios en tu red todavía.' : (superFilterState === 'sin_referidor' ? 'No hay integrantes sin referidor. Todo el mundo tiene admin/referidor asignado.' : superFilterState === 'activos' ? 'No hay negocios activos.' : superFilterState === 'inactivos' ? 'No hay negocios inactivos.' : 'No hay otros negocios. Agregá uno con el botón de arriba.'));
         listEl.innerHTML = '<p class="py-6 text-center text-white/70 text-sm">' + msg + '</p>';
         lucide.createIcons();
+        await renderSuperMembershipDayRequestBanners();
         return;
       }
       listEl.innerHTML = list.map(u => {
@@ -5230,6 +5584,7 @@ async function showApp() {
       }
       await loadSuperMainFerriolResumenCard();
       await loadPartnerCommissionsCard();
+      await renderSuperMembershipDayRequestBanners();
       lucide.createIcons();
     }
     function renderSuperListFromSearch() {
