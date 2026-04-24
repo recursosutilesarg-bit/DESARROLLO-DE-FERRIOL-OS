@@ -89,16 +89,10 @@
     function syncSignUpNichoUI() {
       var n = getSelectedSignupNicho();
       try { sessionStorage.setItem('ferriol_signup_nicho', n === 'socio' ? 'socio' : 'kiosco'); } catch (_) {}
-      var hint = document.getElementById('signUpTypeHint');
       var sub = document.getElementById('signUpLeadLine');
       var nameIn = document.getElementById('signUpKioscoName');
-      if (hint) {
-        hint.textContent = n === 'socio'
-          ? 'Registro como vendedor/a de la red: membresía para comercializar Ferriol OS. Tu referidor queda registrado en tu perfil.'
-          : 'Registro para usar Ferriol OS en tu kiosco, almacén o comercio de barrio.';
-      }
-      if (sub) sub.textContent = n === 'socio' ? 'Membresía red · vendedor del sistema' : 'Alta de negocio · uso del sistema';
-      if (nameIn) nameIn.placeholder = n === 'socio' ? 'Nombre o equipo comercial (visible en la red)' : 'Nombre del negocio';
+      if (sub) sub.textContent = n === 'socio' ? 'Distribuidor digital' : 'Mi negocio';
+      if (nameIn) nameIn.placeholder = n === 'socio' ? 'Tu nombre o equipo' : 'Nombre del negocio';
     }
     function copyTextToClipboard(text, doneMsg) {
       var t = text || '';

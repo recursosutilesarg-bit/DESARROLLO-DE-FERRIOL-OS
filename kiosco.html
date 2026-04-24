@@ -34,7 +34,7 @@
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="kiosco.css?v=20260422s">
+  <link rel="stylesheet" href="kiosco.css?v=20260424signup">
 </head>
 <body class="relative">
   <!-- Banner instalar como app (PWA) — visible al abrir el link -->
@@ -59,7 +59,6 @@
       <div id="loginFormWrap">
         <h1>Ferriol OS</h1>
         <p class="sub">Sistema de gestión para negocios pequeños</p>
-        <p class="login-unified-hint">Mismo acceso para <strong>negocios</strong>, <strong>socios</strong> y <strong>administradores</strong>: usá tu email y contraseña; al entrar, la app abre el panel que corresponde a tu cuenta.</p>
         <div id="loginErr" class="login-err"></div>
         <div id="loginContactAdminWrap" class="hidden mt-3 p-3 rounded-xl bg-[#22c55e]/20 border border-[#22c55e]/40">
           <p class="text-sm text-white/80 mb-2">Contactá por WhatsApp para darte de alta o renovar:</p>
@@ -76,17 +75,17 @@
           </div>
           <button type="button" id="loginBtn" class="btn-login">Iniciar sesión</button>
         </form>
-        <div class="login-signup-dual" role="group" aria-label="Crear cuenta nueva">
-          <button type="button" id="signUpBtnNegocio" class="login-signup-path touch-target">
-            <span class="login-signup-path-title">Crear cuenta · Negocio</span>
-            <span class="login-signup-path-desc">Para tu kiosco, almacén o comercio: caja, stock y ventas en el local.</span>
+        <p class="login-signup-new-label">¿Primera vez?</p>
+        <div class="login-signup-dual" role="group" aria-label="Elegir tipo de registro">
+          <button type="button" id="signUpBtnNegocio" class="login-signup-tile login-signup-tile--negocio touch-target" title="Registro para usar el sistema en tu negocio">
+            <span class="login-signup-tile-ico" aria-hidden="true">🏪</span>
+            <span class="login-signup-tile-label">Mi negocio</span>
           </button>
-          <button type="button" id="signUpBtnSocio" class="login-signup-path login-signup-path--socio touch-target">
-            <span class="login-signup-path-title">Crear cuenta · Socio digital</span>
-            <span class="login-signup-path-desc">Membresía para comercializar Ferriol OS, referir negocios y cobrar comisiones según el plan.</span>
+          <button type="button" id="signUpBtnSocio" class="login-signup-tile login-signup-tile--distribuidor touch-target" title="Registro para vender Ferriol OS y la red">
+            <span class="login-signup-tile-ico" aria-hidden="true">🤝</span>
+            <span class="login-signup-tile-label">Distribuidor digital</span>
           </button>
         </div>
-        <p class="login-signup-dual-hint">¿Te pasaron un enlace de invitación? Elegí el tipo de alta; el código de referido puede venir ya guardado.</p>
         <p class="login-hint login-hint--solo-link" id="loginHint">
           <a href="#" id="forgotPwd" class="text-[#86efac]">¿Olvidaste tu contraseña?</a>
         </p>
@@ -126,18 +125,16 @@
         <div class="flex flex-col gap-2 mb-3">
           <label class="flex items-center gap-2 cursor-pointer text-sm text-white/90 touch-target py-1">
             <input type="radio" name="signUpNicho" value="kiosco" checked class="rounded-full border-white/40 text-[#22c55e] focus:ring-[#22c55e]">
-            <span>Negocio — kiosco, almacén o comercio (usás el sistema en el local)</span>
+            <span>Mi negocio</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer text-sm text-white/90 touch-target py-1">
             <input type="radio" name="signUpNicho" value="socio" class="rounded-full border-white/40 text-[#22c55e] focus:ring-[#22c55e]">
-            <span>Vendedor de la red — membresía para comercializar el sistema</span>
+            <span>Distribuidor digital</span>
           </label>
         </div>
-        <p id="signUpTypeHint" class="text-[11px] text-white/50 mb-3 leading-snug">Registro para usar Ferriol OS en tu kiosco, almacén o comercio de barrio.</p>
         <input type="text" id="signUpKioscoName" placeholder="Nombre del negocio" class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white">
         <label class="block text-xs text-white/60 mb-1">Código de referido (opcional)</label>
-        <input type="text" id="signUpReferralCode" placeholder="Ej. el que te pasó tu líder" autocomplete="off" class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white uppercase" maxlength="32">
-        <p class="text-[11px] text-white/45 mb-3 -mt-1">Si entraste con un enlace de invitación, puede venir ya cargado. Mayúsculas o minúsculas da igual.</p>
+        <input type="text" id="signUpReferralCode" placeholder="Código" autocomplete="off" class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white uppercase" maxlength="32">
         <div class="mb-4 flex items-start gap-2">
           <input type="checkbox" id="signUpAcceptTerms" class="mt-1.5 rounded border-white/30 bg-white/10 text-[#22c55e] focus:ring-[#22c55e]">
           <label for="signUpAcceptTerms" class="text-sm text-white/80 leading-tight">
