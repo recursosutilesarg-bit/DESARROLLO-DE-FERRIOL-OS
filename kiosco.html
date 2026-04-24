@@ -1088,8 +1088,9 @@
               <p class="text-[10px] text-white/45 mt-1 max-w-md">La empresa debe aprobar y constatar el pago a Ferriol antes de que puedas crear la cuenta del nuevo socio.</p>
             </div>
             <button type="button" id="btnOpenNewKiosqueroModal" class="btn-glow rounded-xl py-3 px-5 font-semibold flex items-center justify-center gap-2 touch-target">
-              <i data-lucide="user-plus" class="w-5 h-5"></i> Agregar negocio
+              <i data-lucide="store" class="w-5 h-5"></i> Solicitar alta de negocio (kiosco)
             </button>
+            <p class="text-[10px] text-white/45 w-full basis-full">El alta del sistema de gestión queda pendiente hasta que <strong class="text-white/60">Ferriol apruebe</strong> y constate el pago.</p>
             <button type="button" id="btnExportDirectorioCSV" class="super-only super-main-only btn-neomorphic rounded-xl py-3 px-5 font-semibold flex items-center justify-center gap-2 touch-target">
               <i data-lucide="file-spreadsheet" class="w-5 h-5"></i> Exportar directorio (CSV)
             </button>
@@ -1256,32 +1257,45 @@
       </div>
     </section>
 
-    <!-- Modal Nuevo negocio (registro desde admin) -->
-    <div id="newKiosqueroModal" class="fixed inset-0 z-[74] hidden items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="newKiosqueroModalOverlay"></div>
+    <!-- Modal: solicitar alta kiosco (empresa aprueba → contraseña) -->
+    <div id="kiosqueroProvisionRequestModal" class="fixed inset-0 z-[73] hidden items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="kiosqueroProvisionRequestModalOverlay"></div>
       <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto scale-in">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="font-bold text-lg">Nuevo negocio</h3>
-          <button type="button" id="newKiosqueroModalClose" class="btn-neomorphic rounded-xl p-2 touch-target">
-            <i data-lucide="x" class="w-5 h-5"></i>
-          </button>
+          <h3 class="font-bold text-lg">Alta de negocio (kiosco)</h3>
+          <button type="button" id="kiosqueroProvisionRequestModalClose" class="btn-neomorphic rounded-xl p-2 touch-target"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
-        <p class="text-sm text-white/70 mb-4">Completá los datos para dar de alta un nuevo usuario. Podrá iniciar sesión con el email y contraseña que ingreses.</p>
-        <div id="newKiosqueroErr" class="login-err hidden mb-3"></div>
-        <input type="email" id="newKiosqueroEmail" placeholder="Email (obligatorio)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
-        <input type="tel" id="newKiosqueroPhone" placeholder="Teléfono (opcional)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
-        <div class="password-wrap mb-3">
-          <input type="password" id="newKiosqueroPassword" placeholder="Contraseña (mín. 6)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base" minlength="6">
-          <label class="toggle-pwd" for="showNewKiosqueroPwd" title="Ver contraseña">
-            <input type="checkbox" id="showNewKiosqueroPwd" class="pwd-checkbox">
-            <span class="pwd-label">Ver</span>
-          </label>
+        <p class="text-sm text-white/65 mb-3">Registrá el cobro y el <strong class="text-white/80">20%</strong> a Ferriol. Recién tras la aprobación podrás crear el usuario del negocio.</p>
+        <div id="kiosqueroProvisionRequestErr" class="login-err hidden mb-3"></div>
+        <label class="block text-xs text-white/55 mb-1">Email del encargado del negocio</label>
+        <input type="email" id="kiosqueroProvisionEmail" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-3" placeholder="negocio@ejemplo.com" autocomplete="off">
+        <label class="block text-xs text-white/55 mb-1">Nombre del negocio</label>
+        <input type="text" id="kiosqueroProvisionKioscoName" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-3" placeholder="Kiosco Central">
+        <label class="block text-xs text-white/55 mb-1">Teléfono (opcional)</label>
+        <input type="tel" id="kiosqueroProvisionPhone" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-3" placeholder="WhatsApp">
+        <label class="block text-xs text-white/55 mb-1">Monto cobrado al cliente / negocio (ARS)</label>
+        <input type="number" id="kiosqueroProvisionClientPay" min="1" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-1" value="9900">
+        <p class="text-[10px] text-white/50 mb-2">20% empresa: <strong class="text-cyan-200/90" id="kiosqueroProvisionCompanyPct">—</strong> ARS</p>
+        <label class="block text-xs text-white/55 mb-1">Referencia pago 20% a empresa (opcional)</label>
+        <input type="text" id="kiosqueroProvisionCompanyNote" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-4" placeholder="Transferencia, fecha…">
+        <button type="button" id="kiosqueroProvisionSubmitRequest" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target">Enviar solicitud a la empresa</button>
+      </div>
+    </div>
+    <div id="kiosqueroProvisionCompleteModal" class="fixed inset-0 z-[76] hidden items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="kiosqueroProvisionCompleteModalOverlay"></div>
+      <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md scale-in">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-bold text-lg">Crear cuenta del negocio</h3>
+          <button type="button" id="kiosqueroProvisionCompleteModalClose" class="btn-neomorphic rounded-xl p-2 touch-target"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
-        <input type="text" id="newKiosqueroKioscoName" placeholder="Nombre del negocio" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-4">
-        <button type="button" id="btnCreateUserInModal" class="btn-glow rounded-xl py-3 w-full font-semibold flex items-center justify-center gap-2 touch-target">
-          <i data-lucide="user-plus" class="w-5 h-5"></i> Crear negocio
-        </button>
-        <p id="createUserMsgModal" class="text-sm mt-3 text-green-300 hidden"></p>
+        <p class="text-sm text-white/65 mb-3">Ferriol aprobó el alta. Definí la contraseña del usuario del kiosco.</p>
+        <div id="kiosqueroProvisionCompleteErr" class="login-err hidden mb-3"></div>
+        <input type="hidden" id="kiosqueroProvisionCompleteToken" value="">
+        <label class="block text-xs text-white/55 mb-1">Email</label>
+        <input type="email" id="kiosqueroProvisionCompleteEmail" readonly class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white/80 text-base mb-3 bg-white/5">
+        <label class="block text-xs text-white/55 mb-1">Contraseña (mín. 6)</label>
+        <input type="password" id="kiosqueroProvisionCompletePassword" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-4" minlength="6" autocomplete="new-password">
+        <button type="button" id="kiosqueroProvisionCompleteSubmit" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target">Crear usuario kiosquero</button>
       </div>
     </div>
 
@@ -1677,7 +1691,7 @@
   </div>
   </div><!-- /#appWrap -->
   <script src="kiosco-config.js"></script>
-  <script defer src="kiosco-app.js?v=20260422provision"></script>
+  <script defer src="kiosco-app.js?v=20260422control"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>

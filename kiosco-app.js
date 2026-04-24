@@ -282,6 +282,19 @@
       return 15;
     }
 
+    /** Si app_settings.ferriol_public_signup es closed o company_only, bloquea el registro desde la pantalla pública. */
+    async function ferriolIsPublicSignupClosed() {
+      if (!supabaseClient) return null;
+      try {
+        var r = await supabaseClient.from('app_settings').select('value').eq('key', 'ferriol_public_signup').maybeSingle();
+        var v = String((r.data && r.data.value) || '').trim().toLowerCase();
+        if (v === 'closed' || v === 'company_only') {
+          return 'El registro público está deshabilitado. El alta es solo con aprobación de Ferriol (solicitud de socio o de negocio).';
+        }
+      } catch (_) {}
+      return null;
+    }
+
     function ferriolMonthInputToPeriodDate(monthStr) {
       if (!monthStr || String(monthStr).length < 7) return null;
       var p = String(monthStr).slice(0, 7).split('-');
@@ -1869,8 +1882,10 @@
       if (pm) { pm.classList.add('hidden'); pm.classList.remove('flex'); }
       var cm = document.getElementById('clienteModal');
       if (cm) { cm.classList.add('hidden'); cm.classList.remove('flex'); }
-      var nk = document.getElementById('newKiosqueroModal');
-      if (nk) { nk.classList.add('hidden'); nk.classList.remove('flex'); }
+      var kpr = document.getElementById('kiosqueroProvisionRequestModal');
+      if (kpr) { kpr.classList.add('hidden'); kpr.classList.remove('flex'); }
+      var kpc = document.getElementById('kiosqueroProvisionCompleteModal');
+      if (kpc) { kpc.classList.add('hidden'); kpc.classList.remove('flex'); }
       var sud = document.getElementById('superUserDetailModal');
       if (sud) { sud.classList.add('hidden'); sud.classList.remove('flex'); }
       if (typeof window._cerrarModalLibreta === 'function') {
@@ -4508,6 +4523,12 @@ async function showApp() {
         errEl.classList.add('show');
         return;
       }
+      var signupBlocked = await ferriolIsPublicSignupClosed();
+      if (signupBlocked) {
+        errEl.textContent = signupBlocked;
+        errEl.classList.add('show');
+        return;
+      }
       var sp = { sponsorId: null, error: null };
       if (signupNicho === 'socio') {
         sp = await resolveSponsorForSignup();
@@ -5013,15 +5034,10 @@ async function showApp() {
             </button>`;
       var founderActionsHtml = `
         <div class="border-t border-white/10 pt-4 space-y-3 super-detail-actions-founder">
+          <p class="text-xs text-white/55 leading-relaxed">Los <strong class="text-[#86efac]/90">días de licencia</strong> (kiosco o socio) no se cargan a mano acá: solo desde la <strong class="text-white/75">cola de aprobaciones</strong> en Negocios, después de verificar el cobro y el pago a Ferriol.</p>
           <div class="flex items-center gap-2 flex-wrap">
             <span class="text-sm text-white/70">Activar/Desactivar:</span>
             <button type="button" class="super-detail-toggle toggle-switch ${user.active ? 'active' : ''}" title="${user.active ? 'Desactivar' : 'Activar'}"></button>
-          </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="text-sm text-white/70 w-full">Días de membresía:</span>
-            <input type="number" min="1" max="365" value="30" class="super-detail-days-input w-16 px-2 py-2 rounded-lg text-sm bg-white/10 border border-white/20 text-white touch-target">
-            <button type="button" class="super-detail-add-days px-3 py-2 rounded-lg text-sm bg-green-500/20 text-green-300 border border-green-500/40 touch-target">+ Agregar</button>
-            <button type="button" class="super-detail-remove-days px-3 py-2 rounded-lg text-sm bg-red-500/20 text-red-300 border border-red-500/40 touch-target">− Quitar</button>
           </div>
           <div class="flex flex-col gap-2 pt-2">
             <button type="button" class="super-detail-reset w-full py-2.5 rounded-xl text-sm bg-amber-500/20 text-amber-300 border border-amber-500/40 touch-target flex items-center justify-center gap-2">
@@ -5072,10 +5088,44 @@ async function showApp() {
             </button>
           </div>
         </div>`;
-      var socioPartnerReadOnlyHtml = `
-        <div class="border-t border-white/10 pt-4 space-y-2 super-detail-actions-socio-partner-ro">
-          <p class="text-sm text-amber-100/90 font-medium">Socio de la red</p>
-          <p class="text-xs text-white/55 leading-relaxed">No podés aplicar cambios a otros administradores/socios que referiste. Eso lo gestiona solo el <strong class="text-white/75">fundador</strong> (vista empresa del admin raíz).</p>
+      var socioPartnerLicenseHtml = `
+        <div class="border-t border-white/10 pt-4 space-y-3 super-detail-actions-socio-partner-license">
+          <p class="text-xs text-white/60 leading-relaxed">Para la <strong class="text-violet-200/95">licencia de distribución</strong> de este socio: no sumás días a mano. Enviás solicitud a la empresa con el cobro y el <strong class="text-white/75">20%</strong> a Ferriol; cuando aprueben, se actualiza el vencimiento de su membresía.</p>
+          <div class="rounded-xl border border-violet-500/35 bg-violet-500/08 p-3 space-y-2">
+            <p class="text-sm font-medium text-violet-100/95">Solicitar suma de días (licencia socio)</p>
+            <div class="flex flex-wrap items-end gap-2">
+              <label class="text-[10px] text-white/55 block w-full">Días a sumar</label>
+              <input type="number" min="1" max="365" value="30" class="super-detail-req-add-days w-20 px-2 py-2 rounded-lg text-sm bg-white/10 border border-white/20 text-white touch-target">
+            </div>
+            <div>
+              <label class="text-[10px] text-white/55">Monto cobrado al socio / cuota (ARS)</label>
+              <input type="number" min="1" step="1" class="super-detail-req-client-payment w-full glass rounded-lg px-3 py-2 border border-white/20 text-white text-sm" value="${FERRIOL_PLAN_AMOUNTS.vendorMonthly}">
+            </div>
+            <p class="text-[10px] text-white/50">20% para la empresa: <strong class="text-cyan-200/90 super-detail-req-company-pct">—</strong> ARS</p>
+            <div>
+              <label class="text-[10px] text-white/55">Referencia del pago del 20% a empresa (opcional)</label>
+              <input type="text" class="super-detail-req-company-note w-full glass rounded-lg px-3 py-2 border border-white/20 text-white text-sm" placeholder="Ej. transferencia, fecha, banco">
+            </div>
+            <button type="button" class="super-detail-req-submit-add w-full py-2.5 rounded-xl text-sm bg-violet-500/25 text-violet-100 border border-violet-500/45 touch-target font-medium">Enviar solicitud de suma</button>
+          </div>
+          <div class="rounded-xl border border-red-500/35 bg-red-500/08 p-3 space-y-2">
+            <p class="text-sm font-medium text-red-200/95">Solicitar quita de días (licencia socio)</p>
+            <p class="text-[10px] text-white/50">Motivo obligatorio. La empresa debe aprobar.</p>
+            <div class="flex flex-wrap items-end gap-2">
+              <label class="text-[10px] text-white/55 block w-full">Días a quitar</label>
+              <input type="number" min="1" max="365" value="1" class="super-detail-req-remove-days w-20 px-2 py-2 rounded-lg text-sm bg-white/10 border border-white/20 text-white touch-target">
+            </div>
+            <div>
+              <label class="text-[10px] text-white/55">Motivo obligatorio</label>
+              <textarea class="super-detail-req-remove-reason w-full glass rounded-lg px-3 py-2 border border-white/20 text-white text-sm min-h-[4rem]" placeholder="Motivo de la quita de días de licencia."></textarea>
+            </div>
+            <button type="button" class="super-detail-req-submit-remove w-full py-2.5 rounded-xl text-sm bg-red-600/25 text-red-200 border border-red-500/45 touch-target font-medium">Enviar solicitud de quita</button>
+          </div>
+          <div class="flex flex-col gap-2 pt-2">
+            <button type="button" class="super-detail-reset w-full py-2.5 rounded-xl text-sm bg-amber-500/20 text-amber-300 border border-amber-500/40 touch-target flex items-center justify-center gap-2">
+              <i data-lucide="key" class="w-4 h-4"></i> Enviar enlace para restablecer contraseña
+            </button>
+          </div>
         </div>`;
       var adminActionsHtml = '';
       if (isFounderEmpresa) {
@@ -5083,7 +5133,7 @@ async function showApp() {
       } else if (isSocioLens && user.role === 'kiosquero') {
         adminActionsHtml = socioKiosqueroActionsHtml;
       } else if (isSocioLens && user.role === 'partner') {
-        adminActionsHtml = socioPartnerReadOnlyHtml;
+        adminActionsHtml = socioPartnerLicenseHtml;
       } else if (isSocioLens) {
         adminActionsHtml = socioKiosqueroActionsHtml;
       }
@@ -5128,39 +5178,6 @@ async function showApp() {
           const newActive = !u.active;
           await supabaseClient.from('profiles').update({ active: newActive }).eq('id', u.id);
           u.active = newActive;
-          openSuperUserDetail(u);
-        };
-      }
-      var addDaysBtn = content.querySelector('.super-detail-add-days');
-      if (addDaysBtn) {
-        addDaysBtn.onclick = async function () {
-          if (!supabaseClient) return;
-          const input = content.querySelector('.super-detail-days-input');
-          const days = Math.max(1, Math.min(365, parseInt(input && input.value ? input.value : 30, 10) || 30));
-          const now = new Date();
-          const currentEnd = u.trial_ends_at ? new Date(u.trial_ends_at) : null;
-          const from = (currentEnd && currentEnd > now) ? currentEnd : now;
-          const newEnd = new Date(from);
-          newEnd.setDate(newEnd.getDate() + days);
-          u.trial_ends_at = newEnd.toISOString().slice(0, 19) + 'Z';
-          const { error } = await supabaseClient.from('profiles').update({ trial_ends_at: u.trial_ends_at, active: true }).eq('id', u.id);
-          if (error) { alert('Error: ' + error.message); return; }
-          u.active = true;
-          openSuperUserDetail(u);
-        };
-      }
-      var remDaysBtn = content.querySelector('.super-detail-remove-days');
-      if (remDaysBtn) {
-        remDaysBtn.onclick = async function () {
-          if (!supabaseClient) return;
-          const input = content.querySelector('.super-detail-days-input');
-          const days = Math.max(1, Math.min(365, parseInt(input && input.value ? input.value : 30, 10) || 30));
-          const currentEnd = u.trial_ends_at ? new Date(u.trial_ends_at) : new Date();
-          const newEnd = new Date(currentEnd);
-          newEnd.setDate(newEnd.getDate() - days);
-          u.trial_ends_at = newEnd.toISOString().slice(0, 19) + 'Z';
-          const { error } = await supabaseClient.from('profiles').update({ trial_ends_at: u.trial_ends_at }).eq('id', u.id);
-          if (error) { alert('Error: ' + error.message); return; }
           openSuperUserDetail(u);
         };
       }
@@ -5388,6 +5405,45 @@ async function showApp() {
       m.classList.remove('flex');
     }
 
+    function openKiosqueroProvisionRequestModal() {
+      var m = document.getElementById('kiosqueroProvisionRequestModal');
+      if (!m) return;
+      var err = document.getElementById('kiosqueroProvisionRequestErr');
+      if (err) { err.classList.add('hidden'); err.classList.remove('show'); }
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+      var pay = document.getElementById('kiosqueroProvisionClientPay');
+      if (pay) pay.dispatchEvent(new Event('input', { bubbles: true }));
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    function closeKiosqueroProvisionRequestModal() {
+      var m = document.getElementById('kiosqueroProvisionRequestModal');
+      if (!m) return;
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+    function openKiosqueroProvisionCompleteModal(token, email) {
+      var m = document.getElementById('kiosqueroProvisionCompleteModal');
+      if (!m) return;
+      var tEl = document.getElementById('kiosqueroProvisionCompleteToken');
+      var eEl = document.getElementById('kiosqueroProvisionCompleteEmail');
+      var pEl = document.getElementById('kiosqueroProvisionCompletePassword');
+      var err = document.getElementById('kiosqueroProvisionCompleteErr');
+      if (tEl) tEl.value = token || '';
+      if (eEl) eEl.value = email || '';
+      if (pEl) pEl.value = '';
+      if (err) { err.classList.add('hidden'); err.classList.remove('show'); }
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    function closeKiosqueroProvisionCompleteModal() {
+      var m = document.getElementById('kiosqueroProvisionCompleteModal');
+      if (!m) return;
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+
     async function renderSuperMembershipDayRequestBanners() {
       var founderBox = document.getElementById('superDayRequestsFounderBox');
       var partnerBox = document.getElementById('superDayRequestsPartnerBox');
@@ -5404,18 +5460,21 @@ async function showApp() {
         if (isEmpresaLensSuper() && founderBox) {
           var r = await supabaseClient.from('ferriol_membership_day_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false }).limit(50);
           var rProv = await supabaseClient.from('ferriol_partner_provision_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false }).limit(50);
+          var rKpr = await supabaseClient.from('ferriol_kiosquero_provision_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false }).limit(50);
           var dayErr = r.error;
           var provErr = rProv.error;
+          var kprErr = rKpr.error;
           var rows = dayErr ? [] : (r.data || []);
           var provRows = provErr ? [] : (rProv.data || []);
+          var kprRows = kprErr ? [] : (rKpr.data || []);
           founderBox.classList.remove('hidden');
-          if (dayErr && provErr) {
-            founderBox.innerHTML = '<p class="text-xs text-amber-200/90 font-medium mb-1">Aprobaciones pendientes</p><p class="text-xs text-white/55">No se pudieron cargar las colas. SQL: <code class="text-cyan-200/80">supabase-ferriol-membership-day-requests.sql</code> y <code class="text-cyan-200/80">supabase-ferriol-partner-provision-requests.sql</code>. ' + String(dayErr.message || provErr.message || '') + '</p>';
+          if (dayErr && provErr && kprErr) {
+            founderBox.innerHTML = '<p class="text-xs text-amber-200/90 font-medium mb-1">Aprobaciones pendientes</p><p class="text-xs text-white/55">No se pudieron cargar las colas. Ejecutá los SQL: membresía, partner-provision, kiosquero-provision, mdr-partner-target. ' + String(dayErr.message || provErr.message || kprErr.message || '') + '</p>';
             lucide.createIcons();
             return;
           }
-          if (rows.length === 0 && provRows.length === 0) {
-            founderBox.innerHTML = '<p class="text-xs text-amber-200/90 font-medium mb-1 flex items-center gap-2"><i data-lucide="inbox" class="w-4 h-4"></i> Aprobaciones (empresa)</p><p class="text-xs text-white/55">No hay solicitudes pendientes de días ni de altas de administradores de red.</p>';
+          if (rows.length === 0 && provRows.length === 0 && kprRows.length === 0) {
+            founderBox.innerHTML = '<p class="text-xs text-amber-200/90 font-medium mb-1 flex items-center gap-2"><i data-lucide="inbox" class="w-4 h-4"></i> Aprobaciones (empresa)</p><p class="text-xs text-white/55">No hay pendientes: días de licencia, altas de socios ni altas de negocios (kioscos).</p>';
             lucide.createIcons();
             return;
           }
@@ -5430,7 +5489,9 @@ async function showApp() {
           } else if (rows.length > 0) {
             html += '<p class="text-[11px] font-medium text-amber-100/90 mb-1">Membresía · días</p><div class="space-y-2 max-h-[32vh] overflow-y-auto pr-1 mb-3">';
             rows.forEach(function (row) {
-              var kname = String(nameOf(row.kiosquero_user_id)).replace(/</g, '&lt;');
+              var targProf = pool.find(function (x) { return x.id === row.kiosquero_user_id; });
+              var kindLab = targProf && targProf.role === 'partner' ? '<span class="text-violet-300/90 text-[10px]">Socio · </span>' : '<span class="text-emerald-300/90 text-[10px]">Kiosco · </span>';
+              var kname = kindLab + String(nameOf(row.kiosquero_user_id)).replace(/</g, '&lt;');
               var reqname = String(nameOf(row.requested_by)).replace(/</g, '&lt;');
               var sign = row.days_delta > 0 ? '+' : '';
               var payLine = row.days_delta > 0 && row.client_payment_ars != null ? '<p class="text-[10px] text-white/50">Cobro cliente ARS: ' + row.client_payment_ars + ' · 20% empresa: ' + (row.company_share_ars != null ? row.company_share_ars : '—') + '</p>' : '';
@@ -5465,17 +5526,36 @@ async function showApp() {
             });
             html += '</div>';
           }
+          if (kprErr) {
+            html += '<p class="text-[10px] text-red-300 mb-2">Altas de negocios (kioscos): error. ' + String(kprErr.message || '') + '</p>';
+          } else if (kprRows.length > 0) {
+            html += '<p class="text-[11px] font-medium text-emerald-200/95 mb-1">Nuevo negocio (kiosco · gestión)</p><div class="space-y-2 max-h-[28vh] overflow-y-auto pr-1">';
+            kprRows.forEach(function (row) {
+              var reqname = String(nameOf(row.requested_by)).replace(/</g, '&lt;');
+              var em = String(row.target_email || '').replace(/</g, '&lt;');
+              var kn = String(row.kiosco_name || '').replace(/</g, '&lt;');
+              var payLine = row.client_payment_ars != null ? '<p class="text-[10px] text-white/50">Cobro ARS: ' + row.client_payment_ars + ' · 20% empresa: ' + (row.company_share_ars != null ? row.company_share_ars : '—') + '</p>' : '';
+              var noteLine = row.company_transfer_note ? '<p class="text-[10px] text-cyan-100/80">Ref.: ' + String(row.company_transfer_note).replace(/</g, '&lt;') + '</p>' : '';
+              html += '<div class="rounded-lg border border-emerald-500/30 bg-emerald-950/15 p-2 text-xs">' +
+                '<p class="font-medium text-white/90">' + kn + '</p><p class="text-[10px] text-white/55">' + em + ' · Solicita: ' + reqname + '</p>' + payLine + noteLine +
+                '<div class="flex flex-wrap gap-2 mt-2">' +
+                '<button type="button" class="ferriol-kpr-approve btn-glow rounded-lg py-1.5 px-3 text-[11px] font-semibold touch-target" data-kpr-id="' + row.id + '">Aprobar alta kiosco</button>' +
+                '<button type="button" class="ferriol-kpr-reject rounded-lg py-1.5 px-3 text-[11px] font-semibold touch-target border border-red-400/50 bg-red-500/15 text-red-200" data-kpr-id="' + row.id + '">Rechazar</button>' +
+                '</div></div>';
+            });
+            html += '</div>';
+          }
           founderBox.innerHTML = html;
           founderBox.querySelectorAll('.ferriol-mdr-approve').forEach(function (btn) {
             btn.onclick = async function () {
               var id = btn.getAttribute('data-id');
-              if (!id || !confirm('¿Aprobar esta solicitud y aplicar los días en la cuenta del kiosquero?')) return;
+              if (!id || !confirm('¿Aprobar y aplicar los días de licencia en la cuenta (kiosco o socio)?')) return;
               var rpc = await supabaseClient.rpc('ferriol_approve_membership_day_request', { p_request_id: id, p_approve: true, p_reject_note: null });
               if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
               var out = rpc.data;
               if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
               if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo aprobar.'); return; }
-              alert('Listo: los días ya figuran en la membresía del kiosquero.');
+              alert('Listo: los días ya figuran en la licencia.');
               renderSuper();
             };
           });
@@ -5520,11 +5600,39 @@ async function showApp() {
               renderSuper();
             };
           });
+          founderBox.querySelectorAll('.ferriol-kpr-approve').forEach(function (btn) {
+            btn.onclick = async function () {
+              var id = btn.getAttribute('data-kpr-id');
+              if (!id || !confirm('¿Aprobar el alta del negocio? El referidor podrá definir la contraseña del kiosco.')) return;
+              var rpc = await supabaseClient.rpc('ferriol_approve_kiosquero_provision_request', { p_request_id: id, p_approve: true, p_reject_note: null });
+              if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+              var out = rpc.data;
+              if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+              if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo aprobar.'); return; }
+              alert('Alta de kiosco aprobada.');
+              renderSuper();
+            };
+          });
+          founderBox.querySelectorAll('.ferriol-kpr-reject').forEach(function (btn) {
+            btn.onclick = async function () {
+              var id = btn.getAttribute('data-kpr-id');
+              if (!id) return;
+              var note = prompt('Motivo del rechazo (opcional):');
+              if (note === null) return;
+              var rpc = await supabaseClient.rpc('ferriol_approve_kiosquero_provision_request', { p_request_id: id, p_approve: false, p_reject_note: note || null });
+              if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+              var out = rpc.data;
+              if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+              if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo rechazar.'); return; }
+              renderSuper();
+            };
+          });
           lucide.createIcons();
         }
         if (isPartnerLens() && !isEmpresaLensSuper() && partnerBox) {
           var r2 = await supabaseClient.from('ferriol_membership_day_requests').select('*').eq('requested_by', currentUser.id).order('created_at', { ascending: false }).limit(20);
           var r2p = await supabaseClient.from('ferriol_partner_provision_requests').select('*').eq('requested_by', currentUser.id).order('created_at', { ascending: false }).limit(25);
+          var r2k = await supabaseClient.from('ferriol_kiosquero_provision_requests').select('*').eq('requested_by', currentUser.id).order('created_at', { ascending: false }).limit(25);
           partnerBox.classList.remove('hidden');
           var pool2 = window._ferriolAllProfilesCache || [];
           function nameOf2(id) {
@@ -5536,9 +5644,9 @@ async function showApp() {
             h2 += '<p class="text-xs text-cyan-100/90 font-medium mb-1">Solicitudes de días</p><p class="text-[10px] text-red-300/90 mb-3">' + String(r2.error.message || '') + '</p>';
           } else {
             var rows2 = r2.data || [];
-            h2 += '<p class="text-xs text-cyan-100/90 font-medium mb-2">Solicitudes de días (kioscos)</p>';
+            h2 += '<p class="text-xs text-cyan-100/90 font-medium mb-2">Solicitudes de días (kioscos y socios en tu red)</p>';
             if (rows2.length === 0) {
-              h2 += '<p class="text-[10px] text-white/50 mb-3">Desde el detalle de cada kiosco podés pedir suma o quita de días; la empresa debe aprobar.</p>';
+              h2 += '<p class="text-[10px] text-white/50 mb-3">Desde el detalle de cada integrante pedí suma o quita; Ferriol aprueba antes de aplicar.</p>';
             } else {
               h2 += '<div class="space-y-1.5 max-h-[22vh] overflow-y-auto text-[11px] mb-3">';
               rows2.forEach(function (row) {
@@ -5572,6 +5680,29 @@ async function showApp() {
               h2 += '</div>';
             }
           }
+          if (r2k.error) {
+            h2 += '<p class="text-xs text-emerald-200/90 font-medium mb-1 mt-2">Altas de negocios (kioscos)</p><p class="text-[10px] text-red-300/90">' + String(r2k.error.message || '') + '</p>';
+          } else {
+            var krows = r2k.data || [];
+            h2 += '<p class="text-xs text-emerald-200/90 font-medium mb-2 mt-2">Altas de negocios (kioscos)</p>';
+            if (krows.length === 0) {
+              h2 += '<p class="text-[10px] text-white/50">Usá el botón verde «Solicitar alta de negocio»; la empresa debe aprobar antes de crear el usuario.</p>';
+            } else {
+              h2 += '<div class="space-y-1.5 max-h-[22vh] overflow-y-auto text-[11px]">';
+              krows.forEach(function (kr) {
+                var st = kr.status === 'pending' ? 'text-amber-200' : kr.status === 'approved' ? 'text-emerald-200' : kr.status === 'completed' ? 'text-white/55' : 'text-red-200/80';
+                var em = String(kr.target_email || '').replace(/</g, '&lt;');
+                var kn = String(kr.kiosco_name || '').replace(/</g, '&lt;');
+                var dt = kr.created_at ? String(kr.created_at).slice(0, 10) : '';
+                var btnK = '';
+                if (kr.status === 'approved' && kr.completion_token) {
+                  btnK = '<button type="button" class="ferriol-kpr-complete mt-1 w-full btn-glow rounded-lg py-1.5 text-[10px] font-semibold touch-target" data-token="' + String(kr.completion_token) + '" data-email-enc="' + encodeURIComponent(kr.target_email || '') + '">Definir contraseña del kiosco</button>';
+                }
+                h2 += '<div class="rounded-lg border border-emerald-500/25 bg-black/20 px-2 py-1.5"><span class="' + st + '">' + kr.status + '</span> · ' + kn + ' · ' + em + ' · ' + dt + btnK + '</div>';
+              });
+              h2 += '</div>';
+            }
+          }
           partnerBox.innerHTML = h2;
           partnerBox.querySelectorAll('.ferriol-ppr-complete').forEach(function (btn) {
             btn.onclick = function () {
@@ -5580,6 +5711,15 @@ async function showApp() {
               var em = '';
               try { em = decodeURIComponent(enc); } catch (_) { em = ''; }
               openPartnerProvisionCompleteModal(tok, em);
+            };
+          });
+          partnerBox.querySelectorAll('.ferriol-kpr-complete').forEach(function (btn) {
+            btn.onclick = function () {
+              var tok = btn.getAttribute('data-token');
+              var enc = btn.getAttribute('data-email-enc') || '';
+              var em = '';
+              try { em = decodeURIComponent(enc); } catch (_) { em = ''; }
+              openKiosqueroProvisionCompleteModal(tok, em);
             };
           });
         }
@@ -6085,24 +6225,8 @@ async function showApp() {
       lucide.createIcons();
     };
 
-    function openNewKiosqueroModal() {
-      document.getElementById('newKiosqueroErr').classList.add('hidden');
-      document.getElementById('createUserMsgModal').classList.add('hidden');
-      document.getElementById('newKiosqueroEmail').value = '';
-      document.getElementById('newKiosqueroPhone').value = '';
-      document.getElementById('newKiosqueroPassword').value = '';
-      document.getElementById('newKiosqueroKioscoName').value = '';
-      document.getElementById('newKiosqueroModal').classList.remove('hidden');
-      document.getElementById('newKiosqueroModal').classList.add('flex');
-      lucide.createIcons();
-    }
-    function closeNewKiosqueroModal() {
-      document.getElementById('newKiosqueroModal').classList.add('hidden');
-      document.getElementById('newKiosqueroModal').classList.remove('flex');
-      renderSuper();
-      lucide.createIcons();
-    }
-    document.getElementById('btnOpenNewKiosqueroModal').onclick = openNewKiosqueroModal;
+    var btnOpenKiosqueroProv = document.getElementById('btnOpenNewKiosqueroModal');
+    if (btnOpenKiosqueroProv) btnOpenKiosqueroProv.onclick = function () { openKiosqueroProvisionRequestModal(); };
     var btnExportDir = document.getElementById('btnExportDirectorioCSV');
     if (btnExportDir) btnExportDir.onclick = function () { exportSuperDirectorioCSV(); };
     var ferriolPayTypeEl = document.getElementById('ferriolNewPayType');
@@ -6224,56 +6348,122 @@ async function showApp() {
       if (state.superSection === 'cobros') renderSuperCobrosSection();
       lucide.createIcons();
     };
-    document.getElementById('newKiosqueroModalClose').onclick = closeNewKiosqueroModal;
-    document.getElementById('newKiosqueroModalOverlay').onclick = closeNewKiosqueroModal;
-    setupPasswordToggle('showNewKiosqueroPwd', 'newKiosqueroPassword');
-    try {
-      if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
-    } catch (_) {}
-    document.getElementById('btnCreateUserInModal').onclick = async () => {
-      const email = document.getElementById('newKiosqueroEmail').value.trim();
-      const password = document.getElementById('newKiosqueroPassword').value;
-      const kioscoName = document.getElementById('newKiosqueroKioscoName').value.trim();
-      const errEl = document.getElementById('newKiosqueroErr');
-      const msgEl = document.getElementById('createUserMsgModal');
-      errEl.classList.add('hidden');
-      msgEl.classList.add('hidden');
-      if (!email) {
-        errEl.textContent = 'El email es obligatorio.';
-        errEl.classList.remove('hidden'); errEl.classList.add('show');
+    var kprReqClose = document.getElementById('kiosqueroProvisionRequestModalClose');
+    if (kprReqClose) kprReqClose.onclick = closeKiosqueroProvisionRequestModal;
+    var kprReqOv = document.getElementById('kiosqueroProvisionRequestModalOverlay');
+    if (kprReqOv) kprReqOv.onclick = closeKiosqueroProvisionRequestModal;
+    var kprPayEl = document.getElementById('kiosqueroProvisionClientPay');
+    var kprPctEl = document.getElementById('kiosqueroProvisionCompanyPct');
+    function syncKiosqueroProvisionPct() {
+      if (!kprPayEl || !kprPctEl) return;
+      var n = parseFloat(String(kprPayEl.value || '').replace(',', '.'), 10);
+      if (isNaN(n) || n <= 0) { kprPctEl.textContent = '—'; return; }
+      kprPctEl.textContent = String(Math.round(n * 0.2 * 100) / 100);
+    }
+    if (kprPayEl) {
+      kprPayEl.addEventListener('input', syncKiosqueroProvisionPct);
+      kprPayEl.addEventListener('change', syncKiosqueroProvisionPct);
+    }
+    var kprSubmitBtn = document.getElementById('kiosqueroProvisionSubmitRequest');
+    if (kprSubmitBtn) kprSubmitBtn.onclick = async function () {
+      var errBox = document.getElementById('kiosqueroProvisionRequestErr');
+      if (errBox) { errBox.classList.add('hidden'); errBox.classList.remove('show'); }
+      if (!supabaseClient || !currentUser) return;
+      if (!isPartnerLens() && !isEmpresaLensSuper()) return;
+      var email = (document.getElementById('kiosqueroProvisionEmail') && document.getElementById('kiosqueroProvisionEmail').value || '').trim().toLowerCase();
+      var kname = (document.getElementById('kiosqueroProvisionKioscoName') && document.getElementById('kiosqueroProvisionKioscoName').value || '').trim();
+      var phone = (document.getElementById('kiosqueroProvisionPhone') && document.getElementById('kiosqueroProvisionPhone').value || '').trim();
+      var pay = parseFloat(String((kprPayEl && kprPayEl.value) || '').replace(',', '.'), 10);
+      var note = (document.getElementById('kiosqueroProvisionCompanyNote') && document.getElementById('kiosqueroProvisionCompanyNote').value || '').trim();
+      if (!email || email.indexOf('@') < 1) {
+        if (errBox) { errBox.textContent = 'Email válido obligatorio.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
         return;
       }
-      if (!password || password.length < 6) {
-        errEl.textContent = 'La contraseña es obligatoria y debe tener al menos 6 caracteres.';
-        errEl.classList.remove('hidden'); errEl.classList.add('show');
+      if (!kname) {
+        if (errBox) { errBox.textContent = 'Nombre del negocio obligatorio.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
         return;
       }
-      if (!supabaseClient) {
-        errEl.textContent = 'Supabase no está configurado.';
-        errEl.classList.remove('hidden'); errEl.classList.add('show');
+      if (isNaN(pay) || pay <= 0) {
+        if (errBox) { errBox.textContent = 'Indicá el monto cobrado al cliente / negocio.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
         return;
       }
-      const { data: signUpData, error: signUpErr } = await supabaseClient.auth.signUp({ email, password });
-      if (signUpErr) {
-        errEl.textContent = signUpErr.message.includes('already registered') ? 'Ya existe un usuario con ese email.' : signUpErr.message;
-        errEl.classList.remove('hidden'); errEl.classList.add('show');
+      var ex = await ferriolResolveProfileIdByEmail(email);
+      if (ex) {
+        if (errBox) { errBox.textContent = 'Ya existe una cuenta con ese email.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
         return;
       }
-      const newId = signUpData.user?.id;
-      if (newId) {
-        var patch = { kiosco_name: kioscoName || '' };
-        if (isPartnerLens()) patch.sponsor_id = currentUser.id;
-        await supabaseClient.from('profiles').update(patch).eq('id', newId);
+      if (email === String(currentUser.email || '').toLowerCase()) {
+        if (errBox) { errBox.textContent = 'No podés usar tu propio email como negocio.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+        return;
       }
-      msgEl.textContent = 'Kiosquero creado. Ya puede iniciar sesión con ese email y contraseña.';
-      msgEl.classList.remove('hidden');
-      document.getElementById('newKiosqueroEmail').value = '';
-      document.getElementById('newKiosqueroPhone').value = '';
-      document.getElementById('newKiosqueroPassword').value = '';
-      document.getElementById('newKiosqueroKioscoName').value = '';
+      var share = Math.round(pay * 0.2 * 100) / 100;
+      if (!confirm('Se enviará la solicitud de alta del negocio a la empresa. Hasta la aprobación no podés crear el usuario. ¿Continuar?')) return;
+      var ins = await supabaseClient.from('ferriol_kiosquero_provision_requests').insert({
+        requested_by: currentUser.id,
+        target_email: email,
+        kiosco_name: kname,
+        phone: phone || null,
+        client_payment_ars: pay,
+        company_share_ars: share,
+        company_transfer_note: note || null
+      });
+      if (ins.error) {
+        if (errBox) {
+          errBox.textContent = ins.error.message + (String(ins.error.message || '').indexOf('ferriol_kiosquero') !== -1 ? '' : ' · Ejecutá supabase-ferriol-kiosquero-provision-requests.sql');
+          errBox.classList.remove('hidden');
+          errBox.classList.add('show');
+        }
+        return;
+      }
+      closeKiosqueroProvisionRequestModal();
+      alert('Solicitud enviada. Cuando Ferriol apruebe, aparecerá el botón para definir la contraseña del kiosco.');
       renderSuper();
-      lucide.createIcons();
-      setTimeout(closeNewKiosqueroModal, 2000);
+    };
+    var kprCompClose = document.getElementById('kiosqueroProvisionCompleteModalClose');
+    if (kprCompClose) kprCompClose.onclick = closeKiosqueroProvisionCompleteModal;
+    var kprCompOv = document.getElementById('kiosqueroProvisionCompleteModalOverlay');
+    if (kprCompOv) kprCompOv.onclick = closeKiosqueroProvisionCompleteModal;
+    var kprCompSubmit = document.getElementById('kiosqueroProvisionCompleteSubmit');
+    if (kprCompSubmit) kprCompSubmit.onclick = async function () {
+      var errBox = document.getElementById('kiosqueroProvisionCompleteErr');
+      if (errBox) { errBox.classList.add('hidden'); errBox.classList.remove('show'); }
+      if (!supabaseClient) return;
+      var tokenStr = (document.getElementById('kiosqueroProvisionCompleteToken') && document.getElementById('kiosqueroProvisionCompleteToken').value || '').trim();
+      var email = (document.getElementById('kiosqueroProvisionCompleteEmail') && document.getElementById('kiosqueroProvisionCompleteEmail').value || '').trim().toLowerCase();
+      var password = (document.getElementById('kiosqueroProvisionCompletePassword') && document.getElementById('kiosqueroProvisionCompletePassword').value || '');
+      if (!tokenStr || !email || !password || password.length < 6) {
+        if (errBox) { errBox.textContent = 'Completá email, token y contraseña (mín. 6).'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+        return;
+      }
+      var tokenUuid = tokenStr;
+      var signUpRes = await supabaseClient.auth.signUp({ email: email, password: password });
+      if (signUpRes.error) {
+        if (errBox) { errBox.textContent = signUpRes.error.message || 'Error al registrar'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+        return;
+      }
+      var newId = signUpRes.data && signUpRes.data.user && signUpRes.data.user.id;
+      if (!newId) {
+        if (errBox) {
+          errBox.textContent = 'Registro recibido. Si tu proyecto pide confirmar el email, abrí el enlace y luego iniciá sesión una vez; después reintentá o pedí ayuda a la empresa.';
+          errBox.classList.remove('hidden');
+          errBox.classList.add('show');
+        }
+        return;
+      }
+      var rpc = await supabaseClient.rpc('ferriol_finalize_kiosquero_provision', { p_token: tokenUuid, p_new_profile_id: newId });
+      if (rpc.error) {
+        if (errBox) { errBox.textContent = rpc.error.message; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+        return;
+      }
+      var out = rpc.data;
+      if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+      if (!out || out.ok !== true) {
+        if (errBox) { errBox.textContent = (out && out.error) ? out.error : 'No se pudo activar el kiosco.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+        return;
+      }
+      closeKiosqueroProvisionCompleteModal();
+      alert('Listo: el negocio ya puede iniciar sesión como kiosquero.');
+      renderSuper();
     };
 
     var btnOpenProv = document.getElementById('btnOpenPartnerProvisionModal');
