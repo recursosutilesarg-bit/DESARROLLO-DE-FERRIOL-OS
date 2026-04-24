@@ -330,7 +330,7 @@
     async function loadPartnerCommissionsCard() {
       var el = document.getElementById('superPartnerCommissionsCard');
       if (!el) return;
-      if (!supabaseClient || !currentUser || currentUser.role !== 'partner') {
+      if (!supabaseClient || !currentUser || !isPartnerLens()) {
         el.classList.add('hidden');
         el.innerHTML = '';
         return;
@@ -355,7 +355,7 @@
     async function loadSuperMainFerriolResumenCard() {
       var el = document.getElementById('superMainFerriolResumenCard');
       if (!el) return;
-      if (!supabaseClient || !currentUser || currentUser.role !== 'super' || state.superUiMode === 'negocio') {
+      if (!supabaseClient || !currentUser || !isEmpresaLensSuper()) {
         el.classList.add('hidden');
         el.innerHTML = '';
         return;
@@ -433,7 +433,7 @@
       var sponsorEl = document.getElementById('kioscoLicenseSponsorHint');
       var dash = document.getElementById('dashboardKioscoLicenseCard');
       if (!currentUser) return;
-      var show = currentUser.role === 'kiosquero' || (currentUser.role === 'super' && state.superUiMode === 'negocio');
+      var show = currentUser.role === 'kiosquero' || isSuperKioscoPreviewMode();
       if (block) block.style.display = show ? '' : 'none';
       if (dash) {
         if (!show) {
@@ -481,7 +481,7 @@
       }
     }
     async function renderSuperCobrosSection() {
-      if (!supabaseClient || !currentUser || currentUser.role !== 'super') return;
+      if (!supabaseClient || !isEmpresaLensSuper()) return;
       var pendingEl = document.getElementById('ferriolPaymentsPendingList');
       var verifiedEl = document.getElementById('ferriolPaymentsVerifiedList');
       if (!pendingEl || !verifiedEl) return;
@@ -1813,7 +1813,7 @@
       var isSuper = currentUser.role === 'super';
       var isPartner = currentUser.role === 'partner';
       var isNetworkAdmin = isNetworkAdminRole(currentUser.role);
-      var uiNegocio = isSuper && state.superUiMode === 'negocio';
+      var uiNegocio = isSuperKioscoPreviewMode();
       var asKiosquero = !isNetworkAdmin || uiNegocio;
       document.querySelectorAll('.kiosquero-only').forEach(function (el) {
         if (el.id === 'navKiosquero') return;
@@ -1826,7 +1826,7 @@
           el.style.display = 'none';
           return;
         }
-        if (isPartner && el.classList.contains('super-main-only')) {
+        if ((isPartner || isSuperSocioLens()) && el.classList.contains('super-main-only')) {
           el.style.display = 'none';
           return;
         }
@@ -1857,17 +1857,24 @@
         if (isSuper && !uiNegocio) {
           ht.textContent = 'FERRIOL OS';
           if (subEl) {
-            subEl.textContent = 'Administración';
-            subEl.classList.add('header-sub--toggle');
-            subEl.title = 'Tocá para usar la app como negocio (misma cuenta)';
-            subEl.setAttribute('aria-label', 'Cambiar a modo negocio');
+            if (isSuperSocioLens()) {
+              subEl.textContent = 'Vista socio vendedor (simulación)';
+              subEl.classList.add('header-sub--toggle');
+              subEl.title = 'Atajo: volver a vista kiosco de prueba';
+              subEl.setAttribute('aria-label', 'Cambiar a vista kiosco');
+            } else {
+              subEl.textContent = 'Fundador · empresa';
+              subEl.classList.add('header-sub--toggle');
+              subEl.title = 'Atajo: abrir vista kiosco de prueba';
+              subEl.setAttribute('aria-label', 'Cambiar a vista kiosco');
+            }
           }
         } else if (isSuper && uiNegocio) {
           ht.textContent = currentUser.kioscoName || 'Ferriol OS';
           if (subEl) {
-            subEl.textContent = 'Modo negocio';
+            subEl.textContent = 'Vista kiosco (prueba)';
             subEl.classList.add('header-sub--toggle');
-            subEl.title = 'Tocá para volver al panel de administración';
+            subEl.title = 'Tocá para volver a panel fundador / socio';
             subEl.setAttribute('aria-label', 'Volver a administración');
           }
         } else if (isPartner) {
@@ -1889,18 +1896,19 @@
           }
         }
       }
-      if (currentUser && (currentUser.role === 'kiosquero' || (currentUser.role === 'super' && state.superUiMode === 'negocio'))) {
+      if (currentUser && (currentUser.role === 'kiosquero' || isSuperKioscoPreviewMode())) {
         loadKioscoLicensePaymentInfo();
       }
       if (currentUser && currentUser.role === 'super') {
         loadSuperMainFerriolResumenCard();
       }
+      updateSuperLensSwitcherUI();
     }
 
     function showPanel(name, cajaTabOverride) {
       if (name === 'super' && currentUser && currentUser.role === 'super' && state.superUiMode === 'negocio') {
-        state.superUiMode = 'admin';
-        try { sessionStorage.setItem('ferriol_super_ui', 'admin'); } catch (_) {}
+        state.superUiMode = 'empresa';
+        try { sessionStorage.setItem('ferriol_super_ui', 'empresa'); } catch (_) {}
         applyAppShell();
       }
       if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'negocios') {
@@ -1987,7 +1995,7 @@
     function switchSuperSection(sectionName) {
       state.superSection = sectionName || 'negocios';
       var reqSuper = state.superSection === 'cobros';
-      if (reqSuper && currentUser && currentUser.role !== 'super') {
+      if (reqSuper && currentUser && (currentUser.role !== 'super' || !isEmpresaLensSuper())) {
         state.superSection = 'negocios';
       }
       document.querySelectorAll('#panel-super .super-section').forEach(function (el) {
@@ -2008,7 +2016,7 @@
       if (headerAjustesBtn) headerAjustesBtn.classList.toggle('active', state.superSection === 'ajustes');
       var headerNotifBtn = document.getElementById('headerSuperNotifBtn');
       if (headerNotifBtn) headerNotifBtn.classList.toggle('active', state.superSection === 'notificaciones');
-      if (state.superSection === 'cobros' && currentUser && currentUser.role === 'super') renderSuperCobrosSection();
+      if (state.superSection === 'cobros' && isEmpresaLensSuper()) renderSuperCobrosSection();
       lucide.createIcons();
     }
     var headerAjustesBtnEl = document.getElementById('headerSuperAjustesBtn');
@@ -4064,13 +4072,12 @@ async function showApp() {
     document.getElementById('appWrap').classList.remove('hidden');
     if (isSuper) {
       try {
-        var _su = sessionStorage.getItem('ferriol_super_ui');
-        state.superUiMode = (_su === 'negocio') ? 'negocio' : 'admin';
+        state.superUiMode = ferriolNormalizeSuperUiMode(sessionStorage.getItem('ferriol_super_ui'));
       } catch (_) {
-        state.superUiMode = 'admin';
+        state.superUiMode = 'empresa';
       }
     } else {
-      state.superUiMode = 'admin';
+      state.superUiMode = 'empresa';
     }
     applyAppShell();
 
@@ -4442,7 +4449,7 @@ async function showApp() {
     function doLogout() {
       if (supabaseClient) supabaseClient.auth.signOut();
       currentUser = null;
-      state.superUiMode = 'admin';
+      state.superUiMode = 'empresa';
       try { sessionStorage.removeItem('ferriol_super_ui'); } catch (_) {}
       state.cart = [];
       state.transaccionesList = [];
@@ -4472,27 +4479,31 @@ async function showApp() {
       applyAppShell();
       lucide.createIcons();
     };
-    window._superIrModoAdmin = function () {
+    window._superIrModoAdmin = async function () {
       if (!currentUser || currentUser.role !== 'super') return;
-      if (window._trialCountdownInterval) { clearInterval(window._trialCountdownInterval); window._trialCountdownInterval = null; }
-      state.superUiMode = 'admin';
-      try { sessionStorage.setItem('ferriol_super_ui', 'admin'); } catch (_) {}
-      goToPanel('super');
-      applyAppShell();
-      lucide.createIcons();
+      await ferriolSetSuperLens('empresa');
     };
     var headerSubBtn = document.getElementById('headerSub');
     if (headerSubBtn) {
       headerSubBtn.addEventListener('click', function () {
         if (!currentUser || currentUser.role !== 'super') return;
-        if (state.superUiMode === 'negocio') window._superIrModoAdmin();
-        else window._superIrModoNegocio();
+        if (state.superUiMode === 'negocio') ferriolSetSuperLens('empresa');
+        else ferriolSetSuperLens('negocio');
       });
     }
+    (function () {
+      var sw = document.getElementById('superLensSwitcher');
+      if (!sw) return;
+      sw.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-super-lens]');
+        if (!b) return;
+        ferriolSetSuperLens(b.getAttribute('data-super-lens'));
+      });
+    })();
 
     function fillConfigForm() {
       if (!currentUser) return;
-      var asNegocio = currentUser.role === 'kiosquero' || (currentUser.role === 'super' && state.superUiMode === 'negocio');
+      var asNegocio = currentUser.role === 'kiosquero' || isSuperKioscoPreviewMode();
       if (!asNegocio) return;
       document.getElementById('configKioscoName').value = currentUser.kioscoName || '';
       document.getElementById('configWhatsappMsg').value = currentUser.whatsappMessage || DEFAULT_WHATSAPP;
@@ -4500,7 +4511,7 @@ async function showApp() {
     }
     async function saveConfig() {
       if (!currentUser) return;
-      var asNegocio = currentUser.role === 'kiosquero' || (currentUser.role === 'super' && state.superUiMode === 'negocio');
+      var asNegocio = currentUser.role === 'kiosquero' || isSuperKioscoPreviewMode();
       if (!asNegocio) return;
       const kioscoName = document.getElementById('configKioscoName').value.trim();
       const whatsappMessage = document.getElementById('configWhatsappMsg').value.trim() || DEFAULT_WHATSAPP;
@@ -4812,7 +4823,7 @@ async function showApp() {
       }
       var refCodeEsc = (user.referral_code || '—').replace(/</g, '&lt;');
       var assignHtml = '';
-      if (currentUser && currentUser.role === 'super') {
+      if (isEmpresaLensSuper()) {
         var poolFull = window._ferriolAllProfilesCache || [];
         var opts = ['<option value="">— Sin referidor / sin asignar —</option>'];
         var candidates = poolFull.filter(function (p) { return p.id !== user.id; }).slice().sort(function (a, b) {
@@ -4840,7 +4851,7 @@ async function showApp() {
         sponsorIsPartner = !!(spRow0 && spRow0.role === 'partner');
       }
       var defSaleHtml = '';
-      if (currentUser && currentUser.role === 'super' && user.role === 'kiosquero' && user.sponsor_id && sponsorIsPartner) {
+      if (isEmpresaLensSuper() && user.role === 'kiosquero' && user.sponsor_id && sponsorIsPartner) {
         defSaleHtml = `
         <div class="border-t border-white/10 pt-4 space-y-2">
           <p class="text-sm font-medium text-cyan-200/95 flex items-center gap-2"><i data-lucide="percent" class="w-4 h-4"></i> Venta licencia kiosco (alta definitiva)</p>
@@ -4848,7 +4859,7 @@ async function showApp() {
           <button type="button" class="super-detail-definitive-sale w-full py-2.5 rounded-xl text-sm bg-cyan-500/20 text-cyan-100 border border-cyan-400/45 touch-target font-medium">Registrar venta (20% / 80%)</button>
         </div>`;
       }
-      var quitarHtml = (currentUser && currentUser.role === 'partner') ? '' : `
+      var quitarHtml = isPartnerLens() ? '' : `
             <button type="button" class="super-detail-quitar w-full py-2.5 rounded-xl text-sm bg-red-500/20 text-red-300 border border-red-500/40 touch-target flex items-center justify-center gap-2">
               <i data-lucide="user-minus" class="w-4 h-4"></i> Quitar negocio (pide contraseña admin)
             </button>`;
@@ -5034,7 +5045,7 @@ async function showApp() {
         window._superTrialReminderEditCache = trialCfgParsed;
         var winDaysInput = document.getElementById('trialReminderWindowDays');
         if (winDaysInput) winDaysInput.value = String(trialCfgParsed.windowDays);
-        if (!currentUser || currentUser.role !== 'partner') fillTrialReminderAdminFields(trialCfgParsed, null);
+        if (!isPartnerLens()) fillTrialReminderAdminFields(trialCfgParsed, null);
         if (superFilterState !== 'todos') {
           document.querySelectorAll('.super-filter-btn').forEach(function (b) {
             var active = b.dataset.filter === superFilterState;
@@ -5047,7 +5058,7 @@ async function showApp() {
       const { data: allProfiles, error: errProfiles } = await supabaseClient.from('profiles').select('id, email, role, active, kiosco_name, trial_ends_at, sponsor_id, referral_code');
       window._ferriolAllProfilesCache = allProfiles || [];
       var list = (allProfiles || []).filter(u => u.id !== currentUser?.id);
-      if (currentUser && currentUser.role === 'partner') {
+      if (isPartnerLens()) {
         var downIds = getPartnerDownlineUserIdSet(allProfiles || [], currentUser.id);
         list = list.filter(function (u) { return downIds.has(u.id); });
       }
@@ -5056,7 +5067,7 @@ async function showApp() {
       else if (superFilterState === 'sin_referidor') list = list.filter(function (u) { return !u.sponsor_id; });
       superUserListCache = list.slice();
       var statsEl = document.getElementById('superDirectoryStats');
-      if (statsEl && currentUser && currentUser.role === 'super') {
+      if (statsEl && isEmpresaLensSuper()) {
         var totalN = (allProfiles || []).length;
         var sinRef = (allProfiles || []).filter(function (r) { return !r.sponsor_id; }).length;
         statsEl.textContent = 'Integrantes en el sistema: ' + totalN + ' · Sin referidor: ' + sinRef;
@@ -5080,8 +5091,8 @@ async function showApp() {
         lucide.createIcons();
         return;
       }
-      if (list.length === 0 && (currentUser?.role === 'super' || currentUser?.role === 'partner')) {
-        var msg = searchTerm ? 'Ningún usuario coincide con la búsqueda.' : (currentUser?.role === 'partner' ? 'No hay negocios en tu red todavía.' : (superFilterState === 'sin_referidor' ? 'No hay integrantes sin referidor. Todo el mundo tiene admin/referidor asignado.' : superFilterState === 'activos' ? 'No hay negocios activos.' : superFilterState === 'inactivos' ? 'No hay negocios inactivos.' : 'No hay otros negocios. Agregá uno con el botón de arriba.'));
+      if (list.length === 0 && (isEmpresaLensSuper() || isPartnerLens())) {
+        var msg = searchTerm ? 'Ningún usuario coincide con la búsqueda.' : (isPartnerLens() ? 'No hay negocios en tu red todavía.' : (superFilterState === 'sin_referidor' ? 'No hay integrantes sin referidor. Todo el mundo tiene admin/referidor asignado.' : superFilterState === 'activos' ? 'No hay negocios activos.' : superFilterState === 'inactivos' ? 'No hay negocios inactivos.' : 'No hay otros negocios. Agregá uno con el botón de arriba.'));
         listEl.innerHTML = '<p class="py-6 text-center text-white/70 text-sm">' + msg + '</p>';
         lucide.createIcons();
         return;
@@ -5093,7 +5104,7 @@ async function showApp() {
         const badgeClass = trialFull.expired ? 'bg-red-500/20 text-red-300' : 'bg-[#dc2626]/30 text-[#f87171]';
         const endIso = (u.trial_ends_at || '').replace(/"/g, '&quot;');
         var rolePill = (u.role === 'super') ? '<span class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-violet-500/30 text-violet-200 border border-violet-400/30 shrink-0">Root</span>' : ((u.role === 'partner') ? '<span class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-cyan-500/25 text-cyan-200 border border-cyan-400/25 shrink-0">Red</span>' : '');
-        var sinRefPill = (!u.sponsor_id && currentUser?.role === 'super') ? '<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-200 border border-amber-400/35 shrink-0">Sin ref.</span>' : '';
+        var sinRefPill = (!u.sponsor_id && isEmpresaLensSuper()) ? '<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-200 border border-amber-400/35 shrink-0">Sin ref.</span>' : '';
         return `
           <button type="button" class="super-user-card w-full text-left glass rounded-xl p-4 flex items-center justify-between gap-3 border border-white/10 hover:border-[#dc2626]/40 active:scale-[0.99] transition-all touch-target" data-id="${u.id}" data-trial-ends-at="${endIso}">
             <div class="flex-1 min-w-0">
@@ -5116,7 +5127,7 @@ async function showApp() {
       });
       var founderBlock = document.getElementById('superFounderLinksBlock');
       if (founderBlock) {
-        if (currentUser && currentUser.role === 'super') {
+        if (isEmpresaLensSuper()) {
           var fCode = currentUser.referralCode || '';
           if (!fCode) {
             fCode = await ensureUserReferralCode(currentUser.id) || '';
@@ -5135,7 +5146,7 @@ async function showApp() {
       }
       var netInfoEl = document.getElementById('superPartnerNetInfo');
       if (netInfoEl) {
-        if (currentUser && currentUser.role === 'partner') {
+        if (isPartnerLens()) {
           function finishPartnerNetInfo(cc) {
             var c = cc || '';
             var cSafe = String(c || '—').replace(/</g, '&lt;').replace(/&/g, '&amp;');
@@ -5200,7 +5211,7 @@ async function showApp() {
         var badgeClass = trialFull.expired ? 'bg-red-500/20 text-red-300' : 'bg-[#dc2626]/30 text-[#f87171]';
         var endIso = (u.trial_ends_at || '').replace(/"/g, '&quot;');
         var rolePill = (u.role === 'super') ? '<span class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-violet-500/30 text-violet-200 border border-violet-400/30 shrink-0">Root</span>' : ((u.role === 'partner') ? '<span class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-cyan-500/25 text-cyan-200 border border-cyan-400/25 shrink-0">Red</span>' : '');
-        var sinRefPill = (!u.sponsor_id && currentUser && currentUser.role === 'super') ? '<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-200 border border-amber-400/35 shrink-0">Sin ref.</span>' : '';
+        var sinRefPill = (!u.sponsor_id && isEmpresaLensSuper()) ? '<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-200 border border-amber-400/35 shrink-0">Sin ref.</span>' : '';
         return '<button type="button" class="super-user-card w-full text-left glass rounded-xl p-4 flex items-center justify-between gap-3 border border-white/10 hover:border-[#dc2626]/40 active:scale-[0.99] transition-all touch-target" data-id="' + u.id + '" data-trial-ends-at="' + endIso + '"><div class="flex-1 min-w-0"><p class="font-semibold truncate flex items-center gap-2 flex-wrap">' + name + rolePill + sinRefPill + '</p><p class="text-xs text-white/50 truncate mt-0.5">' + (u.email || '').replace(/</g, '&lt;') + '</p></div><div class="flex items-center gap-2 shrink-0"><span class="super-list-countdown px-2 py-1 rounded-lg text-xs ' + badgeClass + '">' + badge + '</span><i data-lucide="chevron-right" class="w-5 h-5 text-white/40"></i></div></button>';
       }).join('');
       listEl.querySelectorAll('.super-user-card').forEach(function (btn) {
@@ -5216,7 +5227,7 @@ async function showApp() {
     if (superSearchInput) superSearchInput.addEventListener('input', renderSuperListFromSearch);
     if (superSearchInput) superSearchInput.addEventListener('search', renderSuperListFromSearch);
     document.getElementById('saveAdminContact').onclick = async () => {
-      if (currentUser && currentUser.role === 'partner') return;
+      if (isPartnerLens()) return;
       const whatsapp = (document.getElementById('adminContactWhatsapp').value || '').trim().replace(/\D/g, '');
       const whatsapp2 = (document.getElementById('adminContactWhatsapp2').value || '').trim().replace(/\D/g, '');
       const whatsapp3 = (document.getElementById('adminContactWhatsapp3').value || '').trim().replace(/\D/g, '');
@@ -5268,7 +5279,7 @@ async function showApp() {
       });
     })();
     async function exportSuperDirectorioCSV() {
-      if (!currentUser || currentUser.role !== 'super' || !supabaseClient) return;
+      if (!isEmpresaLensSuper() || !supabaseClient) return;
       try {
         var res = await supabaseClient.from('profiles').select('id, email, kiosco_name, role, active, referral_code, sponsor_id, trial_ends_at').order('email', { ascending: true });
         if (res.error) throw res.error;
@@ -5299,7 +5310,7 @@ async function showApp() {
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
     async function exportAllUsersBackup() {
-      if (!currentUser || currentUser.role !== 'super' || !supabaseClient) return;
+      if (!isEmpresaLensSuper() || !supabaseClient) return;
       var msgEl = document.getElementById('adminBackupAllMsg');
       var btn = document.getElementById('btnExportAllUsersBackup');
       if (msgEl) { msgEl.textContent = 'Exportando...'; msgEl.classList.remove('hidden'); msgEl.className = 'text-xs mt-2 text-white/70'; }
@@ -5338,7 +5349,7 @@ async function showApp() {
       lucide.createIcons();
     }
     async function importAllUsersBackup(file) {
-      if (!file || !currentUser || currentUser.role !== 'super' || !supabaseClient) return;
+      if (!file || !isEmpresaLensSuper() || !supabaseClient) return;
       var msgEl = document.getElementById('adminBackupAllMsg');
       var btn = document.getElementById('inputImportAllUsersBackup');
       if (msgEl) { msgEl.textContent = 'Importando (complementando datos)...'; msgEl.classList.remove('hidden'); msgEl.className = 'text-xs mt-2 text-white/70'; }
@@ -5495,7 +5506,7 @@ async function showApp() {
       var msgEl = document.getElementById('adminNotificationMsg');
       var msg = (textarea && textarea.value) ? textarea.value.trim() : '';
       if (!msg) { if (msgEl) { msgEl.textContent = 'Escribí un mensaje.'; msgEl.classList.remove('hidden'); msgEl.className = 'text-xs mt-2 text-amber-300'; } return; }
-      if (!supabaseClient || currentUser?.role !== 'super') return;
+      if (!supabaseClient || !isEmpresaLensSuper()) return;
       try {
         var err = (await supabaseClient.from('notifications').insert({ message: msg })).error;
         if (err) throw err;
@@ -5535,7 +5546,7 @@ async function showApp() {
     var ferriolBtnMonthly = document.getElementById('ferriolBtnRunMonthlyAccrual');
     if (ferriolBtnMonthly) {
       ferriolBtnMonthly.onclick = async function () {
-        if (!supabaseClient || !currentUser || currentUser.role !== 'super') return;
+        if (!supabaseClient || !isEmpresaLensSuper()) return;
         if (!confirm('¿Generar en el libro los cargos automáticos del mes calendario actual (Argentina)? No duplica si ya existen (idempotencia).')) return;
         var rpc = await supabaseClient.rpc('ferriol_accrue_monthly_billing', {});
         if (rpc.error) { alert('Error: ' + (rpc.error.message || '')); return; }
@@ -5550,7 +5561,7 @@ async function showApp() {
     var ferriolBtnDemo = document.getElementById('ferriolBtnDemoSeed');
     if (ferriolBtnDemo) {
       ferriolBtnDemo.onclick = async function () {
-        if (!supabaseClient || !currentUser || currentUser.role !== 'super') return;
+        if (!supabaseClient || !isEmpresaLensSuper()) return;
         if (!confirm('¿Insertar 3 movimientos de demostración en mlm_ledger? No duplica si ya existen.')) return;
         var rpc = await supabaseClient.rpc('ferriol_demo_seed_ledger', {});
         if (rpc.error) {
@@ -5573,7 +5584,7 @@ async function showApp() {
     var ferriolBtnDemoClear = document.getElementById('ferriolBtnDemoClear');
     if (ferriolBtnDemoClear) {
       ferriolBtnDemoClear.onclick = async function () {
-        if (!supabaseClient || !currentUser || currentUser.role !== 'super') return;
+        if (!supabaseClient || !isEmpresaLensSuper()) return;
         if (!confirm('¿Eliminar del libro solo las 3 filas de demostración (claves ferriol:demo:seed:*)? No afecta cargos reales.')) return;
         var rpc = await supabaseClient.rpc('ferriol_demo_clear_seed_ledger', {});
         if (rpc.error) {
@@ -5596,7 +5607,7 @@ async function showApp() {
     if (ferriolBtnCreate) ferriolBtnCreate.onclick = async function () {
       var errEl = document.getElementById('ferriolNewPayErr');
       if (errEl) { errEl.classList.add('hidden'); errEl.textContent = ''; }
-      if (!supabaseClient || !currentUser || currentUser.role !== 'super') return;
+      if (!supabaseClient || !isEmpresaLensSuper()) return;
       var type = (document.getElementById('ferriolNewPayType') || {}).value;
       var payerEm = (document.getElementById('ferriolNewPayPayerEmail') || {}).value || '';
       var sellerEm = (document.getElementById('ferriolNewPaySellerEmail') || {}).value || '';
@@ -5684,7 +5695,7 @@ async function showApp() {
       const newId = signUpData.user?.id;
       if (newId) {
         var patch = { kiosco_name: kioscoName || '' };
-        if (currentUser && currentUser.role === 'partner') patch.sponsor_id = currentUser.id;
+        if (isPartnerLens()) patch.sponsor_id = currentUser.id;
         await supabaseClient.from('profiles').update(patch).eq('id', newId);
       }
       msgEl.textContent = 'Kiosquero creado. Ya puede iniciar sesión con ese email y contraseña.';
