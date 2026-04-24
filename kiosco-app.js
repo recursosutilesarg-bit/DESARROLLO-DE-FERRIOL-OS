@@ -91,7 +91,7 @@
       try { sessionStorage.setItem('ferriol_signup_nicho', n === 'socio' ? 'socio' : 'kiosco'); } catch (_) {}
       var sub = document.getElementById('signUpLeadLine');
       var nameIn = document.getElementById('signUpKioscoName');
-      if (sub) sub.textContent = n === 'socio' ? 'Distribuidor digital' : 'Mi negocio';
+      if (sub) sub.textContent = n === 'socio' ? 'Quiero ser distribuidor del sistema' : 'Quiero probar el sistema';
       if (nameIn) nameIn.placeholder = n === 'socio' ? 'Tu nombre o equipo' : 'Nombre del negocio';
     }
     function copyTextToClipboard(text, doneMsg) {
@@ -109,6 +109,48 @@
       if (s == null || s === '') return '';
       return String(s).trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 32);
     }
+
+    /** Abre el formulario de alta; definido acá para que funcione aunque falle código más abajo en este archivo. */
+    function openSignUpFlow(nichoExplicit) {
+      var nicho = nichoExplicit === 'socio' ? 'socio' : 'kiosco';
+      try { sessionStorage.setItem('ferriol_signup_nicho', nicho); } catch (_) {}
+      var loginFormWrap = document.getElementById('loginFormWrap');
+      var resetPwdBox = document.getElementById('resetPwdBox');
+      var setNewPwdBox = document.getElementById('setNewPwdBox');
+      var signUpBox = document.getElementById('signUpBox');
+      var signUpSuccessBox = document.getElementById('signUpSuccessBox');
+      var signUpErr = document.getElementById('signUpErr');
+      if (loginFormWrap) loginFormWrap.classList.add('hidden');
+      if (resetPwdBox) resetPwdBox.classList.add('hidden');
+      if (setNewPwdBox) setNewPwdBox.classList.add('hidden');
+      if (signUpBox) signUpBox.classList.remove('hidden');
+      if (signUpSuccessBox) signUpSuccessBox.classList.add('hidden');
+      if (signUpErr) signUpErr.classList.remove('show');
+      var refIn = document.getElementById('signUpReferralCode');
+      if (refIn) {
+        try {
+          var st = normalizeReferralCode(sessionStorage.getItem('ferriol_signup_ref') || '');
+          refIn.value = st || '';
+        } catch (_) { refIn.value = ''; }
+      }
+      var rSoc = document.querySelector('input[name="signUpNicho"][value="socio"]');
+      var rKio = document.querySelector('input[name="signUpNicho"][value="kiosco"]');
+      if (nicho === 'socio' && rSoc) rSoc.checked = true;
+      else if (rKio) rKio.checked = true;
+      syncSignUpNichoUI();
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    try { window._openSignUpWithNicho = openSignUpFlow; } catch (_) {}
+    (function ferriolWirePublicSignupButtons() {
+      var b1 = document.getElementById('signUpBtnNegocio');
+      if (b1) b1.addEventListener('click', function (e) { e.preventDefault(); openSignUpFlow('kiosco'); });
+      var b2 = document.getElementById('signUpBtnSocio');
+      if (b2) b2.addEventListener('click', function (e) { e.preventDefault(); openSignUpFlow('socio'); });
+      document.querySelectorAll('input[name="signUpNicho"]').forEach(function (inp) {
+        inp.addEventListener('change', syncSignUpNichoUI);
+      });
+    })();
+
     async function resolveReferralCodeToSponsorId(code) {
       if (!supabaseClient || !code) return null;
       var c = normalizeReferralCode(code);
@@ -4307,38 +4349,6 @@ async function showApp() {
       history.replaceState(null, '', location.pathname + location.search);
     };
 
-    function openSignUpFlow(nichoExplicit) {
-      var nicho = nichoExplicit === 'socio' ? 'socio' : 'kiosco';
-      try { sessionStorage.setItem('ferriol_signup_nicho', nicho); } catch (_) {}
-      document.getElementById('loginFormWrap').classList.add('hidden');
-      document.getElementById('resetPwdBox').classList.add('hidden');
-      document.getElementById('signUpBox').classList.remove('hidden');
-      document.getElementById('signUpSuccessBox').classList.add('hidden');
-      var signUpErr = document.getElementById('signUpErr');
-      if (signUpErr) signUpErr.classList.remove('show');
-      var refIn = document.getElementById('signUpReferralCode');
-      if (refIn) {
-        try {
-          var st = normalizeReferralCode(sessionStorage.getItem('ferriol_signup_ref') || '');
-          refIn.value = st || '';
-        } catch (_) { refIn.value = ''; }
-      }
-      var rSoc = document.querySelector('input[name="signUpNicho"][value="socio"]');
-      var rKio = document.querySelector('input[name="signUpNicho"][value="kiosco"]');
-      if (nicho === 'socio' && rSoc) rSoc.checked = true;
-      else if (rKio) rKio.checked = true;
-      syncSignUpNichoUI();
-      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
-    }
-    try { window._openSignUpWithNicho = openSignUpFlow; } catch (_) {}
-
-    var signUpBtnNegocio = document.getElementById('signUpBtnNegocio');
-    if (signUpBtnNegocio) signUpBtnNegocio.onclick = function (e) { e.preventDefault(); openSignUpFlow('kiosco'); };
-    var signUpBtnSocio = document.getElementById('signUpBtnSocio');
-    if (signUpBtnSocio) signUpBtnSocio.onclick = function (e) { e.preventDefault(); openSignUpFlow('socio'); };
-    document.querySelectorAll('input[name="signUpNicho"]').forEach(function (inp) {
-      inp.addEventListener('change', syncSignUpNichoUI);
-    });
     document.getElementById('backToLogin').onclick = (e) => {
       e.preventDefault();
       document.getElementById('signUpBox').classList.add('hidden');

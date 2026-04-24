@@ -419,13 +419,34 @@ button.header-sub.header-sub--toggle:active {
 }
 
 .login-signup-new-label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  color: rgba(255, 255, 255, 0.72);
   text-align: center;
-  margin: 1rem 0 0.5rem;
+  margin: 1rem 0 0.25rem;
+}
+
+.login-signup-new-label--cta {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.62);
+  margin: 1rem 0 0.65rem;
+  padding: 0 0.25rem;
+  max-width: 22rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.login-signup-new-shout {
+  display: inline;
+  color: #86efac;
+  text-shadow: 0 0 20px rgba(134, 239, 172, 0.35);
+  font-weight: 800;
 }
 
 .login-signup-dual {
@@ -437,9 +458,13 @@ button.header-sub.header-sub--toggle:active {
   margin-left: auto;
   margin-right: auto;
   width: 100%;
+  position: relative;
+  z-index: 2;
 }
 
 .login-signup-tile {
+  position: relative;
+  z-index: 2;
   appearance: none;
   -webkit-appearance: none;
   box-sizing: border-box;
@@ -450,13 +475,13 @@ button.header-sub.header-sub--toggle:active {
   gap: 0.65rem;
   width: 100%;
   margin: 0;
-  min-height: 3.35rem;
-  padding: 0.85rem 1rem;
+  min-height: 3.5rem;
+  padding: 0.75rem 0.85rem;
   border: none;
   border-radius: 0.65rem;
   cursor: pointer;
   font-family: inherit;
-  font-size: 1.05rem;
+  font-size: 0.88rem;
   font-weight: 800;
   letter-spacing: -0.02em;
   color: #fff;
@@ -490,7 +515,9 @@ button.header-sub.header-sub--toggle:active {
 }
 
 .login-signup-tile-label {
-  line-height: 1.15;
+  line-height: 1.25;
+  text-align: center;
+  text-wrap: balance;
 }
 
 .login-hint--solo-link {
