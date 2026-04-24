@@ -168,7 +168,15 @@
         </div>
         <div class="min-w-0">
           <h1 class="font-bold text-lg tracking-tight" id="headerTitle">Ferriol OS</h1>
-          <button type="button" id="headerSub" class="header-sub text-xs text-white/80 text-left max-w-[70vw] sm:max-w-md truncate">Sistema Premium</button>
+          <div class="mt-0.5 min-w-0 max-w-[70vw] sm:max-w-md">
+            <button type="button" id="headerSub" class="header-sub w-full text-xs text-white/80 text-left truncate">Sistema Premium</button>
+            <!-- Fundador: tres vistas en el mismo hueco del subtítulo (solo cuenta super, modos admin) -->
+            <div id="superLensSwitcher" class="hidden flex gap-0.5 flex-wrap items-stretch" role="group" aria-label="Vista de administración">
+              <button type="button" data-super-lens="empresa" class="super-lens-btn flex-1 min-w-[4.5rem] rounded-md py-1 px-1 text-[10px] sm:text-[11px] font-semibold border border-white/15 bg-white/5 text-white/80 touch-target leading-tight" aria-pressed="false">Fundador</button>
+              <button type="button" data-super-lens="socio" class="super-lens-btn flex-1 min-w-[4.5rem] rounded-md py-1 px-1 text-[10px] sm:text-[11px] font-semibold border border-white/15 bg-white/5 text-white/80 touch-target leading-tight" aria-pressed="false">Administrador</button>
+              <button type="button" data-super-lens="negocio" class="super-lens-btn flex-1 min-w-[4.5rem] rounded-md py-1 px-1 text-[10px] sm:text-[11px] font-semibold border border-white/15 bg-white/5 text-white/80 touch-target leading-tight" aria-pressed="false">Usuario</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="flex items-center gap-2">
@@ -199,15 +207,6 @@
         <button id="logoutBtn" class="btn-neomorphic rounded-xl p-2.5 touch-target super-only" title="Cerrar sesión">
           <i data-lucide="log-out" class="w-5 h-5"></i>
         </button>
-      </div>
-    </div>
-    <!-- Solo cuenta fundador (super): tres paneles de prueba -->
-    <div id="superLensSwitcher" class="hidden max-w-7xl mx-auto w-full mt-2 pt-2 border-t border-white/10 px-1 pb-1">
-      <p class="text-[10px] text-center text-white/45 mb-1.5">Vista de fundador: empresa, socio o kiosco</p>
-      <div class="flex gap-1 flex-wrap sm:flex-nowrap justify-center">
-        <button type="button" data-super-lens="empresa" class="super-lens-btn flex-1 min-w-[5.5rem] max-w-[11rem] rounded-lg py-1.5 px-1 text-[10px] sm:text-xs font-semibold border border-white/15 bg-white/5 text-white/75 touch-target" aria-pressed="false">Fundador · empresa</button>
-        <button type="button" data-super-lens="socio" class="super-lens-btn flex-1 min-w-[5.5rem] max-w-[11rem] rounded-lg py-1.5 px-1 text-[10px] sm:text-xs font-semibold border border-white/15 bg-white/5 text-white/75 touch-target" aria-pressed="false">Socio · partner</button>
-        <button type="button" data-super-lens="negocio" class="super-lens-btn flex-1 min-w-[5.5rem] max-w-[11rem] rounded-lg py-1.5 px-1 text-[10px] sm:text-xs font-semibold border border-white/15 bg-white/5 text-white/75 touch-target" aria-pressed="false">Kiosco · prueba</button>
       </div>
     </div>
   </header>

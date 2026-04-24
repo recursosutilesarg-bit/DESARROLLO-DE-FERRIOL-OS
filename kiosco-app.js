@@ -904,12 +904,21 @@
     }
     function updateSuperLensSwitcherUI() {
       var wrap = document.getElementById('superLensSwitcher');
+      var subBtn = document.getElementById('headerSub');
       if (!wrap) return;
       if (!currentUser || currentUser.role !== 'super') {
         wrap.classList.add('hidden');
+        if (subBtn) subBtn.classList.remove('hidden');
         return;
       }
-      wrap.classList.remove('hidden');
+      var uiNegocio = isSuperKioscoPreviewMode();
+      if (uiNegocio) {
+        wrap.classList.add('hidden');
+        if (subBtn) subBtn.classList.remove('hidden');
+      } else {
+        wrap.classList.remove('hidden');
+        if (subBtn) subBtn.classList.add('hidden');
+      }
       var m = state.superUiMode;
       wrap.querySelectorAll('[data-super-lens]').forEach(function (btn) {
         var on = btn.getAttribute('data-super-lens') === m;
@@ -1857,25 +1866,17 @@
         if (isSuper && !uiNegocio) {
           ht.textContent = 'FERRIOL OS';
           if (subEl) {
-            if (isSuperSocioLens()) {
-              subEl.textContent = 'Vista socio vendedor (simulación)';
-              subEl.classList.add('header-sub--toggle');
-              subEl.title = 'Atajo: volver a vista kiosco de prueba';
-              subEl.setAttribute('aria-label', 'Cambiar a vista kiosco');
-            } else {
-              subEl.textContent = 'Fundador · empresa';
-              subEl.classList.add('header-sub--toggle');
-              subEl.title = 'Atajo: abrir vista kiosco de prueba';
-              subEl.setAttribute('aria-label', 'Cambiar a vista kiosco');
-            }
+            subEl.classList.remove('header-sub--toggle');
+            subEl.removeAttribute('title');
+            subEl.removeAttribute('aria-label');
           }
         } else if (isSuper && uiNegocio) {
           ht.textContent = currentUser.kioscoName || 'Ferriol OS';
           if (subEl) {
-            subEl.textContent = 'Vista kiosco (prueba)';
+            subEl.textContent = 'Usuario · modo tienda (tocá para administración)';
             subEl.classList.add('header-sub--toggle');
-            subEl.title = 'Tocá para volver a panel fundador / socio';
-            subEl.setAttribute('aria-label', 'Volver a administración');
+            subEl.title = 'Volver a Fundador, Administrador o elegir otra vista arriba';
+            subEl.setAttribute('aria-label', 'Volver a vista administración');
           }
         } else if (isPartner) {
           ht.textContent = 'FERRIOL OS';
