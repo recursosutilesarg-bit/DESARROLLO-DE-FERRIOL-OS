@@ -15,7 +15,7 @@
     // CREATE TABLE notifications ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now(), message text NOT NULL );
     // ALTER TABLE notifications ENABLE ROW LEVEL SECURITY; políticas SELECT según tu proyecto + INSERT solo super en el SQL anterior.
     // Recordatorios de fin de prueba (mensajes por día + ventana): guardá en app_settings una fila key = 'trial_reminder_config', value = JSON, ej. {"windowDays":5,"messages":{"5":"...","4":"..."}}. Placeholders en textos: {dias}, {dias_restantes}, {nombre}, {negocio}.
-    // Red de referidos: solo role 'partner' o 'super' tienen código y enlaces (kiosquero no refiere). SQL: supabase-referral-network.sql, supabase-mlm-foundation.sql, supabase-ferriol-payments.sql (cobros + RPC ferriol_verify_payment). Solicitudes de días de membresía (socio → empresa): supabase-ferriol-membership-day-requests.sql. Objeto FerriolMlm en este archivo.
+    // Red de referidos: solo role 'partner' o 'super' tienen código y enlaces (kiosquero no refiere). SQL: supabase-referral-network.sql, supabase-mlm-foundation.sql, supabase-ferriol-payments.sql (cobros + RPC ferriol_verify_payment). Solicitudes de días (socio → empresa): supabase-ferriol-membership-day-requests.sql. Alta de otro socio/admin: supabase-ferriol-partner-provision-requests.sql. Objeto FerriolMlm en este archivo.
     // Enlaces: ?ref=CÓDIGO&nicho=kiosco (alta negocio) | ?ref=CÓDIGO&nicho=socio (membresía vendedor). Aliases: nicho=vendedor|red|membresia, membresia=1, tipo=...
     // Historial de cierres de caja (facturación y ganancia por día):
     // CREATE TABLE cierres_caja ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE, fecha date NOT NULL, fecha_cierre timestamptz NOT NULL DEFAULT now(), total_facturado numeric NOT NULL DEFAULT 0, ganancia numeric NOT NULL DEFAULT 0, created_at timestamptz DEFAULT now() );
@@ -1985,6 +1985,8 @@
       try {
         if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
       } catch (_) {}
+      var provWrap = document.querySelector('.ferriol-partner-provision-btn-wrap');
+      if (provWrap) provWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper()));
     }
 
     function showPanel(name, cajaTabOverride) {
@@ -5347,6 +5349,45 @@ async function showApp() {
 
     var superFilterState = 'todos';
 
+    function openPartnerProvisionRequestModal() {
+      var m = document.getElementById('partnerProvisionRequestModal');
+      if (!m) return;
+      var err = document.getElementById('partnerProvisionRequestErr');
+      if (err) err.classList.add('hidden');
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+      var pay = document.getElementById('partnerProvisionClientPay');
+      if (pay) pay.dispatchEvent(new Event('input', { bubbles: true }));
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    function closePartnerProvisionRequestModal() {
+      var m = document.getElementById('partnerProvisionRequestModal');
+      if (!m) return;
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+    function openPartnerProvisionCompleteModal(token, email) {
+      var m = document.getElementById('partnerProvisionCompleteModal');
+      if (!m) return;
+      var tEl = document.getElementById('partnerProvisionCompleteToken');
+      var eEl = document.getElementById('partnerProvisionCompleteEmail');
+      var pEl = document.getElementById('partnerProvisionCompletePassword');
+      var err = document.getElementById('partnerProvisionCompleteErr');
+      if (tEl) tEl.value = token || '';
+      if (eEl) eEl.value = email || '';
+      if (pEl) pEl.value = '';
+      if (err) err.classList.add('hidden');
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    function closePartnerProvisionCompleteModal() {
+      var m = document.getElementById('partnerProvisionCompleteModal');
+      if (!m) return;
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+
     async function renderSuperMembershipDayRequestBanners() {
       var founderBox = document.getElementById('superDayRequestsFounderBox');
       var partnerBox = document.getElementById('superDayRequestsPartnerBox');
@@ -5362,15 +5403,19 @@ async function showApp() {
       try {
         if (isEmpresaLensSuper() && founderBox) {
           var r = await supabaseClient.from('ferriol_membership_day_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false }).limit(50);
-          if (r.error) {
-            founderBox.classList.remove('hidden');
-            founderBox.innerHTML = '<p class="text-xs text-amber-200/90 font-medium mb-1">Membresía · solicitudes de días</p><p class="text-xs text-white/55">No se pudo cargar la cola. Si aún no corrés el SQL en Supabase, ejecutá <code class="text-cyan-200/80">supabase-ferriol-membership-day-requests.sql</code>. Detalle: ' + String(r.error.message || '') + '</p>';
+          var rProv = await supabaseClient.from('ferriol_partner_provision_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false }).limit(50);
+          var dayErr = r.error;
+          var provErr = rProv.error;
+          var rows = dayErr ? [] : (r.data || []);
+          var provRows = provErr ? [] : (rProv.data || []);
+          founderBox.classList.remove('hidden');
+          if (dayErr && provErr) {
+            founderBox.innerHTML = '<p class="text-xs text-amber-200/90 font-medium mb-1">Aprobaciones pendientes</p><p class="text-xs text-white/55">No se pudieron cargar las colas. SQL: <code class="text-cyan-200/80">supabase-ferriol-membership-day-requests.sql</code> y <code class="text-cyan-200/80">supabase-ferriol-partner-provision-requests.sql</code>. ' + String(dayErr.message || provErr.message || '') + '</p>';
+            lucide.createIcons();
             return;
           }
-          var rows = r.data || [];
-          founderBox.classList.remove('hidden');
-          if (rows.length === 0) {
-            founderBox.innerHTML = '<p class="text-xs text-amber-200/90 font-medium mb-1 flex items-center gap-2"><i data-lucide="inbox" class="w-4 h-4"></i> Membresía · solicitudes de días</p><p class="text-xs text-white/55">No hay solicitudes pendientes de administradores de red.</p>';
+          if (rows.length === 0 && provRows.length === 0) {
+            founderBox.innerHTML = '<p class="text-xs text-amber-200/90 font-medium mb-1 flex items-center gap-2"><i data-lucide="inbox" class="w-4 h-4"></i> Aprobaciones (empresa)</p><p class="text-xs text-white/55">No hay solicitudes pendientes de días ni de altas de administradores de red.</p>';
             lucide.createIcons();
             return;
           }
@@ -5379,23 +5424,47 @@ async function showApp() {
             var p = pool.find(function (x) { return x.id === id; });
             return p ? (p.kiosco_name || p.email || id) : id;
           }
-          var html = '<p class="text-xs text-amber-200/90 font-medium mb-2 flex items-center gap-2"><i data-lucide="clipboard-list" class="w-4 h-4"></i> Pendientes: carga o quita de días</p><p class="text-[10px] text-white/45 mb-2">Aprobá solo si el administrador ya abonó a la empresa el <strong class="text-white/60">20%</strong> correspondiente al cobro del cliente y los datos coinciden.</p><div class="space-y-2 max-h-[40vh] overflow-y-auto pr-1">';
-          rows.forEach(function (row) {
-            var kname = String(nameOf(row.kiosquero_user_id)).replace(/</g, '&lt;');
-            var reqname = String(nameOf(row.requested_by)).replace(/</g, '&lt;');
-            var sign = row.days_delta > 0 ? '+' : '';
-            var payLine = row.days_delta > 0 && row.client_payment_ars != null ? '<p class="text-[10px] text-white/50">Cobro cliente ARS: ' + row.client_payment_ars + ' · 20% empresa: ' + (row.company_share_ars != null ? row.company_share_ars : '—') + '</p>' : '';
-            var noteLine = row.company_transfer_note ? '<p class="text-[10px] text-cyan-100/80">Ref. pago empresa: ' + String(row.company_transfer_note).replace(/</g, '&lt;') + '</p>' : '';
-            var reasonLine = row.reason ? '<p class="text-[10px] text-red-200/90">Motivo quita: ' + String(row.reason).replace(/</g, '&lt;') + '</p>' : '';
-            html += '<div class="rounded-lg border border-white/15 bg-black/25 p-2 text-xs" data-mdr-id="' + row.id + '">' +
-              '<p class="font-medium text-white/90">' + kname + ' <span class="text-white/50">←</span> ' + reqname + '</p>' +
-              '<p class="text-amber-100/90">' + sign + row.days_delta + ' días</p>' + payLine + noteLine + reasonLine +
-              '<div class="flex flex-wrap gap-2 mt-2">' +
-              '<button type="button" class="ferriol-mdr-approve btn-glow rounded-lg py-1.5 px-3 text-[11px] font-semibold touch-target" data-id="' + row.id + '">Aprobar</button>' +
-              '<button type="button" class="ferriol-mdr-reject rounded-lg py-1.5 px-3 text-[11px] font-semibold touch-target border border-red-400/50 bg-red-500/15 text-red-200" data-id="' + row.id + '">Rechazar</button>' +
-              '</div></div>';
-          });
-          html += '</div>';
+          var html = '<p class="text-xs text-amber-200/90 font-medium mb-2 flex items-center gap-2"><i data-lucide="clipboard-list" class="w-4 h-4"></i> Pendientes de aprobación</p><p class="text-[10px] text-white/45 mb-2">Verificá el pago del <strong class="text-white/60">20%</strong> a Ferriol antes de aprobar.</p>';
+          if (dayErr) {
+            html += '<p class="text-[10px] text-red-300 mb-2">Días: error al cargar. ' + String(dayErr.message || '') + '</p>';
+          } else if (rows.length > 0) {
+            html += '<p class="text-[11px] font-medium text-amber-100/90 mb-1">Membresía · días</p><div class="space-y-2 max-h-[32vh] overflow-y-auto pr-1 mb-3">';
+            rows.forEach(function (row) {
+              var kname = String(nameOf(row.kiosquero_user_id)).replace(/</g, '&lt;');
+              var reqname = String(nameOf(row.requested_by)).replace(/</g, '&lt;');
+              var sign = row.days_delta > 0 ? '+' : '';
+              var payLine = row.days_delta > 0 && row.client_payment_ars != null ? '<p class="text-[10px] text-white/50">Cobro cliente ARS: ' + row.client_payment_ars + ' · 20% empresa: ' + (row.company_share_ars != null ? row.company_share_ars : '—') + '</p>' : '';
+              var noteLine = row.company_transfer_note ? '<p class="text-[10px] text-cyan-100/80">Ref. pago empresa: ' + String(row.company_transfer_note).replace(/</g, '&lt;') + '</p>' : '';
+              var reasonLine = row.reason ? '<p class="text-[10px] text-red-200/90">Motivo quita: ' + String(row.reason).replace(/</g, '&lt;') + '</p>' : '';
+              html += '<div class="rounded-lg border border-white/15 bg-black/25 p-2 text-xs">' +
+                '<p class="font-medium text-white/90">' + kname + ' <span class="text-white/50">←</span> ' + reqname + '</p>' +
+                '<p class="text-amber-100/90">' + sign + row.days_delta + ' días</p>' + payLine + noteLine + reasonLine +
+                '<div class="flex flex-wrap gap-2 mt-2">' +
+                '<button type="button" class="ferriol-mdr-approve btn-glow rounded-lg py-1.5 px-3 text-[11px] font-semibold touch-target" data-id="' + row.id + '">Aprobar</button>' +
+                '<button type="button" class="ferriol-mdr-reject rounded-lg py-1.5 px-3 text-[11px] font-semibold touch-target border border-red-400/50 bg-red-500/15 text-red-200" data-id="' + row.id + '">Rechazar</button>' +
+                '</div></div>';
+            });
+            html += '</div>';
+          }
+          if (provErr) {
+            html += '<p class="text-[10px] text-red-300 mb-2">Altas de administradores: error. ' + String(provErr.message || '') + '</p>';
+          } else if (provRows.length > 0) {
+            html += '<p class="text-[11px] font-medium text-violet-200/95 mb-1">Nuevo administrador de red (socio)</p><div class="space-y-2 max-h-[32vh] overflow-y-auto pr-1">';
+            provRows.forEach(function (row) {
+              var reqname = String(nameOf(row.requested_by)).replace(/</g, '&lt;');
+              var em = String(row.target_email || '').replace(/</g, '&lt;');
+              var dn = row.display_name ? String(row.display_name).replace(/</g, '&lt;') : '—';
+              var payLine = row.client_payment_ars != null ? '<p class="text-[10px] text-white/50">Cobro socio ARS: ' + row.client_payment_ars + ' · 20% empresa: ' + (row.company_share_ars != null ? row.company_share_ars : '—') + '</p>' : '';
+              var noteLine = row.company_transfer_note ? '<p class="text-[10px] text-cyan-100/80">Ref.: ' + String(row.company_transfer_note).replace(/</g, '&lt;') + '</p>' : '';
+              html += '<div class="rounded-lg border border-violet-500/25 bg-violet-950/20 p-2 text-xs">' +
+                '<p class="font-medium text-white/90">' + em + '</p><p class="text-[10px] text-white/55">Nombre: ' + dn + ' · Solicita: ' + reqname + '</p>' + payLine + noteLine +
+                '<div class="flex flex-wrap gap-2 mt-2">' +
+                '<button type="button" class="ferriol-ppr-approve btn-glow rounded-lg py-1.5 px-3 text-[11px] font-semibold touch-target" data-ppr-id="' + row.id + '">Aprobar alta</button>' +
+                '<button type="button" class="ferriol-ppr-reject rounded-lg py-1.5 px-3 text-[11px] font-semibold touch-target border border-red-400/50 bg-red-500/15 text-red-200" data-ppr-id="' + row.id + '">Rechazar</button>' +
+                '</div></div>';
+            });
+            html += '</div>';
+          }
           founderBox.innerHTML = html;
           founderBox.querySelectorAll('.ferriol-mdr-approve').forEach(function (btn) {
             btn.onclick = async function () {
@@ -5424,41 +5493,100 @@ async function showApp() {
               renderSuper();
             };
           });
+          founderBox.querySelectorAll('.ferriol-ppr-approve').forEach(function (btn) {
+            btn.onclick = async function () {
+              var id = btn.getAttribute('data-ppr-id');
+              if (!id || !confirm('¿Aprobar el alta? El socio podrá crear la cuenta con contraseña desde su panel.')) return;
+              var rpc = await supabaseClient.rpc('ferriol_approve_partner_provision_request', { p_request_id: id, p_approve: true, p_reject_note: null });
+              if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+              var out = rpc.data;
+              if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+              if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo aprobar.'); return; }
+              alert('Alta aprobada. El administrador de red verá el botón para definir la contraseña del nuevo socio.');
+              renderSuper();
+            };
+          });
+          founderBox.querySelectorAll('.ferriol-ppr-reject').forEach(function (btn) {
+            btn.onclick = async function () {
+              var id = btn.getAttribute('data-ppr-id');
+              if (!id) return;
+              var note = prompt('Motivo del rechazo (opcional):');
+              if (note === null) return;
+              var rpc = await supabaseClient.rpc('ferriol_approve_partner_provision_request', { p_request_id: id, p_approve: false, p_reject_note: note || null });
+              if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+              var out = rpc.data;
+              if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+              if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo rechazar.'); return; }
+              renderSuper();
+            };
+          });
           lucide.createIcons();
         }
         if (isPartnerLens() && !isEmpresaLensSuper() && partnerBox) {
           var r2 = await supabaseClient.from('ferriol_membership_day_requests').select('*').eq('requested_by', currentUser.id).order('created_at', { ascending: false }).limit(20);
-          if (r2.error) {
-            partnerBox.classList.remove('hidden');
-            partnerBox.innerHTML = '<p class="text-xs text-cyan-100/90 font-medium">Tus solicitudes de días</p><p class="text-[10px] text-white/50">' + String(r2.error.message || '') + '</p>';
-            return;
-          }
-          var rows2 = r2.data || [];
+          var r2p = await supabaseClient.from('ferriol_partner_provision_requests').select('*').eq('requested_by', currentUser.id).order('created_at', { ascending: false }).limit(25);
           partnerBox.classList.remove('hidden');
           var pool2 = window._ferriolAllProfilesCache || [];
           function nameOf2(id) {
             var p = pool2.find(function (x) { return x.id === id; });
             return p ? (p.kiosco_name || p.email || '') : '';
           }
-          var h2 = '<p class="text-xs text-cyan-100/90 font-medium mb-2">Tus solicitudes de membresía (días)</p>';
-          if (rows2.length === 0) {
-            h2 += '<p class="text-[10px] text-white/50">Cuando cobrás al cliente, transferí el 20% a la empresa y enviá la solicitud de suma desde el detalle del kiosquero. Hasta que la empresa apruebe, el contador del kiosco no cambia.</p>';
+          var h2 = '';
+          if (r2.error) {
+            h2 += '<p class="text-xs text-cyan-100/90 font-medium mb-1">Solicitudes de días</p><p class="text-[10px] text-red-300/90 mb-3">' + String(r2.error.message || '') + '</p>';
           } else {
-            h2 += '<div class="space-y-1.5 max-h-[28vh] overflow-y-auto text-[11px]">';
-            rows2.forEach(function (row) {
-              var st = row.status === 'pending' ? 'text-amber-200' : row.status === 'approved' ? 'text-emerald-200' : 'text-red-200/80';
-              var kn = String(nameOf2(row.kiosquero_user_id)).replace(/</g, '&lt;');
-              var dt = row.created_at ? String(row.created_at).slice(0, 10) : '';
-              h2 += '<div class="rounded-lg border border-white/10 bg-black/20 px-2 py-1.5"><span class="' + st + '">' + row.status + '</span> · ' + kn + ' · ' + (row.days_delta > 0 ? '+' : '') + row.days_delta + ' d · ' + dt + '</div>';
-            });
-            h2 += '</div>';
+            var rows2 = r2.data || [];
+            h2 += '<p class="text-xs text-cyan-100/90 font-medium mb-2">Solicitudes de días (kioscos)</p>';
+            if (rows2.length === 0) {
+              h2 += '<p class="text-[10px] text-white/50 mb-3">Desde el detalle de cada kiosco podés pedir suma o quita de días; la empresa debe aprobar.</p>';
+            } else {
+              h2 += '<div class="space-y-1.5 max-h-[22vh] overflow-y-auto text-[11px] mb-3">';
+              rows2.forEach(function (row) {
+                var st = row.status === 'pending' ? 'text-amber-200' : row.status === 'approved' ? 'text-emerald-200' : 'text-red-200/80';
+                var kn = String(nameOf2(row.kiosquero_user_id)).replace(/</g, '&lt;');
+                var dt = row.created_at ? String(row.created_at).slice(0, 10) : '';
+                h2 += '<div class="rounded-lg border border-white/10 bg-black/20 px-2 py-1.5"><span class="' + st + '">' + row.status + '</span> · ' + kn + ' · ' + (row.days_delta > 0 ? '+' : '') + row.days_delta + ' d · ' + dt + '</div>';
+              });
+              h2 += '</div>';
+            }
+          }
+          if (r2p.error) {
+            h2 += '<p class="text-xs text-violet-200/90 font-medium mb-1">Altas de administradores</p><p class="text-[10px] text-red-300/90">' + String(r2p.error.message || '') + '</p>';
+          } else {
+            var prow = r2p.data || [];
+            h2 += '<p class="text-xs text-violet-200/90 font-medium mb-2">Altas de administradores de red</p>';
+            if (prow.length === 0) {
+              h2 += '<p class="text-[10px] text-white/50">Sin solicitudes. Usá el botón violeta arriba; la empresa debe aprobar antes de crear el usuario.</p>';
+            } else {
+              h2 += '<div class="space-y-1.5 max-h-[22vh] overflow-y-auto text-[11px]">';
+              prow.forEach(function (pr) {
+                var st = pr.status === 'pending' ? 'text-amber-200' : pr.status === 'approved' ? 'text-emerald-200' : pr.status === 'completed' ? 'text-white/55' : 'text-red-200/80';
+                var em = String(pr.target_email || '').replace(/</g, '&lt;');
+                var dt = pr.created_at ? String(pr.created_at).slice(0, 10) : '';
+                var btnC = '';
+                if (pr.status === 'approved' && pr.completion_token) {
+                  btnC = '<button type="button" class="ferriol-ppr-complete mt-1 w-full btn-glow rounded-lg py-1.5 text-[10px] font-semibold touch-target" data-token="' + String(pr.completion_token) + '" data-email-enc="' + encodeURIComponent(pr.target_email || '') + '">Definir contraseña y crear cuenta</button>';
+                }
+                h2 += '<div class="rounded-lg border border-violet-500/25 bg-black/20 px-2 py-1.5"><span class="' + st + '">' + pr.status + '</span> · ' + em + ' · ' + dt + btnC + '</div>';
+              });
+              h2 += '</div>';
+            }
           }
           partnerBox.innerHTML = h2;
+          partnerBox.querySelectorAll('.ferriol-ppr-complete').forEach(function (btn) {
+            btn.onclick = function () {
+              var tok = btn.getAttribute('data-token');
+              var enc = btn.getAttribute('data-email-enc') || '';
+              var em = '';
+              try { em = decodeURIComponent(enc); } catch (_) { em = ''; }
+              openPartnerProvisionCompleteModal(tok, em);
+            };
+          });
         }
       } catch (_) {
         if (founderBox && isEmpresaLensSuper()) {
           founderBox.classList.remove('hidden');
-          founderBox.innerHTML = '<p class="text-xs text-white/60">Solicitudes de días: error al cargar.</p>';
+          founderBox.innerHTML = '<p class="text-xs text-white/60">Aprobaciones: error al cargar.</p>';
         }
       }
     }
@@ -6146,6 +6274,126 @@ async function showApp() {
       renderSuper();
       lucide.createIcons();
       setTimeout(closeNewKiosqueroModal, 2000);
+    };
+
+    var btnOpenProv = document.getElementById('btnOpenPartnerProvisionModal');
+    if (btnOpenProv) btnOpenProv.onclick = function () { openPartnerProvisionRequestModal(); };
+    var provReqClose = document.getElementById('partnerProvisionRequestModalClose');
+    if (provReqClose) provReqClose.onclick = closePartnerProvisionRequestModal;
+    var provReqOv = document.getElementById('partnerProvisionRequestModalOverlay');
+    if (provReqOv) provReqOv.onclick = closePartnerProvisionRequestModal;
+    var provPayEl = document.getElementById('partnerProvisionClientPay');
+    var provPctEl = document.getElementById('partnerProvisionCompanyPct');
+    function syncPartnerProvisionPct() {
+      if (!provPayEl || !provPctEl) return;
+      var n = parseFloat(String(provPayEl.value || '').replace(',', '.'), 10);
+      if (isNaN(n) || n <= 0) { provPctEl.textContent = '—'; return; }
+      provPctEl.textContent = String(Math.round(n * 0.2 * 100) / 100);
+    }
+    if (provPayEl) {
+      provPayEl.addEventListener('input', syncPartnerProvisionPct);
+      provPayEl.addEventListener('change', syncPartnerProvisionPct);
+    }
+    var provSubmitBtn = document.getElementById('partnerProvisionSubmitRequest');
+    if (provSubmitBtn) provSubmitBtn.onclick = async function () {
+      var errBox = document.getElementById('partnerProvisionRequestErr');
+      if (errBox) { errBox.classList.add('hidden'); errBox.classList.remove('show'); }
+      if (!supabaseClient || !currentUser) return;
+      if (!isPartnerLens() || isEmpresaLensSuper()) return;
+      var email = (document.getElementById('partnerProvisionEmail') && document.getElementById('partnerProvisionEmail').value || '').trim().toLowerCase();
+      var dname = (document.getElementById('partnerProvisionDisplayName') && document.getElementById('partnerProvisionDisplayName').value || '').trim();
+      var phone = (document.getElementById('partnerProvisionPhone') && document.getElementById('partnerProvisionPhone').value || '').trim();
+      var pay = parseFloat(String((provPayEl && provPayEl.value) || '').replace(',', '.'), 10);
+      var note = (document.getElementById('partnerProvisionCompanyNote') && document.getElementById('partnerProvisionCompanyNote').value || '').trim();
+      if (!email || email.indexOf('@') < 1) {
+        if (errBox) { errBox.textContent = 'Email válido obligatorio.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+        return;
+      }
+      if (!dname) {
+        if (errBox) { errBox.textContent = 'Nombre para mostrar obligatorio.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+        return;
+      }
+      if (isNaN(pay) || pay <= 0) {
+        if (errBox) { errBox.textContent = 'Indicá el monto cobrado al nuevo socio.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+        return;
+      }
+      var ex = await ferriolResolveProfileIdByEmail(email);
+      if (ex) {
+        if (errBox) { errBox.textContent = 'Ya existe una cuenta con ese email.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+        return;
+      }
+      if (email === String(currentUser.email || '').toLowerCase()) {
+        if (errBox) { errBox.textContent = 'No podés usar tu propio email.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+        return;
+      }
+      var share = Math.round(pay * 0.2 * 100) / 100;
+      if (!confirm('Se enviará la solicitud de alta a la empresa. Hasta la aprobación no podés crear el usuario. ¿Continuar?')) return;
+      var ins = await supabaseClient.from('ferriol_partner_provision_requests').insert({
+        requested_by: currentUser.id,
+        target_email: email,
+        display_name: dname,
+        phone: phone || null,
+        client_payment_ars: pay,
+        company_share_ars: share,
+        company_transfer_note: note || null
+      });
+      if (ins.error) {
+        if (errBox) {
+          errBox.textContent = ins.error.message + (String(ins.error.message || '').indexOf('ferriol_partner') !== -1 ? '' : ' · Ejecutá supabase-ferriol-partner-provision-requests.sql');
+          errBox.classList.remove('hidden');
+          errBox.classList.add('show');
+        }
+        return;
+      }
+      closePartnerProvisionRequestModal();
+      alert('Solicitud enviada. Cuando Ferriol apruebe, aparecerá el botón para definir la contraseña del nuevo socio.');
+      renderSuper();
+    };
+    var provCompClose = document.getElementById('partnerProvisionCompleteModalClose');
+    if (provCompClose) provCompClose.onclick = closePartnerProvisionCompleteModal;
+    var provCompOv = document.getElementById('partnerProvisionCompleteModalOverlay');
+    if (provCompOv) provCompOv.onclick = closePartnerProvisionCompleteModal;
+    var provCompSubmit = document.getElementById('partnerProvisionCompleteSubmit');
+    if (provCompSubmit) provCompSubmit.onclick = async function () {
+      var errBox = document.getElementById('partnerProvisionCompleteErr');
+      if (errBox) { errBox.classList.add('hidden'); errBox.classList.remove('show'); }
+      if (!supabaseClient) return;
+      var tokenStr = (document.getElementById('partnerProvisionCompleteToken') && document.getElementById('partnerProvisionCompleteToken').value || '').trim();
+      var email = (document.getElementById('partnerProvisionCompleteEmail') && document.getElementById('partnerProvisionCompleteEmail').value || '').trim().toLowerCase();
+      var password = (document.getElementById('partnerProvisionCompletePassword') && document.getElementById('partnerProvisionCompletePassword').value || '');
+      if (!tokenStr || !email || !password || password.length < 6) {
+        if (errBox) { errBox.textContent = 'Completá email, token y contraseña (mín. 6).'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+        return;
+      }
+      var tokenUuid = tokenStr;
+      var signUpRes = await supabaseClient.auth.signUp({ email: email, password: password });
+      if (signUpRes.error) {
+        if (errBox) { errBox.textContent = signUpRes.error.message || 'Error al registrar'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+        return;
+      }
+      var newId = signUpRes.data && signUpRes.data.user && signUpRes.data.user.id;
+      if (!newId) {
+        if (errBox) {
+          errBox.textContent = 'Registro recibido. Si tu proyecto pide confirmar el email, abrí el enlace y luego iniciá sesión una vez; después reintentá «Definir contraseña» o pedí ayuda a la empresa.';
+          errBox.classList.remove('hidden');
+          errBox.classList.add('show');
+        }
+        return;
+      }
+      var rpc = await supabaseClient.rpc('ferriol_finalize_partner_provision', { p_token: tokenUuid, p_new_profile_id: newId });
+      if (rpc.error) {
+        if (errBox) { errBox.textContent = rpc.error.message; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+        return;
+      }
+      var out = rpc.data;
+      if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+      if (!out || out.ok !== true) {
+        if (errBox) { errBox.textContent = (out && out.error) ? out.error : 'No se pudo activar el socio.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+        return;
+      }
+      closePartnerProvisionCompleteModal();
+      alert('Listo: el nuevo administrador de red ya puede iniciar sesión como socio.');
+      renderSuper();
     };
 
     (async function init() {

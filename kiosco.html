@@ -1081,6 +1081,12 @@
           <div id="superDayRequestsFounderBox" class="hidden mb-3 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-3 text-sm"></div>
           <div id="superDayRequestsPartnerBox" class="hidden mb-3 rounded-xl border border-cyan-500/35 bg-cyan-500/08 px-3 py-3 text-sm"></div>
           <div class="flex flex-wrap gap-2 mb-4">
+            <div class="ferriol-partner-provision-btn-wrap hidden w-full sm:w-auto">
+              <button type="button" id="btnOpenPartnerProvisionModal" class="btn-neomorphic rounded-xl py-3 px-5 font-semibold flex items-center justify-center gap-2 touch-target w-full sm:w-auto border border-violet-400/40 bg-violet-500/15 text-violet-100">
+                <i data-lucide="user-cog" class="w-5 h-5"></i> Solicitar alta de administrador de red
+              </button>
+              <p class="text-[10px] text-white/45 mt-1 max-w-md">La empresa debe aprobar y constatar el pago a Ferriol antes de que puedas crear la cuenta del nuevo socio.</p>
+            </div>
             <button type="button" id="btnOpenNewKiosqueroModal" class="btn-glow rounded-xl py-3 px-5 font-semibold flex items-center justify-center gap-2 touch-target">
               <i data-lucide="user-plus" class="w-5 h-5"></i> Agregar negocio
             </button>
@@ -1241,8 +1247,9 @@
         <div id="super-section-mas" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0" style="display: none;">
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2">
             <i data-lucide="user-cog" class="w-5 h-5 text-[#86efac]"></i>
-            Agregar otro administrador
+            Otro administrador global (super)
           </h2>
+          <p class="text-xs text-white/55 mb-3">Los <strong class="text-white/70">socios</strong> dan de alta a otros administradores de red desde <strong class="text-white/70">Negocios</strong> → «Solicitar alta de administrador» (con aprobación de la empresa). Esta sección es solo para promover un usuario a <strong class="text-white/70">super</strong> en Supabase si lo necesitás.</p>
           <p class="text-xs text-white/50 mb-3">En Supabase → SQL Editor ejecutá (cambiá el email):</p>
           <pre class="text-xs bg-black/30 rounded-lg p-3 overflow-x-auto text-[#86efac] mb-2" id="sqlAddAdmin">UPDATE profiles SET role = 'super' WHERE id = (SELECT id FROM auth.users WHERE email = 'tu-email@ejemplo.com');</pre>
         </div>
@@ -1275,6 +1282,50 @@
           <i data-lucide="user-plus" class="w-5 h-5"></i> Crear negocio
         </button>
         <p id="createUserMsgModal" class="text-sm mt-3 text-green-300 hidden"></p>
+      </div>
+    </div>
+
+    <!-- Modal: solicitar alta de otro administrador de red (socio → empresa aprueba) -->
+    <div id="partnerProvisionRequestModal" class="fixed inset-0 z-[74] hidden items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="partnerProvisionRequestModalOverlay"></div>
+      <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto scale-in">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-bold text-lg">Alta de administrador de red</h3>
+          <button type="button" id="partnerProvisionRequestModalClose" class="btn-neomorphic rounded-xl p-2 touch-target"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <p class="text-sm text-white/65 mb-3">Completá el cobro y el pago del <strong class="text-white/80">20%</strong> a la empresa. Sin aprobación de Ferriol no se puede crear el usuario.</p>
+        <div id="partnerProvisionRequestErr" class="login-err hidden mb-3"></div>
+        <label class="block text-xs text-white/55 mb-1">Email del nuevo socio (será su usuario de acceso)</label>
+        <input type="email" id="partnerProvisionEmail" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-3" placeholder="nuevo@ejemplo.com" autocomplete="off">
+        <label class="block text-xs text-white/55 mb-1">Nombre para mostrar</label>
+        <input type="text" id="partnerProvisionDisplayName" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-3" placeholder="Nombre y apellido">
+        <label class="block text-xs text-white/55 mb-1">Teléfono (opcional)</label>
+        <input type="tel" id="partnerProvisionPhone" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-3" placeholder="WhatsApp">
+        <label class="block text-xs text-white/55 mb-1">Monto cobrado al nuevo socio (ARS)</label>
+        <input type="number" id="partnerProvisionClientPay" min="1" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-1" value="20000">
+        <p class="text-[10px] text-white/50 mb-2">20% empresa: <strong class="text-cyan-200/90" id="partnerProvisionCompanyPct">—</strong> ARS</p>
+        <label class="block text-xs text-white/55 mb-1">Referencia del pago del 20% a empresa (opcional)</label>
+        <input type="text" id="partnerProvisionCompanyNote" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-4" placeholder="Transferencia, fecha, banco…">
+        <button type="button" id="partnerProvisionSubmitRequest" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target">Enviar solicitud a la empresa</button>
+      </div>
+    </div>
+
+    <!-- Modal: completar alta (contraseña) tras aprobación -->
+    <div id="partnerProvisionCompleteModal" class="fixed inset-0 z-[75] hidden items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="partnerProvisionCompleteModalOverlay"></div>
+      <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md scale-in">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-bold text-lg">Crear cuenta del socio</h3>
+          <button type="button" id="partnerProvisionCompleteModalClose" class="btn-neomorphic rounded-xl p-2 touch-target"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <p class="text-sm text-white/65 mb-3">La empresa ya aprobó el alta. Definí la contraseña inicial para el email indicado. Si la sesión pasa al nuevo usuario, completá el paso iniciando sesión otra vez con <strong class="text-white/80">tu</strong> cuenta de socio.</p>
+        <div id="partnerProvisionCompleteErr" class="login-err hidden mb-3"></div>
+        <input type="hidden" id="partnerProvisionCompleteToken" value="">
+        <label class="block text-xs text-white/55 mb-1">Email</label>
+        <input type="email" id="partnerProvisionCompleteEmail" readonly class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white/80 text-base mb-3 bg-white/5">
+        <label class="block text-xs text-white/55 mb-1">Contraseña (mín. 6)</label>
+        <input type="password" id="partnerProvisionCompletePassword" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-4" minlength="6" autocomplete="new-password">
+        <button type="button" id="partnerProvisionCompleteSubmit" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target">Crear usuario y activar como socio</button>
       </div>
     </div>
 
@@ -1626,7 +1677,7 @@
   </div>
   </div><!-- /#appWrap -->
   <script src="kiosco-config.js"></script>
-  <script defer src="kiosco-app.js?v=20260422notif"></script>
+  <script defer src="kiosco-app.js?v=20260422provision"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>
