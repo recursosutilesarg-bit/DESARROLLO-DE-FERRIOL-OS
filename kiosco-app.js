@@ -279,6 +279,29 @@
         perIn.value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
       }
     }
+    function ferriolMlmLedgerRowLineLi(r) {
+      return '<li class="border-b border-white/10 pb-1">' + String(r.created_at || '').slice(0, 10) + ' · $' + Number(r.amount).toLocaleString('es-AR', { minimumFractionDigits: 2 }) + ' · ' + String(r.event_type || '') + ' · ' + String(r.status || '') + '</li>';
+    }
+    function ferriolMlmBeneficiaryCardHtml(rows, titleHtml, subtitleHtml) {
+      var pendPay = rows.filter(function (r) { return r.event_type === 'vendor_payable_company' && r.status === 'pending'; });
+      var pendComm = rows.filter(function (r) { return r.event_type === 'sale_commission' && r.status === 'pending'; });
+      var sumPay = pendPay.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
+      var sumComm = pendComm.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
+      return (titleHtml || '') + (subtitleHtml || '') +
+        '<div class="text-xs space-y-2 mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2 py-2">' +
+        '<p class="text-amber-100/95 font-medium">20% licencia kiosco · aportar a la empresa (pendiente)</p>' +
+        '<p class="text-white/80">Total pendiente: <strong>$ ' + sumPay.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> ARS</p>' +
+        (pendPay.length === 0 ? '<p class="text-white/45">Nada pendiente en esta categoría.</p>' : '<ul class="space-y-1 max-h-24 overflow-y-auto">' + pendPay.map(ferriolMlmLedgerRowLineLi).join('') + '</ul>') +
+        '</div>' +
+        '<div class="text-xs space-y-2 mb-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2 py-2">' +
+        '<p class="text-emerald-100/95 font-medium">Tu comisión de venta (80% · pendiente de acreditación)</p>' +
+        '<p class="text-white/80">Total pendiente: <strong>$ ' + sumComm.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> ARS</p>' +
+        (pendComm.length === 0 ? '<p class="text-white/45">Nada pendiente; cuando el admin verifique cobros o liquide, verás movimientos.</p>' : '<ul class="space-y-1 max-h-24 overflow-y-auto">' + pendComm.map(ferriolMlmLedgerRowLineLi).join('') + '</ul>') +
+        '</div>' +
+        '<p class="text-xs text-white/45 mb-1">Otros movimientos recientes</p>' +
+        (rows.length === 0 ? '<p class="text-xs text-white/50">Sin movimientos.</p>' :
+          '<ul class="text-xs space-y-1 max-h-32 overflow-y-auto">' + rows.slice(0, 15).map(ferriolMlmLedgerRowLineLi).join('') + '</ul>');
+    }
     async function loadPartnerCommissionsCard() {
       var el = document.getElementById('superPartnerCommissionsCard');
       if (!el) return;
@@ -291,31 +314,35 @@
         var res = await supabaseClient.from('mlm_ledger').select('created_at, amount, event_type, status, depth').eq('beneficiary_user_id', currentUser.id).order('created_at', { ascending: false }).limit(40);
         if (res.error) throw res.error;
         var rows = res.data || [];
-        var pendPay = rows.filter(function (r) { return r.event_type === 'vendor_payable_company' && r.status === 'pending'; });
-        var pendComm = rows.filter(function (r) { return r.event_type === 'sale_commission' && r.status === 'pending'; });
-        var sumPay = pendPay.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
-        var sumComm = pendComm.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
-        function rowLine(r) {
-          return '<li class="border-b border-white/10 pb-1">' + String(r.created_at || '').slice(0, 10) + ' · $' + Number(r.amount).toLocaleString('es-AR', { minimumFractionDigits: 2 }) + ' · ' + String(r.event_type || '') + ' · ' + String(r.status || '') + '</li>';
-        }
         el.classList.remove('hidden');
-        el.innerHTML = '<p class="font-semibold text-emerald-200/90 mb-2 flex items-center gap-2"><i data-lucide="wallet" class="w-4 h-4"></i> Tu cuenta con Ferriol (libro)</p>' +
-          '<div class="text-xs space-y-2 mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2 py-2">' +
-          '<p class="text-amber-100/95 font-medium">20% licencia kiosco · aportar a la empresa (pendiente)</p>' +
-          '<p class="text-white/80">Total pendiente: <strong>$ ' + sumPay.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> ARS</p>' +
-          (pendPay.length === 0 ? '<p class="text-white/45">Nada pendiente en esta categoría.</p>' : '<ul class="space-y-1 max-h-24 overflow-y-auto">' + pendPay.map(rowLine).join('') + '</ul>') +
-          '</div>' +
-          '<div class="text-xs space-y-2 mb-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2 py-2">' +
-          '<p class="text-emerald-100/95 font-medium">Tu comisión de venta (80% · pendiente de acreditación)</p>' +
-          '<p class="text-white/80">Total pendiente: <strong>$ ' + sumComm.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> ARS</p>' +
-          (pendComm.length === 0 ? '<p class="text-white/45">Nada pendiente; cuando el admin verifique cobros o liquide, verás movimientos.</p>' : '<ul class="space-y-1 max-h-24 overflow-y-auto">' + pendComm.map(rowLine).join('') + '</ul>') +
-          '</div>' +
-          '<p class="text-xs text-white/45 mb-1">Otros movimientos recientes</p>' +
-          (rows.length === 0 ? '<p class="text-xs text-white/50">Sin movimientos.</p>' :
-            '<ul class="text-xs space-y-1 max-h-32 overflow-y-auto">' + rows.slice(0, 15).map(rowLine).join('') + '</ul>');
+        el.innerHTML = ferriolMlmBeneficiaryCardHtml(rows,
+          '<p class="font-semibold text-emerald-200/90 mb-2 flex items-center gap-2"><i data-lucide="wallet" class="w-4 h-4"></i> Tu cuenta con Ferriol (libro)</p>',
+          '');
       } catch (e) {
         el.classList.remove('hidden');
         el.innerHTML = '<p class="text-xs text-amber-200">Libro MLM: ejecutá los SQL de compensaciones o revisá RLS.</p>';
+      }
+      lucide.createIcons();
+    }
+    async function loadSuperNegocioFerriolCard() {
+      var el = document.getElementById('superNegocioFerriolCard');
+      if (!el) return;
+      if (!supabaseClient || !currentUser || currentUser.role !== 'super' || state.superUiMode !== 'negocio') {
+        el.classList.add('hidden');
+        el.innerHTML = '';
+        return;
+      }
+      try {
+        var res = await supabaseClient.from('mlm_ledger').select('created_at, amount, event_type, status, depth').eq('beneficiary_user_id', currentUser.id).order('created_at', { ascending: false }).limit(40);
+        if (res.error) throw res.error;
+        var rows = res.data || [];
+        el.classList.remove('hidden');
+        el.innerHTML = ferriolMlmBeneficiaryCardHtml(rows,
+          '<p class="font-semibold text-violet-100 mb-1 flex items-center gap-2"><i data-lucide="wallet" class="w-4 h-4"></i> Ferriol · libro (esta cuenta en modo negocio)</p>',
+          '<p class="text-[11px] text-white/50 mb-2">Si usaste «Insertar 3 movimientos demo» en Cobros, acá ves los pendientes 20% y 80% a tu nombre.</p>');
+      } catch (e) {
+        el.classList.remove('hidden');
+        el.innerHTML = '<p class="text-xs text-amber-200">No se pudo cargar el libro. Revisá RLS o ejecutá los SQL de Ferriol.</p>';
       }
       lucide.createIcons();
     }
@@ -349,16 +376,18 @@
       verifiedEl.innerHTML = '';
       try {
         var recvEl = document.getElementById('ferriolCompanyReceivableText');
+        var partPayEl = document.getElementById('ferriolPartnersPayableText');
+        var prevEl = document.getElementById('ferriolLedgerPendingPreview');
         if (recvEl) {
           try {
-            var lr = await supabaseClient.from('mlm_ledger').select('amount').is('beneficiary_user_id', null).eq('status', 'pending').eq('event_type', 'company_reserve').like('idempotency_key', 'kiosdef%:company');
+            var lr = await supabaseClient.from('mlm_ledger').select('amount, metadata, idempotency_key').is('beneficiary_user_id', null).eq('status', 'pending').eq('event_type', 'company_reserve');
             if (!lr.error && lr.data && lr.data.length) {
               var sum20 = lr.data.reduce(function (a, x) { return a + Number(x.amount || 0); }, 0);
-              recvEl.innerHTML = 'Total <strong class="text-cyan-100">20% licencia kiosco</strong> pendiente de cobro (altas definitivas): <strong class="text-cyan-100">$ ' + sum20.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> ARS · ' + lr.data.length + ' partida(s).';
+              recvEl.innerHTML = 'Total empresa <strong class="text-cyan-100">pendiente de cobro</strong> (20% kiosco, cuotas socios automáticas, etc.): <strong class="text-cyan-100">$ ' + sum20.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> ARS · ' + lr.data.length + ' partida(s).';
             } else if (!lr.error) {
-              recvEl.textContent = 'Sin partidas 20% pendientes por ventas “alta definitiva”. Registralas desde el detalle de cada kiosco referido por un socio.';
+              recvEl.textContent = 'Sin partidas empresa pendientes. Verificá pagos en la lista de abajo o ejecutá “Generar cargos del mes” si corresponde.';
             } else {
-              recvEl.textContent = 'No se pudo cargar el resumen. ¿Ejecutaste supabase-ferriol-kiosco-definitive-trial.sql?';
+              recvEl.textContent = 'No se pudo cargar el resumen. ¿Ejecutaste los SQL de Ferriol (payments + monthly-auto)?';
             }
           } catch (_) {
             recvEl.textContent = '—';
@@ -380,6 +409,39 @@
         function emailOf(uid) {
           var p = byId[uid];
           return p ? (p.email || uid.slice(0, 8)) : String(uid || '').slice(0, 8);
+        }
+        try {
+          var pendLed = await supabaseClient.from('mlm_ledger').select('created_at, amount, event_type, beneficiary_user_id, metadata, idempotency_key').eq('status', 'pending').order('created_at', { ascending: false }).limit(40);
+          if (partPayEl) {
+            if (!pendLed.error && pendLed.data) {
+              var partnerEv = { sale_commission: true, vendor_payable_company: true, renewal: true };
+              var toSoc = pendLed.data.filter(function (r) { return r.beneficiary_user_id && partnerEv[r.event_type]; });
+              var sumSoc = toSoc.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
+              partPayEl.innerHTML = toSoc.length ? ('Socios · <strong class="text-amber-100">pendiente de liquidar</strong> en el libro (comisiones, aportes 20%, renovaciones): <strong class="text-amber-100">$ ' + sumSoc.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> ARS · ' + toSoc.length + ' partida(s).') : 'Socios · sin partidas pendientes de liquidar en el libro (comisiones / aportes).';
+            } else {
+              partPayEl.textContent = 'Socios · no se pudo cargar el libro.';
+            }
+          }
+          if (prevEl) {
+            if (!pendLed.error && pendLed.data && pendLed.data.length) {
+              prevEl.innerHTML = pendLed.data.map(function (r) {
+                var meta = r.metadata && typeof r.metadata === 'object' ? r.metadata : {};
+                var lbl = meta.label ? String(meta.label) : '';
+                var ben = r.beneficiary_user_id ? emailOf(r.beneficiary_user_id) : 'Empresa (reserva)';
+                var demo = meta.demo ? ' <span class="text-violet-300/90">[demo]</span>' : '';
+                return '<div class="py-1.5 border-b border-white/10">' +
+                  '<span class="text-white/55">' + String(r.created_at || '').slice(0, 16) + '</span> · <strong class="text-white/85">$' + Number(r.amount).toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> · <span class="text-cyan-200/80">' + String(r.event_type || '') + '</span>' + demo + '<br/>' +
+                  '<span class="text-white/45">Benef.: ' + ben.replace(/</g, '&lt;') + (lbl ? ' · ' + lbl.replace(/</g, '&lt;') : '') + '</span></div>';
+              }).join('');
+            } else if (!pendLed.error) {
+              prevEl.innerHTML = '<p class="text-white/45">Sin movimientos pending. Usá «Insertar 3 movimientos demo» o generá cargos del mes.</p>';
+            } else {
+              prevEl.innerHTML = '<p class="text-red-300/90">Error al leer mlm_ledger.</p>';
+            }
+          }
+        } catch (_) {
+          if (partPayEl) partPayEl.textContent = '—';
+          if (prevEl) prevEl.innerHTML = '';
         }
         var pend = rows.filter(function (r) { return r.status === 'pending'; });
         var ver = rows.filter(function (r) { return r.status === 'verified'; }).slice(0, 20);
@@ -1177,6 +1239,7 @@
         } catch (_) {}
       }
       renderFrequentProducts();
+      await loadSuperNegocioFerriolCard();
     }
     function openDetalleVentaModal(v) {
       var content = document.getElementById('detalleVentaModalContent');
@@ -5292,6 +5355,66 @@ async function showApp() {
     if (ferriolPayTypeEl) {
       ferriolPayTypeEl.addEventListener('change', ferriolSyncNewPaymentFormDefaults);
       ferriolSyncNewPaymentFormDefaults();
+    }
+    var ferriolBtnMonthly = document.getElementById('ferriolBtnRunMonthlyAccrual');
+    if (ferriolBtnMonthly) {
+      ferriolBtnMonthly.onclick = async function () {
+        if (!supabaseClient || !currentUser || currentUser.role !== 'super') return;
+        if (!confirm('¿Generar en el libro los cargos automáticos del mes calendario actual (Argentina)? No duplica si ya existen (idempotencia).')) return;
+        var rpc = await supabaseClient.rpc('ferriol_accrue_monthly_billing', {});
+        if (rpc.error) { alert('Error: ' + (rpc.error.message || '')); return; }
+        var out = rpc.data;
+        if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+        if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo ejecutar.'); return; }
+        alert('Listo. Mes: ' + (out.period_month || '') + '. Kioscos nuevos: ' + (out.kiosco_months_new != null ? out.kiosco_months_new : '—') + '. Socios nuevos: ' + (out.partner_months_new != null ? out.partner_months_new : '—'));
+        if (state.superSection === 'cobros') renderSuperCobrosSection();
+        lucide.createIcons();
+      };
+    }
+    var ferriolBtnDemo = document.getElementById('ferriolBtnDemoSeed');
+    if (ferriolBtnDemo) {
+      ferriolBtnDemo.onclick = async function () {
+        if (!supabaseClient || !currentUser || currentUser.role !== 'super') return;
+        if (!confirm('¿Insertar 3 movimientos de demostración en mlm_ledger? No duplica si ya existen.')) return;
+        var rpc = await supabaseClient.rpc('ferriol_demo_seed_ledger', {});
+        if (rpc.error) {
+          alert('Error: ' + (rpc.error.message || '') + '\n\n¿Ejecutaste supabase-ferriol-demo-seed.sql en Supabase?');
+          return;
+        }
+        var out = rpc.data;
+        if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+        if (!out || out.ok !== true) {
+          alert((out && out.error) ? out.error : 'No se pudo completar la demo.');
+          return;
+        }
+        var n = out.inserted_rows != null ? out.inserted_rows : '—';
+        alert('Listo. Filas nuevas: ' + n + '. Revisá Cobros y, en modo negocio, el inicio.');
+        if (state.superSection === 'cobros') renderSuperCobrosSection();
+        await loadSuperNegocioFerriolCard();
+        lucide.createIcons();
+      };
+    }
+    var ferriolBtnDemoClear = document.getElementById('ferriolBtnDemoClear');
+    if (ferriolBtnDemoClear) {
+      ferriolBtnDemoClear.onclick = async function () {
+        if (!supabaseClient || !currentUser || currentUser.role !== 'super') return;
+        if (!confirm('¿Eliminar del libro solo las 3 filas de demostración (claves ferriol:demo:seed:*)? No afecta cargos reales.')) return;
+        var rpc = await supabaseClient.rpc('ferriol_demo_clear_seed_ledger', {});
+        if (rpc.error) {
+          alert('Error: ' + (rpc.error.message || '') + '\n\nActualizá supabase-ferriol-demo-seed.sql en Supabase si falta la función.');
+          return;
+        }
+        var out = rpc.data;
+        if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+        if (!out || out.ok !== true) {
+          alert((out && out.error) ? out.error : 'No se pudo quitar la demo.');
+          return;
+        }
+        alert('Listo. Filas eliminadas: ' + (out.deleted_rows != null ? out.deleted_rows : '—') + '.');
+        if (state.superSection === 'cobros') renderSuperCobrosSection();
+        await loadSuperNegocioFerriolCard();
+        lucide.createIcons();
+      };
     }
     var ferriolBtnCreate = document.getElementById('ferriolBtnCreatePayment');
     if (ferriolBtnCreate) ferriolBtnCreate.onclick = async function () {
