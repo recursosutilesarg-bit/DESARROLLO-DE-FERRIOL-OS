@@ -211,7 +211,7 @@
           <i data-lucide="store" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Negocios</span>
         </button>
-        <button data-super-section="cobros" class="super-nav-btn super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Cobros y comisiones">
+        <button data-super-section="cobros" class="super-nav-btn super-only super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Cobros y comisiones (solo administrador)">
           <i data-lucide="banknote" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Cobros</span>
         </button>
@@ -292,6 +292,8 @@
             </button>
           </div>
         </div>
+        <!-- Super en modo negocio: libro Ferriol (mismas filas beneficiary que la demo) -->
+        <div id="superNegocioFerriolCard" class="hidden glass rounded-2xl p-4 sm:p-5 slide-up border border-violet-500/35 bg-violet-500/08"></div>
         <!-- Productos frecuentes (más vendidos hoy) -->
         <div id="dashboardFrecuentesWrap" class="kiosquero-only hidden">
           <h3 class="font-semibold mb-2 flex items-center gap-2 text-sm text-white/80">
@@ -1099,7 +1101,8 @@
           </div>
         </div>
         <!-- Sección Cobros (solo super): transferencias + verificar → mlm_ledger -->
-        <div id="super-section-cobros" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 z-0 overflow-y-auto super-only super-main-only" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+        <!-- Sin super-only en el contenedor: si no, applyAppShell oculta la sección para socios y pisa display:block de switchSuperSection -->
+        <div id="super-section-cobros" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 z-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
             <i data-lucide="banknote" class="w-5 h-5 text-[#86efac]"></i>
             Cobros (transferencia)
@@ -1108,9 +1111,21 @@
           <div id="ferriolCompanyReceivableBox" class="rounded-xl border border-cyan-500/35 bg-cyan-500/10 p-4 mb-4 text-sm">
             <h3 class="font-semibold text-cyan-100 mb-1 flex items-center gap-2"><i data-lucide="building-2" class="w-4 h-4"></i> Empresa · saldos automáticos (pendientes)</h3>
             <p id="ferriolCompanyReceivableText" class="text-xs text-white/70">—</p>
+            <p id="ferriolPartnersPayableText" class="text-xs text-amber-100/90 mt-2">—</p>
             <p class="text-xs text-white/45 mt-2">Los cargos mensuales (licencia kiosco 20/80 y cuota socios según plan) se generan el <strong class="text-white/60">día 1</strong> si tenés <code class="text-cyan-200/80">pg_cron</code> en Supabase. Ejecutá antes <code class="text-cyan-200/80">supabase-ferriol-monthly-auto.sql</code>.</p>
             <button type="button" id="ferriolBtnRunMonthlyAccrual" class="mt-2 btn-neomorphic rounded-xl py-2 px-3 text-xs font-semibold touch-target">Generar cargos del mes (manual)</button>
           </div>
+          <div class="rounded-xl border border-violet-500/30 bg-violet-500/08 p-4 mb-4 text-sm">
+            <h3 class="font-semibold text-violet-100 mb-1 flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> Simulación rápida</h3>
+            <p class="text-xs text-white/65 mb-2">Tres movimientos de prueba en el libro: uno «empresa a cobrar» y dos con <strong class="text-white/80">tu usuario admin</strong> como beneficiario para que también los veas en <strong class="text-white/80">modo negocio</strong> (inicio). Idempotente: no duplica.</p>
+            <div class="flex flex-wrap gap-2 mt-1">
+              <button type="button" id="ferriolBtnDemoSeed" class="btn-neomorphic rounded-xl py-2 px-3 text-xs font-semibold touch-target">Insertar 3 movimientos demo</button>
+              <button type="button" id="ferriolBtnDemoClear" class="rounded-xl py-2 px-3 text-xs font-semibold touch-target border border-red-400/40 bg-red-500/15 text-red-200 hover:bg-red-500/25">Quitar movimientos demo</button>
+            </div>
+            <p class="text-[10px] text-white/40 mt-2">Primera vez: ejecutá en Supabase <code class="text-violet-200/80">supabase-ferriol-demo-seed.sql</code> (incluye insertar y quitar). Solo borra filas con claves <code class="text-violet-200/80">ferriol:demo:seed:*</code>.</p>
+          </div>
+          <h3 class="font-semibold text-sm mb-2 flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-cyan-200/90"></i> Libro · pendientes (vista admin)</h3>
+          <div id="ferriolLedgerPendingPreview" class="space-y-1 max-h-[36vh] overflow-y-auto text-xs mb-6 rounded-xl border border-white/10 bg-black/20 p-3"></div>
           <div class="rounded-xl border border-white/15 bg-white/5 p-4 mb-4 space-y-3">
             <h3 class="font-semibold text-sm text-white/90">Nuevo cobro pendiente</h3>
             <label class="block text-xs text-white/60">Tipo</label>

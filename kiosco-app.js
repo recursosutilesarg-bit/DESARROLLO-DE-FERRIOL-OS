@@ -1815,6 +1815,10 @@
     });
     function switchSuperSection(sectionName) {
       state.superSection = sectionName || 'negocios';
+      var reqSuper = state.superSection === 'cobros';
+      if (reqSuper && currentUser && currentUser.role !== 'super') {
+        state.superSection = 'negocios';
+      }
       document.querySelectorAll('#panel-super .super-section').forEach(function (el) {
         el.classList.add('hidden');
         el.style.setProperty('display', 'none', 'important');
