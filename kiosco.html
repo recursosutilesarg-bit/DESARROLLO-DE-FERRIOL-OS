@@ -201,6 +201,15 @@
         </button>
       </div>
     </div>
+    <!-- Solo cuenta fundador (super): tres paneles de prueba -->
+    <div id="superLensSwitcher" class="hidden max-w-7xl mx-auto w-full mt-2 pt-2 border-t border-white/10 px-1 pb-1">
+      <p class="text-[10px] text-center text-white/45 mb-1.5">Vista de fundador: empresa, socio o kiosco</p>
+      <div class="flex gap-1 flex-wrap sm:flex-nowrap justify-center">
+        <button type="button" data-super-lens="empresa" class="super-lens-btn flex-1 min-w-[5.5rem] max-w-[11rem] rounded-lg py-1.5 px-1 text-[10px] sm:text-xs font-semibold border border-white/15 bg-white/5 text-white/75 touch-target" aria-pressed="false">Fundador · empresa</button>
+        <button type="button" data-super-lens="socio" class="super-lens-btn flex-1 min-w-[5.5rem] max-w-[11rem] rounded-lg py-1.5 px-1 text-[10px] sm:text-xs font-semibold border border-white/15 bg-white/5 text-white/75 touch-target" aria-pressed="false">Socio · partner</button>
+        <button type="button" data-super-lens="negocio" class="super-lens-btn flex-1 min-w-[5.5rem] max-w-[11rem] rounded-lg py-1.5 px-1 text-[10px] sm:text-xs font-semibold border border-white/15 bg-white/5 text-white/75 touch-target" aria-pressed="false">Kiosco · prueba</button>
+      </div>
+    </div>
   </header>
 
   <!-- Barra inferior admin (panel de control): secciones al pie, como la app de negocios -->
@@ -292,8 +301,8 @@
             </button>
           </div>
         </div>
-        <!-- Super en modo negocio: libro Ferriol (mismas filas beneficiary que la demo) -->
-        <div id="superNegocioFerriolCard" class="hidden glass rounded-2xl p-4 sm:p-5 slide-up border border-violet-500/35 bg-violet-500/08"></div>
+        <!-- Kiosquero / admin en modo negocio: solo licencia mensual a Ferriol (sin libro MLM) -->
+        <div id="dashboardKioscoLicenseCard" class="kiosquero-only hidden glass rounded-2xl p-4 sm:p-5 slide-up border border-[#22c55e]/35 bg-[#22c55e]/10"></div>
         <!-- Productos frecuentes (más vendidos hoy) -->
         <div id="dashboardFrecuentesWrap" class="kiosquero-only hidden">
           <h3 class="font-semibold mb-2 flex items-center gap-2 text-sm text-white/80">
@@ -994,11 +1003,14 @@
           <div id="kioscoLicensePaymentBlock" class="kiosquero-only rounded-xl border border-[#22c55e]/30 bg-[#22c55e]/08 p-4 mb-4">
             <h3 class="font-semibold mb-2 flex items-center gap-2 text-sm text-[#86efac]">
               <i data-lucide="landmark" class="w-4 h-4"></i>
-              Licencia Ferriol OS (pago por transferencia)
+              Licencia mensual Ferriol OS
             </h3>
             <p id="kioscoLicensePriceHint" class="text-sm text-white/75 mb-2"></p>
-            <p class="text-xs text-white/55 mb-2">Transferí el importe y enviá el comprobante según las instrucciones del administrador.</p>
+            <p id="kioscoLicenseSponsorHint" class="text-xs text-white/60 mb-2"></p>
+            <p class="text-xs text-white/55 mb-1">El pago de la licencia lo hacés al <strong class="text-white/75">referidor / administrador</strong> que te dio de alta, usando los datos de cuenta que figuran abajo (los carga el administrador en Ajustes). Enviá el comprobante como te indiquen.</p>
+            <p class="text-[10px] text-white/45 mb-2">Ese canal es quien centraliza el cobro de tu cuota frente a Ferriol OS.</p>
             <pre id="kioscoTransferInfoText" class="text-xs whitespace-pre-wrap text-white/90 glass rounded-lg p-3 border border-white/15 max-h-48 overflow-y-auto font-sans"></pre>
+            <p class="text-[10px] text-white/40 mt-2">En esta app no verás comisiones ni repartos 20/80: eso es gestión de la red comercial, no de tu caja diaria.</p>
           </div>
           <div>
             <label class="block text-sm text-white/70 mb-2">Mensaje de cobro por WhatsApp (usá <code class="text-[#86efac]">{cliente}</code> y <code class="text-[#86efac]">{monto}</code>)</label>
@@ -1058,6 +1070,7 @@
             Negocios
           </h2>
           <p id="superDirectoryStats" class="hidden text-xs text-white/45 mb-2 super-only super-main-only"></p>
+          <div id="superMainFerriolResumenCard" class="hidden mb-3 rounded-xl border border-cyan-500/35 bg-cyan-500/10 px-3 py-3 text-sm super-only super-main-only"></div>
           <div id="superFounderLinksBlock" class="hidden super-only super-main-only rounded-xl border border-amber-500/35 bg-amber-500/10 p-4 mb-3">
             <h3 class="font-semibold text-sm text-amber-100 mb-1 flex items-center gap-2">
               <i data-lucide="crown" class="w-4 h-4 text-amber-300"></i>
@@ -1079,7 +1092,7 @@
           </div>
           <p class="text-xs text-white/50 mb-2 super-only super-main-only">Directorio completo del sistema. Filtrá «Sin referidor» para ver cuentas sin admin/referidor y asignalas desde el detalle del usuario.</p>
           <p id="superPartnerNetInfo" class="hidden text-sm text-white/75 mb-3 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-2"></p>
-          <div id="superPartnerCommissionsCard" class="hidden mb-3 rounded-xl border border-emerald-500/35 bg-emerald-500/10 px-3 py-2 text-sm"></div>
+          <div id="superPartnerCommissionsCard" class="hidden mb-3 rounded-xl border border-emerald-500/35 bg-emerald-500/10 px-3 py-3 text-sm"></div>
           <div class="flex flex-wrap gap-2 mb-4">
             <button type="button" id="btnOpenNewKiosqueroModal" class="btn-glow rounded-xl py-3 px-5 font-semibold flex items-center justify-center gap-2 touch-target">
               <i data-lucide="user-plus" class="w-5 h-5"></i> Agregar negocio
@@ -1117,7 +1130,7 @@
           </div>
           <div class="rounded-xl border border-violet-500/30 bg-violet-500/08 p-4 mb-4 text-sm">
             <h3 class="font-semibold text-violet-100 mb-1 flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> Simulación rápida</h3>
-            <p class="text-xs text-white/65 mb-2">Tres movimientos de prueba en el libro: uno «empresa a cobrar» y dos con <strong class="text-white/80">tu usuario admin</strong> como beneficiario para que también los veas en <strong class="text-white/80">modo negocio</strong> (inicio). Idempotente: no duplica.</p>
+            <p class="text-xs text-white/65 mb-2">Tres movimientos de prueba en el libro: uno «empresa a cobrar» y dos con <strong class="text-white/80">tu usuario admin</strong> como beneficiario (revisalos acá en Cobros y en la lista de pendientes). Los kiosqueros <strong class="text-white/80">no</strong> ven el libro: solo la licencia en Inicio. Idempotente: no duplica.</p>
             <div class="flex flex-wrap gap-2 mt-1">
               <button type="button" id="ferriolBtnDemoSeed" class="btn-neomorphic rounded-xl py-2 px-3 text-xs font-semibold touch-target">Insertar 3 movimientos demo</button>
               <button type="button" id="ferriolBtnDemoClear" class="rounded-xl py-2 px-3 text-xs font-semibold touch-target border border-red-400/40 bg-red-500/15 text-red-200 hover:bg-red-500/25">Quitar movimientos demo</button>
@@ -1179,9 +1192,9 @@
             <div class="border-t border-white/10 pt-4 mt-4">
               <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
                 <i data-lucide="landmark" class="w-4 h-4 text-[#86efac]"></i>
-                Datos de transferencia (kioscos y socios)
+                Datos de transferencia (licencia kioscos / socios)
               </h3>
-              <p class="text-xs text-white/50 mb-2">Se muestra en Configuración del kiosquero. Una línea por CBU/alias/concepto.</p>
+              <p class="text-xs text-white/50 mb-2">Lo ven los kiosqueros en Inicio y Configuración: es la cuenta a la que deben transferir la <strong class="text-white/70">cuota al referidor/administrador</strong> (vos centralizás lo que corresponda a Ferriol). CBU, alias, titular, concepto, etc.</p>
               <textarea id="adminTransferInfo" rows="5" placeholder="Titular, CBU, alias, instrucciones..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm resize-y mb-2"></textarea>
             </div>
             <div class="border-t border-white/10 pt-4 mt-4">

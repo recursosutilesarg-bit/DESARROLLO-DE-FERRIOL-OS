@@ -282,25 +282,50 @@
     function ferriolMlmLedgerRowLineLi(r) {
       return '<li class="border-b border-white/10 pb-1">' + String(r.created_at || '').slice(0, 10) + ' · $' + Number(r.amount).toLocaleString('es-AR', { minimumFractionDigits: 2 }) + ' · ' + String(r.event_type || '') + ' · ' + String(r.status || '') + '</li>';
     }
-    function ferriolMlmBeneficiaryCardHtml(rows, titleHtml, subtitleHtml) {
+    function ferriolPartnerLedgerLineLi(r) {
+      var d = r.depth != null && r.depth !== '' ? ' · niv.' + r.depth : '';
+      var pm = r.period_month ? ' · ' + String(r.period_month).slice(0, 7) : '';
+      return '<li class="border-b border-white/10 pb-1">' + String(r.created_at || '').slice(0, 10) + pm + ' · $' + Number(r.amount).toLocaleString('es-AR', { minimumFractionDigits: 2 }) + ' · ' + String(r.event_type || '') + d + ' · ' + String(r.status || '') + '</li>';
+    }
+    function ferriolPartnerResumenHtml(rows, nKioscosActive) {
+      var unit = FERRIOL_PLAN_AMOUNTS.kioscoMonthly;
+      var orientMes = (nKioscosActive || 0) * unit;
       var pendPay = rows.filter(function (r) { return r.event_type === 'vendor_payable_company' && r.status === 'pending'; });
       var pendComm = rows.filter(function (r) { return r.event_type === 'sale_commission' && r.status === 'pending'; });
+      var ren1 = rows.filter(function (r) { return r.event_type === 'renewal' && r.status === 'pending' && Number(r.depth) === 1; });
+      var ren2 = rows.filter(function (r) { return r.event_type === 'renewal' && r.status === 'pending' && Number(r.depth) === 2; });
       var sumPay = pendPay.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
       var sumComm = pendComm.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
-      return (titleHtml || '') + (subtitleHtml || '') +
-        '<div class="text-xs space-y-2 mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2 py-2">' +
-        '<p class="text-amber-100/95 font-medium">20% licencia kiosco · aportar a la empresa (pendiente)</p>' +
+      var s1 = ren1.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
+      var s2 = ren2.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
+      var head = '<p class="font-semibold text-emerald-200/95 mb-2 flex items-center gap-2"><i data-lucide="layout-list" class="w-4 h-4"></i> Resumen Ferriol · socio vendedor</p>' +
+        '<p class="text-[11px] text-white/50 mb-3">Licencias con tus negocios (cobro como referidor), obligaciones y regalías según el <strong class="text-white/65">libro</strong> (cuando el admin liquida transferencias o corre el mes).</p>';
+      var secK =
+        '<div class="text-xs space-y-1.5 mb-3 rounded-lg border border-[#22c55e]/35 bg-[#22c55e]/08 px-2 py-2">' +
+        '<p class="text-[#86efac] font-medium flex items-center gap-1"><i data-lucide="store" class="w-3.5 h-3.5"></i> Licencias con tus kioscos (operativo)</p>' +
+        '<p class="text-white/80">Negocios activos referidos: <strong>' + (nKioscosActive || 0) + '</strong>. Cuota orientativa de licencia ($ ' + unit.toLocaleString('es-AR') + ' c/u): <strong>$ ' + orientMes.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> ARS/mes a coordinar con ellos (vos cobrás como referidor; no reemplaza el libro).</p></div>';
+      var secPay =
+        '<div class="text-xs space-y-1.5 mb-3 rounded-lg border border-amber-500/35 bg-amber-500/10 px-2 py-2">' +
+        '<p class="text-amber-100/95 font-medium">A pagar a la empresa (libro · 20% licencia kiosco u obligaciones similares)</p>' +
         '<p class="text-white/80">Total pendiente: <strong>$ ' + sumPay.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> ARS</p>' +
-        (pendPay.length === 0 ? '<p class="text-white/45">Nada pendiente en esta categoría.</p>' : '<ul class="space-y-1 max-h-24 overflow-y-auto">' + pendPay.map(ferriolMlmLedgerRowLineLi).join('') + '</ul>') +
-        '</div>' +
-        '<div class="text-xs space-y-2 mb-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2 py-2">' +
-        '<p class="text-emerald-100/95 font-medium">Tu comisión de venta (80% · pendiente de acreditación)</p>' +
+        (pendPay.length === 0 ? '<p class="text-white/45">Sin partidas pendientes en esta categoría.</p>' : '<ul class="space-y-1 max-h-24 overflow-y-auto">' + pendPay.map(ferriolPartnerLedgerLineLi).join('') + '</ul>') +
+        '</div>';
+      var secComm =
+        '<div class="text-xs space-y-1.5 mb-3 rounded-lg border border-emerald-500/35 bg-emerald-500/10 px-2 py-2">' +
+        '<p class="text-emerald-100/95 font-medium">Tu parte en el libro (ej. 80% licencia · pendiente de liquidación)</p>' +
         '<p class="text-white/80">Total pendiente: <strong>$ ' + sumComm.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> ARS</p>' +
-        (pendComm.length === 0 ? '<p class="text-white/45">Nada pendiente; cuando el admin verifique cobros o liquide, verás movimientos.</p>' : '<ul class="space-y-1 max-h-24 overflow-y-auto">' + pendComm.map(ferriolMlmLedgerRowLineLi).join('') + '</ul>') +
-        '</div>' +
-        '<p class="text-xs text-white/45 mb-1">Otros movimientos recientes</p>' +
+        (pendComm.length === 0 ? '<p class="text-white/45">Nada pendiente; cuando el admin verifique cobros verás movimientos.</p>' : '<ul class="space-y-1 max-h-24 overflow-y-auto">' + pendComm.map(ferriolPartnerLedgerLineLi).join('') + '</ul>') +
+        '</div>';
+      var secRoy =
+        '<div class="text-xs space-y-1.5 mb-3 rounded-lg border border-violet-500/30 bg-violet-500/10 px-2 py-2">' +
+        '<p class="text-violet-100/95 font-medium">Regalías · cuotas de socios (libro · pendiente)</p>' +
+        '<p class="text-white/75">Nivel 1 (línea directa): <strong>$ ' + s1.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> · Nivel 2: <strong>$ ' + s2.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> ARS</p>' +
+        ((ren1.length + ren2.length) === 0 ? '<p class="text-white/45">Sin regalías pendientes registradas.</p>' : '<ul class="space-y-1 max-h-28 overflow-y-auto">' + ren1.concat(ren2).map(ferriolPartnerLedgerLineLi).join('') + '</ul>') +
+        '</div>';
+      var tail = '<p class="text-[10px] text-white/45 mb-1">Últimos movimientos en tu cuenta (libro)</p>' +
         (rows.length === 0 ? '<p class="text-xs text-white/50">Sin movimientos.</p>' :
-          '<ul class="text-xs space-y-1 max-h-32 overflow-y-auto">' + rows.slice(0, 15).map(ferriolMlmLedgerRowLineLi).join('') + '</ul>');
+          '<ul class="text-xs space-y-1 max-h-36 overflow-y-auto">' + rows.slice(0, 18).map(ferriolPartnerLedgerLineLi).join('') + '</ul>');
+      return head + secK + secPay + secComm + secRoy + tail;
     }
     async function loadPartnerCommissionsCard() {
       var el = document.getElementById('superPartnerCommissionsCard');
@@ -311,60 +336,148 @@
         return;
       }
       try {
-        var res = await supabaseClient.from('mlm_ledger').select('created_at, amount, event_type, status, depth').eq('beneficiary_user_id', currentUser.id).order('created_at', { ascending: false }).limit(40);
+        var res = await supabaseClient.from('mlm_ledger').select('created_at, amount, event_type, status, depth, period_month').eq('beneficiary_user_id', currentUser.id).order('created_at', { ascending: false }).limit(80);
         if (res.error) throw res.error;
+        var nk = 0;
+        try {
+          var pr = await supabaseClient.from('profiles').select('id').eq('sponsor_id', currentUser.id).eq('role', 'kiosquero').eq('active', true);
+          if (!pr.error && pr.data) nk = pr.data.length;
+        } catch (_) {}
         var rows = res.data || [];
         el.classList.remove('hidden');
-        el.innerHTML = ferriolMlmBeneficiaryCardHtml(rows,
-          '<p class="font-semibold text-emerald-200/90 mb-2 flex items-center gap-2"><i data-lucide="wallet" class="w-4 h-4"></i> Tu cuenta con Ferriol (libro)</p>',
-          '');
+        el.innerHTML = ferriolPartnerResumenHtml(rows, nk);
       } catch (e) {
         el.classList.remove('hidden');
-        el.innerHTML = '<p class="text-xs text-amber-200">Libro MLM: ejecutá los SQL de compensaciones o revisá RLS.</p>';
+        el.innerHTML = '<p class="text-xs text-amber-200">No se pudo cargar el resumen Ferriol. Ejecutá los SQL de compensaciones o revisá RLS.</p>';
       }
       lucide.createIcons();
     }
-    async function loadSuperNegocioFerriolCard() {
-      var el = document.getElementById('superNegocioFerriolCard');
+    async function loadSuperMainFerriolResumenCard() {
+      var el = document.getElementById('superMainFerriolResumenCard');
       if (!el) return;
-      if (!supabaseClient || !currentUser || currentUser.role !== 'super' || state.superUiMode !== 'negocio') {
+      if (!supabaseClient || !currentUser || currentUser.role !== 'super' || state.superUiMode === 'negocio') {
         el.classList.add('hidden');
         el.innerHTML = '';
         return;
       }
+      el.classList.remove('hidden');
+      el.innerHTML = '<p class="text-xs text-white/50">Cargando resumen Ferriol…</p>';
       try {
-        var res = await supabaseClient.from('mlm_ledger').select('created_at, amount, event_type, status, depth').eq('beneficiary_user_id', currentUser.id).order('created_at', { ascending: false }).limit(40);
-        if (res.error) throw res.error;
-        var rows = res.data || [];
-        el.classList.remove('hidden');
-        el.innerHTML = ferriolMlmBeneficiaryCardHtml(rows,
-          '<p class="font-semibold text-violet-100 mb-1 flex items-center gap-2"><i data-lucide="wallet" class="w-4 h-4"></i> Ferriol · libro (esta cuenta en modo negocio)</p>',
-          '<p class="text-[11px] text-white/50 mb-2">Si usaste «Insertar 3 movimientos demo» en Cobros, acá ves los pendientes 20% y 80% a tu nombre.</p>');
+        var lr = await supabaseClient.from('mlm_ledger').select('amount').is('beneficiary_user_id', null).eq('status', 'pending').eq('event_type', 'company_reserve');
+        var sumCo = 0;
+        var nCo = 0;
+        if (!lr.error && lr.data) {
+          nCo = lr.data.length;
+          sumCo = lr.data.reduce(function (a, x) { return a + Number(x.amount || 0); }, 0);
+        }
+        var pendLed = await supabaseClient.from('mlm_ledger').select('amount, event_type, beneficiary_user_id').eq('status', 'pending');
+        var sumSoc = 0;
+        var nSoc = 0;
+        if (!pendLed.error && pendLed.data) {
+          var partnerEv = { sale_commission: true, vendor_payable_company: true, renewal: true };
+          var toSoc = pendLed.data.filter(function (r) { return r.beneficiary_user_id && partnerEv[r.event_type]; });
+          nSoc = toSoc.length;
+          sumSoc = toSoc.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
+        }
+        var nK = 0;
+        var nP = 0;
+        try {
+          var cK = await supabaseClient.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'kiosquero');
+          if (!cK.error && cK.count != null) nK = cK.count;
+          var cP = await supabaseClient.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'partner');
+          if (!cP.error && cP.count != null) nP = cP.count;
+        } catch (_) {}
+        el.innerHTML =
+          '<p class="font-semibold text-cyan-100 mb-2 flex items-center gap-2"><i data-lucide="pie-chart" class="w-4 h-4"></i> Resumen Ferriol · administrador</p>' +
+          '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">' +
+          '<div class="rounded-lg border border-cyan-400/25 bg-black/20 px-2 py-2">' +
+          '<p class="text-white/55">Empresa · pendiente de cobro (reserva libro)</p>' +
+          '<p class="text-cyan-100 font-bold text-base">$ ' + sumCo.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + ' <span class="text-xs font-normal text-white/50">· ' + nCo + ' part.</span></p></div>' +
+          '<div class="rounded-lg border border-amber-400/25 bg-black/20 px-2 py-2">' +
+          '<p class="text-white/55">Red · pendiente de liquidar a socios</p>' +
+          '<p class="text-amber-100 font-bold text-base">$ ' + sumSoc.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + ' <span class="text-xs font-normal text-white/50">· ' + nSoc + ' part.</span></p></div></div>' +
+          '<p class="text-[11px] text-white/45 mt-2">Directorio: <strong class="text-white/65">' + nK + '</strong> kioscos · <strong class="text-white/65">' + nP + '</strong> socios vendedores. Detalle de transferencias, verificaciones y libro: pestaña <strong class="text-white/70">Cobros</strong>.</p>';
       } catch (e) {
-        el.classList.remove('hidden');
-        el.innerHTML = '<p class="text-xs text-amber-200">No se pudo cargar el libro. Revisá RLS o ejecutá los SQL de Ferriol.</p>';
+        el.innerHTML = '<p class="text-xs text-amber-200">No se pudo cargar el resumen. ¿Ejecutaste los SQL de Ferriol?</p>';
       }
       lucide.createIcons();
+    }
+    function ferriolKioscoSponsorHintHtml() {
+      if (!currentUser || !currentUser.sponsorId) {
+        return 'No figura referidor en tu perfil. Si entraste por invitación, pedí que lo carguen en administración.';
+      }
+      return null;
+    }
+    async function ferriolFetchSponsorHintText() {
+      var fallback = ferriolKioscoSponsorHintHtml();
+      if (fallback !== null) return { html: fallback, ok: true };
+      if (!supabaseClient) return { html: 'Configurá Supabase para ver datos del referidor.', ok: false };
+      try {
+        var sp = await supabaseClient.from('profiles').select('kiosco_name, email, role').eq('id', currentUser.sponsorId).maybeSingle();
+        if (sp.error || !sp.data) return { html: 'Tenés referidor asignado. Si no sabés quién es, consultá con el administrador.', ok: true };
+        var d = sp.data;
+        var nm = (d.kiosco_name || '').trim() || (d.email ? String(d.email).split('@')[0] : '') || '—';
+        var roleL = d.role === 'super' ? 'Administrador' : (d.role === 'partner' ? 'Socio vendedor' : 'Referidor');
+        var em = d.email ? String(d.email).replace(/</g, '&lt;').replace(/&/g, '&amp;') : '';
+        var nmEsc = String(nm).replace(/</g, '&lt;').replace(/&/g, '&amp;');
+        var html = 'Pagás la licencia a: <strong class="text-[#86efac]/95">' + nmEsc + '</strong>' + (em ? ' · ' + em : '') + ' <span class="text-white/45">(' + roleL + ')</span>. Usá los datos de transferencia de abajo; si no coinciden, confirmá con esa persona o con el administrador.';
+        return { html: html, ok: true };
+      } catch (_) {
+        return { html: 'Consultá con el administrador quién es tu referidor.', ok: false };
+      }
     }
     async function loadKioscoLicensePaymentInfo() {
       var block = document.getElementById('kioscoLicensePaymentBlock');
       var pre = document.getElementById('kioscoTransferInfoText');
       var priceEl = document.getElementById('kioscoLicensePriceHint');
-      if (!block || !currentUser) return;
+      var sponsorEl = document.getElementById('kioscoLicenseSponsorHint');
+      var dash = document.getElementById('dashboardKioscoLicenseCard');
+      if (!currentUser) return;
       var show = currentUser.role === 'kiosquero' || (currentUser.role === 'super' && state.superUiMode === 'negocio');
-      block.style.display = show ? '' : 'none';
-      if (!show) return;
-      if (priceEl) priceEl.textContent = 'Valor mensual orientativo: $ ' + FERRIOL_PLAN_AMOUNTS.kioscoMonthly.toLocaleString('es-AR') + ' ARS (confirmá con tu administrador).';
-      if (!pre) return;
-      if (!supabaseClient) {
-        pre.textContent = 'Configurá Supabase para ver datos de pago.';
-        return;
+      if (block) block.style.display = show ? '' : 'none';
+      if (dash) {
+        if (!show) {
+          dash.classList.add('hidden');
+          dash.innerHTML = '';
+        }
       }
-      try {
-        var r = await supabaseClient.from('app_settings').select('value').eq('key', 'ferriol_transfer_info').maybeSingle();
-        pre.textContent = (r.data && r.data.value) ? String(r.data.value) : 'El administrador cargará los datos de cuenta en Panel admin → Ajustes.';
-      } catch (_) {
-        pre.textContent = 'No se pudieron cargar los datos de transferencia.';
+      if (!show) return;
+      var amt = FERRIOL_PLAN_AMOUNTS.kioscoMonthly;
+      var amtStr = amt.toLocaleString('es-AR');
+      if (priceEl) {
+        priceEl.innerHTML = 'Cuota orientativa: <strong class="text-[#86efac]">$ ' + amtStr + ' ARS</strong> por mes. Confirmá monto y forma de pago con tu <strong class="text-white/85">referidor o administrador</strong>.';
+      }
+      var transferBody = 'El administrador debe cargar en Ajustes los datos de cuenta a los que transferís la licencia (referidor / administrador).';
+      if (!supabaseClient) {
+        transferBody = 'Configurá Supabase para ver datos de pago.';
+      } else {
+        try {
+          var r = await supabaseClient.from('app_settings').select('value').eq('key', 'ferriol_transfer_info').maybeSingle();
+          transferBody = (r.data && r.data.value) ? String(r.data.value) : transferBody;
+        } catch (_) {
+          transferBody = 'No se pudieron cargar los datos de transferencia.';
+        }
+      }
+      if (pre) pre.textContent = transferBody;
+      var spHint = await ferriolFetchSponsorHintText();
+      if (sponsorEl) sponsorEl.innerHTML = spHint.html;
+      if (dash) {
+        dash.classList.remove('hidden');
+        var spDash = spHint.html;
+        dash.innerHTML =
+          '<h3 class="font-semibold text-base mb-2 flex items-center gap-2 text-[#86efac]">' +
+          '<i data-lucide="landmark" class="w-5 h-5 shrink-0"></i> Licencia mensual Ferriol OS</h3>' +
+          '<p class="text-2xl sm:text-3xl font-bold text-white mb-1">$ ' + amtStr + '<span class="text-lg font-normal text-white/60"> ARS / mes</span></p>' +
+          '<p class="text-xs text-white/65 mb-2">Cuota de <strong class="text-white/85">tu negocio</strong> por usar Ferriol OS. El pago lo hacés al <strong class="text-white/85">referidor o administrador</strong> (canal acordado); los datos concretos van abajo. Lo que ocurre después con empresa y comisiones lo gestiona la red, no tu pantalla de caja.</p>' +
+          '<p class="text-xs text-white/70 mb-2">' + spDash + '</p>' +
+          '<p class="text-[10px] text-white/45 mb-2">Datos para transferir (los define el administrador en Ajustes):</p>' +
+          '<pre class="text-xs whitespace-pre-wrap text-white/90 glass rounded-lg p-3 border border-white/15 max-h-40 overflow-y-auto font-sans"></pre>' +
+          '<p class="text-[10px] text-white/40 mt-2">¿Dudas? Escribí a quien te dio de alta o al administrador.</p>';
+        var preInDash = dash.querySelector('pre');
+        if (preInDash) preInDash.textContent = transferBody;
+        try {
+          if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+        } catch (_) {}
       }
     }
     async function renderSuperCobrosSection() {
@@ -769,8 +882,60 @@
       _suppressCajaHistoryPush: false,
       historialFilter: 'hoy',
       superSection: 'negocios',  // negocios | ajustes | notificaciones | mas
-      superUiMode: 'admin'  // admin | negocio — solo si role === 'super'
+      superUiMode: 'empresa'  // empresa | socio | negocio — solo si role === 'super'
     };
+
+    function ferriolNormalizeSuperUiMode(raw) {
+      if (raw === 'negocio') return 'negocio';
+      if (raw === 'socio') return 'socio';
+      return 'empresa';
+    }
+    function isSuperKioscoPreviewMode() {
+      return !!(currentUser && currentUser.role === 'super' && state.superUiMode === 'negocio');
+    }
+    function isSuperSocioLens() {
+      return !!(currentUser && currentUser.role === 'super' && state.superUiMode === 'socio');
+    }
+    function isPartnerLens() {
+      return !!(currentUser && (currentUser.role === 'partner' || isSuperSocioLens()));
+    }
+    function isEmpresaLensSuper() {
+      return !!(currentUser && currentUser.role === 'super' && state.superUiMode === 'empresa');
+    }
+    function updateSuperLensSwitcherUI() {
+      var wrap = document.getElementById('superLensSwitcher');
+      if (!wrap) return;
+      if (!currentUser || currentUser.role !== 'super') {
+        wrap.classList.add('hidden');
+        return;
+      }
+      wrap.classList.remove('hidden');
+      var m = state.superUiMode;
+      wrap.querySelectorAll('[data-super-lens]').forEach(function (btn) {
+        var on = btn.getAttribute('data-super-lens') === m;
+        btn.classList.toggle('super-lens-btn--active', on);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    }
+    async function ferriolSetSuperLens(lens) {
+      if (!currentUser || currentUser.role !== 'super') return;
+      if (lens !== 'empresa' && lens !== 'socio' && lens !== 'negocio') return;
+      if (lens === 'negocio') {
+        await window._superIrModoNegocio();
+        updateSuperLensSwitcherUI();
+        return;
+      }
+      try { sessionStorage.setItem('ferriol_super_ui', lens); } catch (_) {}
+      state.superUiMode = lens;
+      if (window._trialCountdownInterval) { clearInterval(window._trialCountdownInterval); window._trialCountdownInterval = null; }
+      applyAppShell();
+      updateSuperLensSwitcherUI();
+      state._restoringFromHistory = true;
+      showPanel('super');
+      state._restoringFromHistory = false;
+      await renderSuper();
+      lucide.createIcons();
+    }
 
     function currentHistoryBase() {
       return {
@@ -1239,7 +1404,7 @@
         } catch (_) {}
       }
       renderFrequentProducts();
-      await loadSuperNegocioFerriolCard();
+      await loadKioscoLicensePaymentInfo();
     }
     function openDetalleVentaModal(v) {
       var content = document.getElementById('detalleVentaModalContent');
@@ -1723,6 +1888,12 @@
             else subEl.textContent = 'Sistema Premium';
           }
         }
+      }
+      if (currentUser && (currentUser.role === 'kiosquero' || (currentUser.role === 'super' && state.superUiMode === 'negocio'))) {
+        loadKioscoLicensePaymentInfo();
+      }
+      if (currentUser && currentUser.role === 'super') {
+        loadSuperMainFerriolResumenCard();
       }
     }
 
@@ -4994,6 +5165,7 @@ async function showApp() {
           netInfoEl.textContent = '';
         }
       }
+      await loadSuperMainFerriolResumenCard();
       await loadPartnerCommissionsCard();
       lucide.createIcons();
     }
@@ -5392,9 +5564,9 @@ async function showApp() {
           return;
         }
         var n = out.inserted_rows != null ? out.inserted_rows : '—';
-        alert('Listo. Filas nuevas: ' + n + '. Revisá Cobros y, en modo negocio, el inicio.');
+        alert('Listo. Filas nuevas: ' + n + '. Revisá Cobros (admin). Los kiosqueros solo ven la licencia en Inicio.');
         if (state.superSection === 'cobros') renderSuperCobrosSection();
-        await loadSuperNegocioFerriolCard();
+        await loadKioscoLicensePaymentInfo();
         lucide.createIcons();
       };
     }
@@ -5416,7 +5588,7 @@ async function showApp() {
         }
         alert('Listo. Filas eliminadas: ' + (out.deleted_rows != null ? out.deleted_rows : '—') + '.');
         if (state.superSection === 'cobros') renderSuperCobrosSection();
-        await loadSuperNegocioFerriolCard();
+        await loadKioscoLicensePaymentInfo();
         lucide.createIcons();
       };
     }
