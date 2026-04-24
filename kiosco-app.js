@@ -431,16 +431,9 @@
       var pre = document.getElementById('kioscoTransferInfoText');
       var priceEl = document.getElementById('kioscoLicensePriceHint');
       var sponsorEl = document.getElementById('kioscoLicenseSponsorHint');
-      var dash = document.getElementById('dashboardKioscoLicenseCard');
       if (!currentUser) return;
       var show = currentUser.role === 'kiosquero' || isSuperKioscoPreviewMode();
       if (block) block.style.display = show ? '' : 'none';
-      if (dash) {
-        if (!show) {
-          dash.classList.add('hidden');
-          dash.innerHTML = '';
-        }
-      }
       if (!show) return;
       var amt = FERRIOL_PLAN_AMOUNTS.kioscoMonthly;
       var amtStr = amt.toLocaleString('es-AR');
@@ -461,24 +454,6 @@
       if (pre) pre.textContent = transferBody;
       var spHint = await ferriolFetchSponsorHintText();
       if (sponsorEl) sponsorEl.innerHTML = spHint.html;
-      if (dash) {
-        dash.classList.remove('hidden');
-        var spDash = spHint.html;
-        dash.innerHTML =
-          '<h3 class="font-semibold text-base mb-2 flex items-center gap-2 text-[#86efac]">' +
-          '<i data-lucide="landmark" class="w-5 h-5 shrink-0"></i> Licencia mensual Ferriol OS</h3>' +
-          '<p class="text-2xl sm:text-3xl font-bold text-white mb-1">$ ' + amtStr + '<span class="text-lg font-normal text-white/60"> ARS / mes</span></p>' +
-          '<p class="text-xs text-white/65 mb-2">Cuota de <strong class="text-white/85">tu negocio</strong> por usar Ferriol OS. El pago lo hacés al <strong class="text-white/85">referidor o administrador</strong> (canal acordado); los datos concretos van abajo. Lo que ocurre después con empresa y comisiones lo gestiona la red, no tu pantalla de caja.</p>' +
-          '<p class="text-xs text-white/70 mb-2">' + spDash + '</p>' +
-          '<p class="text-[10px] text-white/45 mb-2">Datos para transferir (los define el administrador en Ajustes):</p>' +
-          '<pre class="text-xs whitespace-pre-wrap text-white/90 glass rounded-lg p-3 border border-white/15 max-h-40 overflow-y-auto font-sans"></pre>' +
-          '<p class="text-[10px] text-white/40 mt-2">¿Dudas? Escribí a quien te dio de alta o al administrador.</p>';
-        var preInDash = dash.querySelector('pre');
-        if (preInDash) preInDash.textContent = transferBody;
-        try {
-          if (typeof lucide !== 'undefined' && lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
-        } catch (_) {}
-      }
     }
     async function renderSuperCobrosSection() {
       if (!supabaseClient || !isEmpresaLensSuper()) return;
@@ -2012,6 +1987,7 @@
         var ctab = cajaTabOverride != null && cajaTabOverride !== '' ? cajaTabOverride : 'hub';
         window._switchCajaTab(ctab);
         state._suppressCajaHistoryPush = false;
+        if (ferriolKiosqueroNotifShell()) loadKioscoLicensePaymentInfo();
       }
       if (name === 'historial') {
         renderHistorial(state.historialFilter || 'hoy');
@@ -4117,7 +4093,7 @@
   
     document.getElementById('searchInventory').addEventListener('input', renderInventory);
 
-   // --- Login / Logout / SaaS ---
+   // --- Login / Logout ---
 async function showApp() {
     const isSuper = currentUser && currentUser.role === 'super';
     const isPartner = currentUser && currentUser.role === 'partner';
@@ -4337,13 +4313,15 @@ async function showApp() {
       history.replaceState(null, '', location.pathname + location.search);
     };
 
-    document.getElementById('showSignUp').onclick = (e) => {
-      e.preventDefault();
+    function openSignUpFlow(nichoExplicit) {
+      var nicho = nichoExplicit === 'socio' ? 'socio' : 'kiosco';
+      try { sessionStorage.setItem('ferriol_signup_nicho', nicho); } catch (_) {}
       document.getElementById('loginFormWrap').classList.add('hidden');
       document.getElementById('resetPwdBox').classList.add('hidden');
       document.getElementById('signUpBox').classList.remove('hidden');
       document.getElementById('signUpSuccessBox').classList.add('hidden');
-      document.getElementById('signUpErr').classList.remove('show');
+      var signUpErr = document.getElementById('signUpErr');
+      if (signUpErr) signUpErr.classList.remove('show');
       var refIn = document.getElementById('signUpReferralCode');
       if (refIn) {
         try {
@@ -4351,13 +4329,19 @@ async function showApp() {
           refIn.value = st || '';
         } catch (_) { refIn.value = ''; }
       }
-      var stN = getSignupNichoFromStorage();
       var rSoc = document.querySelector('input[name="signUpNicho"][value="socio"]');
       var rKio = document.querySelector('input[name="signUpNicho"][value="kiosco"]');
-      if (stN === 'socio' && rSoc) rSoc.checked = true;
+      if (nicho === 'socio' && rSoc) rSoc.checked = true;
       else if (rKio) rKio.checked = true;
       syncSignUpNichoUI();
-    };
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    try { window._openSignUpWithNicho = openSignUpFlow; } catch (_) {}
+
+    var signUpBtnNegocio = document.getElementById('signUpBtnNegocio');
+    if (signUpBtnNegocio) signUpBtnNegocio.onclick = function (e) { e.preventDefault(); openSignUpFlow('kiosco'); };
+    var signUpBtnSocio = document.getElementById('signUpBtnSocio');
+    if (signUpBtnSocio) signUpBtnSocio.onclick = function (e) { e.preventDefault(); openSignUpFlow('socio'); };
     document.querySelectorAll('input[name="signUpNicho"]').forEach(function (inp) {
       inp.addEventListener('change', syncSignUpNichoUI);
     });
@@ -5630,7 +5614,7 @@ async function showApp() {
           return;
         }
         var n = out.inserted_rows != null ? out.inserted_rows : '—';
-        alert('Listo. Filas nuevas: ' + n + '. Revisá Cobros (admin). Los kiosqueros solo ven la licencia en Inicio.');
+        alert('Listo. Filas nuevas: ' + n + '. Revisá Cobros (admin). Los kiosqueros ven la licencia en Caja.');
         if (state.superSection === 'cobros') renderSuperCobrosSection();
         await loadKioscoLicensePaymentInfo();
         lucide.createIcons();

@@ -52,32 +52,42 @@
     </div>
   </div>
 
-  <!-- Login SaaS (se oculta cuando hay usuario) -->
+  <!-- Acceso a la app (se oculta cuando hay sesión) -->
   <div id="loginScreen">
     <div class="login-glass">
       <!-- Vista: Inicio de sesión -->
       <div id="loginFormWrap">
         <h1>Ferriol OS</h1>
-        <p class="sub">Sistema de gestión para kioscos — SaaS</p>
+        <p class="sub">Sistema de gestión para negocios pequeños</p>
+        <p class="login-unified-hint">Mismo acceso para <strong>negocios</strong>, <strong>socios</strong> y <strong>administradores</strong>: usá tu email y contraseña; al entrar, la app abre el panel que corresponde a tu cuenta.</p>
         <div id="loginErr" class="login-err"></div>
         <div id="loginContactAdminWrap" class="hidden mt-3 p-3 rounded-xl bg-[#22c55e]/20 border border-[#22c55e]/40">
           <p class="text-sm text-white/80 mb-2">Contactá por WhatsApp para darte de alta o renovar:</p>
           <div id="loginContactWhatsAppLinks" class="space-y-2"></div>
         </div>
         <form id="loginForm" onsubmit="return false;">
-          <input type="email" id="loginEmail" placeholder="Email" required autocomplete="email">
+          <input type="email" id="loginEmail" placeholder="Email" required autocomplete="username" inputmode="email" enterkeyhint="next" aria-label="Correo electrónico">
           <div class="password-wrap">
-            <input type="password" id="loginPassword" placeholder="Contraseña" required autocomplete="current-password">
+            <input type="password" id="loginPassword" placeholder="Contraseña" required autocomplete="current-password" enterkeyhint="go" aria-label="Contraseña">
             <label class="toggle-pwd" for="showLoginPwd" title="Ver contraseña">
               <input type="checkbox" id="showLoginPwd" class="pwd-checkbox">
               <span class="pwd-label">Ver</span>
             </label>
           </div>
-          <button type="button" id="loginBtn" class="btn-login">Entrar</button>
+          <button type="button" id="loginBtn" class="btn-login">Iniciar sesión</button>
         </form>
-        <p class="login-hint" id="loginHint">
-          <a href="#" id="showSignUp" class="text-[#86efac]">Crear cuenta</a>
-          <span class="mx-2">·</span>
+        <div class="login-signup-dual" role="group" aria-label="Crear cuenta nueva">
+          <button type="button" id="signUpBtnNegocio" class="login-signup-path touch-target">
+            <span class="login-signup-path-title">Crear cuenta · Negocio</span>
+            <span class="login-signup-path-desc">Para tu kiosco, almacén o comercio: caja, stock y ventas en el local.</span>
+          </button>
+          <button type="button" id="signUpBtnSocio" class="login-signup-path login-signup-path--socio touch-target">
+            <span class="login-signup-path-title">Crear cuenta · Socio digital</span>
+            <span class="login-signup-path-desc">Membresía para comercializar Ferriol OS, referir negocios y cobrar comisiones según el plan.</span>
+          </button>
+        </div>
+        <p class="login-signup-dual-hint">¿Te pasaron un enlace de invitación? Elegí el tipo de alta; el código de referido puede venir ya guardado.</p>
+        <p class="login-hint login-hint--solo-link" id="loginHint">
           <a href="#" id="forgotPwd" class="text-[#86efac]">¿Olvidaste tu contraseña?</a>
         </p>
         <div id="resetPwdBox" class="hidden mt-4 pt-4 border-t border-white/10">
@@ -292,8 +302,6 @@
             </button>
           </div>
         </div>
-        <!-- Kiosquero / admin en modo negocio: solo licencia mensual a Ferriol (sin libro MLM) -->
-        <div id="dashboardKioscoLicenseCard" class="kiosquero-only hidden glass rounded-2xl p-4 sm:p-5 slide-up border border-[#22c55e]/35 bg-[#22c55e]/10"></div>
         <!-- Productos frecuentes (más vendidos hoy) -->
         <div id="dashboardFrecuentesWrap" class="kiosquero-only hidden">
           <h3 class="font-semibold mb-2 flex items-center gap-2 text-sm text-white/80">
@@ -403,6 +411,18 @@
 
     <!-- Cierre de caja -->
     <section id="panel-caja" class="panel hidden">
+      <div id="kioscoLicensePaymentBlock" class="kiosquero-only mx-4 mt-4 mb-2 rounded-xl border border-[#22c55e]/30 bg-[#22c55e]/08 p-4">
+        <h3 class="font-semibold mb-2 flex items-center gap-2 text-sm text-[#86efac]">
+          <i data-lucide="landmark" class="w-4 h-4"></i>
+          Licencia mensual Ferriol OS
+        </h3>
+        <p id="kioscoLicensePriceHint" class="text-sm text-white/75 mb-2"></p>
+        <p id="kioscoLicenseSponsorHint" class="text-xs text-white/60 mb-2"></p>
+        <p class="text-xs text-white/55 mb-1">El pago de la licencia lo hacés al <strong class="text-white/75">referidor / administrador</strong> que te dio de alta, usando los datos de cuenta que figuran abajo (los carga el administrador en Ajustes). Enviá el comprobante como te indiquen.</p>
+        <p class="text-[10px] text-white/45 mb-2">Ese canal es quien centraliza el cobro de tu cuota frente a Ferriol OS.</p>
+        <pre id="kioscoTransferInfoText" class="text-xs whitespace-pre-wrap text-white/90 glass rounded-lg p-3 border border-white/15 max-h-48 overflow-y-auto font-sans"></pre>
+        <p class="text-[10px] text-white/40 mt-2">En esta app no verás comisiones ni repartos 20/80: eso es gestión de la red comercial, no de tu caja diaria.</p>
+      </div>
 
       <!-- HUB: 4 botones grandes (2×2) -->
       <div id="caja-hub" class="p-4">
@@ -991,18 +1011,7 @@
             <label class="block text-sm text-white/70 mb-2">Nombre del negocio</label>
             <input type="text" id="configKioscoName" placeholder="Ej: Mi Negocio" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
           </div>
-          <div id="kioscoLicensePaymentBlock" class="kiosquero-only rounded-xl border border-[#22c55e]/30 bg-[#22c55e]/08 p-4 mb-4">
-            <h3 class="font-semibold mb-2 flex items-center gap-2 text-sm text-[#86efac]">
-              <i data-lucide="landmark" class="w-4 h-4"></i>
-              Licencia mensual Ferriol OS
-            </h3>
-            <p id="kioscoLicensePriceHint" class="text-sm text-white/75 mb-2"></p>
-            <p id="kioscoLicenseSponsorHint" class="text-xs text-white/60 mb-2"></p>
-            <p class="text-xs text-white/55 mb-1">El pago de la licencia lo hacés al <strong class="text-white/75">referidor / administrador</strong> que te dio de alta, usando los datos de cuenta que figuran abajo (los carga el administrador en Ajustes). Enviá el comprobante como te indiquen.</p>
-            <p class="text-[10px] text-white/45 mb-2">Ese canal es quien centraliza el cobro de tu cuota frente a Ferriol OS.</p>
-            <pre id="kioscoTransferInfoText" class="text-xs whitespace-pre-wrap text-white/90 glass rounded-lg p-3 border border-white/15 max-h-48 overflow-y-auto font-sans"></pre>
-            <p class="text-[10px] text-white/40 mt-2">En esta app no verás comisiones ni repartos 20/80: eso es gestión de la red comercial, no de tu caja diaria.</p>
-          </div>
+          <p class="text-xs text-white/50 -mt-2 mb-1">La <strong class="text-white/70">licencia mensual</strong> y los datos para transferir están en <strong class="text-[#86efac]">Caja</strong> (pantalla principal de caja).</p>
           <div>
             <label class="block text-sm text-white/70 mb-2">Mensaje de cobro por WhatsApp (usá <code class="text-[#86efac]">{cliente}</code> y <code class="text-[#86efac]">{monto}</code>)</label>
             <textarea id="configWhatsappMsg" rows="4" placeholder="Hola {cliente}, tenés un saldo de ${monto}..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] resize-y"></textarea>
@@ -1111,7 +1120,7 @@
           </div>
           <div class="rounded-xl border border-violet-500/30 bg-violet-500/08 p-4 mb-4 text-sm">
             <h3 class="font-semibold text-violet-100 mb-1 flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> Simulación rápida</h3>
-            <p class="text-xs text-white/65 mb-2">Tres movimientos de prueba en el libro: uno «empresa a cobrar» y dos con <strong class="text-white/80">tu usuario admin</strong> como beneficiario (revisalos acá en Cobros y en la lista de pendientes). Los kiosqueros <strong class="text-white/80">no</strong> ven el libro: solo la licencia en Inicio. Idempotente: no duplica.</p>
+            <p class="text-xs text-white/65 mb-2">Tres movimientos de prueba en el libro: uno «empresa a cobrar» y dos con <strong class="text-white/80">tu usuario admin</strong> como beneficiario (revisalos acá en Cobros y en la lista de pendientes). Los kiosqueros <strong class="text-white/80">no</strong> ven el libro: la licencia está en <strong class="text-white/80">Caja</strong>. Idempotente: no duplica.</p>
             <div class="flex flex-wrap gap-2 mt-1">
               <button type="button" id="ferriolBtnDemoSeed" class="btn-neomorphic rounded-xl py-2 px-3 text-xs font-semibold touch-target">Insertar 3 movimientos demo</button>
               <button type="button" id="ferriolBtnDemoClear" class="rounded-xl py-2 px-3 text-xs font-semibold touch-target border border-red-400/40 bg-red-500/15 text-red-200 hover:bg-red-500/25">Quitar movimientos demo</button>

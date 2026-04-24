@@ -309,6 +309,12 @@ button.header-sub.header-sub--toggle:active {
   display: none;
 }
 
+.super-lens-btn.super-lens-btn--active {
+  border-color: rgba(34, 197, 94, 0.55);
+  background: rgba(34, 197, 94, 0.22);
+  color: #86efac;
+}
+
 .bottom-nav-bar {
   border-radius: 1.35rem 1.35rem 0 0;
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.35);
@@ -347,7 +353,7 @@ button.header-sub.header-sub--toggle:active {
   transform: scale(0.95);
 }
 
-/* Login SaaS */
+/* Pantalla de acceso */
 #loginScreen {
   position: fixed;
   inset: 0;
@@ -408,8 +414,102 @@ button.header-sub.header-sub--toggle:active {
 .login-glass .sub {
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.62);
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.65rem;
   line-height: 1.45;
+}
+
+.login-glass .login-unified-hint {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.48);
+  line-height: 1.45;
+  text-align: center;
+  margin: 0 0 1.25rem;
+  max-width: 20rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.login-glass .login-unified-hint strong {
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 600;
+}
+
+.login-signup-dual {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin: 0.35rem 0 0.5rem;
+  max-width: 22rem;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+
+.login-signup-path {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  background: rgba(0, 0, 0, 0.35);
+  color: #f5f5f5;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s, transform 0.15s var(--ease-out);
+  box-shadow: 0 2px 12px rgba(34, 197, 94, 0.12);
+}
+
+.login-signup-path:hover {
+  border-color: rgba(134, 239, 172, 0.55);
+  background: rgba(22, 101, 52, 0.2);
+  box-shadow: 0 4px 18px rgba(34, 197, 94, 0.22);
+}
+
+.login-signup-path:active {
+  transform: scale(0.99);
+}
+
+.login-signup-path--socio {
+  border-color: rgba(167, 139, 250, 0.4);
+  box-shadow: 0 2px 12px rgba(139, 92, 246, 0.12);
+}
+
+.login-signup-path--socio:hover {
+  border-color: rgba(196, 181, 253, 0.55);
+  background: rgba(76, 29, 149, 0.22);
+  box-shadow: 0 4px 18px rgba(139, 92, 246, 0.2);
+}
+
+.login-signup-path-title {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.2rem;
+  color: #fafafa;
+}
+
+.login-signup-path-desc {
+  display: block;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 400;
+}
+
+.login-signup-dual-hint {
+  font-size: 0.65rem;
+  line-height: 1.4;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.42);
+  margin: 0 0 0.85rem;
+  max-width: 20rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.login-hint--solo-link {
+  margin-top: 0.35rem;
 }
 
 .login-glass input {
