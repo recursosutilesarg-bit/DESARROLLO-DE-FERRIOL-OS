@@ -34,7 +34,7 @@
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="kiosco.css?v=20260424signup">
+  <link rel="stylesheet" href="kiosco.css?v=20260424copy">
 </head>
 <body class="relative">
   <!-- Banner instalar como app (PWA) — visible al abrir el link -->
@@ -76,14 +76,15 @@
           <button type="button" id="loginBtn" class="btn-login">Iniciar sesión</button>
         </form>
         <p class="login-signup-new-label">¿Primera vez?</p>
-        <div class="login-signup-dual" role="group" aria-label="Elegir tipo de registro">
-          <button type="button" id="signUpBtnNegocio" class="login-signup-tile login-signup-tile--negocio touch-target" title="Registro para usar el sistema en tu negocio">
+        <p class="login-signup-new-sub">Los botones de abajo son para <strong class="text-white/80">crear una cuenta</strong>.</p>
+        <div class="login-signup-dual" role="group" aria-label="Crear cuenta: elegir tipo de registro">
+          <button type="button" id="signUpBtnNegocio" class="login-signup-tile login-signup-tile--negocio touch-target" title="Crear cuenta para probar el sistema en tu negocio">
             <span class="login-signup-tile-ico" aria-hidden="true">🏪</span>
-            <span class="login-signup-tile-label">Mi negocio</span>
+            <span class="login-signup-tile-label">Quiero probar el sistema</span>
           </button>
-          <button type="button" id="signUpBtnSocio" class="login-signup-tile login-signup-tile--distribuidor touch-target" title="Registro para vender Ferriol OS y la red">
+          <button type="button" id="signUpBtnSocio" class="login-signup-tile login-signup-tile--distribuidor touch-target" title="Crear cuenta como distribuidor del sistema">
             <span class="login-signup-tile-ico" aria-hidden="true">🤝</span>
-            <span class="login-signup-tile-label">Distribuidor digital</span>
+            <span class="login-signup-tile-label">Quiero ser distribuidor del sistema</span>
           </button>
         </div>
         <p class="login-hint login-hint--solo-link" id="loginHint">
@@ -110,7 +111,7 @@
       <!-- Vista: Solo formulario de creación de cuenta -->
       <div id="signUpBox" class="hidden">
         <h1>Crear cuenta</h1>
-        <p id="signUpLeadLine" class="sub">Alta de negocio · uso del sistema</p>
+        <p id="signUpLeadLine" class="sub">Quiero probar el sistema</p>
         <div id="signUpErr" class="login-err"></div>
         <input type="email" id="signUpEmail" placeholder="Email" required class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white">
         <input type="tel" id="signUpPhone" placeholder="Teléfono (opcional)" class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white">
@@ -123,13 +124,13 @@
         </div>
         <p class="text-xs text-white/60 mb-2">Tipo de cuenta</p>
         <div class="flex flex-col gap-2 mb-3">
-          <label class="flex items-center gap-2 cursor-pointer text-sm text-white/90 touch-target py-1">
-            <input type="radio" name="signUpNicho" value="kiosco" checked class="rounded-full border-white/40 text-[#22c55e] focus:ring-[#22c55e]">
-            <span>Mi negocio</span>
+          <label class="flex items-center gap-2 cursor-pointer text-sm text-white/90 touch-target py-1 leading-snug">
+            <input type="radio" name="signUpNicho" value="kiosco" checked class="rounded-full border-white/40 text-[#22c55e] focus:ring-[#22c55e] shrink-0 mt-0.5">
+            <span>Quiero probar el sistema</span>
           </label>
-          <label class="flex items-center gap-2 cursor-pointer text-sm text-white/90 touch-target py-1">
-            <input type="radio" name="signUpNicho" value="socio" class="rounded-full border-white/40 text-[#22c55e] focus:ring-[#22c55e]">
-            <span>Distribuidor digital</span>
+          <label class="flex items-center gap-2 cursor-pointer text-sm text-white/90 touch-target py-1 leading-snug">
+            <input type="radio" name="signUpNicho" value="socio" class="rounded-full border-white/40 text-[#22c55e] focus:ring-[#22c55e] shrink-0 mt-0.5">
+            <span>Quiero ser distribuidor del sistema</span>
           </label>
         </div>
         <input type="text" id="signUpKioscoName" placeholder="Nombre del negocio" class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white">
@@ -1626,7 +1627,7 @@
   </div>
   </div><!-- /#appWrap -->
   <script src="kiosco-config.js"></script>
-  <script defer src="kiosco-app.js?v=20260422s"></script>
+  <script defer src="kiosco-app.js?v=20260424copy"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>
