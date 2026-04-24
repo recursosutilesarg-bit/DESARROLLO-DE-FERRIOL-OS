@@ -1917,7 +1917,7 @@
               subEl.title = 'Tocá para abrir Modo usuario (vista tienda)';
               subEl.setAttribute('aria-label', 'Cambiar a Modo usuario');
             } else {
-              subEl.textContent = 'Fundador';
+              subEl.innerHTML = '<span class="inline-flex items-center gap-1.5 min-w-0 max-w-full"><i data-lucide="crown" class="w-3.5 h-3.5 text-amber-300 shrink-0" aria-hidden="true"></i><span class="truncate">Fundador</span></span>';
               subEl.title = 'Tocá para abrir Administración (vista socio)';
               subEl.setAttribute('aria-label', 'Cambiar a Administración');
             }
@@ -1955,6 +1955,9 @@
       if (currentUser && currentUser.role === 'super') {
         loadSuperMainFerriolResumenCard();
       }
+      try {
+        if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
+      } catch (_) {}
     }
 
     function showPanel(name, cajaTabOverride) {
@@ -4590,10 +4593,6 @@ async function showApp() {
       document.getElementById('headerTitle').textContent = kioscoName || 'Ferriol OS';
     }
     document.getElementById('saveConfig').onclick = () => saveConfig();
-    var btnCopyFK = document.getElementById('btnSuperFounderCopyKiosco');
-    if (btnCopyFK) btnCopyFK.onclick = function () { copyTextToClipboard((document.getElementById('superFounderLinkKiosco') || {}).value, 'Enlace para negocios copiado.'); };
-    var btnCopyFS = document.getElementById('btnSuperFounderCopySocio');
-    if (btnCopyFS) btnCopyFS.onclick = function () { copyTextToClipboard((document.getElementById('superFounderLinkSocio') || {}).value, 'Enlace para vendedores copiado.'); };
 
     async function exportBackup() {
       if (!currentUser?.id) return;
@@ -5192,25 +5191,6 @@ async function showApp() {
           if (user) openSuperUserDetail(user);
         };
       });
-      var founderBlock = document.getElementById('superFounderLinksBlock');
-      if (founderBlock) {
-        if (isEmpresaLensSuper()) {
-          var fCode = currentUser.referralCode || '';
-          if (!fCode) {
-            fCode = await ensureUserReferralCode(currentUser.id) || '';
-            if (fCode) currentUser.referralCode = fCode;
-          }
-          var fd = document.getElementById('superFounderCodeDisplay');
-          if (fd) fd.textContent = fCode || '—';
-          var fk = document.getElementById('superFounderLinkKiosco');
-          var fs = document.getElementById('superFounderLinkSocio');
-          if (fk) fk.value = fCode ? ferriolReferralInviteUrl(fCode, 'kiosco') : '';
-          if (fs) fs.value = fCode ? ferriolReferralInviteUrl(fCode, 'socio') : '';
-          founderBlock.classList.remove('hidden');
-        } else {
-          founderBlock.classList.add('hidden');
-        }
-      }
       var netInfoEl = document.getElementById('superPartnerNetInfo');
       if (netInfoEl) {
         if (isPartnerLens()) {
