@@ -34,7 +34,7 @@
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="kiosco.css?v=20260424cta">
+  <link rel="stylesheet" href="kiosco.css?v=20260424signupfix">
 </head>
 <body class="relative">
   <!-- Banner instalar como app (PWA) — visible al abrir el link -->
@@ -109,8 +109,10 @@
 
       <!-- Vista: Solo formulario de creación de cuenta -->
       <div id="signUpBox" class="hidden">
-        <h1>Crear cuenta</h1>
-        <p id="signUpLeadLine" class="sub">Quiero probar el sistema</p>
+        <div class="login-signup-header">
+          <h1>Crear cuenta</h1>
+          <p id="signUpLeadLine" class="sub">Quiero probar el sistema</p>
+        </div>
         <div id="signUpErr" class="login-err"></div>
         <input type="email" id="signUpEmail" placeholder="Email" required class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white">
         <input type="tel" id="signUpPhone" placeholder="Teléfono (opcional)" class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white">
@@ -122,21 +124,21 @@
           </label>
         </div>
         <p class="text-xs text-white/60 mb-2">Tipo de cuenta</p>
-        <div class="flex flex-col gap-2 mb-3">
-          <label class="flex items-center gap-2 cursor-pointer text-sm text-white/90 touch-target py-1 leading-snug">
-            <input type="radio" name="signUpNicho" value="kiosco" checked class="rounded-full border-white/40 text-[#22c55e] focus:ring-[#22c55e] shrink-0 mt-0.5">
+        <div class="sign-up-nicho-group" role="radiogroup" aria-label="Tipo de cuenta">
+          <label class="text-sm text-white/90 touch-target leading-snug">
+            <input type="radio" name="signUpNicho" value="kiosco" checked>
             <span>Quiero probar el sistema</span>
           </label>
-          <label class="flex items-center gap-2 cursor-pointer text-sm text-white/90 touch-target py-1 leading-snug">
-            <input type="radio" name="signUpNicho" value="socio" class="rounded-full border-white/40 text-[#22c55e] focus:ring-[#22c55e] shrink-0 mt-0.5">
+          <label class="text-sm text-white/90 touch-target leading-snug">
+            <input type="radio" name="signUpNicho" value="socio">
             <span>Quiero ser distribuidor del sistema</span>
           </label>
         </div>
         <input type="text" id="signUpKioscoName" placeholder="Nombre del negocio" class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white">
         <label class="block text-xs text-white/60 mb-1">Código de referido (opcional)</label>
         <input type="text" id="signUpReferralCode" placeholder="Código" autocomplete="off" class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white uppercase" maxlength="32">
-        <div class="mb-4 flex items-start gap-2">
-          <input type="checkbox" id="signUpAcceptTerms" class="mt-1.5 rounded border-white/30 bg-white/10 text-[#22c55e] focus:ring-[#22c55e]">
+        <div class="mb-4 flex items-start gap-2 sign-up-terms-row">
+          <input type="checkbox" id="signUpAcceptTerms" class="shrink-0">
           <label for="signUpAcceptTerms" class="text-sm text-white/80 leading-tight">
             Acepto los <button type="button" id="openTermsModal" class="text-[#86efac] underline font-medium">Términos y Condiciones</button> y el Contrato de Servicio de Ferriol OS (incluyendo que no hay responsabilidad por pérdida de datos y que los datos están sujetos a la licencia del servicio).
           </label>

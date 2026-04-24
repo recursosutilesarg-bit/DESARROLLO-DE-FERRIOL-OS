@@ -536,6 +536,85 @@ button.header-sub.header-sub--toggle:active {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+/* Radios/checkboxes del registro: sin esto, width:100% del bloque anterior los deforma. */
+.login-glass input[type="radio"] {
+  width: 1.15rem;
+  height: 1.15rem;
+  min-width: 1.15rem;
+  flex-shrink: 0;
+  padding: 0;
+  margin: 0.2rem 0 0;
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-radius: 50%;
+  accent-color: #22c55e;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.login-glass input[type="checkbox"]:not(.pwd-checkbox) {
+  width: 1.1rem;
+  height: 1.1rem;
+  min-width: 1.1rem;
+  flex-shrink: 0;
+  padding: 0;
+  margin: 0;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 0.3rem;
+  accent-color: #22c55e;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+#signUpBox .sign-up-nicho-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+#signUpBox .sign-up-nicho-group label {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.65rem;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+#signUpBox .sign-up-nicho-group label span {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+#signUpBox .sign-up-nicho-group input[type="radio"] {
+  margin-top: 0.15rem;
+}
+
+#signUpBox .login-signup-header {
+  margin-bottom: 0.35rem;
+}
+
+#signUpBox .login-signup-header .sub {
+  margin-bottom: 0.75rem;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+#signUpBox .sign-up-terms-row input[type="checkbox"] {
+  margin-top: 0.35rem;
+}
+
 .login-glass .btn-login {
   width: 100%;
   padding: 0.8rem;
