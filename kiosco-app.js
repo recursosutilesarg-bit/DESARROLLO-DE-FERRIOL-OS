@@ -902,43 +902,88 @@
     function isEmpresaLensSuper() {
       return !!(currentUser && currentUser.role === 'super' && state.superUiMode === 'empresa');
     }
-    function updateSuperLensSwitcherUI() {
-      var wrap = document.getElementById('superLensSwitcher');
-      var subBtn = document.getElementById('headerSub');
-      if (!wrap) return;
-      if (!currentUser || currentUser.role !== 'super') {
-        wrap.classList.add('hidden');
-        if (subBtn) subBtn.classList.remove('hidden');
-        return;
+
+    var FERRIOL_NOTIF_SOUND_KEY = 'ferriol_notif_sound_enabled';
+    function ferriolNotifSoundEnabled() {
+      try {
+        return localStorage.getItem(FERRIOL_NOTIF_SOUND_KEY) !== '0';
+      } catch (_) {
+        return true;
       }
-      var uiNegocio = isSuperKioscoPreviewMode();
-      if (uiNegocio) {
-        wrap.classList.add('hidden');
-        if (subBtn) subBtn.classList.remove('hidden');
-      } else {
-        wrap.classList.remove('hidden');
-        if (subBtn) subBtn.classList.add('hidden');
-      }
-      var m = state.superUiMode;
-      wrap.querySelectorAll('[data-super-lens]').forEach(function (btn) {
-        var on = btn.getAttribute('data-super-lens') === m;
-        btn.classList.toggle('super-lens-btn--active', on);
-        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-      });
     }
+    var _ferriolAudioCtx = null;
+    function ferriolGetAudioContext() {
+      if (_ferriolAudioCtx) return _ferriolAudioCtx;
+      var AC = typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext);
+      if (!AC) return null;
+      _ferriolAudioCtx = new AC();
+      return _ferriolAudioCtx;
+    }
+    (function ferriolSetupNotifAudioUnlock() {
+      var unlocked = false;
+      function unlock() {
+        if (unlocked) return;
+        var ctx = ferriolGetAudioContext();
+        if (ctx && ctx.state === 'suspended') ctx.resume().catch(function () {});
+        unlocked = true;
+        document.removeEventListener('pointerdown', unlock);
+        document.removeEventListener('keydown', unlock);
+      }
+      document.addEventListener('pointerdown', unlock, { passive: true });
+      document.addEventListener('keydown', unlock);
+    })();
+    function ferriolPlayNotificationChime() {
+      if (!ferriolNotifSoundEnabled()) return;
+      var ctx = ferriolGetAudioContext();
+      if (!ctx) return;
+      ctx.resume().catch(function () {});
+      function tone(freq, start, dur, vol) {
+        var osc = ctx.createOscillator();
+        var g = ctx.createGain();
+        osc.connect(g);
+        g.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, start);
+        g.gain.setValueAtTime(0.0001, start);
+        g.gain.exponentialRampToValueAtTime(vol, start + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+        osc.start(start);
+        osc.stop(start + dur + 0.03);
+      }
+      var t = ctx.currentTime;
+      tone(784, t, 0.11, 0.11);
+      tone(1046.5, t + 0.09, 0.14, 0.09);
+    }
+    function ferriolKiosqueroNotifShell() {
+      return !!(currentUser && (currentUser.role === 'kiosquero' || isSuperKioscoPreviewMode()));
+    }
+    function ferriolStartNotificationPolling() {
+      if (window._ferriolNotifPollInterval) clearInterval(window._ferriolNotifPollInterval);
+      window._ferriolNotifPollInterval = setInterval(function () {
+        if (document.hidden || !supabaseClient) return;
+        if (!ferriolKiosqueroNotifShell()) return;
+        loadNotifications();
+      }, 60000);
+    }
+    function ferriolStopNotificationPolling() {
+      if (window._ferriolNotifPollInterval) {
+        clearInterval(window._ferriolNotifPollInterval);
+        window._ferriolNotifPollInterval = null;
+      }
+    }
+
     async function ferriolSetSuperLens(lens) {
       if (!currentUser || currentUser.role !== 'super') return;
       if (lens !== 'empresa' && lens !== 'socio' && lens !== 'negocio') return;
       if (lens === 'negocio') {
         await window._superIrModoNegocio();
-        updateSuperLensSwitcherUI();
         return;
       }
+      ferriolStopNotificationPolling();
       try { sessionStorage.setItem('ferriol_super_ui', lens); } catch (_) {}
       state.superUiMode = lens;
       if (window._trialCountdownInterval) { clearInterval(window._trialCountdownInterval); window._trialCountdownInterval = null; }
       applyAppShell();
-      updateSuperLensSwitcherUI();
       state._restoringFromHistory = true;
       showPanel('super');
       state._restoringFromHistory = false;
@@ -1866,17 +1911,24 @@
         if (isSuper && !uiNegocio) {
           ht.textContent = 'FERRIOL OS';
           if (subEl) {
-            subEl.classList.remove('header-sub--toggle');
-            subEl.removeAttribute('title');
-            subEl.removeAttribute('aria-label');
+            subEl.classList.add('header-sub--toggle');
+            if (isSuperSocioLens()) {
+              subEl.textContent = 'Administración';
+              subEl.title = 'Tocá para abrir Modo usuario (vista tienda)';
+              subEl.setAttribute('aria-label', 'Cambiar a Modo usuario');
+            } else {
+              subEl.textContent = 'Fundador';
+              subEl.title = 'Tocá para abrir Administración (vista socio)';
+              subEl.setAttribute('aria-label', 'Cambiar a Administración');
+            }
           }
         } else if (isSuper && uiNegocio) {
           ht.textContent = currentUser.kioscoName || 'Ferriol OS';
           if (subEl) {
-            subEl.textContent = 'Usuario · modo tienda (tocá para administración)';
+            subEl.textContent = 'Modo usuario';
             subEl.classList.add('header-sub--toggle');
-            subEl.title = 'Volver a Fundador, Administrador o elegir otra vista arriba';
-            subEl.setAttribute('aria-label', 'Volver a vista administración');
+            subEl.title = 'Tocá para volver a Fundador';
+            subEl.setAttribute('aria-label', 'Volver a vista Fundador');
           }
         } else if (isPartner) {
           ht.textContent = 'FERRIOL OS';
@@ -1903,7 +1955,6 @@
       if (currentUser && currentUser.role === 'super') {
         loadSuperMainFerriolResumenCard();
       }
-      updateSuperLensSwitcherUI();
     }
 
     function showPanel(name, cajaTabOverride) {
@@ -1947,7 +1998,7 @@
       if (name === 'dashboard') {
         updateTrialCountdown();
         updateDashboard();
-        if (currentUser && currentUser.role === 'kiosquero') { loadAdminContact(); loadNotifications(); }
+        if (ferriolKiosqueroNotifShell()) { loadAdminContact(); loadNotifications(); }
       }
       if (name === 'scanner') {
         if (typeof window._startScannerCamera === 'function') window._startScannerCamera();
@@ -2051,7 +2102,6 @@
           setNotifLastRead();
           renderNotificationsMerged();
         });
-        if (typeof playBeep === 'function') playBeep();
       } else closeNotifDropdown();
       lucide.createIcons();
     });
@@ -4094,11 +4144,14 @@ async function showApp() {
       showPanel('dashboard');
       state._restoringFromHistory = false;
       history.replaceState({ panel: 'dashboard', root: true }, '', location.href);
+      ferriolStartNotificationPolling();
       lucide.createIcons();
     } else if (isSuper) {
+      ferriolStopNotificationPolling();
       goToPanel('super');
       lucide.createIcons();
     } else if (isPartner) {
+      ferriolStopNotificationPolling();
       goToPanel('super');
       lucide.createIcons();
     } else {
@@ -4113,6 +4166,7 @@ async function showApp() {
       showPanel('dashboard');
       state._restoringFromHistory = false;
       history.replaceState({ panel: 'dashboard', root: true }, '', location.href);
+      ferriolStartNotificationPolling();
       lucide.createIcons();
     }
 }
@@ -4449,6 +4503,8 @@ async function showApp() {
 
     function doLogout() {
       if (supabaseClient) supabaseClient.auth.signOut();
+      ferriolStopNotificationPolling();
+      _ferriolNotifFetchBaselineDone = false;
       currentUser = null;
       state.superUiMode = 'empresa';
       try { sessionStorage.removeItem('ferriol_super_ui'); } catch (_) {}
@@ -4477,6 +4533,7 @@ async function showApp() {
       showPanel('dashboard');
       state._restoringFromHistory = false;
       history.replaceState({ panel: 'dashboard', root: true }, '', location.href);
+      ferriolStartNotificationPolling();
       applyAppShell();
       lucide.createIcons();
     };
@@ -4488,19 +4545,19 @@ async function showApp() {
     if (headerSubBtn) {
       headerSubBtn.addEventListener('click', function () {
         if (!currentUser || currentUser.role !== 'super') return;
-        if (state.superUiMode === 'negocio') ferriolSetSuperLens('empresa');
-        else ferriolSetSuperLens('negocio');
+        if (isSuperKioscoPreviewMode()) {
+          ferriolSetSuperLens('empresa');
+          return;
+        }
+        if (state.superUiMode === 'empresa') {
+          ferriolSetSuperLens('socio');
+          return;
+        }
+        if (state.superUiMode === 'socio') {
+          ferriolSetSuperLens('negocio');
+        }
       });
     }
-    (function () {
-      var sw = document.getElementById('superLensSwitcher');
-      if (!sw) return;
-      sw.addEventListener('click', function (e) {
-        var b = e.target.closest('[data-super-lens]');
-        if (!b) return;
-        ferriolSetSuperLens(b.getAttribute('data-super-lens'));
-      });
-    })();
 
     function fillConfigForm() {
       if (!currentUser) return;
@@ -4508,8 +4565,17 @@ async function showApp() {
       if (!asNegocio) return;
       document.getElementById('configKioscoName').value = currentUser.kioscoName || '';
       document.getElementById('configWhatsappMsg').value = currentUser.whatsappMessage || DEFAULT_WHATSAPP;
+      var ns = document.getElementById('configNotifSoundEnabled');
+      if (ns) ns.checked = ferriolNotifSoundEnabled();
       loadKioscoLicensePaymentInfo();
     }
+    (function setupNotifSoundCheckbox() {
+      var el = document.getElementById('configNotifSoundEnabled');
+      if (!el) return;
+      el.addEventListener('change', function () {
+        try { localStorage.setItem(FERRIOL_NOTIF_SOUND_KEY, el.checked ? '1' : '0'); } catch (_) {}
+      });
+    })();
     async function saveConfig() {
       if (!currentUser) return;
       var asNegocio = currentUser.role === 'kiosquero' || isSuperKioscoPreviewMode();
@@ -5428,6 +5494,7 @@ async function showApp() {
     });
 
     var notificationsCache = [];
+    var _ferriolNotifFetchBaselineDone = false;
     var NOTIF_LAST_READ_KEY = 'ferriol_notif_last_read';
     function getNotifLastRead() {
       try {
@@ -5497,8 +5564,15 @@ async function showApp() {
     async function loadNotifications() {
       if (!supabaseClient) return;
       try {
+        var prevIds = new Set((notificationsCache || []).map(function (n) { return n.id; }).filter(Boolean));
         var res = await supabaseClient.from('notifications').select('id, created_at, message').order('created_at', { ascending: false }).limit(50);
-        notificationsCache = (res.data || []);
+        var data = res.data || [];
+        var newRows = data.filter(function (n) { return n.id && !prevIds.has(n.id); });
+        notificationsCache = data;
+        if (_ferriolNotifFetchBaselineDone && newRows.length > 0 && ferriolKiosqueroNotifShell()) {
+          ferriolPlayNotificationChime();
+        }
+        _ferriolNotifFetchBaselineDone = true;
         renderNotificationsMerged();
       } catch (_) {}
     }

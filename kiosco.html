@@ -168,15 +168,7 @@
         </div>
         <div class="min-w-0">
           <h1 class="font-bold text-lg tracking-tight" id="headerTitle">Ferriol OS</h1>
-          <div class="mt-0.5 min-w-0 max-w-[70vw] sm:max-w-md">
-            <button type="button" id="headerSub" class="header-sub w-full text-xs text-white/80 text-left truncate">Sistema Premium</button>
-            <!-- Fundador: tres vistas en el mismo hueco del subtítulo (solo cuenta super, modos admin) -->
-            <div id="superLensSwitcher" class="hidden flex gap-0.5 flex-wrap items-stretch" role="group" aria-label="Vista de administración">
-              <button type="button" data-super-lens="empresa" class="super-lens-btn flex-1 min-w-[4.5rem] rounded-md py-1 px-1 text-[10px] sm:text-[11px] font-semibold border border-white/15 bg-white/5 text-white/80 touch-target leading-tight" aria-pressed="false">Fundador</button>
-              <button type="button" data-super-lens="socio" class="super-lens-btn flex-1 min-w-[4.5rem] rounded-md py-1 px-1 text-[10px] sm:text-[11px] font-semibold border border-white/15 bg-white/5 text-white/80 touch-target leading-tight" aria-pressed="false">Administrador</button>
-              <button type="button" data-super-lens="negocio" class="super-lens-btn flex-1 min-w-[4.5rem] rounded-md py-1 px-1 text-[10px] sm:text-[11px] font-semibold border border-white/15 bg-white/5 text-white/80 touch-target leading-tight" aria-pressed="false">Usuario</button>
-            </div>
-          </div>
+          <button type="button" id="headerSub" class="header-sub text-xs text-white/80 text-left max-w-[70vw] sm:max-w-md truncate">Sistema Premium</button>
         </div>
       </div>
       <div class="flex items-center gap-2">
@@ -1014,6 +1006,15 @@
           <div>
             <label class="block text-sm text-white/70 mb-2">Mensaje de cobro por WhatsApp (usá <code class="text-[#86efac]">{cliente}</code> y <code class="text-[#86efac]">{monto}</code>)</label>
             <textarea id="configWhatsappMsg" rows="4" placeholder="Hola {cliente}, tenés un saldo de ${monto}..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] resize-y"></textarea>
+          </div>
+          <div class="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+            <label class="flex items-start gap-3 cursor-pointer touch-target">
+              <input type="checkbox" id="configNotifSoundEnabled" class="mt-1 rounded border-white/30 bg-black/20 text-[#22c55e] focus:ring-[#22c55e] shrink-0" checked>
+              <span>
+                <span class="text-sm text-white/85 font-medium block">Sonido al recibir avisos</span>
+                <span class="text-xs text-white/50 block mt-1">Un aviso corto cuando el administrador envía un mensaje nuevo. Los navegadores suelen activar el audio después de que toques la pantalla una vez.</span>
+              </span>
+            </label>
           </div>
           <button id="saveConfig" class="btn-glow rounded-xl py-3 px-6 font-semibold">Guardar</button>
 
