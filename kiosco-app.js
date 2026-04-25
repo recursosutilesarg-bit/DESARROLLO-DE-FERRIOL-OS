@@ -708,20 +708,21 @@
     }
     async function ferriolFetchSponsorHintText() {
       var fallback = ferriolKioscoSponsorHintHtml();
-      if (fallback !== null) return { html: fallback, ok: true };
-      if (!supabaseClient) return { html: 'Configurá Supabase para ver datos del referidor.', ok: false };
+      if (fallback !== null) return { html: fallback, ok: true, partnerTransferInfo: '' };
+      if (!supabaseClient) return { html: 'Configurá Supabase para ver datos del referidor.', ok: false, partnerTransferInfo: '' };
       try {
-        var sp = await supabaseClient.from('profiles').select('kiosco_name, email, role').eq('id', currentUser.sponsorId).maybeSingle();
-        if (sp.error || !sp.data) return { html: 'Tenés referidor asignado. Si no sabés quién es, consultá con el administrador.', ok: true };
+        var sp = await supabaseClient.from('profiles').select('kiosco_name, email, role, partner_transfer_info').eq('id', currentUser.sponsorId).maybeSingle();
+        if (sp.error || !sp.data) return { html: 'Tenés referidor asignado. Si no sabés quién es, consultá con el administrador.', ok: true, partnerTransferInfo: '' };
         var d = sp.data;
+        var partnerTI = d.partner_transfer_info != null && String(d.partner_transfer_info).trim() ? String(d.partner_transfer_info).trim() : '';
         var nm = (d.kiosco_name || '').trim() || (d.email ? String(d.email).split('@')[0] : '') || '—';
         var roleL = d.role === 'super' ? 'Administrador' : (d.role === 'partner' ? 'Socio vendedor' : 'Referidor');
         var em = d.email ? String(d.email).replace(/</g, '&lt;').replace(/&/g, '&amp;') : '';
         var nmEsc = String(nm).replace(/</g, '&lt;').replace(/&/g, '&amp;');
-        var html = 'Pagás la licencia a: <strong class="text-[#86efac]/95">' + nmEsc + '</strong>' + (em ? ' · ' + em : '') + ' <span class="text-white/45">(' + roleL + ')</span>. Usá los datos de transferencia de abajo; si no coinciden, confirmá con esa persona o con el administrador.';
-        return { html: html, ok: true };
+        var html = 'Pagás la licencia a: <strong class="text-[#86efac]/95">' + nmEsc + '</strong>' + (em ? ' · ' + em : '') + ' <span class="text-white/45">(' + roleL + ')</span>. Más abajo: datos de la empresa; si tu referidor cargó los suyos, también aparecen aparte.';
+        return { html: html, ok: true, partnerTransferInfo: partnerTI };
       } catch (_) {
-        return { html: 'Consultá con el administrador quién es tu referidor.', ok: false };
+        return { html: 'Consultá con el administrador quién es tu referidor.', ok: false, partnerTransferInfo: '' };
       }
     }
     async function loadKioscoLicensePaymentInfo() {
@@ -752,6 +753,18 @@
       if (pre) pre.textContent = transferBody;
       var spHint = await ferriolFetchSponsorHintText();
       if (sponsorEl) sponsorEl.innerHTML = spHint.html;
+      var ptw = document.getElementById('kioscoPartnerTransferWrap');
+      var ptx = document.getElementById('kioscoPartnerTransferText');
+      if (ptw && ptx) {
+        var pti = (spHint && spHint.partnerTransferInfo) ? String(spHint.partnerTransferInfo).trim() : '';
+        if (pti) {
+          ptx.textContent = pti;
+          ptw.classList.remove('hidden');
+        } else {
+          ptx.textContent = '';
+          ptw.classList.add('hidden');
+        }
+      }
       var waWrap = document.getElementById('kioscoLicenseReferidorWhatsApp');
       if (waWrap && currentUser && currentUser.role === 'kiosquero') {
         await refreshViewerHelpWhatsApp(currentUser);
@@ -1198,6 +1211,58 @@
     }
     function isEmpresaLensSuper() {
       return !!(currentUser && currentUser.role === 'super' && state.superUiMode === 'empresa');
+    }
+    /** Tarjeta “Pagar a Ferriol” en Más: socios; fundador en vista Empresa la oculta (usa Ajustes). */
+    function shouldShowFerriolCompanyCardInMas() {
+      if (!currentUser) return false;
+      if (currentUser.role === 'partner') return true;
+      if (currentUser.role === 'super' && isSuperSocioLens()) return true;
+      return false;
+    }
+    function updateSuperMasBankingShell() {
+      var cF = document.getElementById('superMasFerriolBankingCard');
+      var cP = document.getElementById('superMasPartnerBankingCard');
+      if (cF) cF.classList.toggle('hidden', !shouldShowFerriolCompanyCardInMas());
+      if (cP) cP.classList.toggle('hidden', !(currentUser && currentUser.role === 'partner'));
+    }
+    async function loadSuperMasBankingSection() {
+      if (!currentUser) return;
+      updateSuperMasBankingShell();
+      var preF = document.getElementById('superMasFerriolTransferText');
+      if (preF && shouldShowFerriolCompanyCardInMas() && supabaseClient) {
+        try {
+          var r = await supabaseClient.from('app_settings').select('value').eq('key', 'ferriol_transfer_info').maybeSingle();
+          preF.textContent = (r.data && r.data.value) ? String(r.data.value) : 'Aún no hay datos de cuenta cargados. Pedí a la empresa que completen Ajustes (fundador) o contactá a soporte.';
+        } catch (_) {
+          preF.textContent = 'No se pudieron cargar los datos de la empresa.';
+        }
+      } else if (preF) preF.textContent = '—';
+      if (currentUser.role === 'partner' && supabaseClient) {
+        try {
+          var pr = await supabaseClient.from('profiles').select('partner_transfer_info').eq('id', currentUser.id).maybeSingle();
+          if (!pr.error && pr.data) {
+            currentUser.partnerTransferInfo = pr.data.partner_transfer_info != null ? String(pr.data.partner_transfer_info) : '';
+          }
+        } catch (_) {}
+      }
+      var prev = document.getElementById('superMasPartnerTransferPreview');
+      if (prev) {
+        var t = (currentUser && currentUser.partnerTransferInfo) ? String(currentUser.partnerTransferInfo).trim() : '';
+        if (t) {
+          var short = t.length > 200 ? t.slice(0, 200) + '…' : t;
+          prev.textContent = 'Guardado: ' + short;
+          prev.classList.remove('hidden', 'text-amber-200/70');
+        } else {
+          prev.textContent = 'Todavía no cargaste datos. Tus referidos solo verán los datos de la empresa en Caja.';
+          prev.classList.add('text-amber-200/70');
+          prev.classList.remove('hidden');
+        }
+      }
+      var ta = document.getElementById('partnerTransferInfoTextarea');
+      if (ta && currentUser && currentUser.role === 'partner') {
+        ta.value = currentUser.partnerTransferInfo != null ? String(currentUser.partnerTransferInfo) : '';
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
 
     var FERRIOL_NOTIF_SOUND_KEY = 'ferriol_notif_sound_enabled';
@@ -2376,6 +2441,8 @@
       if (kpc) { kpc.classList.add('hidden'); kpc.classList.remove('flex'); }
       var pal = document.getElementById('partnerAffiliateLinksModal');
       if (pal) { pal.classList.add('hidden'); pal.classList.remove('flex'); }
+      var pti = document.getElementById('partnerTransferInfoModal');
+      if (pti) { pti.classList.add('hidden'); pti.classList.remove('flex'); }
       var sud = document.getElementById('superUserDetailModal');
       if (sud) { sud.classList.add('hidden'); sud.classList.remove('flex'); }
       if (typeof window._cerrarModalLibreta === 'function') {
@@ -2494,6 +2561,7 @@
       if (provWrap) provWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper()));
       var affWrap = document.querySelector('.ferriol-partner-affiliate-links-wrap');
       if (affWrap) affWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper()));
+      updateSuperMasBankingShell();
     }
 
     function showPanel(name, cajaTabOverride) {
@@ -2502,7 +2570,7 @@
         try { sessionStorage.setItem('ferriol_super_ui', 'empresa'); } catch (_) {}
         applyAppShell();
       }
-      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'afiliados' && state.superSection !== 'balance' && state.superSection !== 'solicitudes') {
+      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'afiliados' && state.superSection !== 'balance' && state.superSection !== 'solicitudes' && state.superSection !== 'mas') {
         switchSuperSection('afiliados');
       }
       if (name !== 'scanner') window._scanForProductCode = false;
@@ -2529,7 +2597,7 @@
         var navSuperBottom = document.getElementById('navSuperBottom');
         if (navSuperBottom) navSuperBottom.classList.remove('hidden');
         var landSuper = state.superSection || 'afiliados';
-        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'balance' && landSuper !== 'solicitudes') landSuper = 'afiliados';
+        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'balance' && landSuper !== 'solicitudes' && landSuper !== 'mas') landSuper = 'afiliados';
         switchSuperSection(landSuper);
       } else {
         if (superListCountdownInterval) { clearInterval(superListCountdownInterval); superListCountdownInterval = null; }
@@ -2618,6 +2686,9 @@
         void renderSuperMembershipDayRequestBanners();
         if (isEmpresaLensSuper()) loadSuperSolicitudesSection();
       }
+      if (state.superSection === 'mas') {
+        void loadSuperMasBankingSection();
+      }
       lucide.createIcons();
     }
     function superMasScrollTo(elId) {
@@ -2638,6 +2709,76 @@
     if (btnSuperMasScrollAdmin) btnSuperMasScrollAdmin.addEventListener('click', function () { superMasScrollTo('superMasBlockAdmin'); });
     var btnSuperAjustesVolverMas = document.getElementById('btnSuperAjustesVolverMas');
     if (btnSuperAjustesVolverMas) btnSuperAjustesVolverMas.addEventListener('click', function () { switchSuperSection('mas'); });
+    function openPartnerTransferInfoModal() {
+      var m = document.getElementById('partnerTransferInfoModal');
+      var ta = document.getElementById('partnerTransferInfoTextarea');
+      var msg = document.getElementById('partnerTransferInfoMsg');
+      if (msg) {
+        msg.classList.add('hidden');
+        msg.textContent = '';
+        msg.classList.remove('text-red-300', 'text-emerald-300');
+      }
+      if (ta && currentUser) ta.value = currentUser.partnerTransferInfo != null ? String(currentUser.partnerTransferInfo) : '';
+      if (m) {
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    function closePartnerTransferInfoModal() {
+      var m = document.getElementById('partnerTransferInfoModal');
+      if (m) {
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+      }
+    }
+    var btnOpenPartnerTransferModal = document.getElementById('btnOpenPartnerTransferModal');
+    if (btnOpenPartnerTransferModal) {
+      btnOpenPartnerTransferModal.addEventListener('click', function () {
+        if (currentUser && currentUser.role === 'partner') openPartnerTransferInfoModal();
+      });
+    }
+    var partnerTransferInfoModalClose = document.getElementById('partnerTransferInfoModalClose');
+    if (partnerTransferInfoModalClose) partnerTransferInfoModalClose.addEventListener('click', closePartnerTransferInfoModal);
+    var partnerTransferInfoModalOverlay = document.getElementById('partnerTransferInfoModalOverlay');
+    if (partnerTransferInfoModalOverlay) partnerTransferInfoModalOverlay.addEventListener('click', closePartnerTransferInfoModal);
+    var partnerTransferInfoSave = document.getElementById('partnerTransferInfoSave');
+    if (partnerTransferInfoSave) {
+      partnerTransferInfoSave.addEventListener('click', async function () {
+        var msg = document.getElementById('partnerTransferInfoMsg');
+        var ta = document.getElementById('partnerTransferInfoTextarea');
+        if (!supabaseClient || !currentUser || currentUser.role !== 'partner') {
+          if (msg) {
+            msg.textContent = 'Solo un administrador de red (socio) puede guardar esto.';
+            msg.classList.remove('hidden', 'text-emerald-300');
+            msg.classList.add('text-red-300');
+          }
+          return;
+        }
+        var val = ta ? String(ta.value) : '';
+        if (msg) {
+          msg.classList.add('hidden');
+          msg.textContent = '';
+        }
+        var up = await supabaseClient.from('profiles').update({ partner_transfer_info: val }).eq('id', currentUser.id);
+        if (up.error) {
+          if (msg) {
+            msg.textContent = 'No se pudo guardar. ¿Ejecutaste el SQL de partner_transfer_info y las políticas RLS? ' + (up.error.message || '');
+            msg.classList.remove('hidden', 'text-emerald-300');
+            msg.classList.add('text-red-300');
+          }
+          return;
+        }
+        currentUser.partnerTransferInfo = val;
+        if (msg) {
+          msg.textContent = 'Listo. Tus referidos lo verán en Caja.';
+          msg.classList.remove('hidden', 'text-red-300');
+          msg.classList.add('text-emerald-300');
+        }
+        await loadSuperMasBankingSection();
+        closePartnerTransferInfoModal();
+      });
+    }
     document.querySelectorAll('.super-nav-btn').forEach(function (btn) {
       btn.onclick = function () {
         if (btn.dataset.superSection) switchSuperSection(btn.dataset.superSection);
@@ -4882,7 +5023,7 @@ async function showApp() {
           return;
         }
         var userCreatedAt = (authData && authData.user && authData.user.created_at) ? authData.user.created_at : null;
-        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending };
+        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '' };
         await showApp();
       } catch (err) {
         console.error('Error en login:', err);
@@ -7353,7 +7494,7 @@ async function showApp() {
           return;
         }
         var userCreatedAt = (session && session.user && session.user.created_at) ? session.user.created_at : null;
-        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending };
+        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '' };
         await showApp();
       } catch (e) {
         console.error('Error en init:', e);

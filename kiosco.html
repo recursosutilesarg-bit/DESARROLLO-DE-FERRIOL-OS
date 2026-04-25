@@ -239,7 +239,7 @@
           <i data-lucide="clipboard-list" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Solicitudes</span>
         </button>
-        <button data-super-section="mas" class="super-nav-btn super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Más opciones">
+        <button data-super-section="mas" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Más opciones">
           <i data-lucide="menu" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Más</span>
         </button>
@@ -429,9 +429,14 @@
         <p id="kioscoLicensePriceHint" class="text-sm text-white/75 mb-2"></p>
         <p id="kioscoLicenseSponsorHint" class="text-xs text-white/60 mb-2"></p>
         <div id="kioscoLicenseReferidorWhatsApp" class="hidden mb-2"></div>
-        <p class="text-xs text-white/55 mb-1">Coordiná el pago con tu <strong class="text-white/75">referidor</strong> (WhatsApp arriba si lo cargó en su perfil). Los <strong class="text-white/70">datos de cuenta</strong> de referencia los publica la empresa en Ferriol; confirmá montos y comprobante con tu referidor. Si te <strong class="text-white/70">reasignan</strong> otro referidor, el nombre y el contacto se actualizan.</p>
+        <p class="text-xs text-white/55 mb-1">Coordiná el pago con tu <strong class="text-white/75">referidor</strong> (WhatsApp arriba si lo cargó en su perfil). Más abajo: datos de la <strong class="text-white/70">empresa (Ferriol)</strong> y, si tu referidor los cargó, <strong class="text-white/70">sus datos bancarios</strong> para abonarle. Confirmá montos y comprobante con quien te corresponda. Si te <strong class="text-white/70">reasignan</strong> otro referidor, el nombre y el contacto se actualizan.</p>
         <p class="text-[10px] text-white/45 mb-2">Ese canal es quien centraliza el cobro de tu cuota frente a Ferriol OS.</p>
+        <p class="text-xs text-cyan-200/80 mb-1">Transferencia a la empresa (Ferriol)</p>
         <pre id="kioscoTransferInfoText" class="text-xs whitespace-pre-wrap text-white/90 glass rounded-lg p-3 border border-white/15 max-h-48 overflow-y-auto font-sans"></pre>
+        <div id="kioscoPartnerTransferWrap" class="hidden mt-3 rounded-lg border border-amber-500/30 bg-amber-500/06 p-3">
+          <p class="text-xs font-medium text-amber-200/90 mb-2 flex items-center gap-1.5"><i data-lucide="user" class="w-3.5 h-3.5 shrink-0"></i> Datos bancarios de tu referidor (para abonarle la parte de red que corresponda)</p>
+          <pre id="kioscoPartnerTransferText" class="text-xs whitespace-pre-wrap text-white/90 font-sans max-h-36 overflow-y-auto"></pre>
+        </div>
         <p class="text-[10px] text-white/40 mt-2">En esta app no verás comisiones ni repartos 20/80: eso es gestión de la red comercial, no de tu caja diaria.</p>
       </div>
 
@@ -1328,7 +1333,24 @@
             <i data-lucide="menu" class="w-5 h-5 text-[#86efac]"></i>
             Más opciones
           </h2>
-          <p class="text-xs text-white/50 mb-4">Atajos a herramientas de administración global.</p>
+          <p class="text-xs text-white/50 mb-4">Datos bancarios y, si sos fundador, más abajo: herramientas globales.</p>
+          <div id="superMasFerriolBankingCard" class="mb-5 rounded-xl border border-cyan-500/35 bg-cyan-500/10 p-4 sm:p-5 hidden">
+            <h3 class="font-bold text-base mb-1 flex items-center gap-2 text-cyan-100/95">
+              <i data-lucide="landmark" class="w-5 h-5 text-cyan-200"></i>
+              Pagar a Ferriol (empresa)
+            </h3>
+            <p class="text-xs text-white/55 mb-2">Usá esta cuenta para la cuota de socio / <strong class="text-white/75">distribuidor digital</strong> (membresía a la red Ferriol).</p>
+            <pre id="superMasFerriolTransferText" class="text-xs whitespace-pre-wrap text-white/90 font-sans max-h-52 overflow-y-auto">—</pre>
+          </div>
+          <div id="superMasPartnerBankingCard" class="mb-5 rounded-xl border border-amber-500/30 bg-amber-500/08 p-4 sm:p-5 hidden">
+            <h3 class="font-bold text-base mb-1 flex items-center gap-2 text-amber-200/95">
+              <i data-lucide="banknote" class="w-4 h-4 text-amber-200"></i>
+              Tus datos para que te paguen (referidos)
+            </h3>
+            <p class="text-xs text-white/55 mb-3">Quien figure como afiliado tuyo verá en <strong class="text-white/70">Caja</strong> el texto de la empresa (arriba) y, si lo cargás acá, <strong class="text-white/70">tus datos bancarios</strong> para abonarte la licencia o lo que defina la red.</p>
+            <button type="button" id="btnOpenPartnerTransferModal" class="w-full sm:w-auto rounded-xl py-2.5 px-4 text-sm font-semibold border border-amber-500/50 bg-amber-500/15 hover:bg-amber-500/25 text-amber-100 touch-target text-left">Cargar o editar datos bancarios</button>
+            <p id="superMasPartnerTransferPreview" class="text-xs text-white/45 mt-2 hidden"></p>
+          </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 super-only super-main-only">
             <button type="button" id="btnSuperMasOpenAjustes" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
               <div class="w-12 h-12 rounded-xl bg-[#22c55e]/25 flex items-center justify-center shrink-0">
@@ -1352,7 +1374,7 @@
               <span class="text-xs text-white/55">Instrucción para rol <strong class="text-white/65">super</strong> en Supabase (casos excepcionales).</span>
             </button>
           </div>
-          <div id="superMasBlockAviso" class="scroll-mt-6 rounded-xl border border-white/10 bg-black/10 p-4 sm:p-5 mb-6">
+          <div id="superMasBlockAviso" class="super-only super-main-only scroll-mt-6 rounded-xl border border-white/10 bg-black/10 p-4 sm:p-5 mb-6">
             <h3 class="font-bold text-base mb-1 flex items-center gap-2 text-white">
               <i data-lucide="megaphone" class="w-5 h-5 text-[#86efac]"></i>
               Aviso global
@@ -1365,7 +1387,7 @@
             </button>
             <p id="adminNotificationMsg" class="text-xs mt-2 text-green-300 hidden"></p>
           </div>
-          <div id="superMasBlockAdmin" class="scroll-mt-6 pt-2">
+          <div id="superMasBlockAdmin" class="super-only super-main-only scroll-mt-6 pt-2">
             <h3 class="font-bold text-base mb-2 flex items-center gap-2 text-white">
               <i data-lucide="user-cog" class="w-5 h-5 text-[#86efac]"></i>
               Otro administrador global
@@ -1874,7 +1896,25 @@
   </div>
   </div><!-- /#appWrap -->
   <script src="kiosco-config.js"></script>
-  <script defer src="kiosco-app.js?v=20260422cartline"></script>
+  <!-- Modal: datos bancarios del socio (para referidos) -->
+  <div id="partnerTransferInfoModal" class="fixed inset-0 z-[74] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="partnerTransferInfoModalOverlay"></div>
+    <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto scale-in">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 text-amber-200"></i> Datos bancarios (referidos)</h3>
+        <button type="button" id="partnerTransferInfoModalClose" class="btn-neomorphic rounded-xl p-2 touch-target" title="Cerrar"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <p class="text-sm text-white/60 mb-3">Esto lo verán tus <strong class="text-white/85">kiosqueros vinculados a vos</strong> en Caja, junto con los datos de la empresa. No incluyas contraseñas; solo lo necesario para transferirte (CBU, CVU, alias, titular, banco, etc.).</p>
+      <div id="partnerTransferInfoMsg" class="text-xs text-amber-200 mb-2 hidden"></div>
+      <label class="block text-xs text-white/55 mb-1" for="partnerTransferInfoTextarea">Texto a mostrar</label>
+      <textarea id="partnerTransferInfoTextarea" rows="8" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-sm resize-y min-h-[140px] mb-4" placeholder="Alias…&#10;CBU…"></textarea>
+      <div class="flex flex-col sm:flex-row gap-2 sm:justify-end">
+        <button type="button" id="partnerTransferInfoSave" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold touch-target">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script defer src="kiosco-app.js?v=20260422partnerbank"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>
