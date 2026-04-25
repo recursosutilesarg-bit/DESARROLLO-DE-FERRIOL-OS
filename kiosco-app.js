@@ -194,6 +194,37 @@
       } catch (_) {}
       return null;
     }
+    function closePartnerAffiliateLinksModal() {
+      var m = document.getElementById('partnerAffiliateLinksModal');
+      if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+    }
+    function openPartnerAffiliateLinksModal() {
+      var m = document.getElementById('partnerAffiliateLinksModal');
+      if (!m || !currentUser) return;
+      function bindCopyAndShow(c) {
+        var code = c || '';
+        var codeEl = document.getElementById('partnerAffiliateCodeDisplay');
+        if (codeEl) codeEl.textContent = code || '—';
+        var ink = document.getElementById('partnerNetLinkK');
+        var ins = document.getElementById('partnerNetLinkS');
+        if (ink) ink.value = code ? ferriolReferralInviteUrl(code, 'kiosco') : '';
+        if (ins) ins.value = code ? ferriolReferralInviteUrl(code, 'socio') : '';
+        var bk = document.getElementById('partnerNetBtnK');
+        var bs = document.getElementById('partnerNetBtnS');
+        if (bk) bk.onclick = function () { copyTextToClipboard((document.getElementById('partnerNetLinkK') || {}).value, 'Enlace para negocios copiado.'); };
+        if (bs) bs.onclick = function () { copyTextToClipboard((document.getElementById('partnerNetLinkS') || {}).value, 'Enlace para vendedores copiado.'); };
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+        try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+      }
+      var cShow = currentUser.referralCode;
+      if (!cShow && supabaseClient) {
+        ensureUserReferralCode(currentUser.id).then(function (cc) {
+          if (cc) currentUser.referralCode = cc;
+          bindCopyAndShow(cc);
+        });
+      } else bindCopyAndShow(cShow);
+    }
     async function getSponsorIdForNewKiosqueroProfile() {
       var fromStore = '';
       try { fromStore = normalizeReferralCode(sessionStorage.getItem('ferriol_signup_ref') || ''); } catch (_) {}
@@ -2179,6 +2210,8 @@
       if (kpr) { kpr.classList.add('hidden'); kpr.classList.remove('flex'); }
       var kpc = document.getElementById('kiosqueroProvisionCompleteModal');
       if (kpc) { kpc.classList.add('hidden'); kpc.classList.remove('flex'); }
+      var pal = document.getElementById('partnerAffiliateLinksModal');
+      if (pal) { pal.classList.add('hidden'); pal.classList.remove('flex'); }
       var sud = document.getElementById('superUserDetailModal');
       if (sud) { sud.classList.add('hidden'); sud.classList.remove('flex'); }
       if (typeof window._cerrarModalLibreta === 'function') {
@@ -2295,6 +2328,8 @@
       } catch (_) {}
       var provWrap = document.querySelector('.ferriol-partner-provision-btn-wrap');
       if (provWrap) provWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper()));
+      var affWrap = document.querySelector('.ferriol-partner-affiliate-links-wrap');
+      if (affWrap) affWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper()));
     }
 
     function showPanel(name, cajaTabOverride) {
@@ -6200,37 +6235,8 @@ async function showApp() {
       }
       listEl.innerHTML = displayList.map(function (u) { return buildSuperAfiliadoRowHtml(u); }).join('');
       bindSuperAfiliadoRowClicks(listEl, displayList);
-      var netInfoEl = document.getElementById('superPartnerNetInfo');
-      if (netInfoEl) {
-        if (isPartnerLens()) {
-          function finishPartnerNetInfo(cc) {
-            var c = cc || '';
-            var cSafe = String(c || '—').replace(/</g, '&lt;').replace(/&/g, '&amp;');
-            netInfoEl.innerHTML = '<p class="text-xs text-white/80 mb-2">Tu código de red: <span class="font-mono font-bold text-amber-200 tracking-wide">' + cSafe + '</span>. Un código, dos enlaces:</p>' +
-              '<div class="space-y-2 text-xs">' +
-              '<div><span class="text-white/55 block mb-1">Negocios (kioscos / almacenes)</span><div class="flex gap-2"><input type="text" id="partnerNetLinkK" readonly class="flex-1 glass rounded-lg px-2 py-1.5 border border-white/20 text-white min-w-0 text-[10px] sm:text-xs" /><button type="button" id="partnerNetBtnK" class="btn-glow shrink-0 px-2 py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold touch-target">Copiar</button></div></div>' +
-              '<div><span class="text-white/55 block mb-1">Vendedores (membresía)</span><div class="flex gap-2"><input type="text" id="partnerNetLinkS" readonly class="flex-1 glass rounded-lg px-2 py-1.5 border border-white/20 text-white min-w-0 text-[10px] sm:text-xs" /><button type="button" id="partnerNetBtnS" class="btn-glow shrink-0 px-2 py-1.5 rounded-lg text-[10px] sm:text-xs font-semibold touch-target">Copiar</button></div></div></div>';
-            var ink = document.getElementById('partnerNetLinkK');
-            var ins = document.getElementById('partnerNetLinkS');
-            if (c && ink) ink.value = ferriolReferralInviteUrl(c, 'kiosco');
-            if (c && ins) ins.value = ferriolReferralInviteUrl(c, 'socio');
-            var bk = document.getElementById('partnerNetBtnK');
-            var bs = document.getElementById('partnerNetBtnS');
-            if (bk) bk.onclick = function () { copyTextToClipboard((document.getElementById('partnerNetLinkK') || {}).value, 'Enlace para negocios copiado.'); };
-            if (bs) bs.onclick = function () { copyTextToClipboard((document.getElementById('partnerNetLinkS') || {}).value, 'Enlace para vendedores copiado.'); };
-            netInfoEl.classList.remove('hidden');
-          }
-          var cShow = currentUser.referralCode;
-          if (!cShow && supabaseClient) {
-            ensureUserReferralCode(currentUser.id).then(function (cc) {
-              if (cc) currentUser.referralCode = cc;
-              finishPartnerNetInfo(cc);
-            });
-          } else finishPartnerNetInfo(cShow);
-        } else {
-          netInfoEl.classList.add('hidden');
-          netInfoEl.textContent = '';
-        }
+      if (isPartnerLens() && supabaseClient && currentUser && !currentUser.referralCode) {
+        ensureUserReferralCode(currentUser.id).then(function (cc) { if (cc) currentUser.referralCode = cc; });
       }
       await loadSuperMainFerriolResumenCard();
       await renderSuperMembershipDayRequestBanners();
@@ -6839,6 +6845,14 @@ async function showApp() {
       renderSuper();
     };
 
+    var btnOpenAff = document.getElementById('btnOpenPartnerAffiliateLinks');
+    if (btnOpenAff) btnOpenAff.onclick = function () { openPartnerAffiliateLinksModal(); };
+    var btnAffClose = document.getElementById('partnerAffiliateLinksModalClose');
+    if (btnAffClose) btnAffClose.onclick = closePartnerAffiliateLinksModal;
+    var btnAffDone = document.getElementById('partnerAffiliateLinksModalDone');
+    if (btnAffDone) btnAffDone.onclick = closePartnerAffiliateLinksModal;
+    var btnAffOv = document.getElementById('partnerAffiliateLinksModalOverlay');
+    if (btnAffOv) btnAffOv.onclick = closePartnerAffiliateLinksModal;
     var btnOpenProv = document.getElementById('btnOpenPartnerProvisionModal');
     if (btnOpenProv) btnOpenProv.onclick = function () { openPartnerProvisionRequestModal(); };
     var provReqClose = document.getElementById('partnerProvisionRequestModalClose');

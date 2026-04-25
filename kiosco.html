@@ -1097,10 +1097,15 @@
           <p id="superDirectoryStats" class="hidden text-xs text-white/45 mb-2 super-only super-main-only"></p>
           <div id="superMainFerriolResumenCard" class="hidden mb-3 rounded-xl border border-cyan-500/35 bg-cyan-500/10 px-3 py-3 text-sm super-only super-main-only"></div>
           <p class="text-xs text-white/50 mb-2 super-only super-main-only">Directorio completo del sistema. Filtrá «Sin referidor» para ver cuentas sin admin/referidor y asignalas desde el detalle del usuario.</p>
-          <p id="superPartnerNetInfo" class="hidden text-sm text-white/75 mb-3 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-2"></p>
           <div id="superDayRequestsFounderBox" class="hidden mb-3 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-3 text-sm"></div>
           <div id="superDayRequestsPartnerBox" class="hidden mb-3 rounded-xl border border-cyan-500/35 bg-cyan-500/08 px-3 py-3 text-sm"></div>
           <div class="flex flex-wrap gap-2 mb-4">
+            <div class="ferriol-partner-affiliate-links-wrap hidden w-full sm:w-auto">
+              <button type="button" id="btnOpenPartnerAffiliateLinks" class="btn-neomorphic rounded-xl py-3 px-5 font-semibold flex items-center justify-center gap-2 touch-target w-full sm:w-auto border border-cyan-400/40 bg-cyan-500/15 text-cyan-100">
+                <i data-lucide="link-2" class="w-5 h-5"></i> Enlaces de afiliación
+              </button>
+              <p class="text-[10px] text-white/45 mt-1 max-w-md">Un código de red: enlace para <strong class="text-white/55">negocios</strong> y otro para <strong class="text-white/55">socios</strong> (membresía).</p>
+            </div>
             <div class="ferriol-partner-provision-btn-wrap hidden w-full sm:w-auto">
               <button type="button" id="btnOpenPartnerProvisionModal" class="btn-neomorphic rounded-xl py-3 px-5 font-semibold flex items-center justify-center gap-2 touch-target w-full sm:w-auto border border-violet-400/40 bg-violet-500/15 text-violet-100">
                 <i data-lucide="user-cog" class="w-5 h-5"></i> Solicitar alta de administrador de red
@@ -1357,6 +1362,35 @@
         <label class="block text-xs text-white/55 mb-1">Contraseña (mín. 6)</label>
         <input type="password" id="kiosqueroProvisionCompletePassword" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-4" minlength="6" autocomplete="new-password">
         <button type="button" id="kiosqueroProvisionCompleteSubmit" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target">Crear usuario kiosquero</button>
+      </div>
+    </div>
+
+    <!-- Modal: enlaces de afiliación (socio / vista socio fundador) -->
+    <div id="partnerAffiliateLinksModal" class="fixed inset-0 z-[75] hidden items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="partnerAffiliateLinksModalOverlay"></div>
+      <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto scale-in">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="link-2" class="w-5 h-5 text-cyan-300"></i> Tus enlaces de afiliación</h3>
+          <button type="button" id="partnerAffiliateLinksModalClose" class="btn-neomorphic rounded-xl p-2 touch-target"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <p class="text-sm text-white/65 mb-3">Tu código de red: <span id="partnerAffiliateCodeDisplay" class="font-mono font-bold text-amber-200 tracking-wide">—</span>. Compartí el enlace que corresponda.</p>
+        <div class="space-y-3 text-sm">
+          <div>
+            <span class="text-white/55 block mb-1 text-xs">Negocios (kioscos / almacenes)</span>
+            <div class="flex gap-2">
+              <input type="text" id="partnerNetLinkK" readonly class="flex-1 glass rounded-lg px-3 py-2 border border-white/20 text-white min-w-0 text-xs" />
+              <button type="button" id="partnerNetBtnK" class="btn-glow shrink-0 px-3 py-2 rounded-lg text-xs font-semibold touch-target">Copiar</button>
+            </div>
+          </div>
+          <div>
+            <span class="text-white/55 block mb-1 text-xs">Vendedores (membresía)</span>
+            <div class="flex gap-2">
+              <input type="text" id="partnerNetLinkS" readonly class="flex-1 glass rounded-lg px-3 py-2 border border-white/20 text-white min-w-0 text-xs" />
+              <button type="button" id="partnerNetBtnS" class="btn-glow shrink-0 px-3 py-2 rounded-lg text-xs font-semibold touch-target">Copiar</button>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="w-full mt-5 py-2.5 rounded-xl border border-white/20 text-white/80 text-sm touch-target" id="partnerAffiliateLinksModalDone">Cerrar</button>
       </div>
     </div>
 
