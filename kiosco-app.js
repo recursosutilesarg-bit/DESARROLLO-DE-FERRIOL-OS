@@ -521,6 +521,104 @@
       }
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
+    function superSolicitudRowHtml(title, mid, right) {
+      return '<div class="inventory-item border-x-0 rounded-none cursor-default"><div class="inv-item-info"><span class="inv-item-name"><span class="block truncate">' + title + '</span></span><span class="inv-item-price text-[#86efac]">' + mid + '</span><span class="inv-item-stock text-white/45 truncate max-w-[38vw] text-[11px]">' + right + '</span></div></div>';
+    }
+    function superSolicitudNameOf(pool, id) {
+      if (!id) return '—';
+      var p = (pool || []).find(function (x) { return x.id === id; });
+      return (p ? (p.kiosco_name || p.email || String(id)) : String(id)).replace(/</g, '&lt;');
+    }
+    async function loadSuperSolicitudesSection() {
+      var elP = document.getElementById('superSolicitudesPendientes');
+      var elA = document.getElementById('superSolicitudesAprobadas');
+      var elR = document.getElementById('superSolicitudesRechazadas');
+      if (!elP || !elA || !elR) return;
+      if (!supabaseClient || !currentUser || !isEmpresaLensSuper()) {
+        elP.innerHTML = elA.innerHTML = elR.innerHTML = '';
+        return;
+      }
+      var loading = '<p class="text-white/45 text-xs py-3 text-center">Cargando…</p>';
+      elP.innerHTML = elA.innerHTML = elR.innerHTML = loading;
+      var pool = window._ferriolAllProfilesCache || [];
+      if (!pool.length) {
+        try {
+          var prPool = await supabaseClient.from('profiles').select('id, email, kiosco_name').limit(800);
+          if (!prPool.error && prPool.data) {
+            window._ferriolAllProfilesCache = prPool.data;
+            pool = prPool.data;
+          }
+        } catch (_) {}
+      }
+      var pend = [];
+      var apr = [];
+      var rech = [];
+      function pushBucket(row, type) {
+        var st = row.status;
+        var b;
+        if (st === 'pending') b = pend;
+        else if (st === 'rejected') b = rech;
+        else b = apr;
+        var ts = row.created_at || '';
+        var title;
+        var mid;
+        var right;
+        var d = String(ts).slice(0, 10);
+        if (type === 'mdr') {
+          title = 'Membresía · ' + superSolicitudNameOf(pool, row.kiosquero_user_id);
+          mid = (row.days_delta > 0 ? '+' : '') + row.days_delta + ' d';
+          right = d + ' · ' + superSolicitudNameOf(pool, row.requested_by);
+          if (row.reject_note && st === 'rejected') right += ' · ' + String(row.reject_note).replace(/</g, '&lt;').slice(0, 40);
+        } else if (type === 'ppr') {
+          title = 'Alta socio · ' + String(row.target_email || '').replace(/</g, '&lt;');
+          mid = row.client_payment_ars != null ? ('$ ' + Number(row.client_payment_ars).toLocaleString('es-AR')) : '—';
+          right = d + ' · ' + superSolicitudNameOf(pool, row.requested_by);
+          if (row.display_name) right += ' · ' + String(row.display_name).replace(/</g, '&lt;');
+          if (row.reject_note && st === 'rejected') right += ' · ' + String(row.reject_note).replace(/</g, '&lt;').slice(0, 32);
+        } else {
+          title = 'Alta kiosco · ' + String(row.kiosco_name || '').replace(/</g, '&lt;');
+          mid = String(row.target_email || '').replace(/</g, '&lt;');
+          right = d + ' · ' + superSolicitudNameOf(pool, row.requested_by);
+          if (row.reject_note && st === 'rejected') right += ' · ' + String(row.reject_note).replace(/</g, '&lt;').slice(0, 32);
+        }
+        if ((st === 'approved' || st === 'completed') && row.reviewed_at) {
+          right += ' · Rev. ' + String(row.reviewed_at).slice(0, 10);
+        }
+        b.push({ ts: ts, html: superSolicitudRowHtml(title, mid, right) });
+      }
+      try {
+        var lim = 200;
+        var qM = await supabaseClient.from('ferriol_membership_day_requests').select('*').order('created_at', { ascending: false }).limit(lim);
+        var qP = await supabaseClient.from('ferriol_partner_provision_requests').select('*').order('created_at', { ascending: false }).limit(lim);
+        var qK = await supabaseClient.from('ferriol_kiosquero_provision_requests').select('*').order('created_at', { ascending: false }).limit(lim);
+        if (qM.error && qP.error && qK.error) throw qM.error || qP.error || qK.error;
+        (qM.data || []).forEach(function (r) { pushBucket(r, 'mdr'); });
+        (qP.data || []).forEach(function (r) { pushBucket(r, 'ppr'); });
+        (qK.data || []).forEach(function (r) { pushBucket(r, 'kpr'); });
+        function sortDesc(a, b) { return String(b.ts).localeCompare(String(a.ts)); }
+        pend.sort(sortDesc);
+        apr.sort(sortDesc);
+        rech.sort(sortDesc);
+        function renderCol(arr, emptyMsg) {
+          if (!arr.length) return '<p class="text-xs text-white/45 py-4 text-center px-2">' + emptyMsg + '</p>';
+          return '<div class="rounded-xl border border-white/10 bg-black/15 overflow-hidden">' + arr.map(function (x) { return x.html; }).join('') + '</div>';
+        }
+        elP.innerHTML = renderCol(pend, 'No hay solicitudes pendientes.');
+        elA.innerHTML = renderCol(apr, 'No hay solicitudes aprobadas o completadas en el historial reciente.');
+        elR.innerHTML = renderCol(rech, 'No hay solicitudes rechazadas.');
+        var warn = [];
+        if (qM.error) warn.push('membresía');
+        if (qP.error) warn.push('socios');
+        if (qK.error) warn.push('kioscos');
+        if (warn.length) {
+          elP.innerHTML = '<p class="text-[10px] text-amber-200/90 px-2 py-1 mb-2">No se cargó: ' + warn.join(', ') + '. Revisá RLS o tablas SQL.</p>' + elP.innerHTML;
+        }
+      } catch (e) {
+        var em = '<p class="text-red-300/90 text-sm py-4 px-2">No se pudieron cargar las solicitudes. ' + String(e.message || e) + '</p>';
+        elP.innerHTML = elA.innerHTML = elR.innerHTML = em;
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
     async function loadSuperMainFerriolResumenCard() {
       var el = document.getElementById('superMainFerriolResumenCard');
       if (!el) return;
@@ -1025,7 +1123,7 @@
       _restoringFromHistory: false,
       _suppressCajaHistoryPush: false,
       historialFilter: 'hoy',
-      superSection: 'afiliados',  // afiliados | balance | cobros | ajustes | notificaciones | mas
+      superSection: 'afiliados',  // afiliados | balance | cobros | ajustes | solicitudes | mas
       afiliadosSubTab: 'usuarios',  // usuarios (kiosquero) | distribuidores (partner)
       balanceSubTab: 'pago',  // pago (deudas/pagos) | cobro (a favor)
       superUiMode: 'empresa'  // empresa | socio | negocio — solo si role === 'super'
@@ -2296,7 +2394,7 @@
       if (reqSuper && currentUser && (currentUser.role !== 'super' || !isEmpresaLensSuper())) {
         state.superSection = 'afiliados';
       }
-      if (state.superSection === 'notificaciones' && currentUser && !isEmpresaLensSuper()) {
+      if (state.superSection === 'solicitudes' && currentUser && !isEmpresaLensSuper()) {
         state.superSection = 'afiliados';
       }
       document.querySelectorAll('#panel-super .super-section').forEach(function (el) {
@@ -2316,15 +2414,16 @@
       var headerAjustesBtn = document.getElementById('headerSuperAjustesBtn');
       if (headerAjustesBtn) headerAjustesBtn.classList.toggle('active', state.superSection === 'ajustes');
       var headerNotifBtn = document.getElementById('headerSuperNotifBtn');
-      if (headerNotifBtn) headerNotifBtn.classList.toggle('active', state.superSection === 'notificaciones');
+      if (headerNotifBtn) headerNotifBtn.classList.toggle('active', state.superSection === 'solicitudes');
       if (state.superSection === 'cobros' && isEmpresaLensSuper()) renderSuperCobrosSection();
       if (state.superSection === 'balance') loadSuperBalanceSection();
+      if (state.superSection === 'solicitudes' && isEmpresaLensSuper()) loadSuperSolicitudesSection();
       lucide.createIcons();
     }
     var headerAjustesBtnEl = document.getElementById('headerSuperAjustesBtn');
     if (headerAjustesBtnEl) headerAjustesBtnEl.addEventListener('click', function () { switchSuperSection('ajustes'); });
     var headerNotifBtnEl = document.getElementById('headerSuperNotifBtn');
-    if (headerNotifBtnEl) headerNotifBtnEl.addEventListener('click', function () { switchSuperSection('notificaciones'); });
+    if (headerNotifBtnEl) headerNotifBtnEl.addEventListener('click', function () { switchSuperSection('solicitudes'); });
     document.querySelectorAll('.super-nav-btn').forEach(function (btn) {
       btn.onclick = function () {
         if (btn.dataset.superSection) switchSuperSection(btn.dataset.superSection);
@@ -6135,6 +6234,7 @@ async function showApp() {
       }
       await loadSuperMainFerriolResumenCard();
       await renderSuperMembershipDayRequestBanners();
+      if (state.superSection === 'solicitudes' && isEmpresaLensSuper()) loadSuperSolicitudesSection();
       lucide.createIcons();
     }
     function renderSuperListFromSearch() {
@@ -6480,7 +6580,8 @@ async function showApp() {
         renderNotificationsMerged();
       } catch (_) {}
     }
-    document.getElementById('sendNotificationBtn').onclick = async function () {
+    var sendNotificationBtnEl = document.getElementById('sendNotificationBtn');
+    if (sendNotificationBtnEl) sendNotificationBtnEl.onclick = async function () {
       var textarea = document.getElementById('adminNotificationMessage');
       var msgEl = document.getElementById('adminNotificationMsg');
       var msg = (textarea && textarea.value) ? textarea.value.trim() : '';

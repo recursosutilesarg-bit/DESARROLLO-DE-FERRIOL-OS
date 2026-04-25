@@ -195,8 +195,8 @@
           <i data-lucide="shopping-cart" class="w-5 h-5"></i>
           <span id="cartCount" class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#dc2626] text-xs font-bold flex items-center justify-center">0</span>
         </button>
-        <button id="headerSuperNotifBtn" class="btn-neomorphic rounded-xl p-2.5 touch-target super-only super-main-only transition-all duration-300 hover:scale-105 active:scale-95" title="Notificaciones">
-          <i data-lucide="bell" class="w-5 h-5"></i>
+        <button id="headerSuperNotifBtn" class="btn-neomorphic rounded-xl p-2.5 touch-target super-only super-main-only transition-all duration-300 hover:scale-105 active:scale-95" title="Solicitudes">
+          <i data-lucide="clipboard-list" class="w-5 h-5"></i>
         </button>
         <button id="headerSuperAjustesBtn" class="btn-neomorphic rounded-xl p-2.5 touch-target super-only super-main-only transition-all duration-300 hover:scale-105 active:scale-95" title="Ajustes">
           <i data-lucide="settings" class="w-5 h-5"></i>
@@ -241,9 +241,9 @@
           <i data-lucide="banknote" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Cobros</span>
         </button>
-        <button data-super-section="notificaciones" class="super-nav-btn super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Notificaciones">
-          <i data-lucide="bell" class="w-5 h-5 shrink-0"></i>
-          <span class="truncate w-full text-center">Avisos</span>
+        <button data-super-section="solicitudes" class="super-nav-btn super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Solicitudes a la empresa">
+          <i data-lucide="clipboard-list" class="w-5 h-5 shrink-0"></i>
+          <span class="truncate w-full text-center">Solicitudes</span>
         </button>
         <button data-super-section="mas" class="super-nav-btn super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Más">
           <i data-lucide="user-cog" class="w-5 h-5 shrink-0"></i>
@@ -1270,27 +1270,48 @@
             </div>
           </div>
         </div>
-        <!-- Sección Notificaciones -->
-        <div id="super-section-notificaciones" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; min-height: 100%; max-height: 85vh;">
-          <h2 class="font-bold text-xl mb-3 flex items-center gap-2">
-            <i data-lucide="bell" class="w-5 h-5 text-[#86efac]"></i>
-            Notificaciones (solo empresa)
+        <!-- Sección Solicitudes (historial + estados; acciones rápidas siguen en Afiliados) -->
+        <div id="super-section-solicitudes" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; min-height: 100%; max-height: 85vh; padding-bottom: 6rem;">
+          <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
+            <i data-lucide="clipboard-list" class="w-5 h-5 text-[#86efac]"></i>
+            Solicitudes
           </h2>
-          <p class="text-xs text-white/50 mb-3">Solo el <strong class="text-white/70">fundador</strong> envía avisos. Los reciben los <strong class="text-white/70">kiosqueros</strong> y los <strong class="text-white/70">administradores de red</strong> en la campana del encabezado. Los socios no pueden enviar mensajes globales.</p>
-          <label class="block text-sm font-medium text-white/80 mb-2">Mensaje global</label>
-          <textarea id="adminNotificationMessage" rows="5" placeholder="Ej: Mañana cerramos a las 18 hs. / Recordá cargar stock de..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base resize-y mb-4 min-h-[120px]"></textarea>
-          <button type="button" id="sendNotificationBtn" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold flex items-center gap-2 touch-target w-full sm:w-auto">
-            <i data-lucide="send" class="w-4 h-4"></i> Enviar a todos
-          </button>
-          <p id="adminNotificationMsg" class="text-xs mt-2 text-green-300 hidden"></p>
+          <p class="text-xs text-white/50 mb-4">Historial de <strong class="text-white/70">días de licencia</strong>, <strong class="text-white/70">altas de socio</strong> y <strong class="text-white/70">altas de kiosco</strong>. Las pendientes también las podés gestionar desde <strong class="text-white/65">Afiliados</strong> (caja ámbar arriba).</p>
+          <div class="space-y-5">
+            <div>
+              <h3 class="text-sm font-semibold text-amber-200/95 mb-2 flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4"></i> Pendientes</h3>
+              <div id="superSolicitudesPendientes" class="min-h-[3rem]"><p class="text-white/45 text-xs py-3 text-center">Cargando…</p></div>
+            </div>
+            <div>
+              <h3 class="text-sm font-semibold text-emerald-200/95 mb-2 flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i> Aprobadas y completadas</h3>
+              <div id="superSolicitudesAprobadas" class="min-h-[3rem]"><p class="text-white/45 text-xs py-3 text-center">Cargando…</p></div>
+            </div>
+            <div>
+              <h3 class="text-sm font-semibold text-red-200/90 mb-2 flex items-center gap-2"><i data-lucide="x-circle" class="w-4 h-4"></i> Rechazadas</h3>
+              <div id="superSolicitudesRechazadas" class="min-h-[3rem]"><p class="text-white/45 text-xs py-3 text-center">Cargando…</p></div>
+            </div>
+          </div>
         </div>
         <!-- Sección Más -->
         <div id="super-section-mas" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0" style="display: none;">
+          <div class="mb-6 pb-6 border-b border-white/10">
+            <h2 class="font-bold text-lg mb-2 flex items-center gap-2">
+              <i data-lucide="megaphone" class="w-5 h-5 text-[#86efac]"></i>
+              Aviso global
+            </h2>
+            <p class="text-xs text-white/50 mb-3">Lo reciben los <strong class="text-white/70">kiosqueros</strong> y los <strong class="text-white/70">administradores de red</strong> en la campana del encabezado.</p>
+            <label class="block text-sm font-medium text-white/80 mb-2">Mensaje</label>
+            <textarea id="adminNotificationMessage" rows="4" placeholder="Ej: Mañana cerramos a las 18 hs. / Recordá cargar stock de..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base resize-y mb-3 min-h-[100px]"></textarea>
+            <button type="button" id="sendNotificationBtn" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold flex items-center gap-2 touch-target w-full sm:w-auto">
+              <i data-lucide="send" class="w-4 h-4"></i> Enviar a todos
+            </button>
+            <p id="adminNotificationMsg" class="text-xs mt-2 text-green-300 hidden"></p>
+          </div>
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2">
             <i data-lucide="user-cog" class="w-5 h-5 text-[#86efac]"></i>
             Otro administrador global (super)
           </h2>
-          <p class="text-xs text-white/55 mb-3">Los <strong class="text-white/70">socios</strong> dan de alta a otros administradores de red desde <strong class="text-white/70">Negocios</strong> → «Solicitar alta de administrador» (con aprobación de la empresa). Esta sección es solo para promover un usuario a <strong class="text-white/70">super</strong> en Supabase si lo necesitás.</p>
+          <p class="text-xs text-white/55 mb-3">Los <strong class="text-white/70">socios</strong> dan de alta a otros administradores de red desde <strong class="text-white/70">Afiliados</strong> → «Solicitar alta de administrador» (con aprobación de la empresa). Esta sección es solo para promover un usuario a <strong class="text-white/70">super</strong> en Supabase si lo necesitás.</p>
           <p class="text-xs text-white/50 mb-3">En Supabase → SQL Editor ejecutá (cambiá el email):</p>
           <pre class="text-xs bg-black/30 rounded-lg p-3 overflow-x-auto text-[#86efac] mb-2" id="sqlAddAdmin">UPDATE profiles SET role = 'super' WHERE id = (SELECT id FROM auth.users WHERE email = 'tu-email@ejemplo.com');</pre>
         </div>
