@@ -229,9 +229,9 @@
   <nav id="navSuperBottom" class="fixed bottom-0 left-0 right-0 z-40 super-only hidden" style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0)); padding-left: env(safe-area-inset-left, 0); padding-right: env(safe-area-inset-right, 0);">
     <div class="bottom-nav-bar glass-strong border-t border-white/10 px-2 py-3 max-w-2xl mx-auto">
       <div class="flex items-center justify-between gap-1">
-        <button data-super-section="negocios" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Negocios">
-          <i data-lucide="store" class="w-5 h-5 shrink-0"></i>
-          <span class="truncate w-full text-center">Negocios</span>
+        <button data-super-section="afiliados" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Afiliados">
+          <i data-lucide="users" class="w-5 h-5 shrink-0"></i>
+          <span class="truncate w-full text-center">Afiliados</span>
         </button>
         <button data-super-section="cobros" class="super-nav-btn super-only super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Cobros y comisiones (solo administrador)">
           <i data-lucide="banknote" class="w-5 h-5 shrink-0"></i>
@@ -1081,14 +1081,14 @@
       </div>
     </section>
 
-    <!-- Panel Admin: secciones al pie (Negocios, Ajustes, Notificaciones, Más) -->
+    <!-- Panel Admin: secciones al pie (Afiliados, Cobros, Avisos, Más) -->
     <section id="panel-super" class="panel hidden">
       <div class="relative isolate min-h-[70vh] pb-24">
-        <!-- Sección Negocios (misma capa absoluta que Cobros/Ajustes para evitar solapamientos) -->
-        <div id="super-section-negocios" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up absolute inset-x-0 top-0 z-0 overflow-y-auto" style="max-height: 85vh; padding-bottom: 6rem;">
+        <!-- Sección Afiliados (usuarios kiosco / distribuidores) -->
+        <div id="super-section-afiliados" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up absolute inset-x-0 top-0 z-0 overflow-y-auto" style="max-height: 85vh; padding-bottom: 6rem;">
           <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
-            <i data-lucide="store" class="w-5 h-5 text-[#86efac]"></i>
-            Negocios
+            <i data-lucide="users" class="w-5 h-5 text-[#86efac]"></i>
+            Afiliados
           </h2>
           <p id="superDirectoryStats" class="hidden text-xs text-white/45 mb-2 super-only super-main-only"></p>
           <div id="superMainFerriolResumenCard" class="hidden mb-3 rounded-xl border border-cyan-500/35 bg-cyan-500/10 px-3 py-3 text-sm super-only super-main-only"></div>
@@ -1112,7 +1112,7 @@
               <i data-lucide="file-spreadsheet" class="w-5 h-5"></i> Exportar directorio (CSV)
             </button>
           </div>
-          <p class="text-xs text-white/50 mb-3">Tocá un negocio para ver detalles, membresía y estado. Para quitar a una persona se pide contraseña de admin (configurarla en Ajustes).</p>
+          <p class="text-xs text-white/50 mb-3">Elegí <strong class="text-white/70">Usuarios</strong> (kioscos / almacenes) o <strong class="text-white/70">Distribuidores</strong> (red). Tocá una fila para ver detalles y membresía. Para quitar a una persona se pide contraseña de admin (Ajustes).</p>
           <input type="text" id="superSearchEmail" placeholder="Buscar por email o nombre..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm mb-3" autocomplete="off">
           <div class="flex flex-wrap gap-2 mb-2">
             <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-[#22c55e]/50 bg-[#22c55e]/30" data-filter="todos">Todos</button>
@@ -1120,8 +1120,12 @@
             <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-white/20 glass" data-filter="inactivos">Inactivos</button>
             <button type="button" class="super-filter-btn super-only super-main-only px-3 py-1.5 rounded-lg text-sm font-medium border border-amber-500/40 glass" data-filter="sin_referidor" title="Cuentas sin referidor asignado">Sin referidor</button>
           </div>
-          <div id="superUsersList" class="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
-            <!-- Lista por JS -->
+          <div class="flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 mb-3" role="tablist" aria-label="Tipo de afiliado">
+            <button type="button" id="superAfiliadosTabUsuarios" role="tab" aria-selected="true" class="super-afiliados-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-[#22c55e]/50 bg-[#22c55e]/20 text-white transition-all">Usuarios</button>
+            <button type="button" id="superAfiliadosTabDistribuidores" role="tab" aria-selected="false" class="super-afiliados-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-transparent text-white/55 hover:text-white/80 transition-all">Distribuidores</button>
+          </div>
+          <div id="superUsersList" class="max-h-[50vh] overflow-y-auto pr-1 rounded-xl border border-white/10 bg-black/15">
+            <!-- Lista por JS (filas estilo inventory-item) -->
           </div>
         </div>
         <!-- Sección Cobros (solo super): transferencias + verificar → mlm_ledger -->

@@ -904,7 +904,8 @@
       _restoringFromHistory: false,
       _suppressCajaHistoryPush: false,
       historialFilter: 'hoy',
-      superSection: 'negocios',  // negocios | ajustes | notificaciones | mas
+      superSection: 'afiliados',  // afiliados | cobros | ajustes | notificaciones | mas
+      afiliadosSubTab: 'usuarios',  // usuarios (kiosquero) | distribuidores (partner)
       superUiMode: 'empresa'  // empresa | socio | negocio — solo si role === 'super'
     };
 
@@ -2082,8 +2083,8 @@
         try { sessionStorage.setItem('ferriol_super_ui', 'empresa'); } catch (_) {}
         applyAppShell();
       }
-      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'negocios') {
-        switchSuperSection('negocios');
+      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'afiliados') {
+        switchSuperSection('afiliados');
       }
       if (name !== 'scanner') window._scanForProductCode = false;
       state.currentPanel = name;
@@ -2108,7 +2109,7 @@
         superListCountdownInterval = setInterval(updateSuperListCountdowns, 1000);
         var navSuperBottom = document.getElementById('navSuperBottom');
         if (navSuperBottom) navSuperBottom.classList.remove('hidden');
-        switchSuperSection('negocios');
+        switchSuperSection('afiliados');
       } else {
         if (superListCountdownInterval) { clearInterval(superListCountdownInterval); superListCountdownInterval = null; }
         var navSuperBottom = document.getElementById('navSuperBottom');
@@ -2166,13 +2167,13 @@
       btn.onclick = () => goToPanel(btn.dataset.nav);
     });
     function switchSuperSection(sectionName) {
-      state.superSection = sectionName || 'negocios';
+      state.superSection = sectionName || 'afiliados';
       var reqSuper = state.superSection === 'cobros';
       if (reqSuper && currentUser && (currentUser.role !== 'super' || !isEmpresaLensSuper())) {
-        state.superSection = 'negocios';
+        state.superSection = 'afiliados';
       }
       if (state.superSection === 'notificaciones' && currentUser && !isEmpresaLensSuper()) {
-        state.superSection = 'negocios';
+        state.superSection = 'afiliados';
       }
       document.querySelectorAll('#panel-super .super-section').forEach(function (el) {
         el.classList.add('hidden');
@@ -5040,11 +5041,53 @@ async function showApp() {
     var superListCountdownInterval = null;
     function updateSuperListCountdowns() {
       document.querySelectorAll('#panel-super .super-list-countdown').forEach(function (span) {
-        var card = span.closest('.super-user-card');
-        var endsAt = card && card.getAttribute('data-trial-ends-at');
+        var row = span.closest('.super-afiliado-row') || span.closest('.super-user-card');
+        var endsAt = row && row.getAttribute('data-trial-ends-at');
         var t = trialLabelFull(endsAt);
         span.textContent = t.expired ? 'Vencida' : t.text;
-        span.className = 'super-list-countdown px-2 py-1 rounded-lg text-xs ' + (t.expired ? 'bg-red-500/20 text-red-300' : 'bg-[#dc2626]/30 text-[#f87171]');
+        span.className = 'inv-item-price super-list-countdown ' + (t.expired ? 'text-red-300' : 'text-[#86efac]');
+      });
+    }
+    function superAfiliadosFilterBySubTab(list) {
+      var sub = state.afiliadosSubTab || 'usuarios';
+      if (sub === 'distribuidores') return list.filter(function (u) { return u.role === 'partner'; });
+      return list.filter(function (u) { return u.role === 'kiosquero'; });
+    }
+    function syncAfiliadosSubTabButtons() {
+      var u = document.getElementById('superAfiliadosTabUsuarios');
+      var d = document.getElementById('superAfiliadosTabDistribuidores');
+      if (!u || !d) return;
+      var isU = state.afiliadosSubTab !== 'distribuidores';
+      u.setAttribute('aria-selected', isU ? 'true' : 'false');
+      d.setAttribute('aria-selected', !isU ? 'true' : 'false');
+      u.className = 'super-afiliados-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border transition-all ' + (isU ? 'border-[#22c55e]/50 bg-[#22c55e]/20 text-white' : 'border-transparent text-white/55 hover:text-white/80');
+      d.className = 'super-afiliados-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border transition-all ' + (!isU ? 'border-[#22c55e]/50 bg-[#22c55e]/20 text-white' : 'border-transparent text-white/55 hover:text-white/80');
+    }
+    function buildSuperAfiliadoRowHtml(u) {
+      var name = (u.kiosco_name || u.email || 'Sin nombre').replace(/</g, '&lt;');
+      var trialFull = trialLabelFull(u.trial_ends_at);
+      var badge = trialFull.expired ? 'Vencida' : trialFull.text;
+      var endIso = (u.trial_ends_at || '').replace(/"/g, '&quot;');
+      var email = (u.email || '').replace(/</g, '&lt;');
+      var stockClass = u.active ? 'text-white/45' : 'text-red-400/90';
+      var sinRef = (!u.sponsor_id && isEmpresaLensSuper()) ? '<span class="text-amber-200/80 text-[10px] font-normal"> · sin ref.</span>' : '';
+      var priceClass = trialFull.expired ? 'text-red-300' : 'text-[#86efac]';
+      return '<button type="button" class="inventory-item super-afiliado-row w-full text-left border-x-0 rounded-none" data-id="' + u.id + '" data-trial-ends-at="' + endIso + '">' +
+        '<div class="inv-item-info">' +
+        '<span class="inv-item-name"><span class="block truncate">' + name + sinRef + '</span></span>' +
+        '<span class="inv-item-price super-list-countdown ' + priceClass + '">' + badge + '</span>' +
+        '<span class="inv-item-stock ' + stockClass + ' max-w-[32vw] sm:max-w-[40%] truncate" title="' + email + '">' + email + '</span>' +
+        '</div>' +
+        '<i data-lucide="chevron-right" class="w-5 h-5 text-white/35 shrink-0"></i>' +
+        '</button>';
+    }
+    function bindSuperAfiliadoRowClicks(listEl, list) {
+      listEl.querySelectorAll('.super-afiliado-row').forEach(function (btn) {
+        btn.onclick = function () {
+          var id = btn.getAttribute('data-id');
+          var user = list.find(function (u) { return u.id === id; });
+          if (user) openSuperUserDetail(user);
+        };
       });
     }
     function openSuperUserDetail(user) {
@@ -5911,47 +5954,28 @@ async function showApp() {
         const nb = (b.kiosco_name || '').toLowerCase().trim() || 'zzz';
         return na.localeCompare(nb);
       });
+      syncAfiliadosSubTabButtons();
+      var displayList = superAfiliadosFilterBySubTab(list);
       const listEl = document.getElementById('superUsersList');
       if (errProfiles) {
         listEl.innerHTML = '<p class="py-4 text-center text-red-300 text-sm">Error al cargar. Revisá las políticas RLS de la tabla profiles.</p>';
         lucide.createIcons();
         return;
       }
-      if (list.length === 0 && (isEmpresaLensSuper() || isPartnerLens())) {
-        var msg = searchTerm ? 'Ningún usuario coincide con la búsqueda.' : (isPartnerLens() ? 'No hay negocios en tu red todavía.' : (superFilterState === 'sin_referidor' ? 'No hay integrantes sin referidor. Todo el mundo tiene admin/referidor asignado.' : superFilterState === 'activos' ? 'No hay negocios activos.' : superFilterState === 'inactivos' ? 'No hay negocios inactivos.' : 'No hay otros negocios. Agregá uno con el botón de arriba.'));
-        listEl.innerHTML = '<p class="py-6 text-center text-white/70 text-sm">' + msg + '</p>';
+      if (displayList.length === 0 && (isEmpresaLensSuper() || isPartnerLens())) {
+        var msg;
+        if (list.length === 0) {
+          msg = searchTerm ? 'Ningún perfil coincide con la búsqueda.' : (isPartnerLens() ? 'No hay afiliados en tu red todavía.' : (superFilterState === 'sin_referidor' ? 'No hay integrantes sin referidor. Todo el mundo tiene admin/referidor asignado.' : superFilterState === 'activos' ? 'No hay perfiles activos con estos filtros.' : superFilterState === 'inactivos' ? 'No hay perfiles inactivos con estos filtros.' : 'No hay otros perfiles. Agregá uno con los botones de arriba.'));
+        } else {
+          msg = searchTerm ? 'Ningún ' + (state.afiliadosSubTab === 'distribuidores' ? 'distribuidor' : 'usuario (kiosco)') + ' coincide con la búsqueda.' : (state.afiliadosSubTab === 'distribuidores' ? 'No hay distribuidores en esta vista. Probá la pestaña Usuarios o relajá los filtros.' : 'No hay usuarios (kioscos) en esta vista. Probá Distribuidores o relajá los filtros.');
+        }
+        listEl.innerHTML = '<p class="py-6 text-center text-white/70 text-sm px-2">' + msg + '</p>';
         lucide.createIcons();
         await renderSuperMembershipDayRequestBanners();
         return;
       }
-      listEl.innerHTML = list.map(u => {
-        const name = (u.kiosco_name || u.email || 'Sin nombre').replace(/</g, '&lt;');
-        const trialFull = trialLabelFull(u.trial_ends_at);
-        const badge = trialFull.expired ? 'Vencida' : trialFull.text;
-        const badgeClass = trialFull.expired ? 'bg-red-500/20 text-red-300' : 'bg-[#dc2626]/30 text-[#f87171]';
-        const endIso = (u.trial_ends_at || '').replace(/"/g, '&quot;');
-        var rolePill = (u.role === 'super') ? '<span class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-violet-500/30 text-violet-200 border border-violet-400/30 shrink-0">Root</span>' : ((u.role === 'partner') ? '<span class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-cyan-500/25 text-cyan-200 border border-cyan-400/25 shrink-0">Red</span>' : '');
-        var sinRefPill = (!u.sponsor_id && isEmpresaLensSuper()) ? '<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-200 border border-amber-400/35 shrink-0">Sin ref.</span>' : '';
-        return `
-          <button type="button" class="super-user-card w-full text-left glass rounded-xl p-4 flex items-center justify-between gap-3 border border-white/10 hover:border-[#dc2626]/40 active:scale-[0.99] transition-all touch-target" data-id="${u.id}" data-trial-ends-at="${endIso}">
-            <div class="flex-1 min-w-0">
-              <p class="font-semibold truncate flex items-center gap-2 flex-wrap">${name}${rolePill}${sinRefPill}</p>
-              <p class="text-xs text-white/50 truncate mt-0.5">${(u.email || '').replace(/</g, '&lt;')}</p>
-            </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <span class="super-list-countdown px-2 py-1 rounded-lg text-xs ${badgeClass}">${badge}</span>
-              <i data-lucide="chevron-right" class="w-5 h-5 text-white/40"></i>
-            </div>
-          </button>
-        `;
-      }).join('');
-      listEl.querySelectorAll('.super-user-card').forEach(btn => {
-        btn.onclick = () => {
-          const id = btn.dataset.id;
-          const user = list.find(u => u.id === id);
-          if (user) openSuperUserDetail(user);
-        };
-      });
+      listEl.innerHTML = displayList.map(function (u) { return buildSuperAfiliadoRowHtml(u); }).join('');
+      bindSuperAfiliadoRowClicks(listEl, displayList);
       var netInfoEl = document.getElementById('superPartnerNetInfo');
       if (netInfoEl) {
         if (isPartnerLens()) {
@@ -6008,33 +6032,35 @@ async function showApp() {
         const nb = (b.kiosco_name || '').toLowerCase().trim() || 'zzz';
         return na.localeCompare(nb);
       });
-      if (list.length === 0) {
-        listEl.innerHTML = '<p class="py-6 text-center text-white/70 text-sm">Ningún usuario coincide con la búsqueda.</p>';
+      syncAfiliadosSubTabButtons();
+      var displayList = superAfiliadosFilterBySubTab(list);
+      if (displayList.length === 0) {
+        var msgEmpty = list.length === 0 ? 'Ningún perfil coincide con la búsqueda o filtros.' : ('No hay ' + (state.afiliadosSubTab === 'distribuidores' ? 'distribuidores' : 'usuarios (kioscos)') + ' que coincidan.');
+        listEl.innerHTML = '<p class="py-6 text-center text-white/70 text-sm px-2">' + msgEmpty + '</p>';
         lucide.createIcons();
         return;
       }
-      listEl.innerHTML = list.map(function (u) {
-        var name = (u.kiosco_name || u.email || 'Sin nombre').replace(/</g, '&lt;');
-        var trialFull = trialLabelFull(u.trial_ends_at);
-        var badge = trialFull.expired ? 'Vencida' : trialFull.text;
-        var badgeClass = trialFull.expired ? 'bg-red-500/20 text-red-300' : 'bg-[#dc2626]/30 text-[#f87171]';
-        var endIso = (u.trial_ends_at || '').replace(/"/g, '&quot;');
-        var rolePill = (u.role === 'super') ? '<span class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-violet-500/30 text-violet-200 border border-violet-400/30 shrink-0">Root</span>' : ((u.role === 'partner') ? '<span class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-cyan-500/25 text-cyan-200 border border-cyan-400/25 shrink-0">Red</span>' : '');
-        var sinRefPill = (!u.sponsor_id && isEmpresaLensSuper()) ? '<span class="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-200 border border-amber-400/35 shrink-0">Sin ref.</span>' : '';
-        return '<button type="button" class="super-user-card w-full text-left glass rounded-xl p-4 flex items-center justify-between gap-3 border border-white/10 hover:border-[#dc2626]/40 active:scale-[0.99] transition-all touch-target" data-id="' + u.id + '" data-trial-ends-at="' + endIso + '"><div class="flex-1 min-w-0"><p class="font-semibold truncate flex items-center gap-2 flex-wrap">' + name + rolePill + sinRefPill + '</p><p class="text-xs text-white/50 truncate mt-0.5">' + (u.email || '').replace(/</g, '&lt;') + '</p></div><div class="flex items-center gap-2 shrink-0"><span class="super-list-countdown px-2 py-1 rounded-lg text-xs ' + badgeClass + '">' + badge + '</span><i data-lucide="chevron-right" class="w-5 h-5 text-white/40"></i></div></button>';
-      }).join('');
-      listEl.querySelectorAll('.super-user-card').forEach(function (btn) {
-        btn.onclick = function () {
-          var id = btn.dataset.id;
-          var user = list.find(function (u) { return u.id === id; });
-          if (user) openSuperUserDetail(user);
-        };
-      });
+      listEl.innerHTML = displayList.map(function (u) { return buildSuperAfiliadoRowHtml(u); }).join('');
+      bindSuperAfiliadoRowClicks(listEl, displayList);
       lucide.createIcons();
     }
     var superSearchInput = document.getElementById('superSearchEmail');
     if (superSearchInput) superSearchInput.addEventListener('input', renderSuperListFromSearch);
     if (superSearchInput) superSearchInput.addEventListener('search', renderSuperListFromSearch);
+    var superAfiliadosTabU = document.getElementById('superAfiliadosTabUsuarios');
+    var superAfiliadosTabD = document.getElementById('superAfiliadosTabDistribuidores');
+    if (superAfiliadosTabU) superAfiliadosTabU.addEventListener('click', function () {
+      state.afiliadosSubTab = 'usuarios';
+      syncAfiliadosSubTabButtons();
+      if (superUserListCache.length) renderSuperListFromSearch();
+      else if (state.currentPanel === 'super') renderSuper();
+    });
+    if (superAfiliadosTabD) superAfiliadosTabD.addEventListener('click', function () {
+      state.afiliadosSubTab = 'distribuidores';
+      syncAfiliadosSubTabButtons();
+      if (superUserListCache.length) renderSuperListFromSearch();
+      else if (state.currentPanel === 'super') renderSuper();
+    });
     document.getElementById('saveAdminContact').onclick = async () => {
       if (isPartnerLens()) return;
       const whatsapp = (document.getElementById('adminContactWhatsapp').value || '').trim().replace(/\D/g, '');
