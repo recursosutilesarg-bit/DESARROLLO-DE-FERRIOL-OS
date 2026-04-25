@@ -2338,7 +2338,7 @@
         try { sessionStorage.setItem('ferriol_super_ui', 'empresa'); } catch (_) {}
         applyAppShell();
       }
-      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'afiliados' && state.superSection !== 'balance') {
+      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'afiliados' && state.superSection !== 'balance' && state.superSection !== 'solicitudes') {
         switchSuperSection('afiliados');
       }
       if (name !== 'scanner') window._scanForProductCode = false;
@@ -2365,7 +2365,7 @@
         var navSuperBottom = document.getElementById('navSuperBottom');
         if (navSuperBottom) navSuperBottom.classList.remove('hidden');
         var landSuper = state.superSection || 'afiliados';
-        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'balance') landSuper = 'afiliados';
+        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'balance' && landSuper !== 'solicitudes') landSuper = 'afiliados';
         switchSuperSection(landSuper);
       } else {
         if (superListCountdownInterval) { clearInterval(superListCountdownInterval); superListCountdownInterval = null; }
@@ -2429,9 +2429,6 @@
       if (reqSuper && currentUser && (currentUser.role !== 'super' || !isEmpresaLensSuper())) {
         state.superSection = 'afiliados';
       }
-      if (state.superSection === 'solicitudes' && currentUser && !isEmpresaLensSuper()) {
-        state.superSection = 'afiliados';
-      }
       document.querySelectorAll('#panel-super .super-section').forEach(function (el) {
         el.classList.add('hidden');
         el.style.setProperty('display', 'none', 'important');
@@ -2452,7 +2449,10 @@
       if (headerNotifBtn) headerNotifBtn.classList.toggle('active', state.superSection === 'solicitudes');
       if (state.superSection === 'cobros' && isEmpresaLensSuper()) renderSuperCobrosSection();
       if (state.superSection === 'balance') loadSuperBalanceSection();
-      if (state.superSection === 'solicitudes' && isEmpresaLensSuper()) loadSuperSolicitudesSection();
+      if (state.superSection === 'solicitudes') {
+        void renderSuperMembershipDayRequestBanners();
+        if (isEmpresaLensSuper()) loadSuperSolicitudesSection();
+      }
       lucide.createIcons();
     }
     var headerAjustesBtnEl = document.getElementById('headerSuperAjustesBtn');
