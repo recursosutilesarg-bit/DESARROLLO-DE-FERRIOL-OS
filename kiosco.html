@@ -1098,7 +1098,6 @@
           <div id="superMainFerriolResumenCard" class="hidden mb-3 rounded-xl border border-cyan-500/35 bg-cyan-500/10 px-3 py-3 text-sm super-only super-main-only"></div>
           <p class="text-xs text-white/50 mb-2 super-only super-main-only">Directorio completo del sistema. Filtrá «Sin referidor» para ver cuentas sin admin/referidor y asignalas desde el detalle del usuario.</p>
           <p id="superPartnerNetInfo" class="hidden text-sm text-white/75 mb-3 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-2"></p>
-          <div id="superPartnerCommissionsCard" class="hidden mb-3 rounded-xl border border-emerald-500/35 bg-emerald-500/10 px-3 py-3 text-sm"></div>
           <div id="superDayRequestsFounderBox" class="hidden mb-3 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-3 text-sm"></div>
           <div id="superDayRequestsPartnerBox" class="hidden mb-3 rounded-xl border border-cyan-500/35 bg-cyan-500/08 px-3 py-3 text-sm"></div>
           <div class="flex flex-wrap gap-2 mb-4">
@@ -1138,7 +1137,8 @@
             <i data-lucide="scale" class="w-5 h-5 text-[#86efac]"></i>
             Balance
           </h2>
-          <p class="text-xs text-white/50 mb-3">Transferencias que registraste en el sistema y movimientos del <strong class="text-white/65">libro</strong> donde vos sos beneficiario (comisiones, regalías u obligaciones con la empresa).</p>
+          <p class="text-xs text-white/50 mb-3">Transferencias que registraste en el sistema y movimientos del <strong class="text-white/65">libro</strong> donde vos sos beneficiario (comisiones, regalías u obligaciones con la empresa). Si sos <strong class="text-white/70">socio vendedor</strong>, el resumen operativo del libro está arriba.</p>
+          <div id="superBalancePartnerResumen" class="hidden mb-4"></div>
           <div class="flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 mb-4" role="tablist" aria-label="Vista de balance">
             <button type="button" id="superBalanceTabPago" role="tab" aria-selected="true" class="super-balance-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-[#22c55e]/50 bg-[#22c55e]/20 text-white transition-all">Pagos y deudas</button>
             <button type="button" id="superBalanceTabCobro" role="tab" aria-selected="false" class="super-balance-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-transparent text-white/55 hover:text-white/80 transition-all">Cobros a favor</button>
