@@ -34,6 +34,7 @@
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
   <link rel="stylesheet" href="kiosco.css?v=20260424dualform">
 </head>
 <body class="relative">
@@ -226,6 +227,10 @@
         <button data-super-section="afiliados" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Afiliados">
           <i data-lucide="users" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Afiliados</span>
+        </button>
+        <button type="button" id="navSuperIngresosBtn" data-super-section="ingresos" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Ingresos · ventas como vendedor">
+          <i data-lucide="trending-up" class="w-5 h-5 shrink-0"></i>
+          <span class="truncate w-full text-center">Ingresos</span>
         </button>
         <button data-super-section="balance" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Balance · pagos y cobros">
           <i data-lucide="scale" class="w-5 h-5 shrink-0"></i>
@@ -426,15 +431,15 @@
           <i data-lucide="landmark" class="w-4 h-4"></i>
           Licencia mensual Ferriol OS
         </h3>
-        <p id="kioscoLicensePriceHint" class="text-sm text-white/75 mb-2"></p>
+        <p class="text-sm text-white/80 mb-2">La <strong class="text-white/95">cuota de licencia</strong> se paga <strong class="text-[#86efac]">siempre a Ferriol (empresa)</strong> usando <strong class="text-white/90">solo</strong> los datos oficiales de la cuenta de abajo.</p>
+        <p id="kioscoLicensePriceHint" class="text-sm text-white/70 mb-3"></p>
+        <p class="text-xs text-cyan-200/90 mb-1 font-medium">Datos oficiales de pago — Ferriol (empresa)</p>
+        <pre id="kioscoTransferInfoText" class="text-xs whitespace-pre-wrap text-white/90 glass rounded-lg p-3 border border-cyan-500/25 max-h-48 overflow-y-auto font-sans mb-4"></pre>
         <p id="kioscoLicenseSponsorHint" class="text-xs text-white/60 mb-2"></p>
         <div id="kioscoLicenseReferidorWhatsApp" class="hidden mb-2"></div>
-        <p class="text-xs text-white/55 mb-1">Coordiná el pago con tu <strong class="text-white/75">referidor</strong> (WhatsApp arriba si lo cargó en su perfil). Más abajo: datos de la <strong class="text-white/70">empresa (Ferriol)</strong> y, si tu referidor los cargó, <strong class="text-white/70">sus datos bancarios</strong> para abonarle. Confirmá montos y comprobante con quien te corresponda. Si te <strong class="text-white/70">reasignan</strong> otro referidor, el nombre y el contacto se actualizan.</p>
-        <p class="text-[10px] text-white/45 mb-2">Ese canal es quien centraliza el cobro de tu cuota frente a Ferriol OS.</p>
-        <p class="text-xs text-cyan-200/80 mb-1">Transferencia a la empresa (Ferriol)</p>
-        <pre id="kioscoTransferInfoText" class="text-xs whitespace-pre-wrap text-white/90 glass rounded-lg p-3 border border-white/15 max-h-48 overflow-y-auto font-sans"></pre>
-        <div id="kioscoPartnerTransferWrap" class="hidden mt-3 rounded-lg border border-amber-500/30 bg-amber-500/06 p-3">
-          <p class="text-xs font-medium text-amber-200/90 mb-2 flex items-center gap-1.5"><i data-lucide="user" class="w-3.5 h-3.5 shrink-0"></i> Datos bancarios de tu referidor (para abonarle la parte de red que corresponda)</p>
+        <p class="text-xs text-white/50 mb-2">Dudas o comprobante: <strong class="text-white/70">WhatsApp o email de tu red</strong> (arriba, si figuran). Eso <strong class="text-white/75">no reemplaza</strong> el pago a la empresa: el dinero de la licencia va a <strong class="text-white/75">Ferriol</strong> con los datos oficiales.</p>
+        <div id="kioscoPartnerTransferWrap" class="hidden mt-2 rounded-lg border border-amber-500/30 bg-amber-500/06 p-3">
+          <p class="text-xs font-medium text-amber-200/90 mb-2 flex items-center gap-1.5"><i data-lucide="user" class="w-3.5 h-3.5 shrink-0"></i> Dato adicional de tu referidor (red comercial, no reemplaza el pago a Ferriol)</p>
           <pre id="kioscoPartnerTransferText" class="text-xs whitespace-pre-wrap text-white/90 font-sans max-h-36 overflow-y-auto"></pre>
         </div>
         <p class="text-[10px] text-white/40 mt-2">En esta app no verás comisiones ni repartos 20/80: eso es gestión de la red comercial, no de tu caja diaria.</p>
@@ -1155,6 +1160,58 @@
             <!-- Lista por JS (filas estilo inventory-item) -->
           </div>
         </div>
+        <!-- Ingresos: ventas del socio como vendedor (ferriol_payments) estilo resumen comercial -->
+        <div id="super-section-ingresos" class="super-section glass rounded-2xl p-4 sm:p-5 slide-up hidden absolute inset-x-0 top-0 z-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+          <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
+            <div class="min-w-0">
+              <h2 class="font-bold text-xl mb-1 flex items-center gap-2 text-white">
+                <i data-lucide="line-chart" class="w-5 h-5 text-[#86efac] shrink-0"></i>
+                Gestión de ventas
+              </h2>
+              <p class="text-xs text-white/50">Ventas donde <strong class="text-white/70">vos sos el vendedor</strong> en el registro. El cliente paga a Ferriol; la empresa carga el movimiento, verifica el pago y te refleja el saldo en <strong class="text-white/65">Balance</strong> según el plan.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+              <label class="text-xs text-white/45 sr-only" for="ingresosRangeFilter">Período</label>
+              <select id="ingresosRangeFilter" class="glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm min-w-[10.5rem]">
+                <option value="30">Últimos 30 días</option>
+                <option value="90" selected>Últimos 90 días</option>
+                <option value="180">Últimos 6 meses</option>
+                <option value="365">Últimos 12 meses</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+            <div class="rounded-2xl border border-white/12 bg-gradient-to-b from-white/[0.08] to-transparent p-4">
+              <p class="text-xs text-white/50 flex items-center gap-1.5 mb-1">Facturación neta <span class="text-white/35" title="Suma de cobros verificados (ARS)">ⓘ</span></p>
+              <p id="ingresosKpiNet" class="text-2xl font-bold text-[#86efac] tabular-nums">—</p>
+              <p class="text-[10px] text-white/40 mt-1">Pagos <strong class="text-white/55">verificados</strong> por la empresa</p>
+            </div>
+            <div class="rounded-2xl border border-white/12 bg-gradient-to-b from-white/[0.08] to-transparent p-4">
+              <p class="text-xs text-white/50 mb-1">Transacciones</p>
+              <p id="ingresosKpiCount" class="text-2xl font-bold text-cyan-200 tabular-nums">—</p>
+              <p class="text-[10px] text-white/40 mt-1">Cantidad con estado verificado en el período</p>
+            </div>
+            <div class="rounded-2xl border border-white/12 bg-gradient-to-b from-red-500/10 to-transparent p-4">
+              <p class="text-xs text-white/50 mb-1">Rechazos / anulado</p>
+              <p id="ingresosKpiRej" class="text-2xl font-bold text-red-200/90 tabular-nums">—</p>
+              <p class="text-[10px] text-white/40 mt-1">Monto con estado <strong class="text-red-200/80">rechazado</strong> (revisar con empresa)</p>
+            </div>
+          </div>
+          <div class="rounded-2xl border border-white/15 bg-black/25 p-4 sm:p-5 mb-5">
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <h3 class="font-semibold text-sm text-white/90">Desempeño diario</h3>
+              <p class="text-[10px] text-white/40 hidden sm:block">Leyenda: verde = neto; rojo = rech.; azul = nº ventas / día</p>
+            </div>
+            <div class="relative w-full" style="height: 260px;">
+              <canvas id="ingresosChartCanvas" aria-label="Gráfico de desempeño de ventas"></canvas>
+            </div>
+            <p id="ingresosChartFallback" class="text-xs text-amber-200/90 py-6 text-center hidden">No se pudo cargar el gráfico. Revisá la conexión o Chart.js.</p>
+          </div>
+          <h3 class="font-semibold text-sm text-white/85 mb-2">Últimas operaciones</h3>
+          <div id="ingresosTableWrap" class="rounded-xl border border-white/10 bg-black/20 overflow-hidden text-sm min-h-[4rem]">
+            <p class="text-white/45 text-xs py-5 text-center px-2">Cargando…</p>
+          </div>
+        </div>
         <!-- Balance: transferencias declaradas + libro (personal) -->
         <div id="super-section-balance" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 z-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
@@ -1337,9 +1394,9 @@
           <div id="superMasFerriolBankingCard" class="mb-5 rounded-xl border border-cyan-500/35 bg-cyan-500/10 p-4 sm:p-5 hidden">
             <h3 class="font-bold text-base mb-1 flex items-center gap-2 text-cyan-100/95">
               <i data-lucide="landmark" class="w-5 h-5 text-cyan-200"></i>
-              Pagar a Ferriol (empresa)
+              Pago obligatorio a Ferriol (empresa)
             </h3>
-            <p class="text-xs text-white/55 mb-2">Usá esta cuenta para la cuota de socio / <strong class="text-white/75">distribuidor digital</strong> (membresía a la red Ferriol).</p>
+            <p class="text-xs text-white/55 mb-2">Todas las cuotas de licencia y de <strong class="text-white/75">socio / distribuidor digital</strong> se abonan a <strong class="text-cyan-100/90">Ferriol</strong> con estos datos oficiales (no a una cuenta personal del referidor salvo otra regla comercial acordada por fuera).</p>
             <pre id="superMasFerriolTransferText" class="text-xs whitespace-pre-wrap text-white/90 font-sans max-h-52 overflow-y-auto">—</pre>
           </div>
           <div id="superMasPartnerBankingCard" class="mb-5 rounded-xl border border-amber-500/30 bg-amber-500/08 p-4 sm:p-5 hidden">
@@ -1347,7 +1404,7 @@
               <i data-lucide="banknote" class="w-4 h-4 text-amber-200"></i>
               Tus datos para que te paguen (referidos)
             </h3>
-            <p class="text-xs text-white/55 mb-3">Quien figure como afiliado tuyo verá en <strong class="text-white/70">Caja</strong> el texto de la empresa (arriba) y, si lo cargás acá, <strong class="text-white/70">tus datos bancarios</strong> para abonarte la licencia o lo que defina la red.</p>
+            <p class="text-xs text-white/55 mb-3">En <strong class="text-white/70">Caja</strong> verán <strong class="text-cyan-200/80">siempre</strong> primero el pago a <strong class="text-white/75">Ferriol</strong>. Lo que cargues acá es <strong class="text-white/75">extra</strong> (acuerdos de red, no sustituye la licencia a la empresa).</p>
             <button type="button" id="btnOpenPartnerTransferModal" class="w-full sm:w-auto rounded-xl py-2.5 px-4 text-sm font-semibold border border-amber-500/50 bg-amber-500/15 hover:bg-amber-500/25 text-amber-100 touch-target text-left">Cargar o editar datos bancarios</button>
             <p id="superMasPartnerTransferPreview" class="text-xs text-white/45 mt-2 hidden"></p>
           </div>
@@ -1904,7 +1961,7 @@
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 text-amber-200"></i> Datos bancarios (referidos)</h3>
         <button type="button" id="partnerTransferInfoModalClose" class="btn-neomorphic rounded-xl p-2 touch-target" title="Cerrar"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-      <p class="text-sm text-white/60 mb-3">Esto lo verán tus <strong class="text-white/85">kiosqueros vinculados a vos</strong> en Caja, junto con los datos de la empresa. No incluyas contraseñas; solo lo necesario para transferirte (CBU, CVU, alias, titular, banco, etc.).</p>
+      <p class="text-sm text-white/60 mb-3">En Caja, <strong class="text-cyan-200/85">siempre</strong> aparece primero el pago a <strong class="text-white/85">Ferriol (empresa)</strong>. Lo que escribas acá se muestra <strong class="text-white/80">aparte</strong>, para acuerdos de red. No reemplaza la licencia a la empresa. No incluyas contraseñas; solo datos para transferirte (CBU, CVU, alias, titular, banco, etc.).</p>
       <div id="partnerTransferInfoMsg" class="text-xs text-amber-200 mb-2 hidden"></div>
       <label class="block text-xs text-white/55 mb-1" for="partnerTransferInfoTextarea">Texto a mostrar</label>
       <textarea id="partnerTransferInfoTextarea" rows="8" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-sm resize-y min-h-[140px] mb-4" placeholder="Alias…&#10;CBU…"></textarea>
@@ -1914,7 +1971,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260422partnerbank"></script>
+  <script defer src="kiosco-app.js?v=20260425ingresos"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>

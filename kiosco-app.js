@@ -552,6 +552,168 @@
       }
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
+    function ferriolIngresosPaymentTypeLabel(t) {
+      if (t === 'kit_inicial') return 'Kit vendedor';
+      if (t === 'kiosco_licencia') return 'Licencia kiosco';
+      if (t === 'vendor_mantenimiento') return 'Cuota vendedor';
+      return t ? String(t) : '—';
+    }
+    function ferriolIngresosDayKeyFromIso(iso) {
+      if (!iso) return '';
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      var y = d.getFullYear();
+      var m = String(d.getMonth() + 1).padStart(2, '0');
+      var day = String(d.getDate()).padStart(2, '0');
+      return y + '-' + m + '-' + day;
+    }
+    async function loadSuperIngresosSection() {
+      var kpiN = document.getElementById('ingresosKpiNet');
+      var kpiC = document.getElementById('ingresosKpiCount');
+      var kpiR = document.getElementById('ingresosKpiRej');
+      var wrap = document.getElementById('ingresosTableWrap');
+      var canvas = document.getElementById('ingresosChartCanvas');
+      var fb = document.getElementById('ingresosChartFallback');
+      if (!kpiN || !wrap) return;
+      if (!isPartnerLens() || isEmpresaLensSuper() || !supabaseClient || !currentUser) {
+        wrap.innerHTML = '<p class="text-amber-200/90 text-sm py-4 text-center">Esta sección es para administradores de red (vista no fundador).</p>';
+        return;
+      }
+      var rangeSel = document.getElementById('ingresosRangeFilter');
+      var rangeDays = rangeSel && rangeSel.value ? parseInt(rangeSel.value, 10) : 90;
+      if (isNaN(rangeDays) || rangeDays < 1) rangeDays = 90;
+      kpiN.textContent = kpiC.textContent = kpiR.textContent = '…';
+      wrap.innerHTML = '<p class="text-white/45 text-xs py-5 text-center">Cargando…</p>';
+      if (fb) { fb.classList.add('hidden'); if (canvas) canvas.classList.remove('hidden'); }
+      var uid = currentUser.id;
+      var endD = new Date();
+      endD.setHours(23, 59, 59, 999);
+      var startD = new Date();
+      startD.setHours(0, 0, 0, 0);
+      startD.setDate(startD.getDate() - (rangeDays - 1));
+      try {
+        var res = await supabaseClient
+          .from('ferriol_payments')
+          .select('id, created_at, payment_type, amount, status, payer_user_id, period_month, external_note')
+          .eq('seller_user_id', uid)
+          .order('created_at', { ascending: false })
+          .limit(800);
+        if (res.error) throw res.error;
+        var rows = (res.data || []).filter(function (r) {
+          var t = r.created_at ? new Date(r.created_at).getTime() : 0;
+          return t >= startD.getTime() && t <= endD.getTime();
+        });
+        var sumVer = 0;
+        var nVer = 0;
+        var sumRej = 0;
+        var nRej = 0;
+        var byDay = {};
+        rows.forEach(function (r) {
+          var amt = Number(r.amount || 0);
+          var dk = ferriolIngresosDayKeyFromIso(r.created_at);
+          if (!byDay[dk]) byDay[dk] = { net: 0, rej: 0, n: 0 };
+          if (r.status === 'verified') {
+            sumVer += amt;
+            nVer += 1;
+            byDay[dk].net += amt;
+            byDay[dk].n += 1;
+          } else if (r.status === 'rejected') {
+            sumRej += amt;
+            nRej += 1;
+            byDay[dk].rej += amt;
+          }
+        });
+        kpiN.textContent = '$ ' + sumVer.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS';
+        kpiC.textContent = String(nVer);
+        kpiR.textContent = nRej > 0
+          ? ('$ ' + sumRej.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS')
+          : '$ 0,00 ARS';
+        var dayKeys = [];
+        var cur = new Date(startD);
+        while (cur.getTime() <= endD.getTime()) {
+          dayKeys.push(ferriolIngresosDayKeyFromIso(cur.toISOString()));
+          cur.setDate(cur.getDate() + 1);
+        }
+        var labels = dayKeys.map(function (k) {
+          var p = k.split('-');
+          var d = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+          return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
+        });
+        var dataNet = dayKeys.map(function (k) { return byDay[k] ? byDay[k].net : 0; });
+        var dataRej = dayKeys.map(function (k) { return byDay[k] ? byDay[k].rej : 0; });
+        var dataCnt = dayKeys.map(function (k) { return byDay[k] ? byDay[k].n : 0; });
+        if (typeof window.Chart === 'undefined') {
+          if (canvas) canvas.classList.add('hidden');
+          if (fb) { fb.classList.remove('hidden'); fb.textContent = 'Gráfico no disponible (librería de gráficos). Revisá la conexión a internet.'; }
+        } else {
+          if (window._ferriolIngresosChart) {
+            try { window._ferriolIngresosChart.destroy(); } catch (_) {}
+            window._ferriolIngresosChart = null;
+          }
+          if (canvas) {
+            var ctx = canvas.getContext('2d');
+            window._ferriolIngresosChart = new window.Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [
+                  { label: 'Facturación neta (verif.)', data: dataNet, borderColor: 'rgb(134, 239, 172)', backgroundColor: 'rgba(134, 239, 172, 0.12)', tension: 0.25, fill: true, pointRadius: 0, yAxisID: 'y' },
+                  { label: 'Rechazos', data: dataRej, borderColor: 'rgb(248, 113, 113)', backgroundColor: 'rgba(248, 113, 113, 0.08)', tension: 0.25, fill: true, pointRadius: 0, yAxisID: 'y' },
+                  { label: 'Nº transacciones', data: dataCnt, borderColor: 'rgb(56, 189, 248)', backgroundColor: 'rgba(56, 189, 248, 0.06)', tension: 0.2, fill: false, pointRadius: 0, yAxisID: 'y1' }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                  legend: { position: 'top', labels: { color: 'rgba(255,255,255,0.75)', font: { size: 11 } } }
+                },
+                scales: {
+                  x: { ticks: { color: 'rgba(255,255,255,0.45)', maxRotation: 45, minRotation: 0, autoSkip: true, maxTicksLimit: 12 }, grid: { color: 'rgba(255,255,255,0.06)' } },
+                  y: { position: 'left', ticks: { color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255,255,255,0.08)' } },
+                  y1: { position: 'right', min: 0, ticks: { color: 'rgba(56, 189, 248, 0.7)', stepSize: 1 }, grid: { drawOnChartArea: false } }
+                }
+              }
+            });
+          }
+        }
+        var ids = [];
+        var recent = (res.data || []).slice(0, 18);
+        recent.forEach(function (r) { if (r.payer_user_id) ids.push(r.payer_user_id); });
+        var idSet = Array.from(new Set(ids));
+        var nameBy = {};
+        if (idSet.length) {
+          var pr = await supabaseClient.from('profiles').select('id, email, kiosco_name').in('id', idSet);
+          if (!pr.error && pr.data) {
+            pr.data.forEach(function (p) {
+              if (p && p.id) nameBy[p.id] = (p.kiosco_name || '').trim() || p.email || p.id;
+            });
+          }
+        }
+        if (!recent.length) {
+          wrap.innerHTML = '<p class="text-white/50 text-sm py-8 text-center px-3">Aún no hay movimientos con vos como vendedor. La empresa carga en <strong class="text-white/70">Cobros</strong> un registro poniendo tu email en «vendedor» cuando un cliente paga; ahí comenzará a verse tu desempeño y el saldo en <strong class="text-white/70">Balance</strong> al verificarse el pago.</p>';
+        } else {
+          var head = '<div class="grid grid-cols-12 gap-1 px-3 py-2 border-b border-white/10 text-[10px] text-white/45 font-medium uppercase tracking-wide"><div class="col-span-2">Fecha</div><div class="col-span-3">Tipo</div><div class="col-span-2">Monto</div><div class="col-span-2">Estado</div><div class="col-span-3">Comprador</div></div>';
+          var body = recent.map(function (r) {
+            var d = String(r.created_at || '').slice(0, 10);
+            var st = r.status;
+            var stH = st === 'verified' ? 'text-[#86efac]' : (st === 'rejected' ? 'text-red-300' : 'text-amber-200');
+            var nm = nameBy[r.payer_user_id] || ('…' + String(r.payer_user_id || '').slice(0, 8));
+            return '<div class="grid grid-cols-12 gap-1 px-3 py-2.5 border-b border-white/[0.06] text-xs items-center"><div class="col-span-2 text-white/55 tabular-nums">' + d + '</div><div class="col-span-3 text-white/85 truncate" title="' + String(ferriolIngresosPaymentTypeLabel(r.payment_type)).replace(/"/g, '') + '">' + String(ferriolIngresosPaymentTypeLabel(r.payment_type)).replace(/</g, '&lt;') + '</div><div class="col-span-2 text-[#86efac] font-semibold tabular-nums">$ ' + Number(r.amount || 0).toLocaleString('es-AR') + '</div><div class="col-span-2 ' + stH + '">' + (st === 'verified' ? 'Verif.' : (st === 'rejected' ? 'Rechaz.' : 'Pend.')) + '</div><div class="col-span-3 text-white/60 truncate" title="">' + String(nm).replace(/</g, '&lt;') + '</div></div>';
+          }).join('');
+          wrap.innerHTML = head + body;
+        }
+      } catch (e) {
+        kpiN.textContent = kpiC.textContent = kpiR.textContent = '—';
+        wrap.innerHTML = '<p class="text-red-300/90 text-sm py-4 px-2">No se pudieron cargar los ingresos. ' + (e && e.message ? String(e.message) : '') + ' ¿Ejecutaste <code class="text-white/80">supabase-ferriol-payments.sql</code> y las políticas RLS?</p>';
+        if (typeof window !== 'undefined' && window.Chart && canvas && window._ferriolIngresosChart) {
+          try { window._ferriolIngresosChart.destroy(); } catch (_) {}
+          window._ferriolIngresosChart = null;
+        }
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
     function superSolicitudRowHtml(title, mid, right) {
       return '<div class="inventory-item border-x-0 rounded-none cursor-default"><div class="inv-item-info"><span class="inv-item-name"><span class="block truncate">' + title + '</span></span><span class="inv-item-price text-[#86efac]">' + mid + '</span><span class="inv-item-stock text-white/45 truncate max-w-[38vw] text-[11px]">' + right + '</span></div></div>';
     }
@@ -702,7 +864,7 @@
     }
     function ferriolKioscoSponsorHintHtml() {
       if (!currentUser || !currentUser.sponsorId) {
-        return 'No figura referidor en tu perfil. Si entraste por invitación, pedí que lo carguen en administración.';
+        return 'No figura referidor en tu perfil. Si entraste por invitación, pedí que lo carguen en administración. <span class="text-white/60">El pago de la licencia sigue yendo a <strong class="text-white/75">Ferriol (empresa)</strong> con los datos oficiales de arriba.</span>';
       }
       return null;
     }
@@ -712,14 +874,14 @@
       if (!supabaseClient) return { html: 'Configurá Supabase para ver datos del referidor.', ok: false, partnerTransferInfo: '' };
       try {
         var sp = await supabaseClient.from('profiles').select('kiosco_name, email, role, partner_transfer_info').eq('id', currentUser.sponsorId).maybeSingle();
-        if (sp.error || !sp.data) return { html: 'Tenés referidor asignado. Si no sabés quién es, consultá con el administrador.', ok: true, partnerTransferInfo: '' };
+        if (sp.error || !sp.data) return { html: 'Tenés referidor asignado. Si no sabés quién es, consultá con el administrador. <span class="text-white/60">El pago de la licencia es <strong class="text-white/75">siempre a Ferriol</strong> (datos oficiales arriba).</span>', ok: true, partnerTransferInfo: '' };
         var d = sp.data;
         var partnerTI = d.partner_transfer_info != null && String(d.partner_transfer_info).trim() ? String(d.partner_transfer_info).trim() : '';
         var nm = (d.kiosco_name || '').trim() || (d.email ? String(d.email).split('@')[0] : '') || '—';
         var roleL = d.role === 'super' ? 'Administrador' : (d.role === 'partner' ? 'Socio vendedor' : 'Referidor');
         var em = d.email ? String(d.email).replace(/</g, '&lt;').replace(/&/g, '&amp;') : '';
         var nmEsc = String(nm).replace(/</g, '&lt;').replace(/&/g, '&amp;');
-        var html = 'Pagás la licencia a: <strong class="text-[#86efac]/95">' + nmEsc + '</strong>' + (em ? ' · ' + em : '') + ' <span class="text-white/45">(' + roleL + ')</span>. Más abajo: datos de la empresa; si tu referidor cargó los suyos, también aparecen aparte.';
+        var html = 'Contacto de tu red: <strong class="text-[#86efac]/95">' + nmEsc + '</strong>' + (em ? ' · ' + em : '') + ' <span class="text-white/45">(' + roleL + ')</span>. <span class="text-white/60">Dudas y seguimiento. El pago de la <strong class="text-white/75">licencia a Ferriol</strong> hacelo con los <strong class="text-cyan-200/80">datos oficiales de la empresa</strong> (arriba en esta misma tarjeta).</span>';
         return { html: html, ok: true, partnerTransferInfo: partnerTI };
       } catch (_) {
         return { html: 'Consultá con el administrador quién es tu referidor.', ok: false, partnerTransferInfo: '' };
@@ -737,9 +899,9 @@
       var amt = FERRIOL_PLAN_AMOUNTS.kioscoMonthly;
       var amtStr = amt.toLocaleString('es-AR');
       if (priceEl) {
-        priceEl.innerHTML = 'Cuota orientativa: <strong class="text-[#86efac]">$ ' + amtStr + ' ARS</strong> por mes. Confirmá monto y forma de pago con tu <strong class="text-white/85">referidor o administrador</strong>.';
+        priceEl.innerHTML = 'Cuota orientativa: <strong class="text-[#86efac]">$ ' + amtStr + ' ARS</strong> por mes. <strong class="text-white/90">Ese pago</strong> (licencia) va a <strong class="text-cyan-200/90">Ferriol (empresa)</strong> con los datos oficiales. Monto y comprobante: acordalos con tu <strong class="text-white/80">referidor o administración</strong> si hace falta.';
       }
-      var transferBody = 'El administrador debe cargar en Ajustes los datos de cuenta a los que transferís la licencia (referidor / administrador).';
+      var transferBody = 'Falta cargar en Ajustes (fundador) los datos oficiales de la cuenta de Ferriol (empresa) a la que se transfiere la licencia de todos los negocios.';
       if (!supabaseClient) {
         transferBody = 'Configurá Supabase para ver datos de pago.';
       } else {
@@ -2561,6 +2723,14 @@
       if (provWrap) provWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper()));
       var affWrap = document.querySelector('.ferriol-partner-affiliate-links-wrap');
       if (affWrap) affWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper()));
+      var ingNav = document.getElementById('navSuperIngresosBtn');
+      if (ingNav) {
+        if (!isNetworkAdmin || uiNegocio || isEmpresaLensSuper()) {
+          ingNav.style.display = 'none';
+        } else {
+          ingNav.style.display = '';
+        }
+      }
       updateSuperMasBankingShell();
     }
 
@@ -2570,7 +2740,7 @@
         try { sessionStorage.setItem('ferriol_super_ui', 'empresa'); } catch (_) {}
         applyAppShell();
       }
-      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'afiliados' && state.superSection !== 'balance' && state.superSection !== 'solicitudes' && state.superSection !== 'mas') {
+      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'afiliados' && state.superSection !== 'ingresos' && state.superSection !== 'balance' && state.superSection !== 'solicitudes' && state.superSection !== 'mas') {
         switchSuperSection('afiliados');
       }
       if (name !== 'scanner') window._scanForProductCode = false;
@@ -2597,7 +2767,7 @@
         var navSuperBottom = document.getElementById('navSuperBottom');
         if (navSuperBottom) navSuperBottom.classList.remove('hidden');
         var landSuper = state.superSection || 'afiliados';
-        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'balance' && landSuper !== 'solicitudes' && landSuper !== 'mas') landSuper = 'afiliados';
+        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'ingresos' && landSuper !== 'balance' && landSuper !== 'solicitudes' && landSuper !== 'mas') landSuper = 'afiliados';
         switchSuperSection(landSuper);
       } else {
         if (superListCountdownInterval) { clearInterval(superListCountdownInterval); superListCountdownInterval = null; }
@@ -2682,6 +2852,7 @@
       });
       if (state.superSection === 'cobros' && isEmpresaLensSuper()) renderSuperCobrosSection();
       if (state.superSection === 'balance') loadSuperBalanceSection();
+      if (state.superSection === 'ingresos') void loadSuperIngresosSection();
       if (state.superSection === 'solicitudes') {
         void renderSuperMembershipDayRequestBanners();
         if (isEmpresaLensSuper()) loadSuperSolicitudesSection();
@@ -6715,6 +6886,12 @@ async function showApp() {
       syncSuperBalanceTabButtons();
       loadSuperBalanceSection();
     });
+    var ingresosRangeFilter = document.getElementById('ingresosRangeFilter');
+    if (ingresosRangeFilter) {
+      ingresosRangeFilter.addEventListener('change', function () {
+        if (state.superSection === 'ingresos') loadSuperIngresosSection();
+      });
+    }
     document.getElementById('saveAdminContact').onclick = async () => {
       if (isPartnerLens()) return;
       const whatsapp = (document.getElementById('adminContactWhatsapp').value || '').trim().replace(/\D/g, '');
