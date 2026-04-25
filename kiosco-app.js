@@ -1377,7 +1377,7 @@
               <span class="inv-item-price">$${(p.precio ?? 0).toLocaleString('es-AR')}</span>
               <span class="inv-item-stock ${stockColor}">${quedan}</span>
             </div>
-            <button type="button" class="add-to-cart-btn inv-item-btn" data-codigo="${p.codigo}" title="Agregar al carrito">
+            <button type="button" class="add-to-cart-btn inv-item-btn" data-codigo="${p.codigo}" title="Elegir cantidad y agregar al carrito">
               <i data-lucide="plus" class="w-4 h-4"></i>
             </button>
           </div>
@@ -1391,7 +1391,7 @@
         });
       });
       list.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-        btn.onclick = (e) => { e.stopPropagation(); addToCart(btn.dataset.codigo); };
+        btn.onclick = (e) => { e.stopPropagation(); openAddToCartQtyModal(btn.dataset.codigo); };
       });
     }
 
@@ -1417,6 +1417,33 @@
         }
       };
       document.getElementById('productDetailBack').onclick = closeProductDetail;
+      var stockN = Math.max(0, Number(p.stock) || 0);
+      var existingLine = state.cart.find(i => i.codigo === codigo);
+      var inCartLine = existingLine ? existingLine.cant : 0;
+      var maxAddDetail = Math.max(0, stockN - inCartLine);
+      var qtyEl = document.getElementById('productDetailQty');
+      var hintDetail = document.getElementById('productDetailQtyHint');
+      var addCartBtn = document.getElementById('productDetailAddCart');
+      if (qtyEl) {
+        qtyEl.value = '1';
+        qtyEl.min = '1';
+        qtyEl.max = String(Math.max(1, maxAddDetail));
+        qtyEl.disabled = maxAddDetail <= 0;
+      }
+      if (hintDetail) {
+        hintDetail.textContent = maxAddDetail <= 0 ? 'Sin unidades para agregar (revisá stock o el carrito).' : ('Hasta ' + maxAddDetail + ' u. en este paso.');
+      }
+      if (addCartBtn) {
+        addCartBtn.disabled = maxAddDetail <= 0;
+        addCartBtn.classList.toggle('opacity-50', maxAddDetail <= 0);
+        addCartBtn.classList.toggle('pointer-events-none', maxAddDetail <= 0);
+        addCartBtn.onclick = function () {
+          if (maxAddDetail <= 0) return;
+          var q = parseInt(qtyEl && qtyEl.value, 10) || 1;
+          addToCart(codigo, q);
+          closeProductDetail();
+        };
+      }
       const panel = document.getElementById('productDetailPanel');
       panel.classList.remove('hidden');
       panel.classList.add('flex');
@@ -1473,14 +1500,31 @@
       }
     }
 
-    function addToCart(codigo) {
+    function addToCart(codigo, qtyOpt) {
       const d = getData();
       const p = (d.products || {})[codigo];
-      if (!p || p.stock <= 0) return;
+      if (!p) return;
+      const stockAvail = Math.max(0, Number(p.stock) || 0);
+      if (stockAvail <= 0) {
+        if (typeof showScanToast === 'function') showScanToast('Sin stock: ' + (p.nombre || ''), true);
+        return;
+      }
       const existing = state.cart.find(i => i.codigo === codigo);
+      const inCart = existing ? existing.cant : 0;
+      const maxAdd = stockAvail - inCart;
+      if (maxAdd <= 0) {
+        if (typeof showScanToast === 'function') showScanToast('No quedan unidades para agregar (revisá el carrito).', true);
+        return;
+      }
+      let requested = qtyOpt != null && qtyOpt !== '' ? Math.floor(Number(qtyOpt)) : 1;
+      if (isNaN(requested) || requested < 1) requested = 1;
+      const addN = Math.min(requested, maxAdd);
+      if (requested > maxAdd && typeof showScanToast === 'function') {
+        showScanToast('Solo se agregaron ' + addN + ' u. (máx. disponible: ' + maxAdd + ').', false);
+      }
       const costo = p.costo != null ? Number(p.costo) : 0;
-      if (existing) existing.cant++;
-      else state.cart.push({ ...p, cant: 1, costo });
+      if (existing) existing.cant += addN;
+      else state.cart.push({ ...p, cant: addN, costo });
       const cartQty = state.cart.find(i => i.codigo === codigo).cant;
       const stockInicial = p.stockInicial || p.stock || 1;
       const remaining = Math.max(0, p.stock - cartQty);
@@ -1495,6 +1539,55 @@
       document.getElementById('cartPanel').classList.add('translate-x-0');
       document.getElementById('cartDrawer').classList.remove('hidden');
       document.getElementById('cartDrawer').classList.add('flex');
+    }
+
+    function closeAddToCartQtyModal() {
+      state._pendingAddToCartCodigo = null;
+      var m = document.getElementById('addToCartQtyModal');
+      if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+    }
+
+    function openAddToCartQtyModal(codigo) {
+      if (!codigo) return;
+      const d = getData();
+      const p = (d.products || {})[codigo];
+      if (!p) return;
+      const stockAvail = Math.max(0, Number(p.stock) || 0);
+      if (stockAvail <= 0) {
+        if (typeof showScanToast === 'function') showScanToast('Sin stock: ' + (p.nombre || ''), true);
+        return;
+      }
+      const existing = state.cart.find(i => i.codigo === codigo);
+      const inCart = existing ? existing.cant : 0;
+      const maxAdd = stockAvail - inCart;
+      if (maxAdd <= 0) {
+        if (typeof showScanToast === 'function') showScanToast('No hay unidades disponibles (ya están en el carrito).', true);
+        return;
+      }
+      state._pendingAddToCartCodigo = codigo;
+      var titleEl = document.getElementById('addToCartQtyTitle');
+      var subEl = document.getElementById('addToCartQtySubtitle');
+      var inp = document.getElementById('addToCartQtyInput');
+      var hint = document.getElementById('addToCartQtyHint');
+      if (titleEl) titleEl.textContent = p.nombre || 'Producto';
+      if (subEl) {
+        subEl.textContent = '$' + (p.precio ?? 0).toLocaleString('es-AR') + ' · Stock: ' + stockAvail + (inCart ? ' · Ya en carrito: ' + inCart : '');
+      }
+      if (inp) {
+        inp.value = '1';
+        inp.min = '1';
+        inp.max = String(maxAdd);
+      }
+      if (hint) hint.textContent = 'Podés agregar hasta ' + maxAdd + ' u. en este paso.';
+      var m = document.getElementById('addToCartQtyModal');
+      if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+      setTimeout(function () {
+        if (inp) {
+          inp.focus();
+          try { inp.select(); } catch (_) {}
+        }
+      }, 80);
     }
 
     function removeFromCart(idx) {
@@ -1514,7 +1607,7 @@
               <i data-lucide="shopping-cart" class="w-8 h-8 text-white/50"></i>
             </div>
             <p class="font-medium text-white/80 mb-1">Tu carrito está vacío</p>
-            <p class="text-sm text-white/50 mb-4">Agregá productos desde el escáner o la lista de productos.</p>
+            <p class="text-sm text-white/50 mb-4">Agregá desde Productos (elegís la cantidad), desde Inicio o con el escáner.</p>
             <button type="button" id="cartEmptyAddBtn" class="btn-glow rounded-xl py-2.5 px-5 text-sm font-medium flex items-center gap-2 touch-target">
               <i data-lucide="package" class="w-4 h-4"></i> Ir a productos
             </button>
@@ -1817,12 +1910,12 @@
         var precio = prod ? prod.precio : 0;
         var stock = prod ? prod.stock : 0;
         var disabled = stock <= 0 ? ' opacity-50 pointer-events-none' : '';
-        return '<button type="button" class="freq-product-btn flex-shrink-0 glass rounded-xl px-4 py-3 border border-white/10 hover:border-[#22c55e]/50 active:opacity-90 touch-target text-left min-w-0 max-w-[140px]' + disabled + '" data-codigo="' + (p.codigo || '').replace(/"/g, '&quot;') + '" title="Agregar al carrito"><p class="font-medium truncate text-sm leading-snug">' + (nombre || '').replace(/</g, '&lt;') + '</p><p class="text-[#86efac] text-xs mt-1 leading-none tabular-nums">$' + (precio || 0).toLocaleString('es-AR') + '</p></button>';
+        return '<button type="button" class="freq-product-btn flex-shrink-0 glass rounded-xl px-4 py-3 border border-white/10 hover:border-[#22c55e]/50 active:opacity-90 touch-target text-left min-w-0 max-w-[140px]' + disabled + '" data-codigo="' + (p.codigo || '').replace(/"/g, '&quot;') + '" title="Elegir cantidad y agregar"><p class="font-medium truncate text-sm leading-snug">' + (nombre || '').replace(/</g, '&lt;') + '</p><p class="text-[#86efac] text-xs mt-1 leading-none tabular-nums">$' + (precio || 0).toLocaleString('es-AR') + '</p></button>';
       }).join('');
       cont.querySelectorAll('.freq-product-btn').forEach(function (btn) {
         btn.onclick = function () {
           var codigo = btn.dataset.codigo;
-          if (codigo) addToCart(codigo);
+          if (codigo) openAddToCartQtyModal(codigo);
         };
       });
     }
@@ -2519,6 +2612,25 @@
     document.getElementById('closePaymentModal').onclick = closePaymentModal;
     document.getElementById('paymentModalOverlay').onclick = closePaymentModal;
 
+    (function initAddToCartQtyModal() {
+      var ov = document.getElementById('addToCartQtyModalOverlay');
+      var cancel = document.getElementById('addToCartQtyCancel');
+      var confirmBtn = document.getElementById('addToCartQtyConfirm');
+      var inp = document.getElementById('addToCartQtyInput');
+      if (cancel) cancel.onclick = function () { closeAddToCartQtyModal(); };
+      if (ov) ov.onclick = function () { closeAddToCartQtyModal(); };
+      if (confirmBtn) confirmBtn.onclick = function () {
+        var c = state._pendingAddToCartCodigo;
+        if (!c) { closeAddToCartQtyModal(); return; }
+        var q = parseInt(inp && inp.value, 10) || 1;
+        addToCart(c, q);
+        closeAddToCartQtyModal();
+      };
+      if (inp) inp.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); if (confirmBtn) confirmBtn.click(); }
+      });
+    })();
+
     document.getElementById('btnCobroRapido').onclick = openCobroRapidoModal;
     document.getElementById('closeCobroRapido').onclick = closeCobroRapidoModal;
     document.getElementById('cobroRapidoOverlay').onclick = closeCobroRapidoModal;
@@ -2940,9 +3052,7 @@
       const data = getData();
       const found = findProductByCode(data.products, code);
       if (found && found.product.stock > 0) {
-        addToCart(found.codigo);
-        playBeep();
-        showScanToast('Agregado: ' + found.product.nombre, false);
+        openAddToCartQtyModal(found.codigo);
       } else if (found && found.product.stock <= 0) {
         showScanToast('Sin stock: ' + found.product.nombre, true);
       } else {

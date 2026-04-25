@@ -1547,6 +1547,22 @@
     </div>
   </div>
 
+  <!-- Modal: cantidad al agregar al carrito (lista / inicio / código manual) -->
+  <div id="addToCartQtyModal" class="fixed inset-0 z-[96] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="addToCartQtyModalOverlay"></div>
+    <div class="relative glass-strong rounded-2xl p-6 w-full max-w-sm scale-in">
+      <h3 id="addToCartQtyTitle" class="font-bold text-lg mb-1 pr-8">¿Cuántas unidades?</h3>
+      <p id="addToCartQtySubtitle" class="text-xs text-white/55 mb-4 leading-snug"></p>
+      <label for="addToCartQtyInput" class="block text-xs text-white/60 mb-1">Cantidad</label>
+      <input type="number" id="addToCartQtyInput" min="1" step="1" value="1" inputmode="numeric" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-lg font-semibold tabular-nums focus:outline-none focus:ring-2 focus:ring-[#22c55e] mb-4">
+      <p id="addToCartQtyHint" class="text-[11px] text-white/45 mb-4"></p>
+      <div class="flex gap-2">
+        <button type="button" id="addToCartQtyCancel" class="flex-1 btn-neomorphic rounded-xl py-3 text-sm font-medium touch-target">Cancelar</button>
+        <button type="button" id="addToCartQtyConfirm" class="flex-1 btn-glow rounded-xl py-3 text-sm font-semibold touch-target">Agregar al carrito</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal método de pago (tras tocar Cobrar) -->
   <div id="paymentModal" class="fixed inset-0 z-[65] hidden items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="paymentModalOverlay"></div>
@@ -1811,6 +1827,23 @@
           <span class="text-white/60 text-sm">Código</span>
           <span id="productDetailCode" class="font-mono text-white/80 text-sm"></span>
         </div>
+        <div class="rounded-xl border border-[#22c55e]/35 bg-[#22c55e]/08 p-4 space-y-3 mt-2">
+          <p class="text-sm font-semibold text-[#86efac] flex items-center gap-2">
+            <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+            Agregar a la venta
+          </p>
+          <div class="flex flex-wrap items-end gap-3">
+            <div class="flex-1 min-w-[6rem]">
+              <label for="productDetailQty" class="block text-xs text-white/55 mb-1">Unidades</label>
+              <input type="number" id="productDetailQty" min="1" step="1" value="1" inputmode="numeric" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white font-semibold tabular-nums focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+            </div>
+            <p id="productDetailQtyHint" class="text-[11px] text-white/45 pb-2 flex-1 min-w-[8rem]"></p>
+          </div>
+          <button type="button" id="productDetailAddCart" class="w-full btn-glow rounded-xl py-3 font-semibold flex items-center justify-center gap-2 touch-target">
+            <i data-lucide="plus" class="w-5 h-5"></i>
+            Agregar al carrito
+          </button>
+        </div>
       </div>
     </div>
     <div class="px-4 pt-3 flex gap-3 product-detail-footer">
@@ -1840,7 +1873,7 @@
   </div>
   </div><!-- /#appWrap -->
   <script src="kiosco-config.js"></script>
-  <script defer src="kiosco-app.js?v=20260422control"></script>
+  <script defer src="kiosco-app.js?v=20260422cartqty"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>
