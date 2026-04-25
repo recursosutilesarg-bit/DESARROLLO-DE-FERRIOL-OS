@@ -2440,13 +2440,11 @@
         section.style.setProperty('display', 'block', 'important');
         section.style.zIndex = '10';
       }
+      var navHighlight = state.superSection;
+      if (navHighlight === 'ajustes') navHighlight = 'mas';
       document.querySelectorAll('.super-nav-btn').forEach(function (btn) {
-        btn.classList.toggle('active', btn.dataset.superSection === state.superSection);
+        btn.classList.toggle('active', btn.dataset.superSection === navHighlight);
       });
-      var headerAjustesBtn = document.getElementById('headerSuperAjustesBtn');
-      if (headerAjustesBtn) headerAjustesBtn.classList.toggle('active', state.superSection === 'ajustes');
-      var headerNotifBtn = document.getElementById('headerSuperNotifBtn');
-      if (headerNotifBtn) headerNotifBtn.classList.toggle('active', state.superSection === 'solicitudes');
       if (state.superSection === 'cobros' && isEmpresaLensSuper()) renderSuperCobrosSection();
       if (state.superSection === 'balance') loadSuperBalanceSection();
       if (state.superSection === 'solicitudes') {
@@ -2455,10 +2453,24 @@
       }
       lucide.createIcons();
     }
-    var headerAjustesBtnEl = document.getElementById('headerSuperAjustesBtn');
-    if (headerAjustesBtnEl) headerAjustesBtnEl.addEventListener('click', function () { switchSuperSection('ajustes'); });
-    var headerNotifBtnEl = document.getElementById('headerSuperNotifBtn');
-    if (headerNotifBtnEl) headerNotifBtnEl.addEventListener('click', function () { switchSuperSection('solicitudes'); });
+    function superMasScrollTo(elId) {
+      var el = document.getElementById(elId);
+      if (!el) return;
+      try {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (_) {
+        el.scrollIntoView(true);
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    var btnSuperMasOpenAjustes = document.getElementById('btnSuperMasOpenAjustes');
+    if (btnSuperMasOpenAjustes) btnSuperMasOpenAjustes.addEventListener('click', function () { switchSuperSection('ajustes'); });
+    var btnSuperMasScrollAviso = document.getElementById('btnSuperMasScrollAviso');
+    if (btnSuperMasScrollAviso) btnSuperMasScrollAviso.addEventListener('click', function () { superMasScrollTo('superMasBlockAviso'); });
+    var btnSuperMasScrollAdmin = document.getElementById('btnSuperMasScrollAdmin');
+    if (btnSuperMasScrollAdmin) btnSuperMasScrollAdmin.addEventListener('click', function () { superMasScrollTo('superMasBlockAdmin'); });
+    var btnSuperAjustesVolverMas = document.getElementById('btnSuperAjustesVolverMas');
+    if (btnSuperAjustesVolverMas) btnSuperAjustesVolverMas.addEventListener('click', function () { switchSuperSection('mas'); });
     document.querySelectorAll('.super-nav-btn').forEach(function (btn) {
       btn.onclick = function () {
         if (btn.dataset.superSection) switchSuperSection(btn.dataset.superSection);

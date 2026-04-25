@@ -195,12 +195,6 @@
           <i data-lucide="shopping-cart" class="w-5 h-5"></i>
           <span id="cartCount" class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#dc2626] text-xs font-bold flex items-center justify-center">0</span>
         </button>
-        <button id="headerSuperNotifBtn" class="btn-neomorphic rounded-xl p-2.5 touch-target super-only super-main-only transition-all duration-300 hover:scale-105 active:scale-95" title="Solicitudes">
-          <i data-lucide="clipboard-list" class="w-5 h-5"></i>
-        </button>
-        <button id="headerSuperAjustesBtn" class="btn-neomorphic rounded-xl p-2.5 touch-target super-only super-main-only transition-all duration-300 hover:scale-105 active:scale-95" title="Ajustes">
-          <i data-lucide="settings" class="w-5 h-5"></i>
-        </button>
         <button id="logoutBtn" class="btn-neomorphic rounded-xl p-2.5 touch-target super-only" title="Cerrar sesión">
           <i data-lucide="log-out" class="w-5 h-5"></i>
         </button>
@@ -245,8 +239,8 @@
           <i data-lucide="clipboard-list" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Solicitudes</span>
         </button>
-        <button data-super-section="mas" class="super-nav-btn super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Más">
-          <i data-lucide="user-cog" class="w-5 h-5 shrink-0"></i>
+        <button data-super-section="mas" class="super-nav-btn super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Más opciones">
+          <i data-lucide="menu" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Más</span>
         </button>
       </div>
@@ -1096,29 +1090,50 @@
           </h2>
           <p id="superDirectoryStats" class="hidden text-xs text-white/45 mb-2 super-only super-main-only"></p>
           <div id="superMainFerriolResumenCard" class="hidden mb-3 rounded-xl border border-cyan-500/35 bg-cyan-500/10 px-3 py-3 text-sm super-only super-main-only"></div>
-          <p class="text-xs text-white/50 mb-2 super-only super-main-only">Directorio completo del sistema. Filtrá «Sin referidor» para ver cuentas sin admin/referidor y asignalas desde el detalle del usuario.</p>
-          <div class="flex flex-wrap gap-2 mb-4">
-            <div class="ferriol-partner-affiliate-links-wrap hidden w-full sm:w-auto">
-              <button type="button" id="btnOpenPartnerAffiliateLinks" class="btn-neomorphic rounded-xl py-3 px-5 font-semibold flex items-center justify-center gap-2 touch-target w-full sm:w-auto border border-cyan-400/40 bg-cyan-500/15 text-cyan-100">
-                <i data-lucide="link-2" class="w-5 h-5"></i> Enlaces de afiliación
+          <p class="text-xs text-white/50 mb-3 super-only super-main-only">Directorio global: filtro <strong class="text-white/65">Sin referidor</strong> y asignación desde el detalle de cada fila.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            <div class="ferriol-partner-affiliate-links-wrap hidden sm:col-span-2">
+              <button type="button" id="btnOpenPartnerAffiliateLinks" class="glass rounded-2xl p-5 border border-cyan-400/35 bg-cyan-500/[0.07] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-cyan-400/55 active:scale-[0.98] touch-target">
+                <div class="w-12 h-12 rounded-xl bg-cyan-500/25 flex items-center justify-center shrink-0">
+                  <i data-lucide="link-2" class="w-6 h-6 text-cyan-200"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <span class="font-semibold text-sm text-white block">Enlaces de afiliación</span>
+                  <span class="text-xs text-white/55 mt-0.5 block">Enlaces para negocios (kioscos) y para socios (membresía).</span>
+                </div>
               </button>
-              <p class="text-[10px] text-white/45 mt-1 max-w-md">Un código de red: enlace para <strong class="text-white/55">negocios</strong> y otro para <strong class="text-white/55">socios</strong> (membresía).</p>
             </div>
-            <div class="ferriol-partner-provision-btn-wrap hidden w-full sm:w-auto">
-              <button type="button" id="btnOpenPartnerProvisionModal" class="btn-neomorphic rounded-xl py-3 px-5 font-semibold flex items-center justify-center gap-2 touch-target w-full sm:w-auto border border-violet-400/40 bg-violet-500/15 text-violet-100">
-                <i data-lucide="user-cog" class="w-5 h-5"></i> Solicitar alta de administrador de red
+            <div class="ferriol-partner-provision-btn-wrap hidden sm:col-span-2">
+              <button type="button" id="btnOpenPartnerProvisionModal" class="glass rounded-2xl p-5 border border-violet-400/35 bg-violet-500/[0.08] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-violet-400/55 active:scale-[0.98] touch-target">
+                <div class="w-12 h-12 rounded-xl bg-violet-500/25 flex items-center justify-center shrink-0">
+                  <i data-lucide="user-plus" class="w-6 h-6 text-violet-200"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <span class="font-semibold text-sm text-white block">Solicitar alta de administrador de red</span>
+                  <span class="text-xs text-white/55 mt-0.5 block">Requiere aprobación de la empresa y acreditación del pago a Ferriol.</span>
+                </div>
               </button>
-              <p class="text-[10px] text-white/45 mt-1 max-w-md">La empresa debe aprobar y constatar el pago a Ferriol antes de que puedas crear la cuenta del nuevo socio.</p>
             </div>
-            <button type="button" id="btnOpenNewKiosqueroModal" class="btn-glow rounded-xl py-3 px-5 font-semibold flex items-center justify-center gap-2 touch-target">
-              <i data-lucide="store" class="w-5 h-5"></i> Solicitar alta de negocio (kiosco)
+            <button type="button" id="btnOpenNewKiosqueroModal" class="glass rounded-2xl p-5 border border-[#22c55e]/40 bg-[#22c55e]/[0.08] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-[#22c55e]/60 active:scale-[0.98] touch-target sm:col-span-2">
+              <div class="w-12 h-12 rounded-xl bg-[#22c55e]/25 flex items-center justify-center shrink-0">
+                <i data-lucide="store" class="w-6 h-6 text-[#86efac]"></i>
+              </div>
+              <div class="min-w-0 flex-1">
+                <span class="font-semibold text-sm text-white block">Solicitar alta de negocio (kiosco)</span>
+                <span class="text-xs text-white/55 mt-0.5 block">Queda pendiente hasta que Ferriol apruebe y constate el pago.</span>
+              </div>
             </button>
-            <p class="text-[10px] text-white/45 w-full basis-full">El alta del sistema de gestión queda pendiente hasta que <strong class="text-white/60">Ferriol apruebe</strong> y constate el pago.</p>
-            <button type="button" id="btnExportDirectorioCSV" class="super-only super-main-only btn-neomorphic rounded-xl py-3 px-5 font-semibold flex items-center justify-center gap-2 touch-target">
-              <i data-lucide="file-spreadsheet" class="w-5 h-5"></i> Exportar directorio (CSV)
+            <button type="button" id="btnExportDirectorioCSV" class="super-only super-main-only glass rounded-2xl p-5 border border-white/15 flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-[#22c55e]/45 active:scale-[0.98] touch-target sm:col-span-2">
+              <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                <i data-lucide="file-spreadsheet" class="w-6 h-6 text-[#86efac]"></i>
+              </div>
+              <div class="min-w-0 flex-1">
+                <span class="font-semibold text-sm text-white block">Exportar directorio (CSV)</span>
+                <span class="text-xs text-white/55 mt-0.5 block">Descarga de perfiles para análisis externo.</span>
+              </div>
             </button>
           </div>
-          <p class="text-xs text-white/50 mb-3">Elegí <strong class="text-white/70">Usuarios</strong> (kioscos / almacenes) o <strong class="text-white/70">Distribuidores</strong> (red). Tocá una fila para ver detalles y membresía. Para quitar a una persona se pide contraseña de admin (Ajustes).</p>
+          <p class="text-xs text-white/50 mb-3">Pestañas <strong class="text-white/70">Usuarios</strong> / <strong class="text-white/70">Distribuidores</strong>: tocá una fila para detalle y membresía. Quitar cuentas: contraseña en <strong class="text-white/65">Más → Ajustes</strong>.</p>
           <input type="text" id="superSearchEmail" placeholder="Buscar por email o nombre..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm mb-3" autocomplete="off">
           <div class="flex flex-wrap gap-2 mb-2">
             <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-[#22c55e]/50 bg-[#22c55e]/30" data-filter="todos">Todos</button>
@@ -1157,7 +1172,7 @@
             <i data-lucide="banknote" class="w-5 h-5 text-[#86efac]"></i>
             Cobros (transferencia)
           </h2>
-          <p class="text-xs text-white/50 mb-4">Registrá el cobro cuando el cliente o socio transferenció; al verificar se generan líneas en el libro según <span class="text-white/70">PLAN-COMPENSACIONES-FERRIOL.md</span>. Las ventas por <strong class="text-white/75">alta definitiva de kiosco</strong> (tras la prueba) se registran desde el detalle del negocio. SQL: <code class="text-[#86efac]">supabase-ferriol-kiosco-definitive-trial.sql</code>.</p>
+          <p class="text-xs text-white/50 mb-4">Registrá transferencias y verificá para generar movimientos en el libro. Venta <strong class="text-white/75">definitiva de kiosco</strong>: desde el detalle del negocio. Referencia SQL: <code class="text-[#86efac]">supabase-ferriol-kiosco-definitive-trial.sql</code>.</p>
           <div id="ferriolCompanyReceivableBox" class="rounded-xl border border-cyan-500/35 bg-cyan-500/10 p-4 mb-4 text-sm">
             <h3 class="font-semibold text-cyan-100 mb-1 flex items-center gap-2"><i data-lucide="building-2" class="w-4 h-4"></i> Empresa · saldos automáticos (pendientes)</h3>
             <p id="ferriolCompanyReceivableText" class="text-xs text-white/70">—</p>
@@ -1165,15 +1180,20 @@
             <p class="text-xs text-white/45 mt-2">Los cargos mensuales (licencia kiosco 20/80 y cuota socios según plan) se generan el <strong class="text-white/60">día 1</strong> si tenés <code class="text-cyan-200/80">pg_cron</code> en Supabase. Ejecutá antes <code class="text-cyan-200/80">supabase-ferriol-monthly-auto.sql</code>.</p>
             <button type="button" id="ferriolBtnRunMonthlyAccrual" class="mt-2 btn-neomorphic rounded-xl py-2 px-3 text-xs font-semibold touch-target">Generar cargos del mes (manual)</button>
           </div>
-          <div class="rounded-xl border border-violet-500/30 bg-violet-500/08 p-4 mb-4 text-sm">
-            <h3 class="font-semibold text-violet-100 mb-1 flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> Simulación rápida</h3>
-            <p class="text-xs text-white/65 mb-2">Tres movimientos de prueba en el libro: uno «empresa a cobrar» y dos con <strong class="text-white/80">tu usuario admin</strong> como beneficiario (revisalos acá en Cobros y en la lista de pendientes). Los kiosqueros <strong class="text-white/80">no</strong> ven el libro: la licencia está en <strong class="text-white/80">Caja</strong>. Idempotente: no duplica.</p>
-            <div class="flex flex-wrap gap-2 mt-1">
-              <button type="button" id="ferriolBtnDemoSeed" class="btn-neomorphic rounded-xl py-2 px-3 text-xs font-semibold touch-target">Insertar 3 movimientos demo</button>
-              <button type="button" id="ferriolBtnDemoClear" class="rounded-xl py-2 px-3 text-xs font-semibold touch-target border border-red-400/40 bg-red-500/15 text-red-200 hover:bg-red-500/25">Quitar movimientos demo</button>
+          <details class="rounded-xl border border-violet-500/30 bg-violet-500/08 mb-4 text-sm group super-cobros-details">
+            <summary class="p-4 cursor-pointer list-none flex items-center justify-between gap-2 touch-target font-semibold text-violet-100">
+              <span class="flex items-center gap-2 min-w-0"><i data-lucide="sparkles" class="w-4 h-4 shrink-0"></i> Simulación y datos de prueba</span>
+              <i data-lucide="chevron-down" class="w-4 h-4 shrink-0 opacity-70 transition-transform group-open:rotate-180"></i>
+            </summary>
+            <div class="px-4 pb-4 pt-0 border-t border-white/10 space-y-3">
+              <p class="text-xs text-white/65">Tres movimientos de prueba (empresa + beneficiario admin). Idempotente. Kiosqueros no ven el libro.</p>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" id="ferriolBtnDemoSeed" class="btn-neomorphic rounded-xl py-2 px-3 text-xs font-semibold touch-target">Insertar 3 movimientos demo</button>
+                <button type="button" id="ferriolBtnDemoClear" class="rounded-xl py-2 px-3 text-xs font-semibold touch-target border border-red-400/40 bg-red-500/15 text-red-200 hover:bg-red-500/25">Quitar movimientos demo</button>
+              </div>
+              <p class="text-[10px] text-white/40">SQL: <code class="text-violet-200/80">supabase-ferriol-demo-seed.sql</code> · claves <code class="text-violet-200/80">ferriol:demo:seed:*</code></p>
             </div>
-            <p class="text-[10px] text-white/40 mt-2">Primera vez: ejecutá en Supabase <code class="text-violet-200/80">supabase-ferriol-demo-seed.sql</code> (incluye insertar y quitar). Solo borra filas con claves <code class="text-violet-200/80">ferriol:demo:seed:*</code>.</p>
-          </div>
+          </details>
           <h3 class="font-semibold text-sm mb-2 flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-cyan-200/90"></i> Libro · pendientes (vista admin)</h3>
           <div id="ferriolLedgerPendingPreview" class="space-y-1 max-h-[36vh] overflow-y-auto text-xs mb-6 rounded-xl border border-white/10 bg-black/20 p-3"></div>
           <div class="rounded-xl border border-white/15 bg-white/5 p-4 mb-4 space-y-3">
@@ -1206,9 +1226,13 @@
         </div>
         <!-- Sección Ajustes -->
         <div id="super-section-ajustes" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+          <button type="button" id="btnSuperAjustesVolverMas" class="mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5 super-only super-main-only">
+            <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
+            Volver a Más opciones
+          </button>
           <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
             <i data-lucide="settings" class="w-5 h-5 text-[#86efac]"></i>
-            Ajustes
+            Ajustes del sistema
           </h2>
           <div class="space-y-4">
             <div>
@@ -1297,28 +1321,58 @@
             </div>
           </div>
         </div>
-        <!-- Sección Más -->
-        <div id="super-section-mas" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0" style="display: none;">
-          <div class="mb-6 pb-6 border-b border-white/10">
-            <h2 class="font-bold text-lg mb-2 flex items-center gap-2">
+        <!-- Sección Más (hub + bloques, estilo panel kiosquero) -->
+        <div id="super-section-mas" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+          <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
+            <i data-lucide="menu" class="w-5 h-5 text-[#86efac]"></i>
+            Más opciones
+          </h2>
+          <p class="text-xs text-white/50 mb-4">Atajos a herramientas de administración global.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 super-only super-main-only">
+            <button type="button" id="btnSuperMasOpenAjustes" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
+              <div class="w-12 h-12 rounded-xl bg-[#22c55e]/25 flex items-center justify-center shrink-0">
+                <i data-lucide="settings" class="w-6 h-6 text-[#86efac]"></i>
+              </div>
+              <span class="font-semibold text-base text-white">Ajustes del sistema</span>
+              <span class="text-xs text-white/55">WhatsApp, transferencias, prueba, avisos de renovación, respaldo masivo.</span>
+            </button>
+            <button type="button" id="btnSuperMasScrollAviso" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
+              <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
+                <i data-lucide="megaphone" class="w-6 h-6 text-amber-200"></i>
+              </div>
+              <span class="font-semibold text-base text-white">Aviso global</span>
+              <span class="text-xs text-white/55">Mensaje a kiosqueros y administradores de red (campana).</span>
+            </button>
+            <button type="button" id="btnSuperMasScrollAdmin" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target sm:col-span-2">
+              <div class="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center shrink-0">
+                <i data-lucide="terminal" class="w-6 h-6 text-violet-200"></i>
+              </div>
+              <span class="font-semibold text-base text-white">Promover administrador (SQL)</span>
+              <span class="text-xs text-white/55">Instrucción para rol <strong class="text-white/65">super</strong> en Supabase (casos excepcionales).</span>
+            </button>
+          </div>
+          <div id="superMasBlockAviso" class="scroll-mt-6 rounded-xl border border-white/10 bg-black/10 p-4 sm:p-5 mb-6">
+            <h3 class="font-bold text-base mb-1 flex items-center gap-2 text-white">
               <i data-lucide="megaphone" class="w-5 h-5 text-[#86efac]"></i>
               Aviso global
-            </h2>
-            <p class="text-xs text-white/50 mb-3">Lo reciben los <strong class="text-white/70">kiosqueros</strong> y los <strong class="text-white/70">administradores de red</strong> en la campana del encabezado.</p>
+            </h3>
+            <p class="text-xs text-white/50 mb-3">Lo reciben kiosqueros y administradores de red en la campana del encabezado.</p>
             <label class="block text-sm font-medium text-white/80 mb-2">Mensaje</label>
             <textarea id="adminNotificationMessage" rows="4" placeholder="Ej: Mañana cerramos a las 18 hs. / Recordá cargar stock de..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base resize-y mb-3 min-h-[100px]"></textarea>
-            <button type="button" id="sendNotificationBtn" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold flex items-center gap-2 touch-target w-full sm:w-auto">
+            <button type="button" id="sendNotificationBtn" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold flex items-center justify-center gap-2 touch-target w-full sm:w-auto">
               <i data-lucide="send" class="w-4 h-4"></i> Enviar a todos
             </button>
             <p id="adminNotificationMsg" class="text-xs mt-2 text-green-300 hidden"></p>
           </div>
-          <h2 class="font-bold text-xl mb-3 flex items-center gap-2">
-            <i data-lucide="user-cog" class="w-5 h-5 text-[#86efac]"></i>
-            Otro administrador global (super)
-          </h2>
-          <p class="text-xs text-white/55 mb-3">Los <strong class="text-white/70">socios</strong> dan de alta a otros administradores de red desde <strong class="text-white/70">Afiliados</strong> → «Solicitar alta de administrador» (con aprobación de la empresa). Esta sección es solo para promover un usuario a <strong class="text-white/70">super</strong> en Supabase si lo necesitás.</p>
-          <p class="text-xs text-white/50 mb-3">En Supabase → SQL Editor ejecutá (cambiá el email):</p>
-          <pre class="text-xs bg-black/30 rounded-lg p-3 overflow-x-auto text-[#86efac] mb-2" id="sqlAddAdmin">UPDATE profiles SET role = 'super' WHERE id = (SELECT id FROM auth.users WHERE email = 'tu-email@ejemplo.com');</pre>
+          <div id="superMasBlockAdmin" class="scroll-mt-6 pt-2">
+            <h3 class="font-bold text-base mb-2 flex items-center gap-2 text-white">
+              <i data-lucide="user-cog" class="w-5 h-5 text-[#86efac]"></i>
+              Otro administrador global
+            </h3>
+            <p class="text-xs text-white/55 mb-3">Los socios solicitan altas de red desde <strong class="text-white/70">Afiliados</strong>. Usá SQL solo para promover a <strong class="text-white/70">super</strong> cuando haga falta.</p>
+            <p class="text-xs text-white/50 mb-2">Supabase → SQL Editor (cambiá el email):</p>
+            <pre class="text-xs bg-black/30 rounded-lg p-3 overflow-x-auto text-[#86efac]" id="sqlAddAdmin">UPDATE profiles SET role = 'super' WHERE id = (SELECT id FROM auth.users WHERE email = 'tu-email@ejemplo.com');</pre>
+          </div>
         </div>
       </div>
     </section>

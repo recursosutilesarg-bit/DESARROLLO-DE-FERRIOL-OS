@@ -336,11 +336,8 @@ button.header-sub.header-sub--toggle:active {
   transform: scale(0.96);
 }
 
-#headerSuperAjustesBtn.active,
-#headerSuperNotifBtn.active {
-  background: rgba(34, 197, 94, 0.3);
-  color: #fff;
-  box-shadow: 0 0 22px rgba(34, 197, 94, 0.35);
+.super-cobros-details summary::-webkit-details-marker {
+  display: none;
 }
 
 .scanner-circle {
