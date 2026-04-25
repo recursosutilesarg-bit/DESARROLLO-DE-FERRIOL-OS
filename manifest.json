@@ -1,7 +1,7 @@
 {
   "name": "Ferriol OS — Kiosco",
   "short_name": "Ferriol OS",
-  "description": "Sistema de gestión para kioscos — SaaS",
+  "description": "Sistema de gestión para negocios pequeños",
   "start_url": "./kiosco.html",
   "scope": "./",
   "display": "standalone",

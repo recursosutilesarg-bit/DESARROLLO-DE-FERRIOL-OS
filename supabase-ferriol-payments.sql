@@ -82,6 +82,21 @@ Alias: [COMPLETAR]
 Concepto: email del usuario + tipo de pago (kit / licencia kiosco / cuota vendedor)'
 WHERE NOT EXISTS (SELECT 1 FROM app_settings WHERE key = 'ferriol_transfer_info');
 
+-- Horas para completar contraseña tras aprobar alta de socio (kit distribuidor); default en RPC si falta = 24.
+INSERT INTO app_settings (key, value)
+SELECT 'partner_provision_completion_hours', '24'
+WHERE NOT EXISTS (SELECT 1 FROM app_settings WHERE key = 'partner_provision_completion_hours');
+
+-- Gracia mientras Ferriol no aprueba el kit (socio ya creó cuenta con link del referidor).
+INSERT INTO app_settings (key, value)
+SELECT 'partner_pending_grace_hours', '24'
+WHERE NOT EXISTS (SELECT 1 FROM app_settings WHERE key = 'partner_pending_grace_hours');
+
+-- Días de licencia de distribuidor al aprobar el kit (si el socio ya estaba registrado).
+INSERT INTO app_settings (key, value)
+SELECT 'partner_distribution_license_days', '30'
+WHERE NOT EXISTS (SELECT 1 FROM app_settings WHERE key = 'partner_distribution_license_days');
+
 CREATE OR REPLACE FUNCTION public.ferriol_verify_payment(p_payment_id uuid)
 RETURNS jsonb
 LANGUAGE plpgsql

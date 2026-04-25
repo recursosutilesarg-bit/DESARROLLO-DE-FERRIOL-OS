@@ -752,6 +752,28 @@
       if (pre) pre.textContent = transferBody;
       var spHint = await ferriolFetchSponsorHintText();
       if (sponsorEl) sponsorEl.innerHTML = spHint.html;
+      var waWrap = document.getElementById('kioscoLicenseReferidorWhatsApp');
+      if (waWrap && currentUser && currentUser.role === 'kiosquero') {
+        await refreshViewerHelpWhatsApp(currentUser);
+        var waNum = viewerHelpWhatsApp.list && viewerHelpWhatsApp.list[0];
+        if (waNum) {
+          var waUrl = getWhatsAppUrl(waNum, 'Hola, consulto por el pago de la licencia de mi negocio en Ferriol OS.');
+          waWrap.innerHTML = '<a href="' + waUrl + '" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-semibold text-[#86efac] touch-target py-1"><i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp de tu referidor</a>';
+          waWrap.classList.remove('hidden');
+          try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+        } else if (viewerHelpWhatsApp.note === 'sponsor_no_phone' && viewerHelpWhatsApp.sponsorEmail) {
+          var rm = String(viewerHelpWhatsApp.sponsorEmail).trim();
+          waWrap.innerHTML = '<a href="mailto:' + rm.replace(/"/g, '') + '" class="inline-flex items-center gap-2 text-sm font-medium text-white/80 touch-target py-1"><i data-lucide="mail" class="w-4 h-4"></i> Email del referidor (sin WhatsApp cargado)</a>';
+          waWrap.classList.remove('hidden');
+          try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+        } else {
+          waWrap.innerHTML = '';
+          waWrap.classList.add('hidden');
+        }
+      } else if (waWrap) {
+        waWrap.innerHTML = '';
+        waWrap.classList.add('hidden');
+      }
     }
     async function renderSuperCobrosSection() {
       if (!supabaseClient || !isEmpresaLensSuper()) return;
@@ -2189,7 +2211,7 @@
       document.getElementById('loginFormWrap').classList.remove('hidden');
       document.getElementById('signUpBox').classList.add('hidden');
       var errEl = document.getElementById('loginErr');
-      errEl.textContent = 'Tu período de prueba terminó. La cuenta se desactivó. Contactá por WhatsApp para renovar.';
+      errEl.textContent = 'Tu período de prueba terminó. La cuenta se desactivó. Contactá a tu referidor por WhatsApp para renovar.';
       errEl.classList.add('show');
       var wrap = document.getElementById('loginContactAdminWrap');
       if (wrap) {
@@ -2223,8 +2245,7 @@
         if (supabaseClient && currentUser && currentUser.id && !currentUser._trialBlockTriggered) {
           currentUser._trialBlockTriggered = true;
           supabaseClient.from('profiles').update({ active: false }).eq('id', currentUser.id).then(function () {
-            loadAdminContactForTrialEnded().then(function () {
-              window._adminWhatsappForContact = adminContact.whatsapp;
+            refreshViewerHelpWhatsApp(currentUser).then(function () {
               supabaseClient.auth.signOut().then(showLoginScreenTrialEnded);
             });
           });
@@ -2254,13 +2275,16 @@
       var subEl = document.getElementById('headerSub');
       if (subEl) subEl.textContent = 'Sistema de prueba';
     }
-    function loadAdminContactForTrialEnded() {
-      return loadAdminContact();
-    }
     document.getElementById('trialRenovarBtn') && document.getElementById('trialRenovarBtn').addEventListener('click', function () {
-      loadAdminContact().then(function () {
+      if (!currentUser) return;
+      refreshViewerHelpWhatsApp(currentUser).then(function () {
         fillRenovarWhatsAppLinks();
-        if (!adminContact.whatsappList || adminContact.whatsappList.length === 0) { alert('El administrador aún no configuró su WhatsApp.'); return; }
+        var hasWa = viewerHelpWhatsApp.list && viewerHelpWhatsApp.list.length > 0;
+        var hasMail = viewerHelpWhatsApp.note === 'sponsor_no_phone' && viewerHelpWhatsApp.sponsorEmail;
+        if (!hasWa && !hasMail) {
+          alert(currentUser.role === 'kiosquero' ? 'No hay WhatsApp de tu referidor cargado. Pedile que actualice su perfil o contactá al soporte.' : 'La empresa aún no configuró números de contacto para administradores.');
+          return;
+        }
         document.getElementById('renovarModal').classList.remove('hidden');
         document.getElementById('renovarModal').classList.add('flex');
         if (!state._restoringFromHistory) pushHistoryExtra({ modal: 'renovar' });
@@ -2468,7 +2492,10 @@
       if (name === 'dashboard') {
         updateTrialCountdown();
         updateDashboard();
-        if (ferriolKiosqueroNotifShell()) loadAdminContact();
+        if (ferriolKiosqueroNotifShell()) {
+          loadTrialReminderConfigFromSupabase();
+          if (currentUser) refreshViewerHelpWhatsApp(currentUser);
+        }
         if (ferriolNotificationRecipientShell()) loadNotifications();
       }
       if (name === 'scanner') {
@@ -4672,7 +4699,8 @@ async function showApp() {
     } else {
       if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
       window._trialCountdownInterval = setInterval(ferriolTickCountdowns, 1000);
-      await loadAdminContact();
+      await loadTrialReminderConfigFromSupabase();
+      await refreshViewerHelpWhatsApp(currentUser);
       await initData();
       renderInventory();
       updateCartUI();
@@ -4758,17 +4786,17 @@ async function showApp() {
         }
         if ((profile.role === 'kiosquero' || profile.role === 'partner') && !profile.active) {
           try {
-            const { data: setData } = await supabaseClient.from('app_settings').select('value').eq('key', 'admin_whatsapp').maybeSingle();
-            window._adminWhatsappForContact = (setData && setData.value) ? setData.value : '';
-          } catch (_) { window._adminWhatsappForContact = ''; }
+            await refreshViewerHelpWhatsApp(profile);
+          } catch (_) {}
           await supabaseClient.auth.signOut();
           document.getElementById('loginFormWrap').classList.remove('hidden');
           document.getElementById('signUpBox').classList.add('hidden');
-          errEl.textContent = 'Tu cuenta está desactivada. Contactá al administrador por WhatsApp para darte de alta.';
+          errEl.textContent = profile.role === 'kiosquero'
+            ? 'Tu cuenta está desactivada. Contactá a tu referidor por WhatsApp para regularizar.'
+            : 'Tu cuenta está desactivada. Contactá por WhatsApp a los números que configuró la empresa (fundadores).';
           errEl.classList.add('show');
           var wrap = document.getElementById('loginContactAdminWrap');
           if (wrap) {
-            await loadAdminContact();
             fillLoginContactLinks('Hola, mi cuenta de Ferriol OS está desactivada y quiero darme de alta.');
             wrap.classList.remove('hidden');
           }
@@ -4792,12 +4820,12 @@ async function showApp() {
         if (profile.role === 'kiosquero' && trialEndsAt && new Date(trialEndsAt) < new Date()) {
           try {
             await supabaseClient.from('profiles').update({ active: false }).eq('id', uid);
-            await loadAdminContact();
+            await refreshViewerHelpWhatsApp(profile);
           } catch (_) {}
           await supabaseClient.auth.signOut();
           document.getElementById('loginFormWrap').classList.remove('hidden');
           document.getElementById('signUpBox').classList.add('hidden');
-          errEl.textContent = 'Tu período de prueba terminó. La cuenta se desactivó. Contactá por WhatsApp para renovar.';
+          errEl.textContent = 'Tu período de prueba terminó. La cuenta se desactivó. Contactá a tu referidor por WhatsApp para renovar.';
           errEl.classList.add('show');
           var wrap = document.getElementById('loginContactAdminWrap');
           if (wrap) {
@@ -5223,6 +5251,79 @@ async function showApp() {
     document.getElementById('inputImportBackup').onchange = function (e) { var f = e.target.files[0]; if (f) importBackup(f); e.target.value = ''; };
 
     var adminContact = { whatsapp: '', whatsappList: [] };
+    /** WhatsApp mostrado al usuario en login / renovar: fundador (socios) o referidor (kioscos). */
+    var viewerHelpWhatsApp = { list: [], note: '', sponsorEmail: '', sponsorName: '', sourceRole: '' };
+
+    async function refreshViewerHelpWhatsApp(profile) {
+      viewerHelpWhatsApp = { list: [], note: '', sponsorEmail: '', sponsorName: '', sourceRole: '' };
+      if (!profile) return;
+      var role = profile.role;
+      viewerHelpWhatsApp.sourceRole = role || '';
+      var sid = profile.sponsor_id != null ? profile.sponsor_id : profile.sponsorId;
+      if (role === 'partner' || role === 'super') {
+        if (!supabaseClient) return;
+        try {
+          var res = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4']);
+          var list = [];
+          if (res.data && res.data.length) {
+            var order = { admin_whatsapp: 0, admin_whatsapp_2: 1, admin_whatsapp_3: 2, admin_whatsapp_4: 3 };
+            res.data.sort(function (a, b) { return (order[a.key] || 9) - (order[b.key] || 9); });
+            res.data.forEach(function (r) {
+              var v = (r.value || '').trim().replace(/\D/g, '');
+              if (v) list.push(v);
+            });
+          }
+          viewerHelpWhatsApp.list = list;
+        } catch (_) {}
+        return;
+      }
+      if (role !== 'kiosquero') return;
+      if (!supabaseClient || !sid) {
+        viewerHelpWhatsApp.note = 'no_sponsor';
+        return;
+      }
+      try {
+        var sp = await supabaseClient.from('profiles').select('phone, email, kiosco_name').eq('id', sid).maybeSingle();
+        if (sp.error || !sp.data) {
+          viewerHelpWhatsApp.note = 'sponsor_not_found';
+          return;
+        }
+        var d = sp.data;
+        var digits = String(d.phone || '').replace(/\D/g, '');
+        if (digits) {
+          viewerHelpWhatsApp.list = [digits];
+          return;
+        }
+        viewerHelpWhatsApp.note = 'sponsor_no_phone';
+        viewerHelpWhatsApp.sponsorEmail = d.email || '';
+        viewerHelpWhatsApp.sponsorName = (d.kiosco_name || '').trim() || '';
+      } catch (_) {
+        viewerHelpWhatsApp.note = 'error';
+      }
+    }
+
+    function viewerHelpWhatsAppEmptyHtml() {
+      var note = viewerHelpWhatsApp.note;
+      var sr = viewerHelpWhatsApp.sourceRole;
+      var isAdminRole = sr === 'partner' || sr === 'super';
+      var nm = (viewerHelpWhatsApp.sponsorName || '').replace(/</g, '&lt;');
+      if (note === 'sponsor_no_phone' && viewerHelpWhatsApp.sponsorEmail) {
+        var rawMail = String(viewerHelpWhatsApp.sponsorEmail || '').trim();
+        var mailHref = 'mailto:' + rawMail.replace(/"/g, '');
+        return '<p class="text-white/65 text-sm mb-2">Tu referidor <strong class="text-white/80">' + (nm || '—') + '</strong> no cargó WhatsApp en el sistema.</p>' +
+          '<a href="' + mailHref.replace(/"/g, '&quot;') + '" class="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-white/15 hover:bg-white/20 text-white font-medium text-sm touch-target border border-white/20"><i data-lucide="mail" class="w-4 h-4"></i> Escribir por email</a>';
+      }
+      if (note === 'no_sponsor') {
+        return '<p class="text-white/60 text-sm">No figura referidor en tu perfil. Contactá a quien te dio de alta en el sistema.</p>';
+      }
+      if (note === 'sponsor_not_found' || note === 'error') {
+        return '<p class="text-white/60 text-sm">No se pudo obtener el contacto de tu referidor. Probá más tarde o escribí al soporte.</p>';
+      }
+      if (isAdminRole) {
+        return '<p class="text-white/60 text-sm">La empresa aún no configuró números de WhatsApp para administradores.</p>';
+      }
+      return '<p class="text-white/60 text-sm">Tu referidor no cargó un número de WhatsApp en el sistema.</p>';
+    }
     function getWhatsAppUrl(num, text) {
       var digits = (num || '').replace(/\D/g, '');
       if (!digits) return '';
@@ -5368,13 +5469,14 @@ async function showApp() {
     function fillRenovarWhatsAppLinks() {
       var container = document.getElementById('renovarWhatsAppLinks');
       if (!container) return;
-      var list = adminContact.whatsappList && adminContact.whatsappList.length ? adminContact.whatsappList : (adminContact.whatsapp ? [adminContact.whatsapp] : []);
+      var list = viewerHelpWhatsApp.list && viewerHelpWhatsApp.list.length ? viewerHelpWhatsApp.list : [];
       var msg = 'Hola, necesito ayuda con mi cuenta de Ferriol OS.';
       if (list.length === 0) {
-        container.innerHTML = '<p class="text-white/60 text-sm">El administrador aún no configuró su WhatsApp.</p>';
+        container.innerHTML = viewerHelpWhatsAppEmptyHtml();
       } else {
-        container.innerHTML = list.map(function (num, i) {
-          var label = list.length > 1 ? 'Contactar por WhatsApp (' + (i + 1) + ')' : 'Contactar por WhatsApp';
+        var sub = (viewerHelpWhatsApp.sourceRole === 'kiosquero') ? '<p class="text-[11px] text-white/45 mb-2">Contacto de tu referidor / patrocinador.</p>' : '<p class="text-[11px] text-white/45 mb-2">Contacto configurado por la empresa (fundadores).</p>';
+        container.innerHTML = sub + list.map(function (num, i) {
+          var label = list.length > 1 ? 'WhatsApp (' + (i + 1) + ')' : 'Escribir por WhatsApp';
           return '<a href="' + getWhatsAppUrl(num, msg) + '" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-green-600 hover:bg-green-500 text-white font-medium touch-target"><i data-lucide="message-circle" class="w-5 h-5"></i> ' + label + '</a>';
         }).join('');
       }
@@ -5383,13 +5485,13 @@ async function showApp() {
     function fillLoginContactLinks(message) {
       var container = document.getElementById('loginContactWhatsAppLinks');
       if (!container) return;
-      var list = adminContact.whatsappList && adminContact.whatsappList.length ? adminContact.whatsappList : (adminContact.whatsapp ? [adminContact.whatsapp] : []);
+      var list = viewerHelpWhatsApp.list && viewerHelpWhatsApp.list.length ? viewerHelpWhatsApp.list : [];
       var msg = message || 'Hola, necesito ayuda con mi cuenta de Ferriol OS.';
       if (list.length === 0) {
-        container.innerHTML = '<a href="#" class="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white font-medium text-sm touch-target"><i data-lucide="message-circle" class="w-5 h-5"></i> Contactar por WhatsApp</a>';
+        container.innerHTML = viewerHelpWhatsAppEmptyHtml();
       } else {
         container.innerHTML = list.map(function (num, i) {
-          var label = list.length > 1 ? 'Contactar por WhatsApp (' + (i + 1) + ')' : 'Contactar por WhatsApp';
+          var label = list.length > 1 ? 'WhatsApp (' + (i + 1) + ')' : 'Escribir por WhatsApp';
           return '<a href="' + getWhatsAppUrl(num, msg) + '" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white font-medium text-sm touch-target"><i data-lucide="message-circle" class="w-5 h-5"></i> ' + label + '</a>';
         }).join('');
       }
@@ -7152,11 +7254,13 @@ async function showApp() {
         }
         if ((profile.role === 'kiosquero' || profile.role === 'partner') && !profile.active) {
           try {
-            await loadAdminContact();
+            await refreshViewerHelpWhatsApp(profile);
           } catch (_) {}
           await supabaseClient.auth.signOut();
           document.getElementById('loginFormWrap').classList.remove('hidden');
-          document.getElementById('loginErr').textContent = 'Tu cuenta está desactivada. Contactá por WhatsApp para darte de alta.';
+          document.getElementById('loginErr').textContent = profile.role === 'kiosquero'
+            ? 'Tu cuenta está desactivada. Contactá a tu referidor por WhatsApp para regularizar.'
+            : 'Tu cuenta está desactivada. Contactá por WhatsApp a los números que configuró la empresa (fundadores).';
           document.getElementById('loginErr').classList.add('show');
           var wrap = document.getElementById('loginContactAdminWrap');
           if (wrap) {
@@ -7186,11 +7290,11 @@ async function showApp() {
         if (profile.role === 'kiosquero' && trialEndsAt && new Date(trialEndsAt) < new Date()) {
           try {
             await supabaseClient.from('profiles').update({ active: false }).eq('id', profile.id);
-            await loadAdminContact();
+            await refreshViewerHelpWhatsApp(profile);
           } catch (_) {}
           await supabaseClient.auth.signOut();
           document.getElementById('loginFormWrap').classList.remove('hidden');
-          document.getElementById('loginErr').textContent = 'Tu período de prueba terminó. La cuenta se desactivó. Contactá por WhatsApp para renovar.';
+          document.getElementById('loginErr').textContent = 'Tu período de prueba terminó. La cuenta se desactivó. Contactá a tu referidor por WhatsApp para renovar.';
           document.getElementById('loginErr').classList.add('show');
           var wrap = document.getElementById('loginContactAdminWrap');
           if (wrap) {

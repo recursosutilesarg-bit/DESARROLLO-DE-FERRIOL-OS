@@ -61,7 +61,7 @@
         <p class="sub">Sistema de gestión para negocios pequeños</p>
         <div id="loginErr" class="login-err"></div>
         <div id="loginContactAdminWrap" class="hidden mt-3 p-3 rounded-xl bg-[#22c55e]/20 border border-[#22c55e]/40">
-          <p class="text-sm text-white/80 mb-2">Contactá por WhatsApp para darte de alta o renovar:</p>
+          <p id="loginContactIntro" class="text-sm text-white/80 mb-2">Contacto para regularizar tu acceso (referidor si sos negocio; empresa si sos administrador de red):</p>
           <div id="loginContactWhatsAppLinks" class="space-y-2"></div>
         </div>
         <form id="loginForm" onsubmit="return false;">
@@ -286,7 +286,7 @@
           <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="renovarModalOverlay"></div>
           <div class="relative glass-strong rounded-2xl p-6 w-full max-w-sm scale-in">
             <h3 class="font-bold text-lg mb-3">Renovar</h3>
-            <p class="text-sm text-white/70 mb-4">Para renovar tu plan o aclarar dudas, contactá por WhatsApp.</p>
+            <p class="text-sm text-white/70 mb-4">Para renovar o aclarar dudas: si sos negocio, a tu referidor; si sos administrador de red, a los números de la empresa.</p>
             <div id="renovarWhatsAppLinks" class="space-y-2 mb-3"></div>
             <button type="button" id="closeRenovarModal" class="w-full mt-3 py-2.5 rounded-xl border border-white/20 text-white/80 text-sm touch-target">Cerrar</button>
           </div>
@@ -428,7 +428,8 @@
         </h3>
         <p id="kioscoLicensePriceHint" class="text-sm text-white/75 mb-2"></p>
         <p id="kioscoLicenseSponsorHint" class="text-xs text-white/60 mb-2"></p>
-        <p class="text-xs text-white/55 mb-1">El pago de la licencia lo hacés al <strong class="text-white/75">referidor / administrador</strong> que te dio de alta, usando los datos de cuenta que figuran abajo (los carga el administrador en Ajustes). Enviá el comprobante como te indiquen. Si Ferriol OS te <strong class="text-white/70">reasigna</strong> otro referidor, el nombre arriba y las instrucciones se <strong class="text-white/70">actualizan</strong> con los del nuevo encargo.</p>
+        <div id="kioscoLicenseReferidorWhatsApp" class="hidden mb-2"></div>
+        <p class="text-xs text-white/55 mb-1">Coordiná el pago con tu <strong class="text-white/75">referidor</strong> (WhatsApp arriba si lo cargó en su perfil). Los <strong class="text-white/70">datos de cuenta</strong> de referencia los publica la empresa en Ferriol; confirmá montos y comprobante con tu referidor. Si te <strong class="text-white/70">reasignan</strong> otro referidor, el nombre y el contacto se actualizan.</p>
         <p class="text-[10px] text-white/45 mb-2">Ese canal es quien centraliza el cobro de tu cuota frente a Ferriol OS.</p>
         <pre id="kioscoTransferInfoText" class="text-xs whitespace-pre-wrap text-white/90 glass rounded-lg p-3 border border-white/15 max-h-48 overflow-y-auto font-sans"></pre>
         <p class="text-[10px] text-white/40 mt-2">En esta app no verás comisiones ni repartos 20/80: eso es gestión de la red comercial, no de tu caja diaria.</p>
@@ -1236,7 +1237,7 @@
           </h2>
           <div class="space-y-4">
             <div>
-              <p class="text-xs text-white/50 mb-2">Números de contacto que verán los usuarios cuando la cuenta esté desactivada o se termine la prueba.</p>
+              <p class="text-xs text-white/50 mb-2">Números de WhatsApp que verán los <strong class="text-white/65">administradores de red</strong> (socios) si su cuenta se desactiva o deben renovar o pagar. Los <strong class="text-white/65">negocios (kioscos)</strong> ven el teléfono que cargó su referidor en el perfil.</p>
               <label class="block text-xs text-white/70 mb-1">Contacto 1 (WhatsApp)</label>
               <input type="tel" id="adminContactWhatsapp" placeholder="Ej. 5491112345678" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
               <label class="block text-xs text-white/70 mb-1">Contacto 2 (WhatsApp)</label>
@@ -1873,7 +1874,7 @@
   </div>
   </div><!-- /#appWrap -->
   <script src="kiosco-config.js"></script>
-  <script defer src="kiosco-app.js?v=20260422cartqty"></script>
+  <script defer src="kiosco-app.js?v=20260422contact"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>
