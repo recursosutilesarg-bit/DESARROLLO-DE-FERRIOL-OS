@@ -208,6 +208,23 @@
     </div>
   </header>
 
+  <!-- Nuevo distribuidor: gracia 24h hasta aprobación Ferriol (cuenta regresiva) -->
+  <div id="partnerLicensePendingBanner" class="hidden relative z-[48] border-b border-red-500/55 bg-gradient-to-r from-red-950 via-red-900/98 to-red-950 px-4 py-3 shadow-lg shadow-red-950/40" role="alert">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+      <div class="flex items-start gap-3 text-red-50 min-w-0 flex-1">
+        <span class="flex items-center justify-center rounded-xl w-11 h-11 shrink-0 bg-red-500/25 border border-red-400/40">
+          <i data-lucide="timer" class="w-6 h-6 text-red-300" aria-hidden="true"></i>
+        </span>
+        <div class="min-w-0 pt-0.5">
+          <p class="text-sm sm:text-base font-bold leading-snug">
+            Quedan <span id="partnerLicensePendingClock" class="tabular-nums text-red-200 font-black text-lg sm:text-2xl tracking-tight drop-shadow-sm">00:00:00</span> para confirmar la licencia.
+          </p>
+          <p id="partnerLicensePendingLine" class="text-xs sm:text-sm text-red-200/95 mt-1 font-medium">Contactá a tu patrocinador para que Ferriol acredite tu kit.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Barra inferior admin (panel de control): secciones al pie, como la app de negocios -->
   <nav id="navSuperBottom" class="fixed bottom-0 left-0 right-0 z-40 super-only hidden" style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0)); padding-left: env(safe-area-inset-left, 0); padding-right: env(safe-area-inset-right, 0);">
     <div class="bottom-nav-bar glass-strong border-t border-white/10 px-2 py-3 max-w-2xl mx-auto">

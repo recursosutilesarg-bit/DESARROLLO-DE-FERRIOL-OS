@@ -1766,6 +1766,78 @@
     }
 
     // Navegación (barra inferior + panel Más)
+    function ferriolFormatCountdownHMS(msLeft) {
+      if (msLeft < 0) msLeft = 0;
+      var sec = Math.floor(msLeft / 1000);
+      var h = Math.floor(sec / 3600);
+      var m = Math.floor((sec % 3600) / 60);
+      var s = sec % 60;
+      function z(n) { return n < 10 ? '0' + n : String(n); }
+      return z(h) + ':' + z(m) + ':' + z(s);
+    }
+
+    var _partnerPendingBannerSyncTicker = 0;
+    function updatePartnerLicensePendingBanner() {
+      var banner = document.getElementById('partnerLicensePendingBanner');
+      var clockEl = document.getElementById('partnerLicensePendingClock');
+      if (!banner || !clockEl) return;
+      if (!currentUser || currentUser.role !== 'partner' || !currentUser.partnerLicensePending) {
+        _partnerPendingBannerSyncTicker = 0;
+        banner.classList.add('hidden');
+        return;
+      }
+      var endsAt = currentUser.trialEndsAt;
+      if (!endsAt) {
+        _partnerPendingBannerSyncTicker = 0;
+        banner.classList.add('hidden');
+        return;
+      }
+      var end = new Date(endsAt);
+      var now = new Date();
+      var msLeft = end - now;
+      if (msLeft <= 0) {
+        _partnerPendingBannerSyncTicker = 0;
+        banner.classList.add('hidden');
+        if (supabaseClient && currentUser && currentUser.id && !currentUser._partnerPendingBlockTriggered) {
+          currentUser._partnerPendingBlockTriggered = true;
+          supabaseClient.from('profiles').update({ active: false, partner_license_pending: false }).eq('id', currentUser.id).then(function () {
+            supabaseClient.auth.signOut().then(function () {
+              document.getElementById('appWrap').classList.add('hidden');
+              document.getElementById('loginScreen').classList.remove('hidden');
+              var errEl = document.getElementById('loginErr');
+              if (errEl) {
+                errEl.textContent = 'Venció el plazo sin confirmar tu licencia de distribuidor. Contactá a tu patrocinador o a la empresa.';
+                errEl.classList.add('show');
+              }
+            });
+          });
+        }
+        return;
+      }
+      banner.classList.remove('hidden');
+      clockEl.textContent = ferriolFormatCountdownHMS(msLeft);
+      _partnerPendingBannerSyncTicker++;
+      if (_partnerPendingBannerSyncTicker >= 20 && supabaseClient && currentUser) {
+        _partnerPendingBannerSyncTicker = 0;
+        supabaseClient.from('profiles').select('partner_license_pending, trial_ends_at').eq('id', currentUser.id).maybeSingle().then(function (r) {
+          if (r && r.data && currentUser) {
+            if (!r.data.partner_license_pending) {
+              currentUser.partnerLicensePending = false;
+              if (r.data.trial_ends_at) currentUser.trialEndsAt = r.data.trial_ends_at;
+              var b = document.getElementById('partnerLicensePendingBanner');
+              if (b) b.classList.add('hidden');
+            }
+          }
+        });
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+
+    function ferriolTickCountdowns() {
+      updatePartnerLicensePendingBanner();
+      updateTrialCountdown();
+    }
+
     function showLoginScreenTrialEnded() {
       document.getElementById('appWrap').classList.add('hidden');
       document.getElementById('loginScreen').classList.remove('hidden');
@@ -4186,7 +4258,7 @@ async function showApp() {
 
     if (isSuper && state.superUiMode === 'negocio') {
       if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
-      window._trialCountdownInterval = setInterval(updateTrialCountdown, 1000);
+      window._trialCountdownInterval = setInterval(ferriolTickCountdowns, 1000);
       await loadAdminContact();
       await initData();
       renderInventory();
@@ -4205,13 +4277,19 @@ async function showApp() {
       if (ferriolNotificationRecipientShell()) loadNotifications();
       lucide.createIcons();
     } else if (isPartner) {
+      if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
+      window._trialCountdownInterval = null;
+      if (currentUser && currentUser.partnerLicensePending) {
+        window._trialCountdownInterval = setInterval(ferriolTickCountdowns, 1000);
+        ferriolTickCountdowns();
+      }
       ferriolStartNotificationPolling();
       goToPanel('super');
       loadNotifications();
       lucide.createIcons();
     } else {
       if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
-      window._trialCountdownInterval = setInterval(updateTrialCountdown, 1000);
+      window._trialCountdownInterval = setInterval(ferriolTickCountdowns, 1000);
       await loadAdminContact();
       await initData();
       renderInventory();
@@ -4315,6 +4393,20 @@ async function showApp() {
           return;
         }
         const trialEndsAt = profile.trial_ends_at || null;
+        if (profile.role === 'partner' && profile.partner_license_pending && trialEndsAt && new Date(trialEndsAt) < new Date()) {
+          var pendKitLogin = await supabaseClient.from('ferriol_partner_provision_requests').select('id').eq('registered_user_id', uid).eq('status', 'pending').maybeSingle();
+          if (!pendKitLogin.error && pendKitLogin.data && pendKitLogin.data.id) {
+            try {
+              await supabaseClient.from('profiles').update({ active: false, partner_license_pending: false }).eq('id', uid);
+            } catch (_) {}
+            await supabaseClient.auth.signOut();
+            document.getElementById('loginFormWrap').classList.remove('hidden');
+            document.getElementById('signUpBox').classList.add('hidden');
+            errEl.textContent = 'Pasó el plazo sin que Ferriol aprobara tu alta de distribuidor. Contactá a tu referidor o a la empresa.';
+            errEl.classList.add('show');
+            return;
+          }
+        }
         if (profile.role === 'kiosquero' && trialEndsAt && new Date(trialEndsAt) < new Date()) {
           try {
             await supabaseClient.from('profiles').update({ active: false }).eq('id', uid);
@@ -4333,7 +4425,7 @@ async function showApp() {
           return;
         }
         var userCreatedAt = (authData && authData.user && authData.user.created_at) ? authData.user.created_at : null;
-        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null };
+        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending };
         await showApp();
       } catch (err) {
         console.error('Error en login:', err);
@@ -4570,6 +4662,19 @@ async function showApp() {
         return;
       }
       if (newRole === 'partner') await ensureUserReferralCode(newId);
+      if (newRole === 'partner' && newId) {
+        try {
+          var linkRpc = await supabaseClient.rpc('ferriol_link_partner_pending_kit', { p_profile_id: newId });
+          if (linkRpc.error) console.warn('ferriol_link_partner_pending_kit:', linkRpc.error);
+          else {
+            var linkOut = linkRpc.data;
+            if (typeof linkOut === 'string') { try { linkOut = JSON.parse(linkOut); } catch (_) {} }
+            if (linkOut && linkOut.linked === true && linkOut.grace_hours != null) {
+              window._ferriolLastSignupKitGraceHours = linkOut.grace_hours;
+            }
+          }
+        } catch (e) { console.warn(e); }
+      }
       try { sessionStorage.removeItem('ferriol_signup_ref'); sessionStorage.removeItem('ferriol_signup_nicho'); } catch (_) {}
       document.getElementById('signUpBox').classList.add('hidden');
       document.getElementById('signUpSuccessBox').classList.remove('hidden');
@@ -4577,6 +4682,7 @@ async function showApp() {
     };
 
     function doLogout() {
+      if (window._trialCountdownInterval) { clearInterval(window._trialCountdownInterval); window._trialCountdownInterval = null; }
       if (supabaseClient) supabaseClient.auth.signOut();
       ferriolStopNotificationPolling();
       _ferriolNotifFetchBaselineDone = false;
@@ -4599,7 +4705,7 @@ async function showApp() {
       try { sessionStorage.setItem('ferriol_super_ui', 'negocio'); } catch (_) {}
       applyAppShell();
       if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
-      window._trialCountdownInterval = setInterval(updateTrialCountdown, 1000);
+      window._trialCountdownInterval = setInterval(ferriolTickCountdowns, 1000);
       await initData();
       renderInventory();
       updateCartUI();
@@ -5576,13 +5682,17 @@ async function showApp() {
           founderBox.querySelectorAll('.ferriol-ppr-approve').forEach(function (btn) {
             btn.onclick = async function () {
               var id = btn.getAttribute('data-ppr-id');
-              if (!id || !confirm('¿Aprobar el alta? El socio podrá crear la cuenta con contraseña desde su panel.')) return;
+              if (!id || !confirm('¿Aprobar el alta de distribuidor? Verificá el 20 % a Ferriol. Si el socio ya creó cuenta, se acreditarán los días de licencia.')) return;
               var rpc = await supabaseClient.rpc('ferriol_approve_partner_provision_request', { p_request_id: id, p_approve: true, p_reject_note: null });
               if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
               var out = rpc.data;
               if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
               if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo aprobar.'); return; }
-              alert('Alta aprobada. El administrador de red verá el botón para definir la contraseña del nuevo socio.');
+              if (out.action === 'approved_completed') {
+                alert('Listo: el socio ya tenía cuenta. Licencia de distribuidor acreditada (' + (out.license_days != null ? out.license_days + ' días' : 'revisá app_settings.partner_distribution_license_days') + ').');
+              } else {
+                alert('Alta aprobada. Si el socio aún no se registró, el referidor verá el botón para definir la contraseña.');
+              }
               renderSuper();
             };
           });
@@ -6659,6 +6769,21 @@ async function showApp() {
           return;
         }
         const trialEndsAt = profile.trial_ends_at || null;
+        if (profile.role === 'partner' && profile.partner_license_pending && trialEndsAt && new Date(trialEndsAt) < new Date()) {
+          var pendKit2 = await supabaseClient.from('ferriol_partner_provision_requests').select('id').eq('registered_user_id', uid).eq('status', 'pending').maybeSingle();
+          if (!pendKit2.error && pendKit2.data && pendKit2.data.id) {
+            try {
+              await supabaseClient.from('profiles').update({ active: false, partner_license_pending: false }).eq('id', uid);
+            } catch (_) {}
+            await supabaseClient.auth.signOut();
+            document.getElementById('loginFormWrap').classList.remove('hidden');
+            document.getElementById('loginErr').textContent = 'Pasó el plazo sin que Ferriol aprobara tu alta de distribuidor. Contactá a tu referidor o a la empresa.';
+            document.getElementById('loginErr').classList.add('show');
+            document.getElementById('appWrap').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            return;
+          }
+        }
         if (profile.role === 'kiosquero' && trialEndsAt && new Date(trialEndsAt) < new Date()) {
           try {
             await supabaseClient.from('profiles').update({ active: false }).eq('id', profile.id);
@@ -6678,7 +6803,7 @@ async function showApp() {
           return;
         }
         var userCreatedAt = (session && session.user && session.user.created_at) ? session.user.created_at : null;
-        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null };
+        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending };
         await showApp();
       } catch (e) {
         console.error('Error en init:', e);
