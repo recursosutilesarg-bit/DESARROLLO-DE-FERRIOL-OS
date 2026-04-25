@@ -400,6 +400,113 @@
       }
       lucide.createIcons();
     }
+    function ferriolPaymentTypeLabel(t) {
+      if (t === 'kit_inicial') return 'Kit vendedor';
+      if (t === 'kiosco_licencia') return 'Licencia kiosco';
+      if (t === 'vendor_mantenimiento') return 'Cuota mantenimiento';
+      return String(t || '—');
+    }
+    function ferriolLedgerEventLabel(ev) {
+      var m = { sale_commission: 'Comisión (libro)', renewal: 'Regalía / renovación', vendor_payable_company: 'Obligación empresa (libro)', company_reserve: 'Reserva empresa' };
+      return m[ev] || String(ev || '—');
+    }
+    function ferriolBalanceFormatARS(n) {
+      return '$ ' + Number(n || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 });
+    }
+    function syncSuperBalanceTabButtons() {
+      var a = document.getElementById('superBalanceTabPago');
+      var b = document.getElementById('superBalanceTabCobro');
+      if (!a || !b) return;
+      var isPago = state.balanceSubTab !== 'cobro';
+      a.setAttribute('aria-selected', isPago ? 'true' : 'false');
+      b.setAttribute('aria-selected', !isPago ? 'true' : 'false');
+      a.className = 'super-balance-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border transition-all ' + (isPago ? 'border-[#22c55e]/50 bg-[#22c55e]/20 text-white' : 'border-transparent text-white/55 hover:text-white/80');
+      b.className = 'super-balance-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border transition-all ' + (!isPago ? 'border-[#22c55e]/50 bg-[#22c55e]/20 text-white' : 'border-transparent text-white/55 hover:text-white/80');
+    }
+    function renderSuperBalanceInner(payments, ledgerRows) {
+      var uid = currentUser && currentUser.id;
+      var pay = payments || [];
+      var leg = ledgerRows || [];
+      var asPayerVerified = pay.filter(function (p) { return p.payer_user_id === uid && p.status === 'verified'; });
+      var asPayerPending = pay.filter(function (p) { return p.payer_user_id === uid && p.status === 'pending'; });
+      var asSellerVerified = pay.filter(function (p) { return p.seller_user_id === uid && p.status === 'verified'; });
+      var debtLedger = leg.filter(function (r) { return r.event_type === 'vendor_payable_company' && r.status === 'pending'; });
+      var creditPending = leg.filter(function (r) { return (r.event_type === 'sale_commission' || r.event_type === 'renewal') && r.status === 'pending'; });
+      var creditDone = leg.filter(function (r) { return (r.event_type === 'sale_commission' || r.event_type === 'renewal') && r.status !== 'pending' && r.status !== 'void'; });
+      function sum(arr, key) {
+        return arr.reduce(function (a, x) { return a + Number(x[key] || 0); }, 0);
+      }
+      function rowInv(name, mid, right) {
+        return '<div class="inventory-item border-x-0 rounded-none cursor-default"><div class="inv-item-info"><span class="inv-item-name"><span class="block truncate">' + name + '</span></span><span class="inv-item-price text-[#86efac]">' + mid + '</span><span class="inv-item-stock text-white/45 truncate max-w-[36vw]">' + right + '</span></div></div>';
+      }
+      function block(title, subtitle, inner) {
+        return '<div class="mb-4 rounded-xl border border-white/10 bg-black/15 overflow-hidden"><h3 class="text-xs font-semibold text-white/85 px-3 py-2 border-b border-white/10 bg-white/5">' + title + '</h3>' + (subtitle ? '<p class="text-[10px] text-white/45 px-3 py-1.5 border-b border-white/5">' + subtitle + '</p>' : '') + '<div class="max-h-52 overflow-y-auto">' + inner + '</div></div>';
+      }
+      if (state.balanceSubTab === 'cobro') {
+        var sumCobroPend = sum(creditPending, 'amount');
+        var sumCobroLibro = sum(creditDone, 'amount');
+        var sumVentasVendedor = sum(asSellerVerified, 'amount');
+        var hdr = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">' +
+          '<div class="rounded-xl border border-emerald-500/35 bg-emerald-500/10 px-3 py-2"><p class="text-[10px] text-white/55 uppercase tracking-wide">Acreditado en el libro</p><p class="text-lg font-bold text-emerald-200">' + ferriolBalanceFormatARS(sumCobroLibro) + '</p><p class="text-[10px] text-white/40">Comisiones y regalías</p></div>' +
+          '<div class="rounded-xl border border-amber-500/35 bg-amber-500/10 px-3 py-2"><p class="text-[10px] text-white/55 uppercase tracking-wide">Te deben (libro)</p><p class="text-lg font-bold text-amber-100">' + ferriolBalanceFormatARS(sumCobroPend) + '</p><p class="text-[10px] text-white/40">Pendiente de liquidar</p></div></div>' +
+          '<div class="rounded-xl border border-cyan-500/30 bg-cyan-500/08 px-3 py-2 mb-4"><p class="text-[10px] text-white/55 uppercase tracking-wide">Ventas como vendedor (verificado)</p><p class="text-base font-bold text-cyan-100">' + ferriolBalanceFormatARS(sumVentasVendedor) + ' <span class="text-xs font-normal text-white/45">· ' + asSellerVerified.length + ' op.</span></p></div>';
+        var listLibro = creditDone.length ? creditDone.map(function (r) {
+          var d = String(r.created_at || '').slice(0, 10);
+          var dep = r.depth != null && r.depth !== '' ? ' · niv.' + r.depth : '';
+          return rowInv(ferriolLedgerEventLabel(r.event_type) + dep, ferriolBalanceFormatARS(r.amount), d + ' · ' + String(r.status || ''));
+        }).join('') : '<p class="text-xs text-white/45 py-4 text-center px-2">Sin partidas acreditadas en el libro.</p>';
+        var listPend = creditPending.length ? creditPending.map(function (r) {
+          var d = String(r.created_at || '').slice(0, 10);
+          return rowInv(ferriolLedgerEventLabel(r.event_type), ferriolBalanceFormatARS(r.amount), d + ' · pendiente');
+        }).join('') : '<p class="text-xs text-white/45 py-4 text-center px-2">Nada pendiente en el libro a tu favor.</p>';
+        var listSeller = asSellerVerified.length ? asSellerVerified.map(function (p) {
+          var d = String(p.created_at || '').slice(0, 10);
+          return rowInv(ferriolPaymentTypeLabel(p.payment_type), ferriolBalanceFormatARS(p.amount), d + ' · verificado');
+        }).join('') : '<p class="text-xs text-white/45 py-4 text-center px-2">Sin ventas con vos como vendedor ejecutor verificadas.</p>';
+        return hdr + block('Comisiones y regalías · libro', 'Líneas a tu favor ya registradas (p. ej. estado aprobado).', listLibro) + block('Te deben · pendiente', 'Liquidación según plan; el administrador verifica transferencias.', listPend) + block('Pagos donde fuiste vendedor', 'Monto total transferido; el detalle de tu parte está en el libro.', listSeller);
+      }
+      var sumPagado = sum(asPayerVerified, 'amount');
+      var sumPendPago = sum(asPayerPending, 'amount');
+      var sumDeudaLibro = sum(debtLedger, 'amount');
+      var hdr2 = '<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">' +
+        '<div class="rounded-xl border border-[#22c55e]/35 bg-[#22c55e]/10 px-3 py-2"><p class="text-[10px] text-white/55 uppercase tracking-wide">Ya pagaste</p><p class="text-base font-bold text-[#86efac]">' + ferriolBalanceFormatARS(sumPagado) + '</p><p class="text-[10px] text-white/40">Verificado</p></div>' +
+        '<div class="rounded-xl border border-amber-500/35 bg-amber-500/10 px-3 py-2"><p class="text-[10px] text-white/55 uppercase tracking-wide">Pendiente acreditar</p><p class="text-base font-bold text-amber-100">' + ferriolBalanceFormatARS(sumPendPago) + '</p><p class="text-[10px] text-white/40">Declaraste, falta verificación</p></div>' +
+        '<div class="rounded-xl border border-red-400/30 bg-red-500/10 px-3 py-2"><p class="text-[10px] text-white/55 uppercase tracking-wide">Debes (libro)</p><p class="text-base font-bold text-red-200">' + ferriolBalanceFormatARS(sumDeudaLibro) + '</p><p class="text-[10px] text-white/40">A empresa · pendiente</p></div></div>';
+      var listVer = asPayerVerified.length ? asPayerVerified.map(function (p) {
+        var d = String(p.created_at || '').slice(0, 10);
+        return rowInv(ferriolPaymentTypeLabel(p.payment_type), ferriolBalanceFormatARS(p.amount), d);
+      }).join('') : '<p class="text-xs text-white/45 py-4 text-center px-2">Sin pagos verificados como pagador.</p>';
+      var listPendPay = asPayerPending.length ? asPayerPending.map(function (p) {
+        var d = String(p.created_at || '').slice(0, 10);
+        return rowInv(ferriolPaymentTypeLabel(p.payment_type), ferriolBalanceFormatARS(p.amount), d + ' · pendiente');
+      }).join('') : '<p class="text-xs text-white/45 py-4 text-center px-2">No tenés transferencias pendientes de verificación.</p>';
+      var listDebt = debtLedger.length ? debtLedger.map(function (r) {
+        var d = String(r.created_at || '').slice(0, 10);
+        return rowInv(ferriolLedgerEventLabel(r.event_type), ferriolBalanceFormatARS(r.amount), d);
+      }).join('') : '<p class="text-xs text-white/45 py-4 text-center px-2">Sin obligaciones pendientes en el libro a tu nombre.</p>';
+      return hdr2 + block('Ya pagaste (transferencias verificadas)', 'Pagos confirmados por el administrador.', listVer) + block('Pendiente de verificación', 'Registraste el pago; cuando se acredite se refleja en el libro.', listPendPay) + block('Deudas en el libro', 'Partidas pendientes tipo aporte u obligación con la empresa.', listDebt);
+    }
+    async function loadSuperBalanceSection() {
+      var root = document.getElementById('superBalanceContent');
+      if (!root) return;
+      if (!supabaseClient || !currentUser) {
+        root.innerHTML = '<p class="text-amber-200 text-sm py-4">Iniciá sesión para ver el balance.</p>';
+        return;
+      }
+      syncSuperBalanceTabButtons();
+      root.innerHTML = '<p class="text-white/45 text-sm py-6 text-center">Cargando…</p>';
+      var uid = currentUser.id;
+      try {
+        var q1 = await supabaseClient.from('ferriol_payments').select('id, created_at, payment_type, amount, status, period_month, payer_user_id, seller_user_id, external_note').or('payer_user_id.eq.' + uid + ',seller_user_id.eq.' + uid).order('created_at', { ascending: false }).limit(100);
+        var q2 = await supabaseClient.from('mlm_ledger').select('created_at, amount, event_type, status, depth, period_month').eq('beneficiary_user_id', uid).order('created_at', { ascending: false }).limit(120);
+        if (q1.error) throw q1.error;
+        if (q2.error) throw q2.error;
+        root.innerHTML = renderSuperBalanceInner(q1.data || [], q2.data || []);
+      } catch (e) {
+        root.innerHTML = '<p class="text-red-300/90 text-sm py-4 px-2">No se pudo cargar el balance. Revisá políticas RLS de <code class="text-white/80">ferriol_payments</code> y <code class="text-white/80">mlm_ledger</code>. ' + String(e.message || e) + '</p>';
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
     async function loadSuperMainFerriolResumenCard() {
       var el = document.getElementById('superMainFerriolResumenCard');
       if (!el) return;
@@ -904,8 +1011,9 @@
       _restoringFromHistory: false,
       _suppressCajaHistoryPush: false,
       historialFilter: 'hoy',
-      superSection: 'afiliados',  // afiliados | cobros | ajustes | notificaciones | mas
+      superSection: 'afiliados',  // afiliados | balance | cobros | ajustes | notificaciones | mas
       afiliadosSubTab: 'usuarios',  // usuarios (kiosquero) | distribuidores (partner)
+      balanceSubTab: 'pago',  // pago (deudas/pagos) | cobro (a favor)
       superUiMode: 'empresa'  // empresa | socio | negocio — solo si role === 'super'
     };
 
@@ -2083,7 +2191,7 @@
         try { sessionStorage.setItem('ferriol_super_ui', 'empresa'); } catch (_) {}
         applyAppShell();
       }
-      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'afiliados') {
+      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'afiliados' && state.superSection !== 'balance') {
         switchSuperSection('afiliados');
       }
       if (name !== 'scanner') window._scanForProductCode = false;
@@ -2109,7 +2217,9 @@
         superListCountdownInterval = setInterval(updateSuperListCountdowns, 1000);
         var navSuperBottom = document.getElementById('navSuperBottom');
         if (navSuperBottom) navSuperBottom.classList.remove('hidden');
-        switchSuperSection('afiliados');
+        var landSuper = state.superSection || 'afiliados';
+        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'balance') landSuper = 'afiliados';
+        switchSuperSection(landSuper);
       } else {
         if (superListCountdownInterval) { clearInterval(superListCountdownInterval); superListCountdownInterval = null; }
         var navSuperBottom = document.getElementById('navSuperBottom');
@@ -2194,6 +2304,7 @@
       var headerNotifBtn = document.getElementById('headerSuperNotifBtn');
       if (headerNotifBtn) headerNotifBtn.classList.toggle('active', state.superSection === 'notificaciones');
       if (state.superSection === 'cobros' && isEmpresaLensSuper()) renderSuperCobrosSection();
+      if (state.superSection === 'balance') loadSuperBalanceSection();
       lucide.createIcons();
     }
     var headerAjustesBtnEl = document.getElementById('headerSuperAjustesBtn');
@@ -6060,6 +6171,18 @@ async function showApp() {
       syncAfiliadosSubTabButtons();
       if (superUserListCache.length) renderSuperListFromSearch();
       else if (state.currentPanel === 'super') renderSuper();
+    });
+    var superBalanceTabPago = document.getElementById('superBalanceTabPago');
+    var superBalanceTabCobro = document.getElementById('superBalanceTabCobro');
+    if (superBalanceTabPago) superBalanceTabPago.addEventListener('click', function () {
+      state.balanceSubTab = 'pago';
+      syncSuperBalanceTabButtons();
+      loadSuperBalanceSection();
+    });
+    if (superBalanceTabCobro) superBalanceTabCobro.addEventListener('click', function () {
+      state.balanceSubTab = 'cobro';
+      syncSuperBalanceTabButtons();
+      loadSuperBalanceSection();
     });
     document.getElementById('saveAdminContact').onclick = async () => {
       if (isPartnerLens()) return;

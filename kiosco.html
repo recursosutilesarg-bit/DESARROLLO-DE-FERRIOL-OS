@@ -228,20 +228,24 @@
   <!-- Barra inferior admin (panel de control): secciones al pie, como la app de negocios -->
   <nav id="navSuperBottom" class="fixed bottom-0 left-0 right-0 z-40 super-only hidden" style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0)); padding-left: env(safe-area-inset-left, 0); padding-right: env(safe-area-inset-right, 0);">
     <div class="bottom-nav-bar glass-strong border-t border-white/10 px-2 py-3 max-w-2xl mx-auto">
-      <div class="flex items-center justify-between gap-1">
-        <button data-super-section="afiliados" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Afiliados">
+      <div class="flex items-stretch justify-between gap-0.5 sm:gap-1 flex-nowrap overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <button data-super-section="afiliados" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Afiliados">
           <i data-lucide="users" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Afiliados</span>
         </button>
-        <button data-super-section="cobros" class="super-nav-btn super-only super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Cobros y comisiones (solo administrador)">
+        <button data-super-section="balance" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Balance · pagos y cobros">
+          <i data-lucide="scale" class="w-5 h-5 shrink-0"></i>
+          <span class="truncate w-full text-center">Balance</span>
+        </button>
+        <button data-super-section="cobros" class="super-nav-btn super-only super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Cobros y comisiones (solo administrador)">
           <i data-lucide="banknote" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Cobros</span>
         </button>
-        <button data-super-section="notificaciones" class="super-nav-btn super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Notificaciones">
+        <button data-super-section="notificaciones" class="super-nav-btn super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Notificaciones">
           <i data-lucide="bell" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Avisos</span>
         </button>
-        <button data-super-section="mas" class="super-nav-btn super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Más">
+        <button data-super-section="mas" class="super-nav-btn super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Más">
           <i data-lucide="user-cog" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Más</span>
         </button>
@@ -1126,6 +1130,21 @@
           </div>
           <div id="superUsersList" class="max-h-[50vh] overflow-y-auto pr-1 rounded-xl border border-white/10 bg-black/15">
             <!-- Lista por JS (filas estilo inventory-item) -->
+          </div>
+        </div>
+        <!-- Balance: transferencias declaradas + libro (personal) -->
+        <div id="super-section-balance" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 z-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+          <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
+            <i data-lucide="scale" class="w-5 h-5 text-[#86efac]"></i>
+            Balance
+          </h2>
+          <p class="text-xs text-white/50 mb-3">Transferencias que registraste en el sistema y movimientos del <strong class="text-white/65">libro</strong> donde vos sos beneficiario (comisiones, regalías u obligaciones con la empresa).</p>
+          <div class="flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 mb-4" role="tablist" aria-label="Vista de balance">
+            <button type="button" id="superBalanceTabPago" role="tab" aria-selected="true" class="super-balance-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-[#22c55e]/50 bg-[#22c55e]/20 text-white transition-all">Pagos y deudas</button>
+            <button type="button" id="superBalanceTabCobro" role="tab" aria-selected="false" class="super-balance-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-transparent text-white/55 hover:text-white/80 transition-all">Cobros a favor</button>
+          </div>
+          <div id="superBalanceContent" class="text-sm min-h-[12rem]">
+            <p class="text-white/45 text-sm py-6 text-center">Cargando…</p>
           </div>
         </div>
         <!-- Sección Cobros (solo super): transferencias + verificar → mlm_ledger -->
