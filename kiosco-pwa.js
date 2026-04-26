@@ -8,8 +8,9 @@
       });
     }
 
-    // Banner "Instalar app" — visible al abrir el link; un toque para instalar o ver instrucciones
+    // Banner "Instalar app" — en móvil suele mostrarse al abrir; en PC solo cuando el navegador puede instalar (beforeinstallprompt).
     (function () {
+      var PWA_DISMISS_KEY = 'ferriol_pwa_install_banner_dismissed';
       var banner = document.getElementById('pwaInstallBanner');
       var installBtn = document.getElementById('pwaInstallBtn');
       var installText = document.getElementById('pwaInstallText');
@@ -24,7 +25,32 @@
         return;
       }
 
-      if (closeBtn) closeBtn.addEventListener('click', function () { banner.classList.remove('show'); installHint.classList.remove('show'); sessionStorage.setItem('pwaBannerClosed', '1'); });
+      function isBannerDismissed() {
+        try {
+          return localStorage.getItem(PWA_DISMISS_KEY) === '1' || sessionStorage.getItem('pwaBannerClosed') === '1';
+        } catch (_) {
+          return false;
+        }
+      }
+
+      if (isBannerDismissed()) return;
+
+      var ua = navigator.userAgent || '';
+      var isPhoneTabletUA = /iPhone|iPad|iPod|Android/i.test(ua);
+
+      function showInstallBanner() {
+        if (isBannerDismissed()) return;
+        banner.classList.add('show');
+      }
+
+      if (closeBtn) closeBtn.addEventListener('click', function () {
+        banner.classList.remove('show');
+        if (installHint) installHint.classList.remove('show');
+        try {
+          localStorage.setItem(PWA_DISMISS_KEY, '1');
+          sessionStorage.setItem('pwaBannerClosed', '1');
+        } catch (_) {}
+      });
 
       function getInstallHint() {
         var ua = navigator.userAgent || '';
@@ -39,14 +65,17 @@
       }
 
       if (isSecure) {
-        banner.classList.add('show');
         installBtn.style.display = '';
         needServer.style.display = 'none';
         window.addEventListener('beforeinstallprompt', function (e) {
           e.preventDefault();
           deferredPrompt = e;
           if (installHint) { installHint.classList.remove('show'); installHint.textContent = ''; }
+          showInstallBanner();
         });
+        if (isPhoneTabletUA) {
+          showInstallBanner();
+        }
         if (installBtn) installBtn.addEventListener('click', function () {
           if (deferredPrompt) {
             deferredPrompt.prompt();
@@ -63,6 +92,6 @@
         installBtn.style.display = 'none';
         installText.textContent = 'Para instalar la app no podés abrir el archivo directo.';
         if (installHint) installHint.style.display = 'none';
-        banner.classList.add('show');
+        showInstallBanner();
       }
     })();
