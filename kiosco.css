@@ -20,6 +20,8 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 ::selection {
@@ -32,10 +34,13 @@ body {
   background: linear-gradient(145deg, #020b05 0%, #052e16 38%, #064e1f 62%, #020d06 100%);
   min-height: 100vh;
   min-height: 100dvh;
+  min-height: 100svh;
   color: var(--white-pure);
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body::before {
@@ -883,6 +888,11 @@ textarea:focus-visible {
   display: block;
 }
 
+/* Gráfico Ingresos / gestión de ventas (admin) */
+.ingresos-chart-wrap {
+  height: 260px;
+}
+
 /* ===== PANTALLAS COMPLETAS SIN LÍMITES ===== */
 
 /* App wrapper ocupa toda la pantalla en columna */
@@ -1093,6 +1103,132 @@ body[data-panel="inventory"] #panel-inventory {
   #productDetailPanel .product-detail-footer {
     padding-bottom: max(6rem, env(safe-area-inset-bottom, 0) + 5.25rem) !important;
   }
+
+  /* Paneles: respetar notch y gestos del sistema */
+  .panel {
+    padding-left: max(0.85rem, env(safe-area-inset-left, 0px) + 0.35rem);
+    padding-right: max(0.85rem, env(safe-area-inset-right, 0px) + 0.35rem);
+    overscroll-behavior-y: contain;
+  }
+
+  #mainContent {
+    overscroll-behavior-y: contain;
+  }
+
+  /* Login: aire seguro en iPhone con notch / Dynamic Island */
+  #loginScreen {
+    padding: max(1rem, env(safe-area-inset-top, 0px) + 0.5rem) max(1rem, env(safe-area-inset-right, 0px)) max(1.25rem, env(safe-area-inset-bottom, 0px) + 0.5rem) max(1rem, env(safe-area-inset-left, 0px));
+    align-items: center;
+  }
+
+  .login-glass {
+    padding: 1.35rem 1.1rem;
+    border-radius: 1.05rem;
+  }
+
+  .login-glass h1 {
+    font-size: 1.45rem;
+  }
+
+  /* Header principal (Inicio / admin): más compacto para no apretar iconos */
+  #mainHeader {
+    padding-left: max(0.65rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.65rem, env(safe-area-inset-right, 0px));
+  }
+
+  #mainHeader .max-w-7xl {
+    gap: 0.35rem;
+  }
+
+  #mainHeader h1 {
+    font-size: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  #mainHeader .header-sub {
+    font-size: 0.65rem;
+    line-height: 1.3;
+  }
+
+  #mainHeader .rounded-xl.btn-glow.w-10 {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  #mainHeader .rounded-xl.btn-glow.w-10 i {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  #mainHeader .flex.items-center.gap-2 > .btn-neomorphic {
+    padding: 0.45rem !important;
+    min-width: 2.65rem;
+    min-height: 2.65rem;
+    border-radius: 0.7rem;
+  }
+
+  #mainHeader .flex.items-center.gap-2 > .btn-neomorphic i {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+
+  /* Dashboard: tarjetas más densas en pantallas chicas */
+  #panel-dashboard .space-y-6 > * + * {
+    margin-top: 1rem !important;
+  }
+
+  #panel-dashboard .glass.rounded-2xl.p-6 {
+    padding: 1rem 1rem;
+  }
+
+  #panel-dashboard .glass.rounded-2xl.p-4 {
+    padding: 0.95rem 0.95rem;
+  }
+
+  /* Nav inferior: más “dock” en móvil */
+  .bottom-nav-bar {
+    border-radius: 1.1rem 1.1rem 0 0;
+    padding-left: max(0.35rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.35rem, env(safe-area-inset-right, 0px));
+    box-shadow:
+      0 -12px 40px rgba(0, 0, 0, 0.42),
+      0 -1px 0 rgba(134, 239, 172, 0.12);
+  }
+
+  .bottom-nav-btn {
+    min-height: 3rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.01em;
+  }
+
+  #scannerCircleBtn {
+    width: 3.35rem;
+    height: 3.35rem;
+  }
+
+  /* Banner PWA: no chocar con home indicator */
+  #pwaInstallBanner {
+    bottom: max(0.85rem, env(safe-area-inset-bottom, 0px) + 0.35rem);
+    left: max(0.75rem, env(safe-area-inset-left, 0px));
+    right: max(0.75rem, env(safe-area-inset-right, 0px));
+    width: auto;
+    max-width: none;
+    transform: none;
+  }
+
+  /* Gráfico ingresos / gestión ventas */
+  .ingresos-chart-wrap {
+    height: 210px;
+  }
+
+  /* Tablas admin: hint visual de scroll horizontal */
+  #panel-super .super-table-wrap {
+    margin-left: -0.15rem;
+    margin-right: -0.15rem;
+    padding-bottom: 0.25rem;
+    border-radius: 0.65rem;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.12), transparent 0.5rem);
+  }
 }
 
 /* ── TABLET (768px): restaurar header y cards ── */
@@ -1230,6 +1366,15 @@ body[data-panel="inventory"] #panel-inventory {
 select.ferriol-native-select,
 select.ferriol-native-select option {
   color-scheme: dark;
+  background-color: #0f172a;
+  color: #f1f5f9;
+}
+.panel select.ferriol-native-select {
+  background: rgba(15, 23, 42, 0.92) !important;
+  color: #f1f5f9 !important;
+  color-scheme: dark;
+}
+.panel select.ferriol-native-select option {
   background-color: #0f172a;
   color: #f1f5f9;
 }
