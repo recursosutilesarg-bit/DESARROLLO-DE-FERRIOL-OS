@@ -8091,7 +8091,6 @@ async function showApp() {
        ══════════════════════════════════════════════════════════ */
     (function () {
       var NOTAS_KEY = 'ferriol_sistema_notas_v1';
-      var saveTimer = null;
 
       function notasLoad() {
         try { return JSON.parse(localStorage.getItem(NOTAS_KEY) || '[]'); } catch (_) { return []; }
@@ -8104,105 +8103,118 @@ async function showApp() {
         if (!el) return;
         el.textContent = msg;
         el.style.opacity = '1';
-        setTimeout(function () { el.style.opacity = '0'; }, 2000);
+        setTimeout(function () { el.style.opacity = '0'; }, 1800);
+      }
+
+      function notasMakeCard(nota, idx, arr) {
+        var card = document.createElement('div');
+        card.className = 'nota-card';
+
+        var top = document.createElement('div');
+        top.className = 'nota-card-top';
+
+        var ts = document.createElement('span');
+        ts.className = 'nota-ts';
+        ts.textContent = nota.ts;
+        top.appendChild(ts);
+
+        var delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'nota-del-btn touch-target';
+        delBtn.title = 'Eliminar nota';
+        delBtn.textContent = '✕';
+        delBtn.addEventListener('click', function () {
+          if (!confirm('¿Eliminar esta nota?')) return;
+          arr.splice(idx, 1);
+          notasSave(arr);
+          card.parentNode && card.parentNode.removeChild(card);
+          notasCheckEmpty();
+        });
+        top.appendChild(delBtn);
+        card.appendChild(top);
+
+        var textarea = document.createElement('textarea');
+        textarea.className = 'nota-body';
+        textarea.placeholder = 'Escribí tu nota acá...';
+        textarea.spellcheck = true;
+        textarea.value = nota.text || '';
+        textarea.rows = 4;
+
+        var saveTimer = null;
+        textarea.addEventListener('input', function () {
+          arr[idx].text = textarea.value;
+          clearTimeout(saveTimer);
+          saveTimer = setTimeout(function () {
+            notasSave(arr);
+            notasShowStatus('Guardado ✓');
+          }, 500);
+          var charEl = footer.querySelector('.nota-chars');
+          if (charEl) charEl.textContent = textarea.value.length + ' car.';
+        });
+
+        textarea.addEventListener('keydown', function (e) {
+          if (e.key === 'Tab') {
+            e.preventDefault();
+            var s = textarea.selectionStart;
+            textarea.value = textarea.value.slice(0, s) + '    ' + textarea.value.slice(textarea.selectionEnd);
+            textarea.selectionStart = textarea.selectionEnd = s + 4;
+          }
+        });
+
+        card.appendChild(textarea);
+
+        var footer = document.createElement('div');
+        footer.className = 'nota-footer';
+        var chars = document.createElement('span');
+        chars.className = 'nota-chars';
+        chars.textContent = (nota.text || '').length + ' car.';
+        footer.appendChild(chars);
+        card.appendChild(footer);
+
+        return card;
+      }
+
+      function notasCheckEmpty() {
+        var container = document.getElementById('notasList');
+        if (!container) return;
+        var addBtn = document.getElementById('notasAddBtn');
+        if (container.children.length === 0 && addBtn) {
+          addBtn.style.borderStyle = 'dashed';
+        }
       }
 
       function notasRender() {
-        var list = notasLoad();
         var container = document.getElementById('notasList');
-        var empty = document.getElementById('notasEmpty');
-        var clearBtn = document.getElementById('notasClearBtn');
         if (!container) return;
-
-        container.innerHTML = '';
-        if (list.length === 0) {
-          if (empty) empty.classList.remove('hidden');
-          if (clearBtn) clearBtn.classList.add('hidden');
-          return;
-        }
-        if (empty) empty.classList.add('hidden');
-        if (clearBtn) clearBtn.classList.remove('hidden');
-
-        list.forEach(function (nota, idx) {
-          var card = document.createElement('div');
-          card.className = 'nota-card';
-          card.innerHTML =
-            '<div class="nota-card-top">' +
-              '<span class="nota-ts">' + nota.ts + '</span>' +
-              '<button type="button" class="nota-del-btn touch-target" title="Eliminar nota" data-idx="' + idx + '">' +
-                '<i data-lucide="x" class="w-3.5 h-3.5"></i>' +
-              '</button>' +
-            '</div>' +
-            '<div class="nota-body" contenteditable="true" spellcheck="true" data-idx="' + idx + '" tabindex="0">' +
-              escapeHtml(nota.text) +
-            '</div>' +
-            '<div class="nota-footer">' +
-              '<span class="nota-chars">' + nota.text.length + ' car.</span>' +
-            '</div>';
-          container.appendChild(card);
+        while (container.firstChild) container.removeChild(container.firstChild);
+        var arr = notasLoad();
+        arr.forEach(function (nota, idx) {
+          container.appendChild(notasMakeCard(nota, idx, arr));
         });
-
-        container.querySelectorAll('.nota-body').forEach(function (el) {
-          el.addEventListener('input', function () {
-            var i = parseInt(el.dataset.idx);
-            var footer = el.nextElementSibling;
-            if (footer) footer.querySelector('.nota-chars').textContent = el.textContent.length + ' car.';
-            clearTimeout(saveTimer);
-            saveTimer = setTimeout(function () {
-              var arr = notasLoad();
-              if (arr[i] !== undefined) {
-                arr[i].text = el.textContent;
-                notasSave(arr);
-                notasShowStatus('Guardado ✓');
-              }
-            }, 600);
-          });
-          el.addEventListener('keydown', function (e) {
-            if (e.key === 'Tab') { e.preventDefault(); document.execCommand('insertText', false, '    '); }
-          });
-        });
-
-        container.querySelectorAll('.nota-del-btn').forEach(function (btn) {
-          btn.addEventListener('click', function () {
-            var i = parseInt(btn.dataset.idx);
-            if (!confirm('¿Eliminar esta nota?')) return;
-            var arr = notasLoad();
-            arr.splice(i, 1);
-            notasSave(arr);
-            notasRender();
-            try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (_) {}
-          });
-        });
-
-        try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (_) {}
-      }
-
-      function escapeHtml(s) {
-        return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        notasCheckEmpty();
       }
 
       function notasAdd() {
+        var container = document.getElementById('notasList');
+        if (!container) return;
         var arr = notasLoad();
         var now = new Date();
         var ts = now.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
                  ' ' + now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-        arr.unshift({ id: Date.now(), ts: ts, text: '' });
+        var nota = { id: Date.now(), ts: ts, text: '' };
+        arr.unshift(nota);
         notasSave(arr);
-        notasRender();
-        var firstBody = document.querySelector('#notasList .nota-body');
-        if (firstBody) { firstBody.focus(); }
+        var card = notasMakeCard(nota, 0, arr);
+        container.insertBefore(card, container.firstChild);
+        var ta = card.querySelector('textarea');
+        if (ta) { ta.focus(); }
+        var addBtn = document.getElementById('notasAddBtn');
+        if (addBtn) addBtn.style.borderStyle = 'solid';
       }
 
       var addBtn = document.getElementById('notasAddBtn');
-      if (addBtn) addBtn.addEventListener('click', notasAdd);
-
-      var clearBtn = document.getElementById('notasClearBtn');
-      if (clearBtn) {
-        clearBtn.addEventListener('click', function () {
-          if (!confirm('¿Borrar todas las notas? Esta acción no se puede deshacer.')) return;
-          notasSave([]);
-          notasRender();
-        });
+      if (addBtn) {
+        addBtn.addEventListener('click', notasAdd);
       }
 
       notasRender();

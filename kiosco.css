@@ -2492,12 +2492,9 @@ select.ferriol-native-select option:active {
   gap: 0.75rem;
 }
 
-.notas-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2.5rem 1rem;
-  text-align: center;
+.notas-add-btn {
+  background: transparent;
+  cursor: pointer;
 }
 
 .nota-card {
@@ -2529,48 +2526,46 @@ select.ferriol-native-select option:active {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  min-width: 1.75rem;
+  height: 1.75rem;
   border-radius: 0.375rem;
   border: 1px solid transparent;
   background: transparent;
   cursor: pointer;
-  color: rgba(255,255,255,.25);
+  color: rgba(255,255,255,.3);
+  font-size: 0.7rem;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
   flex-shrink: 0;
 }
 .nota-del-btn:hover {
-  color: rgba(248,113,113,.8);
-  background: rgba(239,68,68,.1);
-  border-color: rgba(239,68,68,.25);
+  color: rgba(248,113,113,.9);
+  background: rgba(239,68,68,.12);
+  border-color: rgba(239,68,68,.3);
 }
 
 .nota-body {
+  display: block;
   width: 100%;
-  min-height: 7rem;
+  min-height: 6rem;
   padding: 0.65rem 0.75rem;
   font-size: 0.8rem;
   line-height: 1.65;
   color: rgba(255,255,255,.82);
   background: transparent;
+  border: none;
   outline: none;
-  white-space: pre-wrap;
-  word-break: break-word;
-  cursor: text;
+  resize: vertical;
   caret-color: #86efac;
   font-family: inherit;
 }
-.nota-body:empty::before {
-  content: 'Escribí tu nota aquí...';
-  color: rgba(255,255,255,.2);
-  pointer-events: none;
-}
+.nota-body::placeholder { color: rgba(255,255,255,.2); }
+.nota-body:focus { background: rgba(255,255,255,.02); }
 
 .nota-footer {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  padding: 0.25rem 0.65rem 0.35rem;
+  padding: 0.2rem 0.65rem 0.3rem;
   border-top: 1px solid rgba(255,255,255,.05);
 }
 .nota-chars {
