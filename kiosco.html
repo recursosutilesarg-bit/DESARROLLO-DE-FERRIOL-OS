@@ -35,7 +35,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-  <link rel="stylesheet" href="kiosco.css?v=20260424dualform">
+  <link rel="stylesheet" href="kiosco.css?v=20260426selectdark">
 </head>
 <body class="relative">
   <!-- Banner instalar como app (PWA) — visible al abrir el link -->
@@ -1181,9 +1181,9 @@
             <div class="min-w-0">
               <h2 class="font-bold text-xl mb-1 flex items-center gap-2 text-white">
                 <i data-lucide="line-chart" class="w-5 h-5 text-[#86efac] shrink-0"></i>
-                Gestión de ventas
+                <span id="ingresosSectionTitle">Gestión de ventas</span>
               </h2>
-              <p class="text-xs text-white/50">Ventas donde <strong class="text-white/70">vos sos el vendedor</strong> en el registro. El cliente paga a Ferriol; la empresa carga el movimiento, verifica el pago y te refleja el saldo en <strong class="text-white/65">Balance</strong> según el plan.</p>
+              <p id="ingresosSectionSubtitle" class="text-xs text-white/50">Ventas donde <strong class="text-white/70">vos sos el vendedor</strong> en el registro. Tras verificar el pago, <strong class="text-white/65">Ingresos</strong> muestra tu <strong class="text-white/70">comisión acreditada</strong> (no el monto bruto del cliente). El saldo detallado está en <strong class="text-white/65">Balance</strong>.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2 shrink-0">
               <label class="text-xs text-white/45 sr-only" for="ingresosRangeFilter">Período</label>
@@ -1195,27 +1195,49 @@
               </select>
             </div>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+          <div id="ingresosKpiPartnerRow" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
             <div class="rounded-2xl border border-white/12 bg-gradient-to-b from-white/[0.08] to-transparent p-4">
-              <p class="text-xs text-white/50 flex items-center gap-1.5 mb-1">Facturación neta <span class="text-white/35" title="Suma de cobros verificados (ARS)">ⓘ</span></p>
+              <p class="text-xs text-white/50 flex items-center gap-1.5 mb-1">Tu comisión acreditada <span class="text-white/35" title="Suma en el libro MLM (sale_commission aprobado)">ⓘ</span></p>
               <p id="ingresosKpiNet" class="text-2xl font-bold text-[#86efac] tabular-nums">—</p>
-              <p class="text-[10px] text-white/40 mt-1">Pagos <strong class="text-white/55">verificados</strong> por la empresa</p>
+              <p class="text-[10px] text-white/40 mt-1">Comisiones por ventas <strong class="text-white/55">verificadas</strong> (tu % del bruto)</p>
             </div>
             <div class="rounded-2xl border border-white/12 bg-gradient-to-b from-white/[0.08] to-transparent p-4">
-              <p class="text-xs text-white/50 mb-1">Transacciones</p>
+              <p class="text-xs text-white/50 mb-1">Acreditaciones</p>
               <p id="ingresosKpiCount" class="text-2xl font-bold text-cyan-200 tabular-nums">—</p>
-              <p class="text-[10px] text-white/40 mt-1">Cantidad con estado verificado en el período</p>
+              <p class="text-[10px] text-white/40 mt-1">Movimientos <code class="text-white/50">sale_commission</code> en el período</p>
             </div>
             <div class="rounded-2xl border border-white/12 bg-gradient-to-b from-red-500/10 to-transparent p-4">
               <p class="text-xs text-white/50 mb-1">Rechazos / anulado</p>
               <p id="ingresosKpiRej" class="text-2xl font-bold text-red-200/90 tabular-nums">—</p>
-              <p class="text-[10px] text-white/40 mt-1">Monto con estado <strong class="text-red-200/80">rechazado</strong> (revisar con empresa)</p>
+              <p class="text-[10px] text-white/40 mt-1">Montos de cobros <strong class="text-red-200/80">rechazados</strong> donde figurás como vendedor</p>
+            </div>
+          </div>
+          <div id="ingresosKpiFounderRow" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+            <div class="rounded-2xl border border-white/12 bg-gradient-to-b from-white/[0.08] to-transparent p-4">
+              <p class="text-xs text-white/50 mb-1">Facturación bruta</p>
+              <p id="ingresosKpiGross" class="text-2xl font-bold text-[#86efac] tabular-nums">—</p>
+              <p class="text-[10px] text-white/40 mt-1">Cobros <strong class="text-white/55">verificados</strong> (ARS)</p>
+            </div>
+            <div class="rounded-2xl border border-cyan-500/15 bg-gradient-to-b from-cyan-500/10 to-transparent p-4">
+              <p class="text-xs text-white/50 mb-1">Reserva / a favor empresa</p>
+              <p id="ingresosKpiCompany" class="text-2xl font-bold text-cyan-200 tabular-nums">—</p>
+              <p class="text-[10px] text-white/40 mt-1">Libro: <code class="text-white/50">company_reserve</code></p>
+            </div>
+            <div class="rounded-2xl border border-violet-500/15 bg-gradient-to-b from-violet-500/10 to-transparent p-4">
+              <p class="text-xs text-white/50 mb-1">Comisiones a la red</p>
+              <p id="ingresosKpiPayout" class="text-2xl font-bold text-violet-200 tabular-nums">—</p>
+              <p class="text-[10px] text-white/40 mt-1">Socios y regalías (<code class="text-white/50">sale_commission</code>, <code class="text-white/50">renewal</code>)</p>
+            </div>
+            <div class="rounded-2xl border border-white/12 bg-gradient-to-b from-red-500/10 to-transparent p-4">
+              <p class="text-xs text-white/50 mb-1">Rechazos</p>
+              <p id="ingresosKpiRejFounder" class="text-2xl font-bold text-red-200/90 tabular-nums">—</p>
+              <p class="text-[10px] text-white/40 mt-1">Cobros declarados <strong class="text-red-200/80">rechazados</strong></p>
             </div>
           </div>
           <div class="rounded-2xl border border-white/15 bg-black/25 p-4 sm:p-5 mb-5">
             <div class="flex items-center justify-between gap-2 mb-3">
-              <h3 class="font-semibold text-sm text-white/90">Desempeño diario</h3>
-              <p class="text-[10px] text-white/40 hidden sm:block">Leyenda: verde = neto; rojo = rech.; azul = nº ventas / día</p>
+              <h3 id="ingresosChartTitle" class="font-semibold text-sm text-white/90">Desempeño diario</h3>
+              <p id="ingresosChartLegend" class="text-[10px] text-white/40 hidden sm:block">Leyenda: verde = comisión; rojo = rech.; azul = nº acreditaciones</p>
             </div>
             <div class="relative w-full" style="height: 260px;">
               <canvas id="ingresosChartCanvas" aria-label="Gráfico de desempeño de ventas"></canvas>
@@ -1344,6 +1366,27 @@
               <p class="text-xs text-white/50 mb-2">Días de prueba al registrarse un <strong class="text-white/75">kiosco</strong> o <strong class="text-white/75">socio</strong>. Solo afecta <strong class="text-white/75">nuevos</strong> registros; no modifica cuentas existentes.</p>
               <label class="block text-xs text-white/70 mb-1">Duración en días (1–365)</label>
               <input type="number" id="adminTrialDurationDays" min="1" max="365" value="15" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-2">
+            </div>
+            <div class="border-t border-white/10 pt-4 mt-4 super-only super-main-only">
+              <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
+                <i data-lucide="percent" class="w-4 h-4 text-[#86efac]"></i>
+                Comisiones a administradores (kit y licencia kiosco)
+              </h3>
+              <p class="text-xs text-white/50 mb-3">Desde el alta del socio (<code class="text-white/60">network_joined_at</code> o fecha de cuenta) podés definir un <strong class="text-white/70">período inicial</strong> con un % mayor para el vendedor; después aplica la comisión normal. Los porcentajes son sobre el <strong class="text-white/70">monto bruto</strong> que verificás en Cobros.</p>
+              <label class="block text-xs text-white/70 mb-1">Meses de período inicial (0 = solo comisión normal)</label>
+              <input type="number" id="adminPartnerIntroMonths" min="0" max="36" value="1" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+                <div>
+                  <label class="block text-xs text-white/70 mb-1">% administrador (período inicial)</label>
+                  <input type="number" id="adminPartnerPctIntro" min="0" max="100" step="0.5" value="80" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white text-base">
+                  <p class="text-[10px] text-white/40 mt-1">Empresa: <span id="adminCompanyPctIntroLabel">20</span>%</p>
+                </div>
+                <div>
+                  <label class="block text-xs text-white/70 mb-1">% administrador (comisión normal)</label>
+                  <input type="number" id="adminPartnerPctNormal" min="0" max="100" step="0.5" value="50" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white text-base">
+                  <p class="text-[10px] text-white/40 mt-1">Empresa: <span id="adminCompanyPctNormalLabel">50</span>%</p>
+                </div>
+              </div>
             </div>
             <div class="border-t border-white/10 pt-4 mt-4">
               <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
@@ -1535,7 +1578,7 @@
         <label class="block text-xs text-white/55 mb-1" for="clientSaleClientEmail">Email del cliente (cuenta en Ferriol)</label>
         <input type="email" id="clientSaleClientEmail" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-3" placeholder="cliente@ejemplo.com" autocomplete="email">
         <label class="block text-xs text-white/55 mb-1" for="clientSalePaymentType">Tipo de venta / producto</label>
-        <select id="clientSalePaymentType" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-3">
+        <select id="clientSalePaymentType" class="ferriol-native-select w-full rounded-xl px-4 py-3 border border-white/20 text-base mb-3">
           <option value="kiosco_licencia">Licencia kiosco (mensual)</option>
           <option value="kit_inicial">Kit vendedor (inicial)</option>
           <option value="vendor_mantenimiento">Cuota de mantenimiento vendedor</option>

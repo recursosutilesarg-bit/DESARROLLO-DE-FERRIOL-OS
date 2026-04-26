@@ -64,8 +64,13 @@ VALUES (
     "kit_amount": 60000,
     "kiosco_monthly": 9900,
     "vendor_monthly": 20000,
-    "sale_company_pct": 0.20,
-    "sale_vendor_pct": 0.80,
+    "partner_intro_months": 1,
+    "sale_vendor_pct_intro": 0.80,
+    "sale_company_pct_intro": 0.20,
+    "sale_vendor_pct_normal": 0.50,
+    "sale_company_pct_normal": 0.50,
+    "sale_company_pct": 0.50,
+    "sale_vendor_pct": 0.50,
     "royalty_n1_pct": 0.30,
     "royalty_n2_pct": 0.15
   }'::jsonb,
@@ -121,6 +126,10 @@ DECLARE
   n2_amt numeric := 0;
   comp_amt numeric;
   sell_amt numeric;
+  v_intro_m int;
+  v_anchor timestamptz;
+  v_intro_end timestamptz;
+  use_intro boolean := false;
 BEGIN
   SELECT role INTO v_role FROM profiles WHERE id = v_uid;
   IF v_role IS DISTINCT FROM 'super' THEN
@@ -140,8 +149,6 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'error', 'Falta clave compensation_v1 en mlm_plan_config.');
   END IF;
 
-  sc := COALESCE((plan->>'sale_company_pct')::numeric, 0.20);
-  sv := COALESCE((plan->>'sale_vendor_pct')::numeric, 0.80);
   r1 := COALESCE((plan->>'royalty_n1_pct')::numeric, 0.30);
   r2 := COALESCE((plan->>'royalty_n2_pct')::numeric, 0.15);
   amt := r.amount;
@@ -152,17 +159,50 @@ BEGIN
     IF seller IS NULL THEN
       RETURN jsonb_build_object('ok', false, 'error', 'Indicá el vendedor ejecutor (seller_user_id) para kit o licencia kiosco.');
     END IF;
+    v_intro_m := COALESCE((plan->>'partner_intro_months')::int, 1);
+    sv := COALESCE((plan->>'sale_vendor_pct_normal')::numeric, (plan->>'sale_vendor_pct')::numeric, 0.50);
+    sc := COALESCE((plan->>'sale_company_pct_normal')::numeric, (plan->>'sale_company_pct')::numeric, 0.50);
+    IF v_intro_m > 0 THEN
+      SELECT COALESCE(network_joined_at, created_at) INTO v_anchor FROM profiles WHERE id = seller;
+      IF v_anchor IS NULL THEN
+        v_anchor := now();
+      END IF;
+      v_intro_end := v_anchor + (v_intro_m * interval '1 month');
+      IF now() <= v_intro_end THEN
+        use_intro := true;
+      END IF;
+    END IF;
+    IF use_intro THEN
+      sv := COALESCE((plan->>'sale_vendor_pct_intro')::numeric, (plan->>'sale_vendor_pct')::numeric, 0.80);
+      sc := COALESCE((plan->>'sale_company_pct_intro')::numeric, (plan->>'sale_company_pct')::numeric, 0.20);
+    END IF;
     comp_amt := round(amt * sc, 2);
     sell_amt := round(amt * sv, 2);
+    IF comp_amt + sell_amt <> amt THEN
+      sell_amt := round(amt - comp_amt, 2);
+    END IF;
     INSERT INTO mlm_ledger (beneficiary_user_id, origin_user_id, event_type, status, amount, currency, depth, idempotency_key, metadata, period_month)
     VALUES (NULL, payer, 'company_reserve', 'approved', comp_amt, COALESCE(r.currency, 'ARS'), NULL,
       'pay:' || p_payment_id::text || ':company',
-      jsonb_build_object('payment_id', p_payment_id, 'payment_type', r.payment_type, 'bucket', 'company'),
+      jsonb_build_object(
+        'payment_id', p_payment_id,
+        'payment_type', r.payment_type,
+        'bucket', 'company',
+        'commission_tier', CASE WHEN use_intro THEN 'intro' ELSE 'normal' END,
+        'sale_vendor_pct', sv,
+        'sale_company_pct', sc
+      ),
       r.period_month);
     INSERT INTO mlm_ledger (beneficiary_user_id, origin_user_id, event_type, status, amount, currency, depth, idempotency_key, metadata, period_month)
     VALUES (seller, payer, 'sale_commission', 'approved', sell_amt, COALESCE(r.currency, 'ARS'), 0,
       'pay:' || p_payment_id::text || ':seller',
-      jsonb_build_object('payment_id', p_payment_id, 'payment_type', r.payment_type),
+      jsonb_build_object(
+        'payment_id', p_payment_id,
+        'payment_type', r.payment_type,
+        'commission_tier', CASE WHEN use_intro THEN 'intro' ELSE 'normal' END,
+        'sale_vendor_pct', sv,
+        'sale_company_pct', sc
+      ),
       r.period_month);
   ELSIF r.payment_type = 'vendor_mantenimiento' THEN
     SELECT sponsor_id INTO n1 FROM profiles WHERE id = payer;

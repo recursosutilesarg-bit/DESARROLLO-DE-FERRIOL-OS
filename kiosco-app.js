@@ -567,6 +567,214 @@
       var day = String(d.getDate()).padStart(2, '0');
       return y + '-' + m + '-' + day;
     }
+    function setSuperIngresosSectionMode(founder) {
+      var t = document.getElementById('ingresosSectionTitle');
+      var s = document.getElementById('ingresosSectionSubtitle');
+      var pRow = document.getElementById('ingresosKpiPartnerRow');
+      var fRow = document.getElementById('ingresosKpiFounderRow');
+      var ct = document.getElementById('ingresosChartTitle');
+      var cl = document.getElementById('ingresosChartLegend');
+      if (t) t.textContent = founder ? 'Ingresos (vista empresa)' : 'Gestión de ventas';
+      if (s) {
+        s.textContent = founder
+          ? 'Métricas globales: facturación verificada, reserva a favor de la empresa y comisiones liquidadas a la red (libro MLM). No reemplaza la contabilidad formal.'
+          : 'Tu comisión acreditada proviene del libro MLM (ventas kit/licencia donde la empresa verificó el pago con vos como vendedor). No es el monto bruto del cliente. Ver detalle en Balance.';
+      }
+      if (pRow) pRow.classList.toggle('hidden', founder);
+      if (fRow) fRow.classList.toggle('hidden', !founder);
+      if (ct) ct.textContent = founder ? 'Evolución diaria (empresa)' : 'Desempeño diario (tu comisión)';
+      if (cl) {
+        cl.textContent = founder
+          ? 'Verde: facturación bruta · Cyan: reserva empresa · Violeta: comisiones a la red'
+          : 'Leyenda: verde = comisión; rojo = rech.; azul = nº acreditaciones / día';
+      }
+    }
+    async function loadSuperIngresosFounderSection() {
+      var kpiG = document.getElementById('ingresosKpiGross');
+      var kpiCo = document.getElementById('ingresosKpiCompany');
+      var kpiPo = document.getElementById('ingresosKpiPayout');
+      var kpiRj = document.getElementById('ingresosKpiRejFounder');
+      var wrap = document.getElementById('ingresosTableWrap');
+      var canvas = document.getElementById('ingresosChartCanvas');
+      var fb = document.getElementById('ingresosChartFallback');
+      if (!kpiG || !wrap) return;
+      if (!isEmpresaLensSuper() || !supabaseClient || !currentUser) {
+        wrap.innerHTML = '<p class="text-amber-200/90 text-sm py-4 text-center">Solo disponible en vista fundador (Empresa).</p>';
+        return;
+      }
+      setSuperIngresosSectionMode(true);
+      var rangeSel = document.getElementById('ingresosRangeFilter');
+      var rangeDays = rangeSel && rangeSel.value ? parseInt(rangeSel.value, 10) : 90;
+      if (isNaN(rangeDays) || rangeDays < 1) rangeDays = 90;
+      kpiG.textContent = kpiCo.textContent = kpiPo.textContent = kpiRj.textContent = '…';
+      wrap.innerHTML = '<p class="text-white/45 text-xs py-5 text-center">Cargando…</p>';
+      if (fb) { fb.classList.add('hidden'); if (canvas) canvas.classList.remove('hidden'); }
+      var endD = new Date();
+      endD.setHours(23, 59, 59, 999);
+      var startD = new Date();
+      startD.setHours(0, 0, 0, 0);
+      startD.setDate(startD.getDate() - (rangeDays - 1));
+      function inRange(iso) {
+        if (!iso) return false;
+        var t = new Date(iso).getTime();
+        return t >= startD.getTime() && t <= endD.getTime();
+      }
+      var startIsoR = startD.toISOString();
+      var endIsoR = endD.toISOString();
+      try {
+        var payRes = await supabaseClient
+          .from('ferriol_payments')
+          .select('id, created_at, payment_type, amount, status, payer_user_id, seller_user_id')
+          .gte('created_at', startIsoR)
+          .lte('created_at', endIsoR)
+          .order('created_at', { ascending: false })
+          .limit(1200);
+        if (payRes.error) throw payRes.error;
+        var payAll = payRes.data || [];
+        var sumGross = 0;
+        var sumRej = 0;
+        var byDayGross = {};
+        var byDayRej = {};
+        payAll.forEach(function (r) {
+          var dk = ferriolIngresosDayKeyFromIso(r.created_at);
+          var a = Number(r.amount || 0);
+          if (r.status === 'verified') {
+            sumGross += a;
+            if (!byDayGross[dk]) byDayGross[dk] = 0;
+            byDayGross[dk] += a;
+          } else if (r.status === 'rejected') {
+            sumRej += a;
+            if (!byDayRej[dk]) byDayRej[dk] = 0;
+            byDayRej[dk] += a;
+          }
+        });
+        var ledRes = await supabaseClient
+          .from('mlm_ledger')
+          .select('id, created_at, event_type, status, amount, metadata, beneficiary_user_id')
+          .in('status', ['approved', 'paid'])
+          .gte('created_at', startIsoR)
+          .lte('created_at', endIsoR)
+          .order('created_at', { ascending: false })
+          .limit(2000);
+        if (ledRes.error) throw ledRes.error;
+        var ledRows = ledRes.data || [];
+        var sumComp = 0;
+        var sumPayout = 0;
+        var byDayComp = {};
+        var byDayPay = {};
+        ledRows.forEach(function (L) {
+          var ev = L.event_type;
+          var a = Number(L.amount || 0);
+          var dk = ferriolIngresosDayKeyFromIso(L.created_at);
+          if (ev === 'company_reserve') {
+            sumComp += a;
+            if (!byDayComp[dk]) byDayComp[dk] = 0;
+            byDayComp[dk] += a;
+          } else if ((ev === 'sale_commission' || ev === 'renewal') && L.beneficiary_user_id) {
+            sumPayout += a;
+            if (!byDayPay[dk]) byDayPay[dk] = 0;
+            byDayPay[dk] += a;
+          }
+        });
+        kpiG.textContent = '$ ' + sumGross.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS';
+        kpiCo.textContent = '$ ' + sumComp.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS';
+        kpiPo.textContent = '$ ' + sumPayout.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS';
+        kpiRj.textContent = sumRej > 0
+          ? ('$ ' + sumRej.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS')
+          : '$ 0,00 ARS';
+        var dayKeys = [];
+        var cur = new Date(startD);
+        while (cur.getTime() <= endD.getTime()) {
+          dayKeys.push(ferriolIngresosDayKeyFromIso(cur.toISOString()));
+          cur.setDate(cur.getDate() + 1);
+        }
+        var labels = dayKeys.map(function (k) {
+          var p = k.split('-');
+          var d = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+          return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
+        });
+        var dG = dayKeys.map(function (k) { return byDayGross[k] || 0; });
+        var dC = dayKeys.map(function (k) { return byDayComp[k] || 0; });
+        var dP = dayKeys.map(function (k) { return byDayPay[k] || 0; });
+        if (typeof window.Chart === 'undefined') {
+          if (canvas) canvas.classList.add('hidden');
+          if (fb) { fb.classList.remove('hidden'); fb.textContent = 'Gráfico no disponible (librería de gráficos). Revisá la conexión a internet.'; }
+        } else {
+          if (window._ferriolIngresosChart) {
+            try { window._ferriolIngresosChart.destroy(); } catch (_) {}
+            window._ferriolIngresosChart = null;
+          }
+          if (canvas) {
+            var ctx = canvas.getContext('2d');
+            window._ferriolIngresosChart = new window.Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [
+                  { label: 'Facturación bruta (verif.)', data: dG, borderColor: 'rgb(134, 239, 172)', backgroundColor: 'rgba(134, 239, 172, 0.1)', tension: 0.25, fill: true, pointRadius: 0, yAxisID: 'y' },
+                  { label: 'Reserva empresa', data: dC, borderColor: 'rgb(34, 211, 238)', backgroundColor: 'rgba(34, 211, 238, 0.08)', tension: 0.25, fill: true, pointRadius: 0, yAxisID: 'y' },
+                  { label: 'Comisiones a la red', data: dP, borderColor: 'rgb(167, 139, 250)', backgroundColor: 'rgba(167, 139, 250, 0.08)', tension: 0.25, fill: true, pointRadius: 0, yAxisID: 'y' }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: { legend: { position: 'top', labels: { color: 'rgba(255,255,255,0.75)', font: { size: 11 } } } },
+                scales: {
+                  x: { ticks: { color: 'rgba(255,255,255,0.45)', maxRotation: 45, minRotation: 0, autoSkip: true, maxTicksLimit: 12 }, grid: { color: 'rgba(255,255,255,0.06)' } },
+                  y: { position: 'left', ticks: { color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255,255,255,0.08)' } }
+                }
+              }
+            });
+          }
+        }
+        var recent = payAll.filter(function (r) { return r.status === 'verified'; }).slice(0, 20);
+        var pidSet = {};
+        recent.forEach(function (r) { if (r && r.id) pidSet[r.id] = true; });
+        var ledByPay = {};
+        ledRows.forEach(function (L) {
+          var mid = L.metadata && (L.metadata.payment_id || L.metadata.paymentId);
+          if (mid && pidSet[mid]) {
+            if (!ledByPay[mid]) ledByPay[mid] = { company: 0, payout: 0 };
+            if (L.event_type === 'company_reserve') ledByPay[mid].company += Number(L.amount || 0);
+            if (L.event_type === 'sale_commission' && L.beneficiary_user_id) ledByPay[mid].payout += Number(L.amount || 0);
+          }
+        });
+        var payerIds = recent.map(function (r) { return r.payer_user_id; }).filter(Boolean);
+        var nameBy = {};
+        if (payerIds.length) {
+          var uq = Array.from(new Set(payerIds));
+          var pr = await supabaseClient.from('profiles').select('id, email, kiosco_name').in('id', uq);
+          if (!pr.error && pr.data) {
+            pr.data.forEach(function (p) {
+              if (p && p.id) nameBy[p.id] = (p.kiosco_name || '').trim() || p.email || p.id;
+            });
+          }
+        }
+        if (!recent.length) {
+          wrap.innerHTML = '<p class="text-white/50 text-sm py-8 text-center px-3">Aún no hay cobros verificados en el período. Revisá <strong class="text-white/70">Cobros</strong> o ampliá el rango de fechas.</p>';
+        } else {
+          var headF = '<div class="grid grid-cols-12 gap-1 px-3 py-2 border-b border-white/10 text-[10px] text-white/45 font-medium uppercase tracking-wide"><div class="col-span-2">Fecha</div><div class="col-span-2">Tipo</div><div class="col-span-2">Bruto</div><div class="col-span-2">A empresa</div><div class="col-span-2">A red</div><div class="col-span-2">Paga</div></div>';
+          var bodyF = recent.map(function (r) {
+            var d = String(r.created_at || '').slice(0, 10);
+            var br = Number(r.amount || 0);
+            var lb = ledByPay[r.id] || { company: 0, payout: 0 };
+            var nm = nameBy[r.payer_user_id] || '—';
+            return '<div class="grid grid-cols-12 gap-1 px-3 py-2.5 border-b border-white/[0.06] text-xs items-center"><div class="col-span-2 text-white/55 tabular-nums">' + d + '</div><div class="col-span-2 text-white/85 truncate" title="">' + String(ferriolIngresosPaymentTypeLabel(r.payment_type)).replace(/</g, '&lt;') + '</div><div class="col-span-2 text-[#86efac] font-semibold tabular-nums">$ ' + br.toLocaleString('es-AR') + '</div><div class="col-span-2 text-cyan-200/90 tabular-nums">$ ' + Number(lb.company).toLocaleString('es-AR') + '</div><div class="col-span-2 text-violet-200/90 tabular-nums">$ ' + Number(lb.payout).toLocaleString('es-AR') + '</div><div class="col-span-2 text-white/55 truncate">' + String(nm).replace(/</g, '&lt;') + '</div></div>';
+          }).join('');
+          wrap.innerHTML = headF + bodyF;
+        }
+      } catch (e) {
+        kpiG.textContent = kpiCo.textContent = kpiPo.textContent = kpiRj.textContent = '—';
+        wrap.innerHTML = '<p class="text-red-300/90 text-sm py-4 px-2">No se pudieron cargar ingresos (empresa). ' + (e && e.message ? String(e.message) : '') + '</p>';
+        if (typeof window !== 'undefined' && window.Chart && canvas && window._ferriolIngresosChart) {
+          try { window._ferriolIngresosChart.destroy(); } catch (_) {}
+          window._ferriolIngresosChart = null;
+        }
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
     async function loadSuperIngresosSection() {
       var kpiN = document.getElementById('ingresosKpiNet');
       var kpiC = document.getElementById('ingresosKpiCount');
@@ -574,11 +782,20 @@
       var wrap = document.getElementById('ingresosTableWrap');
       var canvas = document.getElementById('ingresosChartCanvas');
       var fb = document.getElementById('ingresosChartFallback');
-      if (!kpiN || !wrap) return;
-      if (!isPartnerLens() || isEmpresaLensSuper() || !supabaseClient || !currentUser) {
-        wrap.innerHTML = '<p class="text-amber-200/90 text-sm py-4 text-center">Esta sección es para administradores de red (vista no fundador).</p>';
+      if (!wrap) return;
+      if (!supabaseClient || !currentUser) {
+        wrap.innerHTML = '<p class="text-amber-200/90 text-sm py-4 text-center">Iniciá sesión para ver Ingresos.</p>';
         return;
       }
+      if (isEmpresaLensSuper()) {
+        return loadSuperIngresosFounderSection();
+      }
+      if (!kpiN || !kpiC || !kpiR) return;
+      if (!isPartnerLens()) {
+        wrap.innerHTML = '<p class="text-amber-200/90 text-sm py-4 text-center">Esta sección es para administradores de red o fundador (vista empresa).</p>';
+        return;
+      }
+      setSuperIngresosSectionMode(false);
       var rangeSel = document.getElementById('ingresosRangeFilter');
       var rangeDays = rangeSel && rangeSel.value ? parseInt(rangeSel.value, 10) : 90;
       if (isNaN(rangeDays) || rangeDays < 1) rangeDays = 90;
@@ -591,40 +808,54 @@
       var startD = new Date();
       startD.setHours(0, 0, 0, 0);
       startD.setDate(startD.getDate() - (rangeDays - 1));
+      var startIsoP = startD.toISOString();
+      var endIsoP = endD.toISOString();
       try {
-        var res = await supabaseClient
+        var resLed = await supabaseClient
+          .from('mlm_ledger')
+          .select('id, created_at, amount, status, metadata, event_type')
+          .eq('beneficiary_user_id', uid)
+          .eq('event_type', 'sale_commission')
+          .eq('status', 'approved')
+          .gte('created_at', startIsoP)
+          .lte('created_at', endIsoP)
+          .order('created_at', { ascending: false })
+          .limit(1000);
+        if (resLed.error) throw resLed.error;
+        var ledOk = resLed.data || [];
+        var sumCom = 0;
+        var byDay = {};
+        ledOk.forEach(function (L) {
+          var a = Number(L.amount || 0);
+          sumCom += a;
+          var dk = ferriolIngresosDayKeyFromIso(L.created_at);
+          if (!byDay[dk]) byDay[dk] = { net: 0, rej: 0, n: 0 };
+          byDay[dk].net += a;
+          byDay[dk].n += 1;
+        });
+        kpiN.textContent = '$ ' + sumCom.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS';
+        kpiC.textContent = String(ledOk.length);
+        var resPay = await supabaseClient
           .from('ferriol_payments')
-          .select('id, created_at, payment_type, amount, status, payer_user_id, period_month, external_note')
+          .select('id, created_at, payment_type, amount, status, payer_user_id')
           .eq('seller_user_id', uid)
+          .gte('created_at', startIsoP)
+          .lte('created_at', endIsoP)
           .order('created_at', { ascending: false })
           .limit(800);
-        if (res.error) throw res.error;
-        var rows = (res.data || []).filter(function (r) {
-          var t = r.created_at ? new Date(r.created_at).getTime() : 0;
-          return t >= startD.getTime() && t <= endD.getTime();
-        });
-        var sumVer = 0;
-        var nVer = 0;
+        if (resPay.error) throw resPay.error;
+        var pRows = resPay.data || [];
         var sumRej = 0;
         var nRej = 0;
-        var byDay = {};
-        rows.forEach(function (r) {
-          var amt = Number(r.amount || 0);
-          var dk = ferriolIngresosDayKeyFromIso(r.created_at);
-          if (!byDay[dk]) byDay[dk] = { net: 0, rej: 0, n: 0 };
-          if (r.status === 'verified') {
-            sumVer += amt;
-            nVer += 1;
-            byDay[dk].net += amt;
-            byDay[dk].n += 1;
-          } else if (r.status === 'rejected') {
-            sumRej += amt;
+        pRows.forEach(function (r) {
+          if (r.status === 'rejected') {
+            sumRej += Number(r.amount || 0);
             nRej += 1;
-            byDay[dk].rej += amt;
+            var dk = ferriolIngresosDayKeyFromIso(r.created_at);
+            if (!byDay[dk]) byDay[dk] = { net: 0, rej: 0, n: 0 };
+            byDay[dk].rej += Number(r.amount || 0);
           }
         });
-        kpiN.textContent = '$ ' + sumVer.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS';
-        kpiC.textContent = String(nVer);
         kpiR.textContent = nRej > 0
           ? ('$ ' + sumRej.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS')
           : '$ 0,00 ARS';
@@ -657,9 +888,9 @@
               data: {
                 labels: labels,
                 datasets: [
-                  { label: 'Facturación neta (verif.)', data: dataNet, borderColor: 'rgb(134, 239, 172)', backgroundColor: 'rgba(134, 239, 172, 0.12)', tension: 0.25, fill: true, pointRadius: 0, yAxisID: 'y' },
-                  { label: 'Rechazos', data: dataRej, borderColor: 'rgb(248, 113, 113)', backgroundColor: 'rgba(248, 113, 113, 0.08)', tension: 0.25, fill: true, pointRadius: 0, yAxisID: 'y' },
-                  { label: 'Nº transacciones', data: dataCnt, borderColor: 'rgb(56, 189, 248)', backgroundColor: 'rgba(56, 189, 248, 0.06)', tension: 0.2, fill: false, pointRadius: 0, yAxisID: 'y1' }
+                  { label: 'Tu comisión (verif.)', data: dataNet, borderColor: 'rgb(134, 239, 172)', backgroundColor: 'rgba(134, 239, 172, 0.12)', tension: 0.25, fill: true, pointRadius: 0, yAxisID: 'y' },
+                  { label: 'Cobros rechazados (bruto)', data: dataRej, borderColor: 'rgb(248, 113, 113)', backgroundColor: 'rgba(248, 113, 113, 0.08)', tension: 0.25, fill: true, pointRadius: 0, yAxisID: 'y' },
+                  { label: 'Nº acreditaciones', data: dataCnt, borderColor: 'rgb(56, 189, 248)', backgroundColor: 'rgba(56, 189, 248, 0.06)', tension: 0.2, fill: false, pointRadius: 0, yAxisID: 'y1' }
                 ]
               },
               options: {
@@ -678,29 +909,47 @@
             });
           }
         }
-        var ids = [];
-        var recent = (res.data || []).slice(0, 18);
-        recent.forEach(function (r) { if (r.payer_user_id) ids.push(r.payer_user_id); });
-        var idSet = Array.from(new Set(ids));
+        var recentLed = (resLed.data || []).slice(0, 22);
+        var payIds = [];
+        recentLed.forEach(function (L) {
+          var mid = L.metadata && (L.metadata.payment_id || L.metadata.paymentId);
+          if (mid) payIds.push(mid);
+        });
+        var payTypes = {};
+        if (payIds.length) {
+          var uq = Array.from(new Set(payIds));
+          var pr2 = await supabaseClient.from('ferriol_payments').select('id, payment_type, amount, payer_user_id').in('id', uq);
+          if (!pr2.error && pr2.data) {
+            pr2.data.forEach(function (p) { if (p && p.id) payTypes[p.id] = p; });
+          }
+        }
+        var allPayer = Array.from(new Set(recentLed.map(function (L) {
+          var mid = L.metadata && (L.metadata.payment_id || L.metadata.paymentId);
+          if (!mid || !payTypes[mid]) return null;
+          return payTypes[mid].payer_user_id;
+        }).filter(Boolean)));
         var nameBy = {};
-        if (idSet.length) {
-          var pr = await supabaseClient.from('profiles').select('id, email, kiosco_name').in('id', idSet);
-          if (!pr.error && pr.data) {
-            pr.data.forEach(function (p) {
+        if (allPayer.length) {
+          var pr3 = await supabaseClient.from('profiles').select('id, email, kiosco_name').in('id', allPayer);
+          if (!pr3.error && pr3.data) {
+            pr3.data.forEach(function (p) {
               if (p && p.id) nameBy[p.id] = (p.kiosco_name || '').trim() || p.email || p.id;
             });
           }
         }
-        if (!recent.length) {
-          wrap.innerHTML = '<p class="text-white/50 text-sm py-8 text-center px-3">Aún no hay movimientos con vos como vendedor. La empresa carga en <strong class="text-white/70">Cobros</strong> un registro poniendo tu email en «vendedor» cuando un cliente paga; ahí comenzará a verse tu desempeño y el saldo en <strong class="text-white/70">Balance</strong> al verificarse el pago.</p>';
+        if (!recentLed.length) {
+          wrap.innerHTML = '<p class="text-white/50 text-sm py-8 text-center px-3">Aún no tenés comisiones acreditadas en el libro. La empresa carga y verifica en <strong class="text-white/70">Cobros</strong> poniendote como vendedor; el monto de <strong class="text-white/70">Ingresos</strong> es tu comisión, no el bruto de la operación.</p>';
         } else {
-          var head = '<div class="grid grid-cols-12 gap-1 px-3 py-2 border-b border-white/10 text-[10px] text-white/45 font-medium uppercase tracking-wide"><div class="col-span-2">Fecha</div><div class="col-span-3">Tipo</div><div class="col-span-2">Monto</div><div class="col-span-2">Estado</div><div class="col-span-3">Comprador</div></div>';
-          var body = recent.map(function (r) {
-            var d = String(r.created_at || '').slice(0, 10);
-            var st = r.status;
-            var stH = st === 'verified' ? 'text-[#86efac]' : (st === 'rejected' ? 'text-red-300' : 'text-amber-200');
-            var nm = nameBy[r.payer_user_id] || ('…' + String(r.payer_user_id || '').slice(0, 8));
-            return '<div class="grid grid-cols-12 gap-1 px-3 py-2.5 border-b border-white/[0.06] text-xs items-center"><div class="col-span-2 text-white/55 tabular-nums">' + d + '</div><div class="col-span-3 text-white/85 truncate" title="' + String(ferriolIngresosPaymentTypeLabel(r.payment_type)).replace(/"/g, '') + '">' + String(ferriolIngresosPaymentTypeLabel(r.payment_type)).replace(/</g, '&lt;') + '</div><div class="col-span-2 text-[#86efac] font-semibold tabular-nums">$ ' + Number(r.amount || 0).toLocaleString('es-AR') + '</div><div class="col-span-2 ' + stH + '">' + (st === 'verified' ? 'Verif.' : (st === 'rejected' ? 'Rechaz.' : 'Pend.')) + '</div><div class="col-span-3 text-white/60 truncate" title="">' + String(nm).replace(/</g, '&lt;') + '</div></div>';
+          var head = '<div class="grid grid-cols-12 gap-1 px-3 py-2 border-b border-white/10 text-[10px] text-white/45 font-medium uppercase tracking-wide"><div class="col-span-2">Fecha</div><div class="col-span-2">Tipo</div><div class="col-span-2">Comisión</div><div class="col-span-2">Nivel</div><div class="col-span-2">% aplicado</div><div class="col-span-2">Comprador</div></div>';
+          var body = recentLed.map(function (L) {
+            var d = String(L.created_at || '').slice(0, 10);
+            var mid = L.metadata && (L.metadata.payment_id || L.metadata.paymentId);
+            var ptyp = (mid && payTypes[mid]) ? payTypes[mid].payment_type : '';
+            var tier = (L.metadata && L.metadata.commission_tier) ? String(L.metadata.commission_tier) : '—';
+            var pctV = (L.metadata && (L.metadata.sale_vendor_pct != null)) ? (Number(L.metadata.sale_vendor_pct) * 100).toFixed(1) + '%' : '—';
+            var py = (mid && payTypes[mid]) ? payTypes[mid].payer_user_id : null;
+            var nm = py ? (nameBy[py] || '…') : '—';
+            return '<div class="grid grid-cols-12 gap-1 px-3 py-2.5 border-b border-white/[0.06] text-xs items-center"><div class="col-span-2 text-white/55 tabular-nums">' + d + '</div><div class="col-span-2 text-white/85 truncate">' + String(ferriolIngresosPaymentTypeLabel(ptyp)).replace(/</g, '&lt;') + '</div><div class="col-span-2 text-[#86efac] font-semibold tabular-nums">$ ' + Number(L.amount || 0).toLocaleString('es-AR') + '</div><div class="col-span-2 text-amber-200/80">' + String(tier).replace(/</g, '&lt;') + '</div><div class="col-span-2 text-white/50 tabular-nums">' + pctV + '</div><div class="col-span-2 text-white/60 truncate">' + String(nm).replace(/</g, '&lt;') + '</div></div>';
           }).join('');
           wrap.innerHTML = head + body;
         }
@@ -2867,7 +3116,7 @@
       if (affWrap) affWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper()));
       var ingNav = document.getElementById('navSuperIngresosBtn');
       if (ingNav) {
-        if (!isNetworkAdmin || uiNegocio || isEmpresaLensSuper()) {
+        if (!isNetworkAdmin || uiNegocio) {
           ingNav.style.display = 'none';
         } else {
           ingNav.style.display = '';
@@ -6921,6 +7170,32 @@ async function showApp() {
         var winDaysInput = document.getElementById('trialReminderWindowDays');
         if (winDaysInput) winDaysInput.value = String(trialCfgParsed.windowDays);
         if (!isPartnerLens()) fillTrialReminderAdminFields(trialCfgParsed, null);
+        if (isEmpresaLensSuper()) {
+          try {
+            var pl = await supabaseClient.from('mlm_plan_config').select('value').eq('key', 'compensation_v1').maybeSingle();
+            var pv = (pl.data && pl.data.value) || {};
+            if (typeof pv === 'string') { try { pv = JSON.parse(pv); } catch (_) { pv = {}; } }
+            var im = parseInt(pv.partner_intro_months, 10);
+            var pIntro = pv.sale_vendor_pct_intro != null ? Number(pv.sale_vendor_pct_intro) * 100 : 80;
+            var pNorm = pv.sale_vendor_pct_normal != null ? Number(pv.sale_vendor_pct_normal) * 100 : (pv.sale_vendor_pct != null ? Number(pv.sale_vendor_pct) * 100 : 50);
+            var elM = document.getElementById('adminPartnerIntroMonths');
+            var elI = document.getElementById('adminPartnerPctIntro');
+            var elN = document.getElementById('adminPartnerPctNormal');
+            if (elM) elM.value = (!isNaN(im) && im >= 0) ? String(Math.min(36, im)) : '1';
+            if (elI) elI.value = String(Math.min(100, Math.max(0, Math.round(pIntro * 10) / 10)));
+            if (elN) elN.value = String(Math.min(100, Math.max(0, Math.round(pNorm * 10) / 10)));
+            var li = document.getElementById('adminCompanyPctIntroLabel');
+            var ln = document.getElementById('adminCompanyPctNormalLabel');
+            if (elI && li) {
+              var vi = Math.min(100, Math.max(0, parseFloat(String(elI.value).replace(',', '.'), 10) || 0));
+              li.textContent = String(Math.round((100 - vi) * 10) / 10);
+            }
+            if (elN && ln) {
+              var vn = Math.min(100, Math.max(0, parseFloat(String(elN.value).replace(',', '.'), 10) || 0));
+              ln.textContent = String(Math.round((100 - vn) * 10) / 10);
+            }
+          } catch (_) {}
+        }
         if (superFilterState !== 'todos') {
           document.querySelectorAll('.super-filter-btn').forEach(function (b) {
             var active = b.dataset.filter === superFilterState;
@@ -7087,6 +7362,32 @@ async function showApp() {
           { key: 'trial_duration_days', value: String(trialDurSave) },
           { key: 'trial_reminder_config', value: trialReminderJson }
         ], { onConflict: 'key' });
+        if (isEmpresaLensSuper()) {
+          var pl = await supabaseClient.from('mlm_plan_config').select('value').eq('key', 'compensation_v1').maybeSingle();
+          var base = (pl.data && pl.data.value) || {};
+          if (typeof base === 'string') { try { base = JSON.parse(base); } catch (_) { base = {}; } }
+          var imEl = document.getElementById('adminPartnerIntroMonths');
+          var pIntroEl = document.getElementById('adminPartnerPctIntro');
+          var pNormEl = document.getElementById('adminPartnerPctNormal');
+          var im = Math.min(36, Math.max(0, parseInt(imEl && imEl.value, 10) || 0));
+          var pin = Math.min(100, Math.max(0, parseFloat(String((pIntroEl && pIntroEl.value) || '80').replace(',', '.'), 10) || 0));
+          var pno = Math.min(100, Math.max(0, parseFloat(String((pNormEl && pNormEl.value) || '50').replace(',', '.'), 10) || 0));
+          var vInt = pin / 100;
+          var cInt = (100 - pin) / 100;
+          var vNorm = pno / 100;
+          var cNorm = (100 - pno) / 100;
+          var merged = Object.assign({}, base, {
+            partner_intro_months: im,
+            sale_vendor_pct_intro: vInt,
+            sale_company_pct_intro: cInt,
+            sale_vendor_pct_normal: vNorm,
+            sale_company_pct_normal: cNorm,
+            sale_vendor_pct: vNorm,
+            sale_company_pct: cNorm
+          });
+          var upP = await supabaseClient.from('mlm_plan_config').upsert({ key: 'compensation_v1', value: merged, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+          if (upP.error) throw upP.error;
+        }
         adminContact.whatsapp = whatsapp;
         adminContact.whatsappList = [whatsapp, whatsapp2, whatsapp3, whatsapp4].filter(Boolean);
         window._superTrialReminderEditCache = parseTrialReminderConfigValue(trialReminderJson);
@@ -7107,6 +7408,19 @@ async function showApp() {
         var base = window._superTrialReminderEditCache || { windowDays: 5, messages: {} };
         fillTrialReminderAdminFields(base, preserved);
       });
+    })();
+    (function setupAdminPartnerPctLabels() {
+      function upd(inpId, labelId) {
+        var inp = document.getElementById(inpId);
+        var lab = document.getElementById(labelId);
+        if (!inp || !lab) return;
+        var v = Math.min(100, Math.max(0, parseFloat(String(inp.value || '0').replace(',', '.'), 10) || 0));
+        lab.textContent = String(Math.round((100 - v) * 10) / 10);
+      }
+      var i1 = document.getElementById('adminPartnerPctIntro');
+      var i2 = document.getElementById('adminPartnerPctNormal');
+      if (i1) { i1.addEventListener('input', function () { upd('adminPartnerPctIntro', 'adminCompanyPctIntroLabel'); }); i1.addEventListener('change', function () { upd('adminPartnerPctIntro', 'adminCompanyPctIntroLabel'); }); }
+      if (i2) { i2.addEventListener('input', function () { upd('adminPartnerPctNormal', 'adminCompanyPctNormalLabel'); }); i2.addEventListener('change', function () { upd('adminPartnerPctNormal', 'adminCompanyPctNormalLabel'); }); }
     })();
     async function exportSuperDirectorioCSV() {
       if (!isEmpresaLensSuper() || !supabaseClient) return;
