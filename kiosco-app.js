@@ -722,12 +722,150 @@
       var p = (pool || []).find(function (x) { return x.id === id; });
       return (p ? (p.kiosco_name || p.email || String(id)) : String(id)).replace(/</g, '&lt;');
     }
+    function escHtmlCsr(s) {
+      return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    }
+    async function loadFounderClientSaleRequestsPanel() {
+      var clBox = document.getElementById('superClientSaleRequestsList');
+      if (!clBox) return;
+      if (!supabaseClient || !isEmpresaLensSuper()) {
+        clBox.innerHTML = '';
+        return;
+      }
+      clBox.innerHTML = '<p class="text-white/45 text-xs py-2">Cargando comprobantes…</p>';
+      try {
+        var r = await supabaseClient.from('ferriol_client_sale_requests').select('*').order('created_at', { ascending: false }).limit(40);
+        if (r.error) throw r.error;
+        var rows = r.data || [];
+        var pool = window._ferriolAllProfilesCache || [];
+        if (!pool.length) {
+          var prP = await supabaseClient.from('profiles').select('id, email, kiosco_name').limit(800);
+          if (!prP.error && prP.data) {
+            window._ferriolAllProfilesCache = prP.data;
+            pool = prP.data;
+          }
+        }
+        var pending = rows.filter(function (x) { return x.status === 'pending'; });
+        var other = rows.filter(function (x) { return x.status !== 'pending'; });
+        function pubUrl(path) {
+          if (!path) return '';
+          var x = supabaseClient.storage.from('comprobantes-ferriol').getPublicUrl(path);
+          return x && x.data && x.data.publicUrl ? x.data.publicUrl : '';
+        }
+        var htmlPend = pending.map(function (row) {
+          var img = pubUrl(row.comprobante_path);
+          var pName = superSolicitudNameOf(pool, row.partner_id);
+          return (
+            '<div class="rounded-xl border border-white/15 bg-black/30 p-3 space-y-2">' +
+            '<div class="flex flex-wrap gap-2 justify-between text-xs text-white/55"><span>' + String(row.created_at).slice(0, 19).replace('T', ' ') + '</span><span>Admin: ' + escHtmlCsr(pName) + '</span></div>' +
+            '<p class="text-sm text-white/90"><strong>Cliente:</strong> ' + escHtmlCsr(row.client_name) + '</p>' +
+            '<p class="text-sm text-white/80"><strong>Email:</strong> ' + escHtmlCsr(row.client_email) + '</p>' +
+            '<p class="text-xs text-white/55">Tipo: ' + escHtmlCsr(ferriolIngresosPaymentTypeLabel(row.payment_type)) + (row.period_month ? ' · Mes: ' + String(row.period_month).slice(0, 7) : '') + '</p>' +
+            '<div class="flex flex-wrap items-center gap-2"><span class="text-xs text-white/50">Monto ARS</span>' +
+            '<input type="number" id="csr-amount-' + row.id + '" class="glass rounded-lg px-2 py-1 border border-white/20 text-white text-sm w-36" value="' + String(Number(row.amount_ars) || 0) + '"></div>' +
+            (img
+              ? '<a href="' + escHtmlCsr(img) + '" target="_blank" rel="noopener" class="block touch-target"><img src="' + escHtmlCsr(img) + '" alt="Comprobante" class="max-h-48 w-auto max-w-full rounded-lg border border-white/20 object-contain bg-black/20"></a>'
+              : '<p class="text-amber-200 text-xs">No se pudo generar enlace a la imagen. Revisá el bucket y políticas de Storage.</p>') +
+            '<div class="flex flex-wrap gap-2 pt-1">' +
+            '<button type="button" data-csr-approve="' + row.id + '" class="btn-glow rounded-xl py-2 px-3 text-xs font-semibold">Aprobar y acreditar comisión</button>' +
+            '<button type="button" data-csr-reject="' + row.id + '" class="rounded-xl py-2 px-3 text-xs font-semibold border border-red-400/50 text-red-200">Rechazar</button></div></div>'
+          );
+        }).join('');
+        var htmlHist = other.length
+          ? '<h4 class="text-xs font-medium text-white/40 mt-4 mb-2">Historial reciente</h4><div class="text-xs text-white/50 space-y-1.5 max-h-40 overflow-y-auto pr-1">' + other.slice(0, 12).map(function (row) {
+            return (
+              '<p class="border-b border-white/5 pb-1">' + String(row.created_at).slice(0, 10) + ' · ' + escHtmlCsr(row.client_email) + ' · <span class="text-white/70">' + row.status + '</span>' +
+              (row.ferriol_payment_id ? ' · pago' : '') + '</p>'
+            );
+          }).join('') + '</div>'
+          : '';
+        if (!rows.length) {
+          clBox.innerHTML = '<p class="text-white/50 text-sm py-4">Ninguna solicitud con comprobante. Los administradores de red envían desde <strong class="text-white/75">Afiliados</strong> → <strong class="text-white/75">Enviar venta con comprobante</strong>.</p>';
+        } else {
+          clBox.innerHTML = (htmlPend || '<p class="text-amber-200/90 text-sm py-2">Nada pendiente de validar en este listado.</p>') + htmlHist;
+        }
+      } catch (e) {
+        clBox.innerHTML = '<p class="text-red-300 text-sm">Error al cargar comprobantes. ¿Ejecutaste <code class="text-white/80">supabase-ferriol-client-sale-requests.sql</code>? ' + escHtmlCsr(String(e.message || e)) + '</p>';
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    window._ferriolExecCsrApprove = async function (id, approves, rejectNote, amountOverride) {
+      if (!supabaseClient || !isEmpresaLensSuper() || !id) return;
+      if (!window.confirm(approves ? '¿Aprobar esta venta, verificar pago y acreditar comisiones (libro + Ingresos del socio)?' : '¿Rechazar esta solicitud?')) return;
+      var msgEl = document.getElementById('superClientSaleRequestsMsg');
+      if (msgEl) { msgEl.classList.add('hidden'); msgEl.textContent = ''; }
+      try {
+        var rpc = await supabaseClient.rpc('ferriol_approve_client_sale_request', {
+          p_request_id: id,
+          p_approve: approves,
+          p_reject_note: approves ? null : (rejectNote != null && rejectNote !== '' ? rejectNote : null),
+          p_amount_override: approves && amountOverride != null && !isNaN(amountOverride) ? amountOverride : null
+        });
+        if (rpc.error) throw rpc.error;
+        var out = rpc.data;
+        if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+        if (!out || out.ok !== true) {
+          alert((out && out.error) ? out.error : 'No se pudo completar la operación.');
+          return;
+        }
+        if (msgEl) {
+          msgEl.textContent = approves ? 'Aprobado. Pago verificado y comisiones acreditadas.' : 'Solicitud rechazada.';
+          msgEl.classList.remove('hidden');
+        }
+        await loadFounderClientSaleRequestsPanel();
+        if (state.superSection === 'cobros') await renderSuperCobrosSection();
+      } catch (e) {
+        alert('Error: ' + (e && e.message ? e.message : e));
+      }
+    };
+    (function setupFounderClientSaleDelegation() {
+      var box = document.getElementById('superClientSaleRequestsBox');
+      if (!box) return;
+      box.addEventListener('click', function (e) {
+        var a = e.target && e.target.closest && e.target.closest('[data-csr-approve]');
+        if (a) {
+          e.preventDefault();
+          var id = a.getAttribute('data-csr-approve');
+          var inp = id ? document.getElementById('csr-amount-' + id) : null;
+          var raw = inp ? String(inp.value || '').replace(/\./g, '').replace(',', '.') : '';
+          var amt = parseFloat(raw, 10);
+          if (isNaN(amt) || amt <= 0) {
+            alert('Ingresá un monto ARS válido en el recuadro.');
+            return;
+          }
+          void window._ferriolExecCsrApprove(id, true, null, amt);
+          return;
+        }
+        var rj = e.target && e.target.closest && e.target.closest('[data-csr-reject]');
+        if (rj) {
+          e.preventDefault();
+          var id2 = rj.getAttribute('data-csr-reject');
+          var n = (typeof window.prompt === 'function') ? window.prompt('Motivo de rechazo (opcional):', '') : '';
+          void window._ferriolExecCsrApprove(id2, false, n || null, null);
+        }
+      });
+    })();
     async function loadSuperSolicitudesSection() {
       var elP = document.getElementById('superSolicitudesPendientes');
       var elA = document.getElementById('superSolicitudesAprobadas');
       var elR = document.getElementById('superSolicitudesRechazadas');
+      var clBox = document.getElementById('superClientSaleRequestsList');
+      var clWrap = document.getElementById('superClientSaleRequestsBox');
       if (!elP || !elA || !elR) return;
-      if (!supabaseClient || !currentUser || !isEmpresaLensSuper()) {
+      if (!supabaseClient || !currentUser) {
+        elP.innerHTML = elA.innerHTML = elR.innerHTML = '';
+        if (clBox) clBox.innerHTML = '';
+        if (clWrap) clWrap.classList.add('hidden');
+        return;
+      }
+      if (isEmpresaLensSuper() && clWrap) {
+        clWrap.classList.remove('hidden');
+        await loadFounderClientSaleRequestsPanel();
+      } else {
+        if (clBox) clBox.innerHTML = '';
+        if (clWrap) clWrap.classList.add('hidden');
+      }
+      if (!isEmpresaLensSuper()) {
         elP.innerHTML = elA.innerHTML = elR.innerHTML = '';
         return;
       }
@@ -2605,6 +2743,8 @@
       if (pal) { pal.classList.add('hidden'); pal.classList.remove('flex'); }
       var pti = document.getElementById('partnerTransferInfoModal');
       if (pti) { pti.classList.add('hidden'); pti.classList.remove('flex'); }
+      var csrM = document.getElementById('clientSaleRequestModal');
+      if (csrM) { csrM.classList.add('hidden'); csrM.classList.remove('flex'); }
       var sud = document.getElementById('superUserDetailModal');
       if (sud) { sud.classList.add('hidden'); sud.classList.remove('flex'); }
       if (typeof window._cerrarModalLibreta === 'function') {
@@ -2721,6 +2861,8 @@
       } catch (_) {}
       var provWrap = document.querySelector('.ferriol-partner-provision-btn-wrap');
       if (provWrap) provWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper()));
+      var clientSaleWrap = document.querySelector('.ferriol-partner-client-sale-wrap');
+      if (clientSaleWrap) clientSaleWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper()));
       var affWrap = document.querySelector('.ferriol-partner-affiliate-links-wrap');
       if (affWrap) affWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper()));
       var ingNav = document.getElementById('navSuperIngresosBtn');
@@ -6374,6 +6516,28 @@ async function showApp() {
       m.classList.add('hidden');
       m.classList.remove('flex');
     }
+    function openClientSaleRequestModal() {
+      var m = document.getElementById('clientSaleRequestModal');
+      if (!m) return;
+      var err = document.getElementById('clientSaleRequestErr');
+      if (err) { err.classList.add('hidden'); err.textContent = ''; }
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+      syncClientSaleVendorMonthVisibility();
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    function closeClientSaleRequestModal() {
+      var m = document.getElementById('clientSaleRequestModal');
+      if (!m) return;
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+    function syncClientSaleVendorMonthVisibility() {
+      var sel = document.getElementById('clientSalePaymentType');
+      var w = document.getElementById('clientSaleVendorMonthWrap');
+      if (!sel || !w) return;
+      w.classList.toggle('hidden', sel.value !== 'vendor_mantenimiento');
+    }
     function openPartnerProvisionCompleteModal(token, email) {
       var m = document.getElementById('partnerProvisionCompleteModal');
       if (!m) return;
@@ -7442,6 +7606,102 @@ async function showApp() {
     if (btnAffDone) btnAffDone.onclick = closePartnerAffiliateLinksModal;
     var btnAffOv = document.getElementById('partnerAffiliateLinksModalOverlay');
     if (btnAffOv) btnAffOv.onclick = closePartnerAffiliateLinksModal;
+    var btnOpenClientSale = document.getElementById('btnOpenClientSaleRequestModal');
+    if (btnOpenClientSale) btnOpenClientSale.onclick = function () { openClientSaleRequestModal(); };
+    var clientSaleClose = document.getElementById('clientSaleRequestModalClose');
+    if (clientSaleClose) clientSaleClose.onclick = closeClientSaleRequestModal;
+    var clientSaleOv = document.getElementById('clientSaleRequestModalOverlay');
+    if (clientSaleOv) clientSaleOv.onclick = closeClientSaleRequestModal;
+    var clientSaleType = document.getElementById('clientSalePaymentType');
+    if (clientSaleType) clientSaleType.addEventListener('change', syncClientSaleVendorMonthVisibility);
+    var btnFounderGotoCsr = document.getElementById('btnFounderGotoSolicitudesComprobantes');
+    if (btnFounderGotoCsr) {
+      btnFounderGotoCsr.onclick = function () {
+        switchSuperSection('solicitudes');
+        setTimeout(function () {
+          var el = document.getElementById('superClientSaleRequestsBox');
+          if (el) {
+            try { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) { el.scrollIntoView(true); }
+          }
+        }, 250);
+      };
+    }
+    var clientSaleSubmit = document.getElementById('clientSaleRequestSubmit');
+    if (clientSaleSubmit) {
+      clientSaleSubmit.onclick = async function () {
+        var err = document.getElementById('clientSaleRequestErr');
+        if (err) { err.classList.add('hidden'); err.textContent = ''; }
+        if (!supabaseClient || !currentUser) return;
+        if (!isPartnerLens() || isEmpresaLensSuper()) return;
+        var nm = (document.getElementById('clientSaleClientName') && document.getElementById('clientSaleClientName').value || '').trim();
+        var email = (document.getElementById('clientSaleClientEmail') && document.getElementById('clientSaleClientEmail').value || '').trim().toLowerCase();
+        var ptype = (document.getElementById('clientSalePaymentType') && document.getElementById('clientSalePaymentType').value) || 'kiosco_licencia';
+        var amt = parseFloat(String((document.getElementById('clientSaleAmount') && document.getElementById('clientSaleAmount').value) || '').replace(/\./g, '').replace(',', '.'), 10);
+        var fileIn = document.getElementById('clientSaleComprobante');
+        var file = fileIn && fileIn.files && fileIn.files[0];
+        if (!nm || nm.length < 2) {
+          if (err) { err.textContent = 'Completá el nombre del cliente.'; err.classList.remove('hidden'); }
+          return;
+        }
+        if (!email || email.indexOf('@') < 1) {
+          if (err) { err.textContent = 'Email válido obligatorio.'; err.classList.remove('hidden'); }
+          return;
+        }
+        if (isNaN(amt) || amt <= 0) {
+          if (err) { err.textContent = 'Indicá el monto en ARS.'; err.classList.remove('hidden'); }
+          return;
+        }
+        if (!file) {
+          if (err) { err.textContent = 'Adjuntá la imagen del comprobante.'; err.classList.remove('hidden'); }
+          return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          if (err) { err.textContent = 'La imagen supera 5 MB. Elegí un archivo más liviano.'; err.classList.remove('hidden'); }
+          return;
+        }
+        var payerId = await ferriolResolveProfileIdByEmail(email);
+        if (!payerId) {
+          if (err) { err.textContent = 'No hay usuario con ese email. El cliente debe registrarse en Ferriol primero (mismo email).'; err.classList.remove('hidden'); }
+          return;
+        }
+        var periodMonth = null;
+        if (ptype === 'vendor_mantenimiento') {
+          var mval = (document.getElementById('clientSaleVendorMonth') && document.getElementById('clientSaleVendorMonth').value) || '';
+          periodMonth = ferriolMonthInputToPeriodDate(mval);
+          if (!periodMonth) {
+            if (err) { err.textContent = 'Elegí el mes de la cuota (mantenimiento vendedor).'; err.classList.remove('hidden'); }
+            return;
+          }
+        }
+        var reqId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + '-csr';
+        var ext = (file.name && file.name.lastIndexOf('.') > 0) ? file.name.slice(file.name.lastIndexOf('.')).toLowerCase() : '.jpg';
+        if (ext.length > 6) ext = '.jpg';
+        var path = currentUser.id + '/' + reqId + '/comprobante' + ext;
+        var up = await supabaseClient.storage.from('comprobantes-ferriol').upload(path, file, { contentType: file.type || 'image/jpeg', upsert: false });
+        if (up.error) {
+          if (err) { err.textContent = 'No se pudo subir el archivo. ¿Ejecutaste el SQL del bucket? ' + (up.error.message || ''); err.classList.remove('hidden'); }
+          return;
+        }
+        var ins = await supabaseClient.from('ferriol_client_sale_requests').insert({
+          id: reqId,
+          partner_id: currentUser.id,
+          client_name: nm,
+          client_email: email,
+          comprobante_path: path,
+          amount_ars: amt,
+          payment_type: ptype,
+          period_month: periodMonth
+        });
+        if (ins.error) {
+          try { await supabaseClient.storage.from('comprobantes-ferriol').remove([path]); } catch (_) {}
+          if (err) { err.textContent = ins.error.message + ' · Revisá supabase-ferriol-client-sale-requests.sql'; err.classList.remove('hidden'); }
+          return;
+        }
+        closeClientSaleRequestModal();
+        if (fileIn) fileIn.value = '';
+        alert('Enviado. La empresa lo revisa en Solicitudes. Cuando apruebe, verás la comisión en Ingresos y Balance.');
+      };
+    }
     var btnOpenProv = document.getElementById('btnOpenPartnerProvisionModal');
     if (btnOpenProv) btnOpenProv.onclick = function () { openPartnerProvisionRequestModal(); };
     var provReqClose = document.getElementById('partnerProvisionRequestModalClose');
