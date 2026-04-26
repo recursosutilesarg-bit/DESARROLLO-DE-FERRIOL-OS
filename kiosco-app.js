@@ -6027,6 +6027,14 @@ async function showApp() {
       const text = d + 'd ' + h + 'h ' + m + 'm ' + s + 's';
       return { text, d, h, m, s, expired: false };
     }
+    /** true solo si hay fecha de fin válida y ya pasó (no cuenta perfiles sin trial_ends_at). */
+    function isProfileMembershipDateExpired(u) {
+      var raw = u && u.trial_ends_at;
+      if (!raw) return false;
+      var end = new Date(raw);
+      if (isNaN(end.getTime())) return false;
+      return end.getTime() <= Date.now();
+    }
     var superDetailCountdownInterval = null;
     var superListCountdownInterval = null;
     function updateSuperListCountdowns() {
@@ -6971,6 +6979,7 @@ async function showApp() {
       }
       if (superFilterState === 'activos') list = list.filter(u => u.active);
       else if (superFilterState === 'inactivos') list = list.filter(u => !u.active);
+      else if (superFilterState === 'vencida') list = list.filter(function (u) { return isProfileMembershipDateExpired(u); });
       else if (superFilterState === 'sin_referidor') list = list.filter(function (u) { return !u.sponsor_id; });
       superUserListCache = list.slice();
       var statsEl = document.getElementById('superDirectoryStats');
@@ -7003,7 +7012,7 @@ async function showApp() {
       if (displayList.length === 0 && (isEmpresaLensSuper() || isPartnerLens())) {
         var msg;
         if (list.length === 0) {
-          msg = searchTerm ? 'Ningún perfil coincide con la búsqueda.' : (isPartnerLens() ? 'No hay afiliados en tu red todavía.' : (superFilterState === 'sin_referidor' ? 'No hay integrantes sin referidor. Todo el mundo tiene admin/referidor asignado.' : superFilterState === 'activos' ? 'No hay perfiles activos con estos filtros.' : superFilterState === 'inactivos' ? 'No hay perfiles inactivos con estos filtros.' : 'No hay otros perfiles. Agregá uno con los botones de arriba.'));
+          msg = searchTerm ? 'Ningún perfil coincide con la búsqueda.' : (isPartnerLens() ? (superFilterState === 'vencida' ? 'Nadie en tu red tiene la fecha de membresía vencida con estos filtros.' : 'No hay afiliados en tu red todavía.') : (superFilterState === 'sin_referidor' ? 'No hay integrantes sin referidor. Todo el mundo tiene admin/referidor asignado.' : superFilterState === 'activos' ? 'No hay perfiles activos con estos filtros.' : superFilterState === 'inactivos' ? 'No hay perfiles inactivos con estos filtros.' : superFilterState === 'vencida' ? 'No hay perfiles con membresía vencida (fecha de fin ya pasada) con estos filtros.' : 'No hay otros perfiles. Agregá uno con los botones de arriba.'));
         } else {
           msg = searchTerm ? 'Ningún ' + (state.afiliadosSubTab === 'distribuidores' ? 'distribuidor' : 'usuario (kiosco)') + ' coincide con la búsqueda.' : (state.afiliadosSubTab === 'distribuidores' ? 'No hay distribuidores en esta vista. Probá la pestaña Usuarios o relajá los filtros.' : 'No hay usuarios (kioscos) en esta vista. Probá Distribuidores o relajá los filtros.');
         }
@@ -7029,6 +7038,7 @@ async function showApp() {
       var list = superUserListCache.slice();
       if (superFilterState === 'activos') list = list.filter(function (u) { return u.active; });
       else if (superFilterState === 'inactivos') list = list.filter(function (u) { return !u.active; });
+      else if (superFilterState === 'vencida') list = list.filter(function (u) { return isProfileMembershipDateExpired(u); });
       else if (superFilterState === 'sin_referidor') list = list.filter(function (u) { return !u.sponsor_id; });
       if (searchTerm) list = list.filter(function (u) {
         var email = (u.email || '').toLowerCase();
@@ -7307,7 +7317,7 @@ async function showApp() {
         document.querySelectorAll('.super-filter-btn').forEach(function (b) {
           var active = b.dataset.filter === superFilterState;
           var mm = b.classList.contains('super-main-only') ? ' super-only super-main-only' : '';
-          var visual = active ? 'border-[#dc2626]/50 bg-[#dc2626]/30' : (b.dataset.filter === 'sin_referidor' ? 'border-amber-500/40 glass' : 'border-white/20 glass');
+          var visual = active ? 'border-[#dc2626]/50 bg-[#dc2626]/30' : (b.dataset.filter === 'sin_referidor' ? 'border-amber-500/40 glass' : b.dataset.filter === 'vencida' ? 'border-red-500/40 glass' : 'border-white/20 glass');
           b.className = 'super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border touch-target' + mm + ' ' + visual;
         });
         renderSuper();
