@@ -2482,3 +2482,99 @@ select.ferriol-native-select option:active {
   .flujo-title { font-size: 0.75rem; }
   .flujo-desc  { font-size: 0.65rem; }
 }
+
+/* ══════════════════════════════════════════════════════
+   NOTAS DEL SISTEMA
+   ══════════════════════════════════════════════════════ */
+.notas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.notas-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 1rem;
+  text-align: center;
+}
+
+.nota-card {
+  border-radius: 0.875rem;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.04);
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.nota-card:focus-within {
+  border-color: rgba(34,197,94,.35);
+  box-shadow: 0 0 0 2px rgba(34,197,94,.1);
+}
+
+.nota-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0.65rem 0.35rem;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  background: rgba(255,255,255,.03);
+}
+.nota-ts {
+  font-size: 0.6rem;
+  color: rgba(255,255,255,.3);
+  font-variant-numeric: tabular-nums;
+}
+.nota-del-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  color: rgba(255,255,255,.25);
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.nota-del-btn:hover {
+  color: rgba(248,113,113,.8);
+  background: rgba(239,68,68,.1);
+  border-color: rgba(239,68,68,.25);
+}
+
+.nota-body {
+  width: 100%;
+  min-height: 7rem;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: rgba(255,255,255,.82);
+  background: transparent;
+  outline: none;
+  white-space: pre-wrap;
+  word-break: break-word;
+  cursor: text;
+  caret-color: #86efac;
+  font-family: inherit;
+}
+.nota-body:empty::before {
+  content: 'Escribí tu nota aquí...';
+  color: rgba(255,255,255,.2);
+  pointer-events: none;
+}
+
+.nota-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0.25rem 0.65rem 0.35rem;
+  border-top: 1px solid rgba(255,255,255,.05);
+}
+.nota-chars {
+  font-size: 0.58rem;
+  color: rgba(255,255,255,.2);
+  font-variant-numeric: tabular-nums;
+}
