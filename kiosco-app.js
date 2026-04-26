@@ -5613,6 +5613,19 @@ async function showApp() {
       document.getElementById('loginScreen').classList.remove('hidden');
       document.getElementById('loginPassword').value = '';
     }
+    function ferriolReloadAppForUpdate() {
+      var reload = function () { window.location.reload(); };
+      if (!('serviceWorker' in navigator)) {
+        reload();
+        return;
+      }
+      navigator.serviceWorker.getRegistration().then(function (reg) {
+        if (reg) return reg.update();
+      }).catch(function () {}).then(reload, reload);
+    }
+    var appReloadBtn = document.getElementById('appReloadBtn');
+    if (appReloadBtn) appReloadBtn.onclick = function () { ferriolReloadAppForUpdate(); };
+
     document.getElementById('logoutBtn').onclick = doLogout;
     var logoutConfigEl = document.getElementById('logoutBtnConfig');
     if (logoutConfigEl) logoutConfigEl.onclick = doLogout;
