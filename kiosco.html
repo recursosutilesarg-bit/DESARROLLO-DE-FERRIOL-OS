@@ -235,9 +235,9 @@
           <i data-lucide="trending-up" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Ingresos</span>
         </button>
-        <button data-super-section="cobros" class="super-nav-btn super-only super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Cobros y comisiones (solo administrador)">
-          <i data-lucide="banknote" class="w-5 h-5 shrink-0"></i>
-          <span class="truncate w-full text-center">Cobros</span>
+        <button data-super-section="sistema" class="super-nav-btn super-only super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Tablero del sistema MLM y cobros">
+          <i data-lucide="git-fork" class="w-5 h-5 shrink-0"></i>
+          <span class="truncate w-full text-center">Sistema</span>
         </button>
         <button data-super-section="solicitudes" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Solicitudes">
           <i data-lucide="clipboard-list" class="w-5 h-5 shrink-0"></i>
@@ -1229,65 +1229,391 @@
             <p class="text-white/45 text-xs py-5 text-center px-2">Cargando…</p>
           </div>
         </div>
-        <!-- Sección Cobros (solo super): transferencias + verificar → mlm_ledger -->
-        <!-- Sin super-only en el contenedor: si no, applyAppShell oculta la sección para socios y pisa display:block de switchSuperSection -->
-        <div id="super-section-cobros" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 z-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
-          <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
-            <i data-lucide="banknote" class="w-5 h-5 text-[#86efac]"></i>
-            Cobros (transferencia)
-          </h2>
-          <p class="text-xs text-white/50 mb-4">Registrá transferencias y verificá para generar movimientos en el libro. Venta <strong class="text-white/75">definitiva de kiosco</strong>: desde el detalle del negocio. Referencia SQL: <code class="text-[#86efac]">supabase-ferriol-kiosco-definitive-trial.sql</code>.</p>
-          <div id="ferriolCompanyReceivableBox" class="rounded-xl border border-cyan-500/35 bg-cyan-500/10 p-4 mb-4 text-sm">
-            <h3 class="font-semibold text-cyan-100 mb-1 flex items-center gap-2"><i data-lucide="building-2" class="w-4 h-4"></i> Empresa · saldos automáticos (pendientes)</h3>
-            <p id="ferriolCompanyReceivableText" class="text-xs text-white/70">—</p>
-            <p id="ferriolPartnersPayableText" class="text-xs text-amber-100/90 mt-2">—</p>
-            <p class="text-xs text-white/45 mt-2">Los cargos mensuales (licencia kiosco 20/80 y cuota socios según plan) se generan el <strong class="text-white/60">día 1</strong> si tenés <code class="text-cyan-200/80">pg_cron</code> en Supabase. Ejecutá antes <code class="text-cyan-200/80">supabase-ferriol-monthly-auto.sql</code>.</p>
-            <button type="button" id="ferriolBtnRunMonthlyAccrual" class="mt-2 btn-neomorphic rounded-xl py-2 px-3 text-xs font-semibold touch-target">Generar cargos del mes (manual)</button>
+        <!-- ══════════════════════════════════════════════════════
+             SECCIÓN SISTEMA: Tablero visual MLM + Cobros (solo fundador)
+             ══════════════════════════════════════════════════════ -->
+        <div id="super-section-sistema" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-5 slide-up hidden absolute inset-x-0 top-0 z-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+
+          <!-- Encabezado -->
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-5">
+            <div>
+              <h2 class="font-bold text-xl flex items-center gap-2">
+                <i data-lucide="git-fork" class="w-5 h-5 text-[#86efac]"></i>
+                Tablero del Sistema
+              </h2>
+              <p class="text-xs text-white/45 mt-0.5">Red Ferriol OS · estructura, flujo de dinero y comisiones</p>
+            </div>
+            <span class="text-[10px] font-semibold uppercase tracking-widest text-[#86efac]/60 bg-[#22c55e]/10 border border-[#22c55e]/25 rounded-lg px-2.5 py-1 self-start sm:self-auto">Solo fundador</span>
           </div>
-          <details class="rounded-xl border border-violet-500/30 bg-violet-500/08 mb-4 text-sm group super-cobros-details">
-            <summary class="p-4 cursor-pointer list-none flex items-center justify-between gap-2 touch-target font-semibold text-violet-100">
-              <span class="flex items-center gap-2 min-w-0"><i data-lucide="sparkles" class="w-4 h-4 shrink-0"></i> Simulación y datos de prueba</span>
-              <i data-lucide="chevron-down" class="w-4 h-4 shrink-0 opacity-70 transition-transform group-open:rotate-180"></i>
-            </summary>
-            <div class="px-4 pb-4 pt-0 border-t border-white/10 space-y-3">
-              <p class="text-xs text-white/65">Tres movimientos de prueba (empresa + beneficiario admin). Idempotente. Kiosqueros no ven el libro.</p>
-              <div class="flex flex-wrap gap-2">
-                <button type="button" id="ferriolBtnDemoSeed" class="btn-neomorphic rounded-xl py-2 px-3 text-xs font-semibold touch-target">Insertar 3 movimientos demo</button>
-                <button type="button" id="ferriolBtnDemoClear" class="rounded-xl py-2 px-3 text-xs font-semibold touch-target border border-red-400/40 bg-red-500/15 text-red-200 hover:bg-red-500/25">Quitar movimientos demo</button>
+
+          <!-- ── 1. ORGANIGRAMA ───────────────────────────────── -->
+          <div class="mlm-board mb-5">
+            <p class="mlm-board-label">Estructura de la red</p>
+
+            <!-- Nivel 0: Ferriol (fundador) -->
+            <div class="mlm-level">
+              <div class="mlm-node mlm-node--founder">
+                <div class="mlm-node-icon"><i data-lucide="crown" class="w-5 h-5"></i></div>
+                <div class="mlm-node-body">
+                  <span class="mlm-node-role">Fundador / Empresa</span>
+                  <span class="mlm-node-name">Ferriol OS <code class="mlm-code">role: super</code></span>
+                  <span class="mlm-node-desc">Aprueba solicitudes · configura comisiones · gestiona la red completa</span>
+                </div>
+                <div class="mlm-badge mlm-badge--violet">Supabase: <code>super</code></div>
               </div>
-              <p class="text-[10px] text-white/40">SQL: <code class="text-violet-200/80">supabase-ferriol-demo-seed.sql</code> · claves <code class="text-violet-200/80">ferriol:demo:seed:*</code></p>
+            </div>
+
+            <!-- Flecha -->
+            <div class="mlm-arrow-wrap">
+              <div class="mlm-arrow-line"></div>
+              <span class="mlm-arrow-label">Alta aprobada por Ferriol · kit inicial pagado</span>
+              <div class="mlm-arrow-head"></div>
+            </div>
+
+            <!-- Nivel 1: Admin de red (partner) -->
+            <div class="mlm-level">
+              <div class="mlm-node mlm-node--partner">
+                <div class="mlm-node-icon"><i data-lucide="briefcase" class="w-5 h-5"></i></div>
+                <div class="mlm-node-body">
+                  <span class="mlm-node-role">Administrador de Red</span>
+                  <span class="mlm-node-name">Socio / Distribuidor digital <code class="mlm-code">role: partner</code></span>
+                  <span class="mlm-node-desc">Vende licencias · gestiona sus referidos · recibe comisiones en Ingresos</span>
+                </div>
+                <div class="mlm-badge mlm-badge--amber">Supabase: <code>partner</code></div>
+              </div>
+            </div>
+
+            <!-- Flecha -->
+            <div class="mlm-arrow-wrap">
+              <div class="mlm-arrow-line"></div>
+              <span class="mlm-arrow-label">Alta vía link de referido · período de prueba</span>
+              <div class="mlm-arrow-head"></div>
+            </div>
+
+            <!-- Nivel 2: Kiosquero -->
+            <div class="mlm-level">
+              <div class="mlm-node mlm-node--kiosco">
+                <div class="mlm-node-icon"><i data-lucide="store" class="w-5 h-5"></i></div>
+                <div class="mlm-node-body">
+                  <span class="mlm-node-role">Negocio (Kiosco)</span>
+                  <span class="mlm-node-name">Kiosquero <code class="mlm-code">role: kiosquero</code></span>
+                  <span class="mlm-node-desc">Usa el sistema en el local · paga licencia mensual · gestiona productos, caja y deudores</span>
+                </div>
+                <div class="mlm-badge mlm-badge--green">Supabase: <code>kiosquero</code></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── 2. FLUJO DE DINERO ──────────────────────────── -->
+          <div class="mlm-board mb-5">
+            <p class="mlm-board-label"><i data-lucide="arrow-right-left" class="w-3.5 h-3.5 inline mr-1 -mt-0.5"></i>Flujo de dinero</p>
+
+            <!-- Kit inicial -->
+            <div class="mlm-flow-block mlm-flow-block--violet mb-3">
+              <div class="mlm-flow-header">
+                <span class="mlm-flow-tag mlm-flow-tag--violet"><i data-lucide="package" class="w-3 h-3 inline mr-0.5"></i>Kit inicial vendedor</span>
+                <span class="mlm-flow-amount">$ 60.000</span>
+              </div>
+              <div class="mlm-flow-split">
+                <div class="mlm-flow-part mlm-flow-part--green">
+                  <span class="mlm-flow-pct">80 %</span>
+                  <span class="mlm-flow-to">→ Admin de red <small>(período intro, 1er mes)</small></span>
+                </div>
+                <div class="mlm-flow-part mlm-flow-part--cyan">
+                  <span class="mlm-flow-pct">50 %</span>
+                  <span class="mlm-flow-to">→ Admin de red <small>(comisión normal desde mes 2)</small></span>
+                </div>
+                <div class="mlm-flow-part mlm-flow-part--founder">
+                  <span class="mlm-flow-pct">20–50 %</span>
+                  <span class="mlm-flow-to">→ Ferriol (reserva empresa)</span>
+                </div>
+              </div>
+              <p class="mlm-flow-note">El admin recibe el cobro del cliente y transfiere el 20% a Ferriol (o el split configurado). Ferriol verifica y acredita la comisión en el libro MLM.</p>
+            </div>
+
+            <!-- Licencia kiosco -->
+            <div class="mlm-flow-block mlm-flow-block--green mb-3">
+              <div class="mlm-flow-header">
+                <span class="mlm-flow-tag mlm-flow-tag--green"><i data-lucide="calendar-check" class="w-3 h-3 inline mr-0.5"></i>Licencia kiosco (mensual)</span>
+                <span class="mlm-flow-amount">$ 9.900 / mes</span>
+              </div>
+              <div class="mlm-flow-split">
+                <div class="mlm-flow-part mlm-flow-part--green">
+                  <span class="mlm-flow-pct">80 %</span>
+                  <span class="mlm-flow-to">→ Admin de red <small>(intro, mes 1)</small></span>
+                </div>
+                <div class="mlm-flow-part mlm-flow-part--cyan">
+                  <span class="mlm-flow-pct">50 %</span>
+                  <span class="mlm-flow-to">→ Admin de red <small>(normal, mes 2+)</small></span>
+                </div>
+                <div class="mlm-flow-part mlm-flow-part--founder">
+                  <span class="mlm-flow-pct">20 %</span>
+                  <span class="mlm-flow-to">→ Ferriol (siempre)</span>
+                </div>
+              </div>
+              <p class="mlm-flow-note">El kiosco paga al admin. El admin transfiere el 20% a Ferriol. Ferriol aprueba la solicitud y suma los días al contador del kiosco.</p>
+            </div>
+
+            <!-- Cuota mantenimiento -->
+            <div class="mlm-flow-block mlm-flow-block--amber">
+              <div class="mlm-flow-header">
+                <span class="mlm-flow-tag mlm-flow-tag--amber"><i data-lucide="refresh-cw" class="w-3 h-3 inline mr-0.5"></i>Cuota mantenimiento admin (mensual)</span>
+                <span class="mlm-flow-amount">$ 20.000 / mes</span>
+              </div>
+              <div class="mlm-flow-split">
+                <div class="mlm-flow-part mlm-flow-part--founder" style="flex:1">
+                  <span class="mlm-flow-pct">100 %</span>
+                  <span class="mlm-flow-to">→ Ferriol (licencia de distribución)</span>
+                </div>
+              </div>
+              <p class="mlm-flow-note">El admin paga directamente a Ferriol para mantener activo su rol de distribuidor. Sin esta cuota puede pausarse la cuenta.</p>
+            </div>
+          </div>
+
+          <!-- ── 3. ACCESO A LA PLATAFORMA ──────────────────── -->
+          <div class="mlm-board mb-5">
+            <p class="mlm-board-label"><i data-lucide="key-round" class="w-3.5 h-3.5 inline mr-1 -mt-0.5"></i>Acceso a la plataforma</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+
+              <div class="mlm-access-card mlm-access-card--violet">
+                <div class="mlm-access-header">
+                  <i data-lucide="crown" class="w-4 h-4 text-violet-300 shrink-0"></i>
+                  <span class="font-semibold text-sm text-violet-100">Fundador</span>
+                </div>
+                <ul class="mlm-access-list">
+                  <li><i data-lucide="check" class="w-3 h-3 text-violet-300 shrink-0"></i>Todo el sistema</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-violet-300 shrink-0"></i>Vista empresa / negocio</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-violet-300 shrink-0"></i>Aprobación solicitudes</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-violet-300 shrink-0"></i>Libro MLM y cobros</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-violet-300 shrink-0"></i>Ajustes del sistema</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-violet-300 shrink-0"></i>Directorio completo</li>
+                </ul>
+                <span class="mlm-access-code">SQL: role = 'super'</span>
+              </div>
+
+              <div class="mlm-access-card mlm-access-card--amber">
+                <div class="mlm-access-header">
+                  <i data-lucide="briefcase" class="w-4 h-4 text-amber-300 shrink-0"></i>
+                  <span class="font-semibold text-sm text-amber-100">Admin de Red</span>
+                </div>
+                <ul class="mlm-access-list">
+                  <li><i data-lucide="check" class="w-3 h-3 text-amber-300 shrink-0"></i>Sus referidos (kioscos)</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-amber-300 shrink-0"></i>Ingresos / comisiones</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-amber-300 shrink-0"></i>Solicitar días de membresía</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-amber-300 shrink-0"></i>Links de afiliación</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-amber-300 shrink-0"></i>Solicitudes propias</li>
+                  <li><i data-lucide="minus" class="w-3 h-3 text-white/30 shrink-0"></i><span class="text-white/35">Libro global / cobros</span></li>
+                </ul>
+                <span class="mlm-access-code">SQL: role = 'partner'</span>
+              </div>
+
+              <div class="mlm-access-card mlm-access-card--green">
+                <div class="mlm-access-header">
+                  <i data-lucide="store" class="w-4 h-4 text-[#86efac] shrink-0"></i>
+                  <span class="font-semibold text-sm text-[#86efac]">Kiosco</span>
+                </div>
+                <ul class="mlm-access-list">
+                  <li><i data-lucide="check" class="w-3 h-3 text-[#86efac] shrink-0"></i>Productos y stock</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-[#86efac] shrink-0"></i>Caja del día</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-[#86efac] shrink-0"></i>Libreta de deudores</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-[#86efac] shrink-0"></i>Escáner de código</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-[#86efac] shrink-0"></i>Historial de ventas</li>
+                  <li><i data-lucide="minus" class="w-3 h-3 text-white/30 shrink-0"></i><span class="text-white/35">Sin panel de red</span></li>
+                </ul>
+                <span class="mlm-access-code">SQL: role = 'kiosquero'</span>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ── 4. PERÍODOS DE PRUEBA Y ESTADOS ────────────── -->
+          <div class="mlm-board mb-5">
+            <p class="mlm-board-label"><i data-lucide="timer" class="w-3.5 h-3.5 inline mr-1 -mt-0.5"></i>Período de prueba y estados de cuenta</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+              <div class="mlm-timeline">
+                <p class="mlm-timeline-title text-[#86efac]"><i data-lucide="store" class="w-3.5 h-3.5 inline mr-0.5"></i> Ciclo de vida del Kiosco</p>
+                <div class="mlm-timeline-steps">
+                  <div class="mlm-step mlm-step--active">
+                    <span class="mlm-step-dot mlm-step-dot--green"></span>
+                    <div><strong class="text-white/90">Alta vía solicitud</strong><br><span class="text-white/50">Admin inicia en Solicitudes → Ferriol aprueba</span></div>
+                  </div>
+                  <div class="mlm-step">
+                    <span class="mlm-step-dot mlm-step-dot--amber"></span>
+                    <div><strong class="text-white/80">Período de prueba</strong> <span class="text-amber-200/80 text-[10px]">15 días (configurable)</span><br><span class="text-white/50">Acceso completo · sin cobro activo · cuenta regresiva en pantalla</span></div>
+                  </div>
+                  <div class="mlm-step">
+                    <span class="mlm-step-dot mlm-step-dot--green"></span>
+                    <div><strong class="text-white/80">Licencia activa</strong><br><span class="text-white/50">Kiosco paga al admin · admin transfiere 20% · Ferriol aprueba y suma días</span></div>
+                  </div>
+                  <div class="mlm-step">
+                    <span class="mlm-step-dot mlm-step-dot--red"></span>
+                    <div><strong class="text-white/80">Cuenta vencida / inactiva</strong><br><span class="text-white/50">trial_ends_at en el pasado o active = false · kiosco ve aviso de renovación</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mlm-timeline">
+                <p class="mlm-timeline-title text-amber-200">
+                  <i data-lucide="briefcase" class="w-3.5 h-3.5 inline mr-0.5"></i> Ciclo de vida del Admin
+                </p>
+                <div class="mlm-timeline-steps">
+                  <div class="mlm-step mlm-step--active">
+                    <span class="mlm-step-dot mlm-step-dot--violet"></span>
+                    <div><strong class="text-white/90">Solicitud aprobada</strong><br><span class="text-white/50">Paga kit inicial · Ferriol aprueba alta de partner</span></div>
+                  </div>
+                  <div class="mlm-step">
+                    <span class="mlm-step-dot mlm-step-dot--amber"></span>
+                    <div><strong class="text-white/80">Período intro <span class="text-amber-200/80 text-[10px]">mes 1</span></strong><br><span class="text-white/50">Comisión 80% sobre kits y licencias vendidas</span></div>
+                  </div>
+                  <div class="mlm-step">
+                    <span class="mlm-step-dot mlm-step-dot--cyan"></span>
+                    <div><strong class="text-white/80">Comisión normal <span class="text-cyan-200/80 text-[10px]">mes 2+</span></strong><br><span class="text-white/50">Comisión 50% · paga cuota mantenimiento $20.000/mes a Ferriol</span></div>
+                  </div>
+                  <div class="mlm-step">
+                    <span class="mlm-step-dot mlm-step-dot--red"></span>
+                    <div><strong class="text-white/80">Mora / pausa</strong><br><span class="text-white/50">Sin cuota de mantenimiento · Ferriol puede pausar o dar de baja el rol</span></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ── 5. TABLA DE COMISIONES ─────────────────────── -->
+          <div class="mlm-board mb-5">
+            <p class="mlm-board-label"><i data-lucide="percent" class="w-3.5 h-3.5 inline mr-1 -mt-0.5"></i>Tabla de comisiones</p>
+            <div class="overflow-x-auto rounded-xl">
+              <table class="mlm-table">
+                <thead>
+                  <tr>
+                    <th>Concepto</th>
+                    <th>Monto bruto</th>
+                    <th>Admin (intro mes 1)</th>
+                    <th>Admin (normal mes 2+)</th>
+                    <th>Ferriol siempre</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="mlm-pill mlm-pill--violet">Kit inicial</span></td>
+                    <td class="tabular-nums font-semibold text-white/90">$ 60.000</td>
+                    <td class="tabular-nums text-[#86efac] font-bold">80% · $ 48.000</td>
+                    <td class="tabular-nums text-cyan-200">50% · $ 30.000</td>
+                    <td class="tabular-nums text-amber-200">20–50% · $ 12–30k</td>
+                  </tr>
+                  <tr>
+                    <td><span class="mlm-pill mlm-pill--green">Licencia kiosco/mes</span></td>
+                    <td class="tabular-nums font-semibold text-white/90">$ 9.900</td>
+                    <td class="tabular-nums text-[#86efac] font-bold">80% · $ 7.920</td>
+                    <td class="tabular-nums text-cyan-200">50% · $ 4.950</td>
+                    <td class="tabular-nums text-amber-200">20% · $ 1.980</td>
+                  </tr>
+                  <tr>
+                    <td><span class="mlm-pill mlm-pill--amber">Cuota admin/mes</span></td>
+                    <td class="tabular-nums font-semibold text-white/90">$ 20.000</td>
+                    <td colspan="2" class="text-center text-white/40 text-xs">No aplica</td>
+                    <td class="tabular-nums text-amber-200 font-bold">100% · $ 20.000</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="text-[10px] text-white/35 mt-2 px-0.5">* Los % intro/normal se configuran en Más → Ajustes → Comisiones. Los valores de la tabla usan los porcentajes activos del plan (<code class="text-white/50">mlm_plan_config</code>).</p>
+          </div>
+
+          <!-- ── 6. LEYENDA DE ESTADOS ────────────────────────── -->
+          <div class="mlm-board mb-5">
+            <p class="mlm-board-label"><i data-lucide="info" class="w-3.5 h-3.5 inline mr-1 -mt-0.5"></i>Leyenda de estados en la plataforma</p>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div class="mlm-legend-item">
+                <span class="mlm-step-dot mlm-step-dot--green mt-0.5 shrink-0"></span>
+                <div><strong class="text-[10px] text-white/80 block">Activo</strong><span class="text-[10px] text-white/45">active = true · trial vigente</span></div>
+              </div>
+              <div class="mlm-legend-item">
+                <span class="mlm-step-dot mlm-step-dot--amber mt-0.5 shrink-0"></span>
+                <div><strong class="text-[10px] text-white/80 block">Prueba</strong><span class="text-[10px] text-white/45">trial_ends_at futuro · sin pago</span></div>
+              </div>
+              <div class="mlm-legend-item">
+                <span class="mlm-step-dot mlm-step-dot--red mt-0.5 shrink-0"></span>
+                <div><strong class="text-[10px] text-white/80 block">Vencido</strong><span class="text-[10px] text-white/45">trial_ends_at pasado</span></div>
+              </div>
+              <div class="mlm-legend-item">
+                <span class="mlm-step-dot mlm-step-dot--gray mt-0.5 shrink-0"></span>
+                <div><strong class="text-[10px] text-white/80 block">Inactivo</strong><span class="text-[10px] text-white/45">active = false</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── 7. COBROS (colapsable) ─────────────────────── -->
+          <details class="mlm-board group" id="sistemaCobrosDetails">
+            <summary class="flex items-center justify-between gap-2 cursor-pointer touch-target list-none py-1 select-none">
+              <p class="mlm-board-label mb-0 flex items-center gap-1.5"><i data-lucide="banknote" class="w-3.5 h-3.5 inline"></i>Operaciones de cobro</p>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-white/40 transition-transform group-open:rotate-180 shrink-0"></i>
+            </summary>
+            <div class="mt-4 space-y-4">
+              <div id="ferriolCompanyReceivableBox2" class="rounded-xl border border-cyan-500/35 bg-cyan-500/10 p-4 text-sm">
+                <h3 class="font-semibold text-cyan-100 mb-1 flex items-center gap-2"><i data-lucide="building-2" class="w-4 h-4"></i> Empresa · saldos automáticos (pendientes)</h3>
+                <p id="ferriolCompanyReceivableText" class="text-xs text-white/70">—</p>
+                <p id="ferriolPartnersPayableText" class="text-xs text-amber-100/90 mt-2">—</p>
+                <p class="text-xs text-white/45 mt-2">Los cargos mensuales se generan el <strong class="text-white/60">día 1</strong> con <code class="text-cyan-200/80">pg_cron</code>. Ejecutá antes <code class="text-cyan-200/80">supabase-ferriol-monthly-auto.sql</code>.</p>
+                <button type="button" id="ferriolBtnRunMonthlyAccrual" class="mt-2 btn-neomorphic rounded-xl py-2 px-3 text-xs font-semibold touch-target">Generar cargos del mes (manual)</button>
+              </div>
+              <details class="rounded-xl border border-violet-500/30 bg-violet-500/08 text-sm group2 super-cobros-details">
+                <summary class="p-4 cursor-pointer list-none flex items-center justify-between gap-2 touch-target font-semibold text-violet-100">
+                  <span class="flex items-center gap-2 min-w-0"><i data-lucide="sparkles" class="w-4 h-4 shrink-0"></i> Simulación y datos de prueba</span>
+                  <i data-lucide="chevron-down" class="w-4 h-4 shrink-0 opacity-70 transition-transform group2-open:rotate-180"></i>
+                </summary>
+                <div class="px-4 pb-4 pt-0 border-t border-white/10 space-y-3">
+                  <p class="text-xs text-white/65">Tres movimientos de prueba (empresa + beneficiario admin). Idempotente.</p>
+                  <div class="flex flex-wrap gap-2">
+                    <button type="button" id="ferriolBtnDemoSeed" class="btn-neomorphic rounded-xl py-2 px-3 text-xs font-semibold touch-target">Insertar 3 movimientos demo</button>
+                    <button type="button" id="ferriolBtnDemoClear" class="rounded-xl py-2 px-3 text-xs font-semibold touch-target border border-red-400/40 bg-red-500/15 text-red-200 hover:bg-red-500/25">Quitar movimientos demo</button>
+                  </div>
+                  <p class="text-[10px] text-white/40">SQL: <code class="text-violet-200/80">supabase-ferriol-demo-seed.sql</code></p>
+                </div>
+              </details>
+              <div>
+                <h3 class="font-semibold text-sm mb-2 flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-cyan-200/90"></i> Libro · pendientes (vista admin)</h3>
+                <div id="ferriolLedgerPendingPreview" class="space-y-1 max-h-[36vh] overflow-y-auto text-xs mb-4 rounded-xl border border-white/10 bg-black/20 p-3"></div>
+              </div>
+              <div class="rounded-xl border border-white/15 bg-white/5 p-4 space-y-3">
+                <h3 class="font-semibold text-sm text-white/90">Nuevo cobro pendiente</h3>
+                <label class="block text-xs text-white/60">Tipo</label>
+                <select id="ferriolNewPayType" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm ferriol-native-select">
+                  <option value="kit_inicial">Kit vendedor ($ 60.000)</option>
+                  <option value="kiosco_licencia">Licencia kiosco — mes ($ 9.900)</option>
+                  <option value="vendor_mantenimiento">Cuota mantenimiento vendedor ($ 20.000)</option>
+                </select>
+                <label class="block text-xs text-white/60">Email de quien paga (perfil existente)</label>
+                <input type="email" id="ferriolNewPayPayerEmail" placeholder="socio@ejemplo.com" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
+                <label class="block text-xs text-white/60">Vendedor ejecutor (email) — obligatorio para kit y licencia kiosco</label>
+                <input type="email" id="ferriolNewPaySellerEmail" placeholder="vendedor@ejemplo.com" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
+                <label class="block text-xs text-white/60">Monto ARS</label>
+                <input type="number" id="ferriolNewPayAmount" min="1" step="1" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
+                <div id="ferriolNewPayPeriodWrap" class="hidden">
+                  <label class="block text-xs text-white/60">Mes de la cuota (mantenimiento vendedor)</label>
+                  <input type="month" id="ferriolNewPayPeriod" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
+                </div>
+                <label class="block text-xs text-white/60">Nota (opcional: Nº operación)</label>
+                <input type="text" id="ferriolNewPayNote" placeholder="Ej. transferencia 12/04" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
+                <p id="ferriolNewPayErr" class="text-xs text-red-300 hidden"></p>
+                <button type="button" id="ferriolBtnCreatePayment" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold touch-target w-full sm:w-auto">Registrar pendiente</button>
+              </div>
+              <div>
+                <h3 class="font-semibold text-sm mb-2">Pendientes de verificar</h3>
+                <div id="ferriolPaymentsPendingList" class="space-y-2 max-h-[40vh] overflow-y-auto text-sm mb-4"></div>
+                <h3 class="font-semibold text-sm mb-2">Últimos verificados</h3>
+                <div id="ferriolPaymentsVerifiedList" class="space-y-2 max-h-[30vh] overflow-y-auto text-xs text-white/80"></div>
+              </div>
             </div>
           </details>
-          <h3 class="font-semibold text-sm mb-2 flex items-center gap-2"><i data-lucide="list" class="w-4 h-4 text-cyan-200/90"></i> Libro · pendientes (vista admin)</h3>
-          <div id="ferriolLedgerPendingPreview" class="space-y-1 max-h-[36vh] overflow-y-auto text-xs mb-6 rounded-xl border border-white/10 bg-black/20 p-3"></div>
-          <div class="rounded-xl border border-white/15 bg-white/5 p-4 mb-4 space-y-3">
-            <h3 class="font-semibold text-sm text-white/90">Nuevo cobro pendiente</h3>
-            <label class="block text-xs text-white/60">Tipo</label>
-            <select id="ferriolNewPayType" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
-              <option value="kit_inicial">Kit vendedor ($ 60.000)</option>
-              <option value="kiosco_licencia">Licencia kiosco — mes ($ 9.900)</option>
-              <option value="vendor_mantenimiento">Cuota mantenimiento vendedor ($ 20.000)</option>
-            </select>
-            <label class="block text-xs text-white/60">Email de quien paga (perfil existente)</label>
-            <input type="email" id="ferriolNewPayPayerEmail" placeholder="socio@ejemplo.com" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
-            <label class="block text-xs text-white/60">Vendedor ejecutor (email) — obligatorio para kit y licencia kiosco</label>
-            <input type="email" id="ferriolNewPaySellerEmail" placeholder="vendedor@ejemplo.com" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
-            <label class="block text-xs text-white/60">Monto ARS</label>
-            <input type="number" id="ferriolNewPayAmount" min="1" step="1" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
-            <div id="ferriolNewPayPeriodWrap" class="hidden">
-              <label class="block text-xs text-white/60">Mes de la cuota (mantenimiento vendedor)</label>
-              <input type="month" id="ferriolNewPayPeriod" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
-            </div>
-            <label class="block text-xs text-white/60">Nota (opcional: Nº operación)</label>
-            <input type="text" id="ferriolNewPayNote" placeholder="Ej. transferencia 12/04" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
-            <p id="ferriolNewPayErr" class="text-xs text-red-300 hidden"></p>
-            <button type="button" id="ferriolBtnCreatePayment" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold touch-target w-full sm:w-auto">Registrar pendiente</button>
-          </div>
-          <h3 class="font-semibold text-sm mb-2">Pendientes de verificar</h3>
-          <div id="ferriolPaymentsPendingList" class="space-y-2 max-h-[40vh] overflow-y-auto text-sm mb-6"></div>
-          <h3 class="font-semibold text-sm mb-2">Últimos verificados</h3>
-          <div id="ferriolPaymentsVerifiedList" class="space-y-2 max-h-[30vh] overflow-y-auto text-xs text-white/80"></div>
-        </div>
+
+        </div><!-- /super-section-sistema -->
+
+        <!-- Sección Cobros (solo super): transferencias + verificar → mlm_ledger -->
+        <!-- Sin super-only en el contenedor: si no, applyAppShell oculta la sección para socios y pisa display:block de switchSuperSection -->
+        <!-- super-section-cobros: vacío (redirigido a sistema) -->
+        <div id="super-section-cobros" class="super-section hidden absolute" style="display:none!important;"></div>
         <!-- Sección Ajustes -->
         <div id="super-section-ajustes" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <button type="button" id="btnSuperAjustesVolverMas" class="mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5 super-only super-main-only">

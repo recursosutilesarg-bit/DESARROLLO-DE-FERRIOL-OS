@@ -871,7 +871,7 @@
           msgEl.classList.remove('hidden');
         }
         await loadFounderClientSaleRequestsPanel();
-        if (state.superSection === 'cobros') await renderSuperCobrosSection();
+        if (state.superSection === 'sistema' || state.superSection === 'cobros') await renderSuperCobrosSection();
       } catch (e) {
         alert('Error: ' + (e && e.message ? e.message : e));
       }
@@ -1497,7 +1497,7 @@
       _restoringFromHistory: false,
       _suppressCajaHistoryPush: false,
       historialFilter: 'hoy',
-      superSection: 'afiliados',  // afiliados | ingresos | cobros | ajustes | solicitudes | mas
+      superSection: 'afiliados',  // afiliados | ingresos | sistema | ajustes | solicitudes | mas
       afiliadosSubTab: 'usuarios',  // usuarios (kiosquero) | distribuidores (partner)
       superUiMode: 'empresa'  // empresa | socio | negocio — solo si role === 'super'
     };
@@ -2978,8 +2978,9 @@
     function switchSuperSection(sectionName) {
       var sn = sectionName || 'afiliados';
       if (sn === 'balance') sn = 'ingresos';
+      if (sn === 'cobros') sn = 'sistema';
       state.superSection = sn;
-      var reqSuper = state.superSection === 'cobros';
+      var reqSuper = state.superSection === 'sistema';
       if (reqSuper && currentUser && (currentUser.role !== 'super' || !isEmpresaLensSuper())) {
         state.superSection = 'afiliados';
       }
@@ -2999,7 +3000,7 @@
       document.querySelectorAll('.super-nav-btn').forEach(function (btn) {
         btn.classList.toggle('active', btn.dataset.superSection === navHighlight);
       });
-      if (state.superSection === 'cobros' && isEmpresaLensSuper()) renderSuperCobrosSection();
+      if ((state.superSection === 'sistema' || state.superSection === 'cobros') && isEmpresaLensSuper()) renderSuperCobrosSection();
       if (state.superSection === 'ingresos') void loadSuperIngresosSection();
       if (state.superSection === 'solicitudes') {
         void renderSuperMembershipDayRequestBanners();
@@ -6327,7 +6328,7 @@ async function showApp() {
           if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
           if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo registrar.'); return; }
           alert('Registrado. Empresa: 20% pendiente de cobro. Socio: 20% a pagar y 80% comisión pendiente (ver panel del socio).');
-          if (state.superSection === 'cobros') renderSuperCobrosSection();
+          if (state.superSection === 'sistema' || state.superSection === 'cobros') renderSuperCobrosSection();
           openSuperUserDetail(u);
         };
       }
@@ -7458,7 +7459,7 @@ async function showApp() {
         if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
         if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo ejecutar.'); return; }
         alert('Listo. Mes: ' + (out.period_month || '') + '. Kioscos nuevos: ' + (out.kiosco_months_new != null ? out.kiosco_months_new : '—') + '. Socios nuevos: ' + (out.partner_months_new != null ? out.partner_months_new : '—'));
-        if (state.superSection === 'cobros') renderSuperCobrosSection();
+        if (state.superSection === 'sistema' || state.superSection === 'cobros') renderSuperCobrosSection();
         lucide.createIcons();
       };
     }
@@ -7479,8 +7480,8 @@ async function showApp() {
           return;
         }
         var n = out.inserted_rows != null ? out.inserted_rows : '—';
-        alert('Listo. Filas nuevas: ' + n + '. Revisá Cobros (admin). Los kiosqueros ven la licencia en Caja.');
-        if (state.superSection === 'cobros') renderSuperCobrosSection();
+        alert('Listo. Filas nuevas: ' + n + '. Revisá Sistema → Cobros (admin). Los kiosqueros ven la licencia en Caja.');
+        if (state.superSection === 'sistema' || state.superSection === 'cobros') renderSuperCobrosSection();
         await loadKioscoLicensePaymentInfo();
         lucide.createIcons();
       };
@@ -7502,7 +7503,7 @@ async function showApp() {
           return;
         }
         alert('Listo. Filas eliminadas: ' + (out.deleted_rows != null ? out.deleted_rows : '—') + '.');
-        if (state.superSection === 'cobros') renderSuperCobrosSection();
+        if (state.superSection === 'sistema' || state.superSection === 'cobros') renderSuperCobrosSection();
         await loadKioscoLicensePaymentInfo();
         lucide.createIcons();
       };
@@ -7558,7 +7559,7 @@ async function showApp() {
         return;
       }
       alert('Cobro pendiente registrado. Cuando acredite la transferencia, tocá Verificar.');
-      if (state.superSection === 'cobros') renderSuperCobrosSection();
+      if (state.superSection === 'sistema' || state.superSection === 'cobros') renderSuperCobrosSection();
       lucide.createIcons();
     };
     var kprReqClose = document.getElementById('kiosqueroProvisionRequestModalClose');

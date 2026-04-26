@@ -1840,3 +1840,402 @@ select.ferriol-native-select option:active {
 .trial-reminder-notif {
   animation: trial-notif-drop 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   TABLERO SISTEMA MLM  (super-section-sistema)
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Contenedor tipo "tablero" ── */
+.mlm-board {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 1rem;
+  padding: 1rem 1rem 1.1rem;
+}
+.mlm-board-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 0.85rem;
+  display: block;
+}
+
+/* ── Nodos del organigrama ── */
+.mlm-level {
+  display: flex;
+  justify-content: center;
+}
+
+.mlm-node {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border-radius: 0.85rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid;
+  width: 100%;
+  max-width: 560px;
+  position: relative;
+}
+.mlm-node--founder {
+  border-color: rgba(167,139,250,0.5);
+  background: rgba(139,92,246,0.1);
+}
+.mlm-node--partner {
+  border-color: rgba(251,191,36,0.45);
+  background: rgba(245,158,11,0.08);
+}
+.mlm-node--kiosco {
+  border-color: rgba(34,197,94,0.45);
+  background: rgba(22,163,74,0.08);
+}
+
+.mlm-node-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.mlm-node--founder .mlm-node-icon { background: rgba(139,92,246,0.25); color: #c4b5fd; }
+.mlm-node--partner .mlm-node-icon { background: rgba(245,158,11,0.25); color: #fde68a; }
+.mlm-node--kiosco  .mlm-node-icon { background: rgba(34,197,94,0.25);  color: #86efac; }
+
+.mlm-node-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+  min-width: 0;
+}
+.mlm-node-role {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255,255,255,0.45);
+}
+.mlm-node-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.92);
+  line-height: 1.3;
+}
+.mlm-node-desc {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.4;
+  margin-top: 0.1rem;
+}
+.mlm-code {
+  font-family: monospace;
+  font-size: 0.65em;
+  background: rgba(255,255,255,0.08);
+  padding: 0.05em 0.35em;
+  border-radius: 0.25em;
+  color: rgba(255,255,255,0.6);
+  font-weight: 400;
+  margin-left: 0.35em;
+}
+.mlm-badge {
+  align-self: flex-start;
+  font-size: 0.62rem;
+  font-weight: 600;
+  border-radius: 0.4rem;
+  padding: 0.15em 0.5em;
+  border: 1px solid;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.mlm-badge code {
+  font-family: monospace;
+  font-size: 0.9em;
+}
+.mlm-badge--violet { border-color: rgba(167,139,250,0.4); color: #c4b5fd; background: rgba(139,92,246,0.12); }
+.mlm-badge--amber  { border-color: rgba(251,191,36,0.4);  color: #fde68a; background: rgba(245,158,11,0.1); }
+.mlm-badge--green  { border-color: rgba(34,197,94,0.4);   color: #86efac; background: rgba(22,163,74,0.1); }
+
+/* ── Flechas entre niveles ── */
+.mlm-arrow-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  margin: 0.35rem 0;
+  position: relative;
+}
+.mlm-arrow-line {
+  width: 2px;
+  height: 18px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.12), rgba(255,255,255,0.25));
+}
+.mlm-arrow-head {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 7px solid rgba(255,255,255,0.28);
+}
+.mlm-arrow-label {
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.35);
+  text-align: center;
+  padding: 0.15rem 0.5rem;
+  font-style: italic;
+}
+
+/* ── Bloques de flujo de dinero ── */
+.mlm-flow-block {
+  border-radius: 0.75rem;
+  border: 1px solid;
+  padding: 0.75rem 0.9rem;
+}
+.mlm-flow-block--violet { border-color: rgba(139,92,246,0.35); background: rgba(139,92,246,0.07); }
+.mlm-flow-block--green  { border-color: rgba(34,197,94,0.35);  background: rgba(22,163,74,0.07); }
+.mlm-flow-block--amber  { border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.06); }
+
+.mlm-flow-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+  flex-wrap: wrap;
+}
+.mlm-flow-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 0.4rem;
+  padding: 0.2em 0.55em;
+  border: 1px solid;
+}
+.mlm-flow-tag--violet { border-color: rgba(139,92,246,0.45); color: #c4b5fd; background: rgba(139,92,246,0.15); }
+.mlm-flow-tag--green  { border-color: rgba(34,197,94,0.45);  color: #86efac; background: rgba(22,163,74,0.12); }
+.mlm-flow-tag--amber  { border-color: rgba(245,158,11,0.45); color: #fde68a; background: rgba(245,158,11,0.1); }
+
+.mlm-flow-amount {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.85);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.mlm-flow-split {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+.mlm-flow-part {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.73rem;
+  border-radius: 0.4rem;
+  padding: 0.3rem 0.5rem;
+}
+.mlm-flow-part--green   { background: rgba(22,163,74,0.12); }
+.mlm-flow-part--cyan    { background: rgba(6,182,212,0.1); }
+.mlm-flow-part--founder { background: rgba(245,158,11,0.08); }
+
+.mlm-flow-pct {
+  font-weight: 800;
+  font-size: 0.82rem;
+  min-width: 2.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.mlm-flow-part--green   .mlm-flow-pct { color: #86efac; }
+.mlm-flow-part--cyan    .mlm-flow-pct { color: #67e8f9; }
+.mlm-flow-part--founder .mlm-flow-pct { color: #fde68a; }
+
+.mlm-flow-to {
+  color: rgba(255,255,255,0.75);
+  line-height: 1.35;
+}
+.mlm-flow-to small {
+  font-size: 0.85em;
+  color: rgba(255,255,255,0.45);
+}
+.mlm-flow-note {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.45;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 0.45rem;
+  margin-top: 0.1rem;
+}
+
+/* ── Cards de acceso ── */
+.mlm-access-card {
+  border-radius: 0.75rem;
+  border: 1px solid;
+  padding: 0.75rem;
+}
+.mlm-access-card--violet { border-color: rgba(139,92,246,0.35); background: rgba(139,92,246,0.07); }
+.mlm-access-card--amber  { border-color: rgba(245,158,11,0.35); background: rgba(245,158,11,0.06); }
+.mlm-access-card--green  { border-color: rgba(34,197,94,0.35);  background: rgba(22,163,74,0.06); }
+
+.mlm-access-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.55rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.mlm-access-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.mlm-access-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.35;
+}
+.mlm-access-code {
+  display: block;
+  margin-top: 0.6rem;
+  font-family: monospace;
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.3);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 0.4rem;
+}
+
+/* ── Timeline de ciclo de vida ── */
+.mlm-timeline {
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.15);
+  padding: 0.75rem 0.85rem;
+}
+.mlm-timeline-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-bottom: 0.65rem;
+  display: block;
+}
+.mlm-timeline-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding-left: 0.25rem;
+}
+.mlm-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.4;
+  position: relative;
+}
+.mlm-step--active {
+  color: rgba(255,255,255,0.85);
+}
+.mlm-step-dot {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+}
+.mlm-step-dot--green  { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.6); }
+.mlm-step-dot--amber  { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,0.5); }
+.mlm-step-dot--cyan   { background: #06b6d4; box-shadow: 0 0 6px rgba(6,182,212,0.5); }
+.mlm-step-dot--violet { background: #8b5cf6; box-shadow: 0 0 6px rgba(139,92,246,0.5); }
+.mlm-step-dot--red    { background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.5); }
+.mlm-step-dot--gray   { background: rgba(255,255,255,0.25); }
+
+/* ── Tabla de comisiones ── */
+.mlm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.73rem;
+}
+.mlm-table thead tr {
+  background: rgba(0,0,0,0.3);
+}
+.mlm-table th {
+  padding: 0.5rem 0.65rem;
+  text-align: left;
+  font-size: 0.64rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255,255,255,0.45);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  white-space: nowrap;
+}
+.mlm-table td {
+  padding: 0.5rem 0.65rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  vertical-align: middle;
+}
+.mlm-table tbody tr:last-child td { border-bottom: none; }
+.mlm-table tbody tr:nth-child(odd) { background: rgba(255,255,255,0.025); }
+
+.mlm-pill {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  border-radius: 0.35rem;
+  padding: 0.15em 0.5em;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.mlm-pill--violet { border-color: rgba(139,92,246,0.4); color: #c4b5fd; background: rgba(139,92,246,0.12); }
+.mlm-pill--green  { border-color: rgba(34,197,94,0.4);  color: #86efac; background: rgba(22,163,74,0.1); }
+.mlm-pill--amber  { border-color: rgba(245,158,11,0.4); color: #fde68a; background: rgba(245,158,11,0.1); }
+
+/* ── Leyenda de estados ── */
+.mlm-legend-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  background: rgba(0,0,0,0.12);
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+/* ── Responsivo móvil ── */
+@media (max-width: 639px) {
+  .mlm-node {
+    flex-wrap: wrap;
+  }
+  .mlm-badge {
+    align-self: flex-start;
+    margin-left: calc(2.25rem + 0.75rem);
+  }
+  .mlm-flow-header {
+    gap: 0.35rem;
+  }
+  .mlm-table th,
+  .mlm-table td {
+    padding: 0.4rem 0.45rem;
+    font-size: 0.65rem;
+  }
+  .mlm-table th:nth-child(3),
+  .mlm-table td:nth-child(3) {
+    display: none;
+  }
+}
+
+/* ── Acordeón cobros dentro de sistema ── */
+#sistemaCobrosDetails summary::-webkit-details-marker { display: none; }
+#sistemaCobrosDetails summary { outline: none; }
+#sistemaCobrosDetails[open] .mlm-board-label { color: rgba(134,239,172,0.7); }
