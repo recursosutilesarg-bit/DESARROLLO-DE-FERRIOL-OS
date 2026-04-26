@@ -1164,9 +1164,12 @@
             </div>
             <div class="flex flex-wrap items-center gap-2 shrink-0">
               <label class="text-xs text-white/45 sr-only" for="ingresosRangeFilter">Período</label>
-              <select id="ingresosRangeFilter" class="glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm min-w-[10.5rem]">
-                <option value="30">Últimos 30 días</option>
-                <option value="90" selected>Últimos 90 días</option>
+              <select id="ingresosRangeFilter" class="ferriol-native-select glass rounded-xl px-3 py-2.5 border border-white/20 text-sm min-w-[12rem]">
+                <option value="1">Hoy</option>
+                <option value="7">Últimos 7 días</option>
+                <option value="15">Últimos 15 días</option>
+                <option value="30" selected>Últimos 30 días</option>
+                <option value="90">Últimos 90 días</option>
                 <option value="180">Últimos 6 meses</option>
                 <option value="365">Últimos 12 meses</option>
               </select>

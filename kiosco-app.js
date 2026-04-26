@@ -413,8 +413,8 @@
       }
       setSuperIngresosSectionMode(true);
       var rangeSel = document.getElementById('ingresosRangeFilter');
-      var rangeDays = rangeSel && rangeSel.value ? parseInt(rangeSel.value, 10) : 90;
-      if (isNaN(rangeDays) || rangeDays < 1) rangeDays = 90;
+      var rangeDays = rangeSel && rangeSel.value ? parseInt(rangeSel.value, 10) : 30;
+      if (isNaN(rangeDays) || rangeDays < 1) rangeDays = 30;
       kpiG.textContent = kpiCo.textContent = kpiPo.textContent = kpiRj.textContent = '…';
       wrap.innerHTML = '<p class="text-white/45 text-xs py-5 text-center">Cargando…</p>';
       if (fb) { fb.classList.add('hidden'); if (canvas) canvas.classList.remove('hidden'); }
@@ -606,8 +606,8 @@
       }
       setSuperIngresosSectionMode(false);
       var rangeSel = document.getElementById('ingresosRangeFilter');
-      var rangeDays = rangeSel && rangeSel.value ? parseInt(rangeSel.value, 10) : 90;
-      if (isNaN(rangeDays) || rangeDays < 1) rangeDays = 90;
+      var rangeDays = rangeSel && rangeSel.value ? parseInt(rangeSel.value, 10) : 30;
+      if (isNaN(rangeDays) || rangeDays < 1) rangeDays = 30;
       kpiN.textContent = kpiC.textContent = kpiR.textContent = '…';
       wrap.innerHTML = '<p class="text-white/45 text-xs py-5 text-center">Cargando…</p>';
       if (fb) { fb.classList.add('hidden'); if (canvas) canvas.classList.remove('hidden'); }
