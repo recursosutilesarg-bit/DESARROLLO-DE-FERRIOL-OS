@@ -163,7 +163,11 @@ BEGIN
     sv := COALESCE((plan->>'sale_vendor_pct_normal')::numeric, (plan->>'sale_vendor_pct')::numeric, 0.50);
     sc := COALESCE((plan->>'sale_company_pct_normal')::numeric, (plan->>'sale_company_pct')::numeric, 0.50);
     IF v_intro_m > 0 THEN
-      SELECT COALESCE(network_joined_at, created_at) INTO v_anchor FROM profiles WHERE id = seller;
+      -- Fecha de ancla: ingreso a la red; si no hay, fecha de alta en Auth (profiles suele no tener created_at).
+      SELECT COALESCE(p.network_joined_at, au.created_at) INTO v_anchor
+      FROM public.profiles p
+      LEFT JOIN auth.users au ON au.id = p.id
+      WHERE p.id = seller;
       IF v_anchor IS NULL THEN
         v_anchor := now();
       END IF;
