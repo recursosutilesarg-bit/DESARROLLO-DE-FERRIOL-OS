@@ -232,10 +232,6 @@
           <i data-lucide="trending-up" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Ingresos</span>
         </button>
-        <button data-super-section="balance" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Balance · pagos y cobros">
-          <i data-lucide="scale" class="w-5 h-5 shrink-0"></i>
-          <span class="truncate w-full text-center">Balance</span>
-        </button>
         <button data-super-section="cobros" class="super-nav-btn super-only super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Cobros y comisiones (solo administrador)">
           <i data-lucide="banknote" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Cobros</span>
@@ -1183,7 +1179,7 @@
                 <i data-lucide="line-chart" class="w-5 h-5 text-[#86efac] shrink-0"></i>
                 <span id="ingresosSectionTitle">Gestión de ventas</span>
               </h2>
-              <p id="ingresosSectionSubtitle" class="text-xs text-white/50">Ventas donde <strong class="text-white/70">vos sos el vendedor</strong> en el registro. Tras verificar el pago, <strong class="text-white/65">Ingresos</strong> muestra tu <strong class="text-white/70">comisión acreditada</strong> (no el monto bruto del cliente). El saldo detallado está en <strong class="text-white/65">Balance</strong>.</p>
+              <p id="ingresosSectionSubtitle" class="text-xs text-white/50">Ventas donde <strong class="text-white/70">vos sos el vendedor</strong> en el registro. Los clientes pagan a <strong class="text-white/65">Ferriol</strong>; cuando la empresa verifica el cobro, acá ves tu <strong class="text-white/70">comisión acreditada</strong> (no el monto bruto del cliente).</p>
             </div>
             <div class="flex flex-wrap items-center gap-2 shrink-0">
               <label class="text-xs text-white/45 sr-only" for="ingresosRangeFilter">Período</label>
@@ -1247,22 +1243,6 @@
           <h3 class="font-semibold text-sm text-white/85 mb-2">Últimas operaciones</h3>
           <div id="ingresosTableWrap" class="rounded-xl border border-white/10 bg-black/20 overflow-hidden text-sm min-h-[4rem]">
             <p class="text-white/45 text-xs py-5 text-center px-2">Cargando…</p>
-          </div>
-        </div>
-        <!-- Balance: transferencias declaradas + libro (personal) -->
-        <div id="super-section-balance" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 z-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
-          <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
-            <i data-lucide="scale" class="w-5 h-5 text-[#86efac]"></i>
-            Balance
-          </h2>
-          <p class="text-xs text-white/50 mb-3">Transferencias que registraste en el sistema y movimientos del <strong class="text-white/65">libro</strong> donde vos sos beneficiario (comisiones, regalías u obligaciones con la empresa). Si sos <strong class="text-white/70">socio vendedor</strong>, el resumen operativo del libro está arriba.</p>
-          <div id="superBalancePartnerResumen" class="hidden mb-4"></div>
-          <div class="flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 mb-4" role="tablist" aria-label="Vista de balance">
-            <button type="button" id="superBalanceTabPago" role="tab" aria-selected="true" class="super-balance-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-[#22c55e]/50 bg-[#22c55e]/20 text-white transition-all">Pagos y deudas</button>
-            <button type="button" id="superBalanceTabCobro" role="tab" aria-selected="false" class="super-balance-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-transparent text-white/55 hover:text-white/80 transition-all">Cobros a favor</button>
-          </div>
-          <div id="superBalanceContent" class="text-sm min-h-[12rem]">
-            <p class="text-white/45 text-sm py-6 text-center">Cargando…</p>
           </div>
         </div>
         <!-- Sección Cobros (solo super): transferencias + verificar → mlm_ledger -->

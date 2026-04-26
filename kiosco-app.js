@@ -361,197 +361,6 @@
     function ferriolMlmLedgerRowLineLi(r) {
       return '<li class="border-b border-white/10 pb-1">' + String(r.created_at || '').slice(0, 10) + ' · $' + Number(r.amount).toLocaleString('es-AR', { minimumFractionDigits: 2 }) + ' · ' + String(r.event_type || '') + ' · ' + String(r.status || '') + '</li>';
     }
-    function ferriolPaymentTypeLabel(t) {
-      if (t === 'kit_inicial') return 'Kit vendedor';
-      if (t === 'kiosco_licencia') return 'Licencia kiosco';
-      if (t === 'vendor_mantenimiento') return 'Cuota mantenimiento';
-      return String(t || '—');
-    }
-    function ferriolLedgerEventLabel(ev) {
-      var m = { sale_commission: 'Comisión (libro)', renewal: 'Regalía / renovación', vendor_payable_company: 'Obligación empresa (libro)', company_reserve: 'Reserva empresa' };
-      return m[ev] || String(ev || '—');
-    }
-    function ferriolBalanceFormatARS(n) {
-      return '$ ' + Number(n || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 });
-    }
-    function ferriolPartnerLedgerRowInv(r) {
-      var d = String(r.created_at || '').slice(0, 10);
-      var pm = r.period_month ? ' · ' + String(r.period_month).slice(0, 7) : '';
-      var dep = r.depth != null && r.depth !== '' ? ' · niv.' + r.depth : '';
-      var name = ferriolLedgerEventLabel(r.event_type) + dep;
-      var mid = ferriolBalanceFormatARS(r.amount);
-      var right = d + pm + ' · ' + String(r.status || '');
-      return '<div class="inventory-item border-x-0 rounded-none cursor-default"><div class="inv-item-info"><span class="inv-item-name"><span class="block truncate">' + name + '</span></span><span class="inv-item-price text-[#86efac]">' + mid + '</span><span class="inv-item-stock text-white/45 truncate max-w-[40vw]">' + right + '</span></div></div>';
-    }
-    /** Resumen «socio vendedor» (antes en Afiliados); se muestra solo en Balance. */
-    function buildFerriolPartnerResumenBalanceHtml(rows, nKioscosActive) {
-      rows = rows || [];
-      var unit = FERRIOL_PLAN_AMOUNTS.kioscoMonthly;
-      var orientMes = (nKioscosActive || 0) * unit;
-      var pendPay = rows.filter(function (r) { return r.event_type === 'vendor_payable_company' && r.status === 'pending'; });
-      var pendComm = rows.filter(function (r) { return r.event_type === 'sale_commission' && r.status === 'pending'; });
-      var ren1 = rows.filter(function (r) { return r.event_type === 'renewal' && r.status === 'pending' && Number(r.depth) === 1; });
-      var ren2 = rows.filter(function (r) { return r.event_type === 'renewal' && r.status === 'pending' && Number(r.depth) === 2; });
-      var sumPay = pendPay.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
-      var sumComm = pendComm.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
-      var s1 = ren1.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
-      var s2 = ren2.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
-      function listBox(arr, emptyMsg) {
-        if (!arr.length) return '<p class="text-xs text-white/45 py-2.5 px-2 text-center">' + emptyMsg + '</p>';
-        return '<div class="rounded-lg border border-white/10 bg-black/25 overflow-hidden max-h-36 overflow-y-auto -mx-px">' + arr.map(ferriolPartnerLedgerRowInv).join('') + '</div>';
-      }
-      var secK =
-        '<div class="text-xs rounded-xl border border-[#22c55e]/35 bg-[#22c55e]/08 px-3 py-2.5">' +
-        '<p class="text-[#86efac] font-medium flex items-center gap-1.5 mb-1"><i data-lucide="store" class="w-3.5 h-3.5 shrink-0"></i> Licencias con tus kioscos (operativo)</p>' +
-        '<p class="text-white/80 leading-snug">Negocios activos referidos: <strong class="text-white">' + (nKioscosActive || 0) + '</strong>. Cuota orientativa de licencia ($ ' + unit.toLocaleString('es-AR') + ' c/u): <strong>$ ' + orientMes.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + '</strong> ARS/mes a coordinar con ellos (referidor; no reemplaza el libro).</p></div>';
-      var secPay =
-        '<div class="text-xs rounded-xl border border-amber-500/35 bg-amber-500/10 px-3 py-2.5">' +
-        '<p class="text-amber-100/95 font-medium mb-1">A pagar a la empresa (libro)</p>' +
-        '<p class="text-white/80 mb-2">Total pendiente: <strong class="text-amber-100">' + ferriolBalanceFormatARS(sumPay) + '</strong> · 20% licencia kiosco u obligaciones similares.</p>' +
-        listBox(pendPay, 'Sin partidas pendientes en esta categoría.') + '</div>';
-      var secComm =
-        '<div class="text-xs rounded-xl border border-emerald-500/35 bg-emerald-500/10 px-3 py-2.5">' +
-        '<p class="text-emerald-100/95 font-medium mb-1">Tu parte en el libro (pendiente de liquidación)</p>' +
-        '<p class="text-white/80 mb-2">Total pendiente: <strong class="text-emerald-200">' + ferriolBalanceFormatARS(sumComm) + '</strong> · ej. 80% licencia.</p>' +
-        listBox(pendComm, 'Nada pendiente; cuando el admin verifique cobros verás movimientos.') + '</div>';
-      var secRoy =
-        '<div class="text-xs rounded-xl border border-violet-500/30 bg-violet-500/10 px-3 py-2.5">' +
-        '<p class="text-violet-100/95 font-medium mb-1">Regalías · cuotas de socios (libro · pendiente)</p>' +
-        '<p class="text-white/75 mb-2">Nivel 1: <strong class="text-violet-100">' + ferriolBalanceFormatARS(s1) + '</strong> · Nivel 2: <strong class="text-violet-100">' + ferriolBalanceFormatARS(s2) + '</strong></p>' +
-        listBox(ren1.concat(ren2), 'Sin regalías pendientes registradas.') + '</div>';
-      var tailHead = '<p class="text-[10px] text-white/45 font-medium px-0.5 mb-1">Últimos movimientos en tu cuenta (libro)</p>';
-      var tailBody = rows.length === 0 ? '<p class="text-xs text-white/50 py-2 text-center">Sin movimientos.</p>' :
-        '<div class="rounded-xl border border-white/10 bg-black/20 overflow-hidden max-h-40 overflow-y-auto">' + rows.slice(0, 18).map(ferriolPartnerLedgerRowInv).join('') + '</div>';
-      return '<div class="rounded-2xl border border-emerald-500/35 bg-gradient-to-b from-emerald-500/[0.14] to-black/25 overflow-hidden shadow-lg shadow-emerald-900/20">' +
-        '<div class="px-3 py-2.5 sm:px-4 border-b border-emerald-500/25 bg-emerald-500/10">' +
-        '<p class="font-semibold text-emerald-200/95 flex items-center gap-2 text-sm"><i data-lucide="layout-list" class="w-4 h-4 shrink-0"></i> Resumen Ferriol · socio vendedor</p>' +
-        '<p class="text-[11px] text-white/50 mt-1 leading-snug">Mismo criterio que antes en Afiliados: obligaciones y créditos según el libro cuando el administrador liquida transferencias o corre el mes.</p></div>' +
-        '<div class="p-3 sm:p-4 space-y-3">' + secK + secPay + secComm + secRoy + tailHead + tailBody + '</div></div>';
-    }
-    function syncSuperBalanceTabButtons() {
-      var a = document.getElementById('superBalanceTabPago');
-      var b = document.getElementById('superBalanceTabCobro');
-      if (!a || !b) return;
-      var isPago = state.balanceSubTab !== 'cobro';
-      a.setAttribute('aria-selected', isPago ? 'true' : 'false');
-      b.setAttribute('aria-selected', !isPago ? 'true' : 'false');
-      a.className = 'super-balance-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border transition-all ' + (isPago ? 'border-[#22c55e]/50 bg-[#22c55e]/20 text-white' : 'border-transparent text-white/55 hover:text-white/80');
-      b.className = 'super-balance-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border transition-all ' + (!isPago ? 'border-[#22c55e]/50 bg-[#22c55e]/20 text-white' : 'border-transparent text-white/55 hover:text-white/80');
-    }
-    function renderSuperBalanceInner(payments, ledgerRows) {
-      var uid = currentUser && currentUser.id;
-      var pay = payments || [];
-      var leg = ledgerRows || [];
-      var asPayerVerified = pay.filter(function (p) { return p.payer_user_id === uid && p.status === 'verified'; });
-      var asPayerPending = pay.filter(function (p) { return p.payer_user_id === uid && p.status === 'pending'; });
-      var asSellerVerified = pay.filter(function (p) { return p.seller_user_id === uid && p.status === 'verified'; });
-      var debtLedger = leg.filter(function (r) { return r.event_type === 'vendor_payable_company' && r.status === 'pending'; });
-      var creditPending = leg.filter(function (r) { return (r.event_type === 'sale_commission' || r.event_type === 'renewal') && r.status === 'pending'; });
-      var creditDone = leg.filter(function (r) { return (r.event_type === 'sale_commission' || r.event_type === 'renewal') && r.status !== 'pending' && r.status !== 'void'; });
-      function sum(arr, key) {
-        return arr.reduce(function (a, x) { return a + Number(x[key] || 0); }, 0);
-      }
-      function rowInv(name, mid, right) {
-        return '<div class="inventory-item border-x-0 rounded-none cursor-default"><div class="inv-item-info"><span class="inv-item-name"><span class="block truncate">' + name + '</span></span><span class="inv-item-price text-[#86efac]">' + mid + '</span><span class="inv-item-stock text-white/45 truncate max-w-[36vw]">' + right + '</span></div></div>';
-      }
-      function block(title, subtitle, inner) {
-        return '<div class="mb-4 rounded-xl border border-white/10 bg-black/15 overflow-hidden"><h3 class="text-xs font-semibold text-white/85 px-3 py-2 border-b border-white/10 bg-white/5">' + title + '</h3>' + (subtitle ? '<p class="text-[10px] text-white/45 px-3 py-1.5 border-b border-white/5">' + subtitle + '</p>' : '') + '<div class="max-h-52 overflow-y-auto">' + inner + '</div></div>';
-      }
-      if (state.balanceSubTab === 'cobro') {
-        var sumCobroPend = sum(creditPending, 'amount');
-        var sumCobroLibro = sum(creditDone, 'amount');
-        var sumVentasVendedor = sum(asSellerVerified, 'amount');
-        var hdr = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">' +
-          '<div class="rounded-xl border border-emerald-500/35 bg-emerald-500/10 px-3 py-2"><p class="text-[10px] text-white/55 uppercase tracking-wide">Acreditado en el libro</p><p class="text-lg font-bold text-emerald-200">' + ferriolBalanceFormatARS(sumCobroLibro) + '</p><p class="text-[10px] text-white/40">Comisiones y regalías</p></div>' +
-          '<div class="rounded-xl border border-amber-500/35 bg-amber-500/10 px-3 py-2"><p class="text-[10px] text-white/55 uppercase tracking-wide">Te deben (libro)</p><p class="text-lg font-bold text-amber-100">' + ferriolBalanceFormatARS(sumCobroPend) + '</p><p class="text-[10px] text-white/40">Pendiente de liquidar</p></div></div>' +
-          '<div class="rounded-xl border border-cyan-500/30 bg-cyan-500/08 px-3 py-2 mb-4"><p class="text-[10px] text-white/55 uppercase tracking-wide">Ventas como vendedor (verificado)</p><p class="text-base font-bold text-cyan-100">' + ferriolBalanceFormatARS(sumVentasVendedor) + ' <span class="text-xs font-normal text-white/45">· ' + asSellerVerified.length + ' op.</span></p></div>';
-        var listLibro = creditDone.length ? creditDone.map(function (r) {
-          var d = String(r.created_at || '').slice(0, 10);
-          var dep = r.depth != null && r.depth !== '' ? ' · niv.' + r.depth : '';
-          return rowInv(ferriolLedgerEventLabel(r.event_type) + dep, ferriolBalanceFormatARS(r.amount), d + ' · ' + String(r.status || ''));
-        }).join('') : '<p class="text-xs text-white/45 py-4 text-center px-2">Sin partidas acreditadas en el libro.</p>';
-        var listPend = creditPending.length ? creditPending.map(function (r) {
-          var d = String(r.created_at || '').slice(0, 10);
-          return rowInv(ferriolLedgerEventLabel(r.event_type), ferriolBalanceFormatARS(r.amount), d + ' · pendiente');
-        }).join('') : '<p class="text-xs text-white/45 py-4 text-center px-2">Nada pendiente en el libro a tu favor.</p>';
-        var listSeller = asSellerVerified.length ? asSellerVerified.map(function (p) {
-          var d = String(p.created_at || '').slice(0, 10);
-          return rowInv(ferriolPaymentTypeLabel(p.payment_type), ferriolBalanceFormatARS(p.amount), d + ' · verificado');
-        }).join('') : '<p class="text-xs text-white/45 py-4 text-center px-2">Sin ventas con vos como vendedor ejecutor verificadas.</p>';
-        return hdr + block('Comisiones y regalías · libro', 'Líneas a tu favor ya registradas (p. ej. estado aprobado).', listLibro) + block('Te deben · pendiente', 'Liquidación según plan; el administrador verifica transferencias.', listPend) + block('Pagos donde fuiste vendedor', 'Monto total transferido; el detalle de tu parte está en el libro.', listSeller);
-      }
-      var sumPagado = sum(asPayerVerified, 'amount');
-      var sumPendPago = sum(asPayerPending, 'amount');
-      var sumDeudaLibro = sum(debtLedger, 'amount');
-      var hdr2 = '<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">' +
-        '<div class="rounded-xl border border-[#22c55e]/35 bg-[#22c55e]/10 px-3 py-2"><p class="text-[10px] text-white/55 uppercase tracking-wide">Ya pagaste</p><p class="text-base font-bold text-[#86efac]">' + ferriolBalanceFormatARS(sumPagado) + '</p><p class="text-[10px] text-white/40">Verificado</p></div>' +
-        '<div class="rounded-xl border border-amber-500/35 bg-amber-500/10 px-3 py-2"><p class="text-[10px] text-white/55 uppercase tracking-wide">Pendiente acreditar</p><p class="text-base font-bold text-amber-100">' + ferriolBalanceFormatARS(sumPendPago) + '</p><p class="text-[10px] text-white/40">Declaraste, falta verificación</p></div>' +
-        '<div class="rounded-xl border border-red-400/30 bg-red-500/10 px-3 py-2"><p class="text-[10px] text-white/55 uppercase tracking-wide">Debes (libro)</p><p class="text-base font-bold text-red-200">' + ferriolBalanceFormatARS(sumDeudaLibro) + '</p><p class="text-[10px] text-white/40">A empresa · pendiente</p></div></div>';
-      var listVer = asPayerVerified.length ? asPayerVerified.map(function (p) {
-        var d = String(p.created_at || '').slice(0, 10);
-        return rowInv(ferriolPaymentTypeLabel(p.payment_type), ferriolBalanceFormatARS(p.amount), d);
-      }).join('') : '<p class="text-xs text-white/45 py-4 text-center px-2">Sin pagos verificados como pagador.</p>';
-      var listPendPay = asPayerPending.length ? asPayerPending.map(function (p) {
-        var d = String(p.created_at || '').slice(0, 10);
-        return rowInv(ferriolPaymentTypeLabel(p.payment_type), ferriolBalanceFormatARS(p.amount), d + ' · pendiente');
-      }).join('') : '<p class="text-xs text-white/45 py-4 text-center px-2">No tenés transferencias pendientes de verificación.</p>';
-      var listDebt = debtLedger.length ? debtLedger.map(function (r) {
-        var d = String(r.created_at || '').slice(0, 10);
-        return rowInv(ferriolLedgerEventLabel(r.event_type), ferriolBalanceFormatARS(r.amount), d);
-      }).join('') : '<p class="text-xs text-white/45 py-4 text-center px-2">Sin obligaciones pendientes en el libro a tu nombre.</p>';
-      return hdr2 + block('Ya pagaste (transferencias verificadas)', 'Pagos confirmados por el administrador.', listVer) + block('Pendiente de verificación', 'Registraste el pago; cuando se acredite se refleja en el libro.', listPendPay) + block('Deudas en el libro', 'Partidas pendientes tipo aporte u obligación con la empresa.', listDebt);
-    }
-    async function loadSuperBalanceSection() {
-      var root = document.getElementById('superBalanceContent');
-      var wrap = document.getElementById('superBalancePartnerResumen');
-      if (!root) return;
-      if (!supabaseClient || !currentUser) {
-        root.innerHTML = '<p class="text-amber-200 text-sm py-4">Iniciá sesión para ver el balance.</p>';
-        if (wrap) { wrap.innerHTML = ''; wrap.classList.add('hidden'); }
-        return;
-      }
-      syncSuperBalanceTabButtons();
-      root.innerHTML = '<p class="text-white/45 text-sm py-6 text-center">Cargando…</p>';
-      if (wrap) {
-        if (isPartnerLens()) {
-          wrap.classList.remove('hidden');
-          wrap.innerHTML = '<p class="text-white/45 text-xs py-3 text-center">Cargando resumen del libro…</p>';
-        } else {
-          wrap.innerHTML = '';
-          wrap.classList.add('hidden');
-        }
-      }
-      var uid = currentUser.id;
-      try {
-        var q1 = supabaseClient.from('ferriol_payments').select('id, created_at, payment_type, amount, status, period_month, payer_user_id, seller_user_id, external_note').or('payer_user_id.eq.' + uid + ',seller_user_id.eq.' + uid).order('created_at', { ascending: false }).limit(100);
-        var q2 = supabaseClient.from('mlm_ledger').select('created_at, amount, event_type, status, depth, period_month').eq('beneficiary_user_id', uid).order('created_at', { ascending: false }).limit(120);
-        var qNk = isPartnerLens() ? supabaseClient.from('profiles').select('id').eq('sponsor_id', uid).eq('role', 'kiosquero').eq('active', true) : null;
-        var results = await Promise.all([q1, q2, qNk || Promise.resolve({ data: null, error: null })]);
-        var payRes = results[0];
-        var ledRes = results[1];
-        var nkRes = results[2];
-        if (payRes.error) throw payRes.error;
-        if (ledRes.error) throw ledRes.error;
-        var nk = 0;
-        if (nkRes && nkRes.data && !nkRes.error) nk = nkRes.data.length;
-        if (wrap) {
-          if (isPartnerLens()) {
-            wrap.innerHTML = buildFerriolPartnerResumenBalanceHtml(ledRes.data || [], nk);
-            wrap.classList.remove('hidden');
-          } else {
-            wrap.innerHTML = '';
-            wrap.classList.add('hidden');
-          }
-        }
-        root.innerHTML = renderSuperBalanceInner(payRes.data || [], ledRes.data || []);
-      } catch (e) {
-        if (wrap && isPartnerLens()) {
-          wrap.innerHTML = '<p class="text-amber-200 text-xs py-3 px-2 text-center rounded-xl border border-amber-500/30 bg-amber-500/10">No se pudo cargar el resumen del libro. Revisá RLS y SQL de compensaciones.</p>';
-        }
-        root.innerHTML = '<p class="text-red-300/90 text-sm py-4 px-2">No se pudo cargar el balance. Revisá políticas RLS de <code class="text-white/80">ferriol_payments</code> y <code class="text-white/80">mlm_ledger</code>. ' + String(e.message || e) + '</p>';
-      }
-      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
-    }
     function ferriolIngresosPaymentTypeLabel(t) {
       if (t === 'kit_inicial') return 'Kit vendedor';
       if (t === 'kiosco_licencia') return 'Licencia kiosco';
@@ -578,7 +387,7 @@
       if (s) {
         s.textContent = founder
           ? 'Métricas globales: facturación verificada, reserva a favor de la empresa y comisiones liquidadas a la red (libro MLM). No reemplaza la contabilidad formal.'
-          : 'Tu comisión acreditada proviene del libro MLM (ventas kit/licencia donde la empresa verificó el pago con vos como vendedor). No es el monto bruto del cliente. Ver detalle en Balance.';
+          : 'Tu comisión acreditada proviene del libro MLM cuando la empresa verificó el cobro con vos como vendedor. No es el monto bruto que pagó el cliente (ese flujo va siempre a Ferriol).';
       }
       if (pRow) pRow.classList.toggle('hidden', founder);
       if (fRow) fRow.classList.toggle('hidden', !founder);
@@ -1738,9 +1547,8 @@
       _restoringFromHistory: false,
       _suppressCajaHistoryPush: false,
       historialFilter: 'hoy',
-      superSection: 'afiliados',  // afiliados | balance | cobros | ajustes | solicitudes | mas
+      superSection: 'afiliados',  // afiliados | ingresos | cobros | ajustes | solicitudes | mas
       afiliadosSubTab: 'usuarios',  // usuarios (kiosquero) | distribuidores (partner)
-      balanceSubTab: 'pago',  // pago (deudas/pagos) | cobro (a favor)
       superUiMode: 'empresa'  // empresa | socio | negocio — solo si role === 'super'
     };
 
@@ -3131,7 +2939,7 @@
         try { sessionStorage.setItem('ferriol_super_ui', 'empresa'); } catch (_) {}
         applyAppShell();
       }
-      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'afiliados' && state.superSection !== 'ingresos' && state.superSection !== 'balance' && state.superSection !== 'solicitudes' && state.superSection !== 'mas') {
+      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'afiliados' && state.superSection !== 'ingresos' && state.superSection !== 'solicitudes' && state.superSection !== 'mas') {
         switchSuperSection('afiliados');
       }
       if (name !== 'scanner') window._scanForProductCode = false;
@@ -3158,7 +2966,8 @@
         var navSuperBottom = document.getElementById('navSuperBottom');
         if (navSuperBottom) navSuperBottom.classList.remove('hidden');
         var landSuper = state.superSection || 'afiliados';
-        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'ingresos' && landSuper !== 'balance' && landSuper !== 'solicitudes' && landSuper !== 'mas') landSuper = 'afiliados';
+        if (landSuper === 'balance') landSuper = 'ingresos';
+        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'ingresos' && landSuper !== 'solicitudes' && landSuper !== 'mas') landSuper = 'afiliados';
         switchSuperSection(landSuper);
       } else {
         if (superListCountdownInterval) { clearInterval(superListCountdownInterval); superListCountdownInterval = null; }
@@ -3220,7 +3029,9 @@
       btn.onclick = () => goToPanel(btn.dataset.nav);
     });
     function switchSuperSection(sectionName) {
-      state.superSection = sectionName || 'afiliados';
+      var sn = sectionName || 'afiliados';
+      if (sn === 'balance') sn = 'ingresos';
+      state.superSection = sn;
       var reqSuper = state.superSection === 'cobros';
       if (reqSuper && currentUser && (currentUser.role !== 'super' || !isEmpresaLensSuper())) {
         state.superSection = 'afiliados';
@@ -3242,7 +3053,6 @@
         btn.classList.toggle('active', btn.dataset.superSection === navHighlight);
       });
       if (state.superSection === 'cobros' && isEmpresaLensSuper()) renderSuperCobrosSection();
-      if (state.superSection === 'balance') loadSuperBalanceSection();
       if (state.superSection === 'ingresos') void loadSuperIngresosSection();
       if (state.superSection === 'solicitudes') {
         void renderSuperMembershipDayRequestBanners();
@@ -7313,18 +7123,6 @@ async function showApp() {
       if (superUserListCache.length) renderSuperListFromSearch();
       else if (state.currentPanel === 'super') renderSuper();
     });
-    var superBalanceTabPago = document.getElementById('superBalanceTabPago');
-    var superBalanceTabCobro = document.getElementById('superBalanceTabCobro');
-    if (superBalanceTabPago) superBalanceTabPago.addEventListener('click', function () {
-      state.balanceSubTab = 'pago';
-      syncSuperBalanceTabButtons();
-      loadSuperBalanceSection();
-    });
-    if (superBalanceTabCobro) superBalanceTabCobro.addEventListener('click', function () {
-      state.balanceSubTab = 'cobro';
-      syncSuperBalanceTabButtons();
-      loadSuperBalanceSection();
-    });
     var ingresosRangeFilter = document.getElementById('ingresosRangeFilter');
     if (ingresosRangeFilter) {
       ingresosRangeFilter.addEventListener('change', function () {
@@ -8013,7 +7811,7 @@ async function showApp() {
         }
         closeClientSaleRequestModal();
         if (fileIn) fileIn.value = '';
-        alert('Enviado. La empresa lo revisa en Solicitudes. Cuando apruebe, verás la comisión en Ingresos y Balance.');
+        alert('Enviado. La empresa lo revisa en Solicitudes. Cuando apruebe, verás la comisión en Ingresos.');
       };
     }
     var btnOpenProv = document.getElementById('btnOpenPartnerProvisionModal');
