@@ -7672,18 +7672,6 @@ async function showApp() {
     if (clientSaleOv) clientSaleOv.onclick = closeClientSaleRequestModal;
     var clientSaleType = document.getElementById('clientSalePaymentType');
     if (clientSaleType) clientSaleType.addEventListener('change', syncClientSaleVendorMonthVisibility);
-    var btnFounderGotoCsr = document.getElementById('btnFounderGotoSolicitudesComprobantes');
-    if (btnFounderGotoCsr) {
-      btnFounderGotoCsr.onclick = function () {
-        switchSuperSection('solicitudes');
-        setTimeout(function () {
-          var el = document.getElementById('superClientSaleRequestsBox');
-          if (el) {
-            try { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) { el.scrollIntoView(true); }
-          }
-        }, 250);
-      };
-    }
     var clientSaleSubmit = document.getElementById('clientSaleRequestSubmit');
     if (clientSaleSubmit) {
       clientSaleSubmit.onclick = async function () {

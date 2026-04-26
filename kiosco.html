@@ -1131,30 +1131,8 @@
                 </div>
               </button>
             </div>
-            <button type="button" id="btnOpenNewKiosqueroModal" class="glass rounded-2xl p-5 border border-[#22c55e]/40 bg-[#22c55e]/[0.08] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-[#22c55e]/60 active:scale-[0.98] touch-target sm:col-span-2">
-              <div class="w-12 h-12 rounded-xl bg-[#22c55e]/25 flex items-center justify-center shrink-0">
-                <i data-lucide="store" class="w-6 h-6 text-[#86efac]"></i>
-              </div>
-              <div class="min-w-0 flex-1">
-                <span class="font-semibold text-sm text-white block">Solicitar alta de negocio (kiosco)</span>
-                <span class="text-xs text-white/55 mt-0.5 block">Queda pendiente hasta que Ferriol apruebe y constate el pago.</span>
-              </div>
-            </button>
-            <button type="button" id="btnExportDirectorioCSV" class="super-only super-main-only glass rounded-2xl p-5 border border-white/15 flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-[#22c55e]/45 active:scale-[0.98] touch-target sm:col-span-2">
-              <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                <i data-lucide="file-spreadsheet" class="w-6 h-6 text-[#86efac]"></i>
-              </div>
-              <div class="min-w-0 flex-1">
-                <span class="font-semibold text-sm text-white block">Exportar directorio (CSV)</span>
-                <span class="text-xs text-white/55 mt-0.5 block">Descarga de perfiles para análisis externo.</span>
-              </div>
-            </button>
           </div>
-            <div class="mb-3 rounded-xl border border-cyan-500/30 bg-cyan-500/08 p-3 super-only super-main-only">
-              <p class="text-xs text-cyan-100/90 mb-2 flex items-center gap-1.5"><i data-lucide="image" class="w-3.5 h-3.5 shrink-0"></i> <strong>Comprobantes de venta (socios)</strong>: la empresa revisa y aprueba en <strong class="text-white/90">Solicitudes</strong>.</p>
-              <button type="button" id="btnFounderGotoSolicitudesComprobantes" class="text-xs font-semibold text-cyan-200 underline underline-offset-2 touch-target py-0.5">Abrir solicitudes: ventas con comprobante</button>
-            </div>
-            <p class="text-xs text-white/50 mb-3">Pestañas <strong class="text-white/70">Usuarios</strong> / <strong class="text-white/70">Distribuidores</strong>: tocá una fila para detalle y membresía. Quitar cuentas: contraseña en <strong class="text-white/65">Más → Ajustes</strong>.</p>
+          <p class="text-xs text-white/50 mb-3">Pestañas <strong class="text-white/70">Usuarios</strong> / <strong class="text-white/70">Distribuidores</strong>: tocá una fila para detalle y membresía. Quitar cuentas: contraseña en <strong class="text-white/65">Más → Ajustes</strong>.</p>
           <input type="text" id="superSearchEmail" placeholder="Buscar por email o nombre..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm mb-3" autocomplete="off">
           <div class="flex flex-wrap gap-2 mb-2">
             <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-[#22c55e]/50 bg-[#22c55e]/30" data-filter="todos">Todos</button>
@@ -1403,7 +1381,18 @@
             <i data-lucide="clipboard-list" class="w-5 h-5 text-[#86efac]"></i>
             Solicitudes
           </h2>
-          <p class="text-xs text-white/50 mb-3">Gestioná <strong class="text-white/70">pendientes</strong> (aprobá o rechazá) y consultá el <strong class="text-white/65">historial</strong> por estado. Las altas nuevas seguís iniciándolas desde <strong class="text-white/65">Afiliados</strong>.</p>
+          <p class="text-xs text-white/50 mb-3">Gestioná <strong class="text-white/70">pendientes</strong> (aprobá o rechazá) y consultá el <strong class="text-white/65">historial</strong> por estado. El alta de negocio (kiosco) la iniciás con el botón de abajo; las altas de administrador de red siguen en <strong class="text-white/65">Afiliados</strong>.</p>
+          <div class="mb-4 super-only super-main-only">
+            <button type="button" id="btnOpenNewKiosqueroModal" class="glass rounded-2xl p-5 border border-[#22c55e]/40 bg-[#22c55e]/[0.08] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-[#22c55e]/60 active:scale-[0.98] touch-target">
+              <div class="w-12 h-12 rounded-xl bg-[#22c55e]/25 flex items-center justify-center shrink-0">
+                <i data-lucide="store" class="w-6 h-6 text-[#86efac]"></i>
+              </div>
+              <div class="min-w-0 flex-1">
+                <span class="font-semibold text-sm text-white block">Solicitar alta de negocio (kiosco)</span>
+                <span class="text-xs text-white/55 mt-0.5 block">Queda pendiente hasta que Ferriol apruebe y constate el pago.</span>
+              </div>
+            </button>
+          </div>
           <div id="superClientSaleRequestsBox" class="hidden mb-5 rounded-2xl border border-emerald-500/40 bg-emerald-500/[0.08] p-3 sm:p-4 super-only super-main-only">
             <h3 class="text-sm font-semibold text-emerald-200 mb-2 flex items-center gap-2"><i data-lucide="image-plus" class="w-4 h-4"></i> Ventas con comprobante (socios)</h3>
             <p class="text-[11px] text-white/50 mb-3">Revisá nombre, email y monto, mirá el comprobante, y aprobá para generar el cobro y la <strong class="text-white/70">comisión del administrador en Ingresos</strong> (mismo flujo que verificar pago en Cobros).</p>
@@ -1466,6 +1455,13 @@
               <span class="font-semibold text-base text-white">Aviso global</span>
               <span class="text-xs text-white/55">Mensaje a kiosqueros y administradores de red (campana).</span>
             </button>
+            <button type="button" id="btnExportDirectorioCSV" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
+              <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                <i data-lucide="file-spreadsheet" class="w-6 h-6 text-[#86efac]"></i>
+              </div>
+              <span class="font-semibold text-base text-white">Exportar directorio (CSV)</span>
+              <span class="text-xs text-white/55">Descarga de perfiles para análisis externo.</span>
+            </button>
             <button type="button" id="btnSuperMasScrollAdmin" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target sm:col-span-2">
               <div class="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center shrink-0">
                 <i data-lucide="terminal" class="w-6 h-6 text-violet-200"></i>
@@ -1492,7 +1488,7 @@
               <i data-lucide="user-cog" class="w-5 h-5 text-[#86efac]"></i>
               Otro administrador global
             </h3>
-            <p class="text-xs text-white/55 mb-3">Los socios solicitan altas de red desde <strong class="text-white/70">Afiliados</strong>. Usá SQL solo para promover a <strong class="text-white/70">super</strong> cuando haga falta.</p>
+            <p class="text-xs text-white/55 mb-3">El alta de negocio (kiosco) se inicia en <strong class="text-white/70">Solicitudes</strong>. Los socios solicitan altas de red desde <strong class="text-white/70">Afiliados</strong>. Usá SQL solo para promover a <strong class="text-white/70">super</strong> cuando haga falta.</p>
             <p class="text-xs text-white/50 mb-2">Supabase → SQL Editor (cambiá el email):</p>
             <pre class="text-xs bg-black/30 rounded-lg p-3 overflow-x-auto text-[#86efac]" id="sqlAddAdmin">UPDATE profiles SET role = 'super' WHERE id = (SELECT id FROM auth.users WHERE email = 'tu-email@ejemplo.com');</pre>
           </div>
