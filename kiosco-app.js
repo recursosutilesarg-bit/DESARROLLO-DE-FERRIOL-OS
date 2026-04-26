@@ -1008,56 +1008,6 @@
       }
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
-    async function loadSuperMainFerriolResumenCard() {
-      var el = document.getElementById('superMainFerriolResumenCard');
-      if (!el) return;
-      if (!supabaseClient || !currentUser || !isEmpresaLensSuper()) {
-        el.classList.add('hidden');
-        el.innerHTML = '';
-        return;
-      }
-      el.classList.remove('hidden');
-      el.innerHTML = '<p class="text-xs text-white/50">Cargando resumen Ferriol…</p>';
-      try {
-        var lr = await supabaseClient.from('mlm_ledger').select('amount').is('beneficiary_user_id', null).eq('status', 'pending').eq('event_type', 'company_reserve');
-        var sumCo = 0;
-        var nCo = 0;
-        if (!lr.error && lr.data) {
-          nCo = lr.data.length;
-          sumCo = lr.data.reduce(function (a, x) { return a + Number(x.amount || 0); }, 0);
-        }
-        var pendLed = await supabaseClient.from('mlm_ledger').select('amount, event_type, beneficiary_user_id').eq('status', 'pending');
-        var sumSoc = 0;
-        var nSoc = 0;
-        if (!pendLed.error && pendLed.data) {
-          var partnerEv = { sale_commission: true, vendor_payable_company: true, renewal: true };
-          var toSoc = pendLed.data.filter(function (r) { return r.beneficiary_user_id && partnerEv[r.event_type]; });
-          nSoc = toSoc.length;
-          sumSoc = toSoc.reduce(function (a, r) { return a + Number(r.amount || 0); }, 0);
-        }
-        var nK = 0;
-        var nP = 0;
-        try {
-          var cK = await supabaseClient.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'kiosquero');
-          if (!cK.error && cK.count != null) nK = cK.count;
-          var cP = await supabaseClient.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'partner');
-          if (!cP.error && cP.count != null) nP = cP.count;
-        } catch (_) {}
-        el.innerHTML =
-          '<p class="font-semibold text-cyan-100 mb-2 flex items-center gap-2"><i data-lucide="pie-chart" class="w-4 h-4"></i> Resumen Ferriol · administrador</p>' +
-          '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">' +
-          '<div class="rounded-lg border border-cyan-400/25 bg-black/20 px-2 py-2">' +
-          '<p class="text-white/55">Empresa · pendiente de cobro (reserva libro)</p>' +
-          '<p class="text-cyan-100 font-bold text-base">$ ' + sumCo.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + ' <span class="text-xs font-normal text-white/50">· ' + nCo + ' part.</span></p></div>' +
-          '<div class="rounded-lg border border-amber-400/25 bg-black/20 px-2 py-2">' +
-          '<p class="text-white/55">Red · pendiente de liquidar a socios</p>' +
-          '<p class="text-amber-100 font-bold text-base">$ ' + sumSoc.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + ' <span class="text-xs font-normal text-white/50">· ' + nSoc + ' part.</span></p></div></div>' +
-          '<p class="text-[11px] text-white/45 mt-2">Directorio: <strong class="text-white/65">' + nK + '</strong> kioscos · <strong class="text-white/65">' + nP + '</strong> socios vendedores. Detalle de transferencias, verificaciones y libro: pestaña <strong class="text-white/70">Cobros</strong>.</p>';
-      } catch (e) {
-        el.innerHTML = '<p class="text-xs text-amber-200">No se pudo cargar el resumen. ¿Ejecutaste los SQL de Ferriol?</p>';
-      }
-      lucide.createIcons();
-    }
     function ferriolKioscoSponsorHintHtml() {
       if (!currentUser || !currentUser.sponsorId) {
         return 'No figura referidor en tu perfil. Si entraste por invitación, pedí que lo carguen en administración. <span class="text-white/60">El pago de la licencia sigue yendo a <strong class="text-white/75">Ferriol (empresa)</strong> con los datos oficiales de arriba.</span>';
@@ -2909,9 +2859,6 @@
       }
       if (currentUser && (currentUser.role === 'kiosquero' || isSuperKioscoPreviewMode())) {
         loadKioscoLicensePaymentInfo();
-      }
-      if (currentUser && currentUser.role === 'super') {
-        loadSuperMainFerriolResumenCard();
       }
       try {
         if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
@@ -7070,7 +7017,6 @@ async function showApp() {
       if (isPartnerLens() && supabaseClient && currentUser && !currentUser.referralCode) {
         ensureUserReferralCode(currentUser.id).then(function (cc) { if (cc) currentUser.referralCode = cc; });
       }
-      await loadSuperMainFerriolResumenCard();
       await renderSuperMembershipDayRequestBanners();
       if (state.superSection === 'solicitudes' && isEmpresaLensSuper()) loadSuperSolicitudesSection();
       lucide.createIcons();
