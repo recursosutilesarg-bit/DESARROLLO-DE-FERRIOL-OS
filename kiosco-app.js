@@ -8007,3 +8007,81 @@ async function showApp() {
         console.error('Error en init:', e);
       }
     })();
+
+    /* ══════════════════════════════════════════════════════════
+       TABLERO SISTEMA: tabs + flujograma editable
+       ══════════════════════════════════════════════════════════ */
+    (function () {
+      var FLUJO_KEY = 'ferriol_flujo_edits_v1';
+
+      function sistemaSwitchTab(tabId) {
+        document.querySelectorAll('.sistema-tab').forEach(function (btn) {
+          var active = btn.dataset.sistemaTab === tabId;
+          btn.className = 'sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border ' +
+            (active ? 'border-[#22c55e]/50 bg-[#22c55e]/20 text-white' : 'border-transparent text-white/50 hover:text-white/75');
+        });
+        document.querySelectorAll('.mlm-board[data-sistema-tab]').forEach(function (el) {
+          el.classList.toggle('hidden', el.dataset.sistemaTab !== tabId);
+        });
+        try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (_) {}
+      }
+      sistemaSwitchTab('flujo');
+
+      document.querySelectorAll('.sistema-tab').forEach(function (btn) {
+        btn.addEventListener('click', function () { sistemaSwitchTab(btn.dataset.sistemaTab); });
+      });
+
+      /* ── Flujograma editable ── */
+      function flujoLoadEdits() {
+        try {
+          var saved = JSON.parse(localStorage.getItem(FLUJO_KEY) || '{}');
+          document.querySelectorAll('#flujoProcesoBoard [contenteditable]').forEach(function (el) {
+            var step = (el.closest('[data-step]') || {}).dataset && el.closest('[data-step]').dataset.step;
+            var type = el.classList.contains('flujo-title') ? 't' : 'd';
+            var key = step + '_' + type;
+            if (saved[key] !== undefined) el.textContent = saved[key];
+          });
+        } catch (_) {}
+      }
+
+      function flujoSaveEdit(el) {
+        try {
+          var saved = JSON.parse(localStorage.getItem(FLUJO_KEY) || '{}');
+          var stepEl = el.closest('[data-step]');
+          if (!stepEl) return;
+          var step = stepEl.dataset.step;
+          var type = el.classList.contains('flujo-title') ? 't' : 'd';
+          saved[step + '_' + type] = el.textContent;
+          localStorage.setItem(FLUJO_KEY, JSON.stringify(saved));
+        } catch (_) {}
+      }
+
+      document.querySelectorAll('#flujoProcesoBoard [contenteditable]').forEach(function (el) {
+        el.addEventListener('focus', function () {
+          var hint = el.parentElement && el.parentElement.querySelector('.flujo-edit-hint');
+          if (hint) hint.style.opacity = '0';
+        });
+        el.addEventListener('blur', function () {
+          flujoSaveEdit(el);
+          var hint = el.parentElement && el.parentElement.querySelector('.flujo-edit-hint');
+          if (hint) hint.style.opacity = '';
+        });
+        el.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' && el.classList.contains('flujo-title')) { e.preventDefault(); el.blur(); }
+          if (e.key === 'Escape') { el.textContent = el.dataset.default; el.blur(); }
+        });
+      });
+
+      var flujoResetBtn = document.getElementById('flujoResetBtn');
+      if (flujoResetBtn) {
+        flujoResetBtn.addEventListener('click', function () {
+          if (!confirm('¿Restablecer el flujograma a los textos originales?')) return;
+          try { localStorage.removeItem(FLUJO_KEY); } catch (_) {}
+          document.querySelectorAll('#flujoProcesoBoard [contenteditable]').forEach(function (el) {
+            el.textContent = el.dataset.default || el.textContent;
+          });
+        });
+      }
+
+      flujoLoadEdits();
+    })();
