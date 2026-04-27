@@ -35,7 +35,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-  <link rel="stylesheet" href="kiosco.css?v=20260427flatpanel">
+  <link rel="stylesheet" href="kiosco.css?v=20260428masnav">
 </head>
 <body class="relative">
   <!-- Banner instalar como app (PWA) — visible al abrir el link -->
@@ -2065,7 +2065,7 @@
             <i data-lucide="menu" class="w-5 h-5 text-[#86efac]"></i>
             Más opciones
           </h2>
-          <p class="text-xs text-white/50 mb-4">Tarjetas para <strong class="text-white/65">administrador de red</strong>: enlaces de afiliación (negocios y socios) y venta con comprobante. Después: datos bancarios. <strong class="text-white/65">Fundador</strong>: primero la tarjeta verde para revisar las ventas con comprobante que envían los socios; más abajo, el resto de herramientas.</p>
+          <p class="text-xs text-white/50 mb-4">Tarjetas de accesos: enlaces de afiliación, venta con comprobante, <strong class="text-white/65">Ajustes</strong>, aviso global y exportación. <strong class="text-white/65">Fundador</strong>: usá la tarjeta verde para revisar ventas con comprobante. Los <strong class="text-white/65">datos bancarios</strong> (tuyos) los cargás en el menú de tu perfil.</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
             <div class="ferriol-partner-affiliate-links-wrap hidden sm:col-span-2">
               <button type="button" id="btnOpenPartnerAffiliateLinks" class="glass rounded-2xl p-5 border border-cyan-400/35 bg-cyan-500/[0.07] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-cyan-400/55 active:scale-[0.98] touch-target">
@@ -2089,23 +2089,6 @@
                 </div>
               </button>
             </div>
-          </div>
-          <div id="superMasFerriolBankingCard" class="mb-5 rounded-xl border border-cyan-500/35 bg-cyan-500/10 p-4 sm:p-5 hidden">
-            <h3 class="font-bold text-base mb-1 flex items-center gap-2 text-cyan-100/95">
-              <i data-lucide="landmark" class="w-5 h-5 text-cyan-200"></i>
-              Pago obligatorio a Ferriol (empresa)
-            </h3>
-            <p class="text-xs text-white/55 mb-2">Todas las cuotas de licencia y de <strong class="text-white/75">socio / distribuidor digital</strong> se abonan a <strong class="text-cyan-100/90">Ferriol</strong> con estos datos oficiales (no a una cuenta personal del referidor salvo otra regla comercial acordada por fuera).</p>
-            <pre id="superMasFerriolTransferText" class="text-xs whitespace-pre-wrap text-white/90 font-sans max-h-52 overflow-y-auto">—</pre>
-          </div>
-          <div id="superMasPartnerBankingCard" class="mb-5 rounded-xl border border-amber-500/30 bg-amber-500/08 p-4 sm:p-5 hidden">
-            <h3 class="font-bold text-base mb-1 flex items-center gap-2 text-amber-200/95">
-              <i data-lucide="banknote" class="w-4 h-4 text-amber-200"></i>
-              Tus datos para que te paguen (referidos)
-            </h3>
-            <p class="text-xs text-white/55 mb-3">En <strong class="text-white/70">Caja</strong> verán <strong class="text-cyan-200/80">siempre</strong> primero el pago a <strong class="text-white/75">Ferriol</strong>. Lo que cargues acá es <strong class="text-white/75">extra</strong> (acuerdos de red, no sustituye la licencia a la empresa).</p>
-            <button type="button" id="btnOpenPartnerTransferModal" class="w-full sm:w-auto rounded-xl py-2.5 px-4 text-sm font-semibold border border-amber-500/50 bg-amber-500/15 hover:bg-amber-500/25 text-amber-100 touch-target text-left">Cargar o editar datos bancarios</button>
-            <p id="superMasPartnerTransferPreview" class="text-xs text-white/45 mt-2 hidden"></p>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 super-only super-main-only">
             <button type="button" id="btnSuperMasGoSolicitudesVentas" class="glass rounded-2xl p-5 border border-emerald-500/45 bg-emerald-500/[0.12] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-emerald-400/65 active:scale-[0.98] touch-target sm:col-span-2">
