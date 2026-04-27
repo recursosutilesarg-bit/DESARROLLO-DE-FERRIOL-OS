@@ -584,7 +584,41 @@
       }
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
+    function renderIngresosBienvenida() {
+      var banner = document.getElementById('ingresosBienvenidaBanner');
+      if (!banner || !currentUser) return;
+      var isPartner = currentUser.role === 'partner';
+      var isSuperEmpresa = currentUser.role === 'super' && isEmpresaLensSuper();
+      if (!isPartner && !isSuperEmpresa) { banner.classList.add('hidden'); return; }
+      var title = document.getElementById('ingresosBienvenidaTitle');
+      var sub = document.getElementById('ingresosBienvenidaSub');
+      var statsBox = document.getElementById('ingresosBienvenidaStats');
+      var fullName = ((currentUser.first_name || '') + ' ' + (currentUser.last_name || '')).trim() ||
+                     currentUser.nombre_negocio || currentUser.email || '';
+      var firstName = (currentUser.first_name || fullName.split(' ')[0] || '').trim();
+      if (title) title.textContent = 'Hola, ' + (firstName || fullName) + (fullName && firstName !== fullName ? ' ' + (currentUser.last_name || '') : '') + '.';
+      if (sub) sub.textContent = isPartner ? 'Te damos la bienvenida. Acá podés ver tus comisiones y ventas.' : 'Bienvenido al panel de ingresos de la empresa.';
+      if (statsBox) statsBox.classList.toggle('hidden', isSuperEmpresa);
+      banner.classList.remove('hidden');
+      if (!isPartner || !supabaseClient) return;
+      var countEl = document.getElementById('bienvenidaKioscosCount');
+      var mesEl = document.getElementById('bienvenidaMesCount');
+      if (countEl) countEl.textContent = '…';
+      if (mesEl) mesEl.textContent = '…';
+      supabaseClient.from('profiles').select('id', { count: 'exact', head: true })
+        .eq('sponsor_id', currentUser.id).eq('role', 'kiosquero').eq('active', true)
+        .then(function(r) { if (countEl) countEl.textContent = r.count != null ? r.count : '—'; })
+        .catch(function() { if (countEl) countEl.textContent = '—'; });
+      var now = new Date();
+      var start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      supabaseClient.from('mlm_ledger').select('id', { count: 'exact', head: true })
+        .eq('partner_id', currentUser.id).gte('created_at', start)
+        .then(function(r) { if (mesEl) mesEl.textContent = r.count != null ? r.count : '—'; })
+        .catch(function() { if (mesEl) mesEl.textContent = '—'; });
+    }
+
     async function loadSuperIngresosSection() {
+      renderIngresosBienvenida();
       var kpiN = document.getElementById('ingresosKpiNet');
       var kpiC = document.getElementById('ingresosKpiCount');
       var kpiR = document.getElementById('ingresosKpiRej');
@@ -1497,7 +1531,7 @@
       _restoringFromHistory: false,
       _suppressCajaHistoryPush: false,
       historialFilter: 'hoy',
-      superSection: 'afiliados',  // afiliados | ingresos | sistema | ajustes | solicitudes | mas
+      superSection: 'ingresos',  // afiliados | ingresos | sistema | ajustes | solicitudes | mas
       afiliadosSubTab: 'usuarios',  // usuarios (kiosquero) | distribuidores (partner)
       superUiMode: 'empresa'  // empresa | socio | negocio — solo si role === 'super'
     };
@@ -2887,7 +2921,7 @@
         applyAppShell();
       }
       if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'afiliados' && state.superSection !== 'ingresos' && state.superSection !== 'solicitudes' && state.superSection !== 'mas') {
-        switchSuperSection('afiliados');
+        switchSuperSection('ingresos');
       }
       if (name !== 'scanner') window._scanForProductCode = false;
       state.currentPanel = name;
@@ -2912,9 +2946,9 @@
         superListCountdownInterval = setInterval(updateSuperListCountdowns, 1000);
         var navSuperBottom = document.getElementById('navSuperBottom');
         if (navSuperBottom) navSuperBottom.classList.remove('hidden');
-        var landSuper = state.superSection || 'afiliados';
+        var landSuper = state.superSection || 'ingresos';
         if (landSuper === 'balance') landSuper = 'ingresos';
-        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'ingresos' && landSuper !== 'solicitudes' && landSuper !== 'mas') landSuper = 'afiliados';
+        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'ingresos' && landSuper !== 'solicitudes' && landSuper !== 'mas') landSuper = 'ingresos';
         switchSuperSection(landSuper);
       } else {
         if (superListCountdownInterval) { clearInterval(superListCountdownInterval); superListCountdownInterval = null; }
@@ -2976,13 +3010,13 @@
       btn.onclick = () => goToPanel(btn.dataset.nav);
     });
     function switchSuperSection(sectionName) {
-      var sn = sectionName || 'afiliados';
+      var sn = sectionName || 'ingresos';
       if (sn === 'balance') sn = 'ingresos';
       if (sn === 'cobros') sn = 'sistema';
       state.superSection = sn;
       var reqSuper = state.superSection === 'sistema';
       if (reqSuper && currentUser && (currentUser.role !== 'super' || !isEmpresaLensSuper())) {
-        state.superSection = 'afiliados';
+        state.superSection = 'ingresos';
       }
       document.querySelectorAll('#panel-super .super-section').forEach(function (el) {
         el.classList.add('hidden');
