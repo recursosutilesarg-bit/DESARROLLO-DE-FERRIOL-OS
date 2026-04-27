@@ -586,19 +586,23 @@
     }
     function renderIngresosBienvenida() {
       var banner = document.getElementById('ingresosBienvenidaBanner');
-      if (!banner || !currentUser) return;
-      var isPartner = currentUser.role === 'partner';
-      var isSuperEmpresa = currentUser.role === 'super' && isEmpresaLensSuper();
-      if (!isPartner && !isSuperEmpresa) { banner.classList.add('hidden'); return; }
+      if (!banner) return;
+      if (!currentUser || (currentUser.role !== 'partner' && currentUser.role !== 'super')) {
+        banner.classList.add('hidden');
+        return;
+      }
       var title = document.getElementById('ingresosBienvenidaTitle');
       var sub = document.getElementById('ingresosBienvenidaSub');
       var statsBox = document.getElementById('ingresosBienvenidaStats');
-      var fullName = ((currentUser.first_name || '') + ' ' + (currentUser.last_name || '')).trim() ||
-                     currentUser.nombre_negocio || currentUser.email || '';
-      var firstName = (currentUser.first_name || fullName.split(' ')[0] || '').trim();
-      if (title) title.textContent = 'Hola, ' + (firstName || fullName) + (fullName && firstName !== fullName ? ' ' + (currentUser.last_name || '') : '') + '.';
-      if (sub) sub.textContent = isPartner ? 'Te damos la bienvenida. Acá podés ver tus comisiones y ventas.' : 'Bienvenido al panel de ingresos de la empresa.';
-      if (statsBox) statsBox.classList.toggle('hidden', isSuperEmpresa);
+      var nombre = (currentUser.kioscoName || '').trim() ||
+                   (currentUser.email ? currentUser.email.split('@')[0] : '') ||
+                   'equipo';
+      if (title) title.textContent = 'Hola, ' + nombre + ', te damos la bienvenida.';
+      if (sub) sub.textContent = currentUser.role === 'partner'
+        ? 'Acá podés ver tus comisiones, ventas y kioscos activos.'
+        : 'Panel de ingresos y operaciones de Ferriol OS.';
+      var isPartner = currentUser.role === 'partner';
+      if (statsBox) statsBox.classList.toggle('hidden', !isPartner);
       banner.classList.remove('hidden');
       if (!isPartner || !supabaseClient) return;
       var countEl = document.getElementById('bienvenidaKioscosCount');
@@ -2946,6 +2950,7 @@
         superListCountdownInterval = setInterval(updateSuperListCountdowns, 1000);
         var navSuperBottom = document.getElementById('navSuperBottom');
         if (navSuperBottom) navSuperBottom.classList.remove('hidden');
+        renderIngresosBienvenida();
         var landSuper = state.superSection || 'ingresos';
         if (landSuper === 'balance') landSuper = 'ingresos';
         if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'ingresos' && landSuper !== 'solicitudes' && landSuper !== 'mas') landSuper = 'ingresos';
