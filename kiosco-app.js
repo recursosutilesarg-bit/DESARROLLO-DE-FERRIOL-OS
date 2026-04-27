@@ -1340,14 +1340,27 @@
         if (balRpc.error) throw balRpc.error;
         var bal = Number(balRpc.data != null ? balRpc.data : 0);
         av.textContent = '$ ' + bal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS';
-        var led = await supabaseClient.from('mlm_ledger').select('amount').eq('beneficiary_user_id', currentUser.id).in('status', ['approved', 'paid']).in('event_type', ['sale_commission', 'renewal']);
-        var gross = 0;
-        (led.data || []).forEach(function (L) { gross += Number(L.amount || 0); });
-        var paidQ = await supabaseClient.from('ferriol_partner_withdrawal_requests').select('amount_ars').eq('partner_user_id', currentUser.id).eq('status', 'paid');
+        var led = await supabaseClient.from('mlm_ledger').select('amount').eq('beneficiary_user_id', currentUser.id).eq('event_type', 'sale_commission').eq('status', 'approved');
+        if (led.error) throw led.error;
+        var ingresosTotal = 0;
+        (led.data || []).forEach(function (L) { ingresosTotal += Number(L.amount || 0); });
+        var rqTotals = await supabaseClient.from('ferriol_partner_withdrawal_requests').select('amount_ars, status').eq('partner_user_id', currentUser.id);
+        if (rqTotals.error) throw rqTotals.error;
+        var historialComprometido = 0;
         var paidSum = 0;
-        (paidQ.data || []).forEach(function (r) { paidSum += Number(r.amount_ars || 0); });
+        (rqTotals.data || []).forEach(function (w) {
+          var a = Number(w.amount_ars || 0);
+          if (w.status !== 'rejected') historialComprometido += a;
+          if (w.status === 'paid') paidSum += a;
+        });
         if (br) {
-          br.textContent = 'Comisiones acreditadas (libro): $ ' + gross.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + ' · Ya pagado a vos: $ ' + paidSum.toLocaleString('es-AR', { minimumFractionDigits: 2 });
+          br.innerHTML =
+            'Total Ingresos acreditados (histórico, mismo criterio que la pestaña Ingresos): $ ' +
+            ingresosTotal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
+            ' · Retiros en historial (pagados + en trámite, sin rechazados): $ ' +
+            historialComprometido.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
+            ' · Ya transferido a vos: $ ' +
+            paidSum.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
         var rq = await supabaseClient.from('ferriol_partner_withdrawal_requests').select('*').eq('partner_user_id', currentUser.id).order('created_at', { ascending: false }).limit(40);
         if (rq.error) throw rq.error;
