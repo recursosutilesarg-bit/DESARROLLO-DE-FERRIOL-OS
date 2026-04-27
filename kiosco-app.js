@@ -1321,14 +1321,14 @@
       var av = document.getElementById('partnerWalletAvailable');
       var br = document.getElementById('partnerWalletBreakdown');
       var hist = document.getElementById('partnerWithdrawHistory');
+      var btnW = document.getElementById('btnPartnerWithdrawOpen');
       if (!av || !hist) return;
-      if (!supabaseClient || !currentUser || currentUser.role !== 'partner') {
+      if (!supabaseClient || !currentUser || !isPartnerLens() || isEmpresaLensSuper()) {
         av.textContent = '—';
         if (br) br.textContent = '';
+        if (btnW) { btnW.disabled = true; btnW.classList.add('opacity-50'); btnW.removeAttribute('title'); }
         if (hist) {
-          hist.innerHTML = currentUser && currentUser.role === 'super' && isSuperSocioLens()
-            ? '<p class="text-amber-200/90 text-xs py-2">En vista fundador no se solicitan retiros. Usá una cuenta de administrador de red (socio) para la billetera.</p>'
-            : '<p class="text-white/45 text-xs py-2 text-center">—</p>';
+          hist.innerHTML = '<p class="text-white/45 text-xs py-2 text-center">—</p>';
         }
         return;
       }
@@ -1340,7 +1340,7 @@
         if (balRpc.error) throw balRpc.error;
         var bal = Number(balRpc.data != null ? balRpc.data : 0);
         av.textContent = '$ ' + bal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS';
-        var led = await supabaseClient.from('mlm_ledger').select('amount').eq('beneficiary_user_id', currentUser.id).eq('event_type', 'sale_commission').eq('status', 'approved');
+        var led = await supabaseClient.from('mlm_ledger').select('amount').eq('beneficiary_user_id', currentUser.id).eq('event_type', 'sale_commission').in('status', ['approved', 'paid']);
         if (led.error) throw led.error;
         var ingresosTotal = 0;
         (led.data || []).forEach(function (L) { ingresosTotal += Number(L.amount || 0); });
@@ -1355,7 +1355,7 @@
         });
         if (br) {
           br.innerHTML =
-            'Total Ingresos acreditados (histórico, mismo criterio que la pestaña Ingresos): $ ' +
+            'Comisiones en libro (sale_commission, estados approved o paid, histórico): $ ' +
             ingresosTotal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
             ' · Retiros en historial (pagados + en trámite, sin rechazados): $ ' +
             historialComprometido.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
@@ -1365,6 +1365,23 @@
         var rq = await supabaseClient.from('ferriol_partner_withdrawal_requests').select('*').eq('partner_user_id', currentUser.id).order('created_at', { ascending: false }).limit(40);
         if (rq.error) throw rq.error;
         var rows = rq.data || [];
+        if (btnW) {
+          if (currentUser.role === 'partner') {
+            btnW.disabled = false;
+            btnW.classList.remove('opacity-50');
+            btnW.removeAttribute('title');
+          } else {
+            btnW.disabled = true;
+            btnW.classList.add('opacity-50');
+            btnW.setAttribute('title', 'Las solicitudes de retiro solo las puede enviar una cuenta con rol administrador de red (partner), no la cuenta fundador.');
+          }
+        }
+        if (currentUser.role === 'super' && isSuperSocioLens() && br) {
+          br.innerHTML = '<p class="text-[10px] text-amber-200/90 mb-1.5">Cuenta fundador (vista administración): ves el saldo de tu usuario. Para pedir retiros a la empresa hace falta una cuenta con rol <strong class="text-amber-100/90">partner</strong>.</p>' + br.innerHTML;
+        }
+        if (currentUser.role === 'partner' && bal === 0 && ingresosTotal === 0 && br) {
+          br.innerHTML += '<p class="text-[10px] text-white/35 mt-1.5">Si creés que deberías tener saldo: confirmá que en Supabase corriste <code class="text-white/50">supabase-ferriol-partner-withdrawals.sql</code> y que en el libro ya hay comisiones <code class="text-white/50">sale_commission</code> en estado <code class="text-white/50">approved</code> o <code class="text-white/50">paid</code> a tu nombre.</p>';
+        }
         if (!rows.length) {
           hist.innerHTML = '<p class="text-xs text-white/45 py-3 text-center">Todavía no tenés solicitudes de retiro.</p>';
         } else {
@@ -1380,6 +1397,10 @@
         }
       } catch (e) {
         av.textContent = '—';
+        if (btnW && isPartnerLens() && !isEmpresaLensSuper()) {
+          btnW.disabled = currentUser.role !== 'partner';
+          btnW.classList.toggle('opacity-50', currentUser.role !== 'partner');
+        }
         hist.innerHTML = '<p class="text-red-300/90 text-xs py-2">No se pudo cargar la billetera. ¿Ejecutaste <code class="text-white/80">supabase-ferriol-partner-withdrawals.sql</code>? ' + String(e.message || e) + '</p>';
       }
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}

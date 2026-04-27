@@ -42,7 +42,7 @@ CREATE POLICY "fpwr_partner_select" ON public.ferriol_partner_withdrawal_request
 
 GRANT SELECT ON public.ferriol_partner_withdrawal_requests TO authenticated;
 
--- ——— Saldo retirable = mismo “libro” que la pestaña Ingresos del socio (sale_commission + approved, histórico)
+-- ——— Saldo retirable = comisiones sale_commission en libro (approved o paid), histórico,
 --     menos retiros pagados y montos reservados (pending_review + approved_pending_payout). ———
 CREATE OR REPLACE FUNCTION public.ferriol_partner_withdrawable_balance(p_partner_id uuid)
 RETURNS numeric
@@ -55,7 +55,7 @@ AS $$
     COALESCE((
       SELECT SUM(l.amount) FROM public.mlm_ledger l
       WHERE l.beneficiary_user_id = p_partner_id
-        AND l.status = 'approved'
+        AND l.status IN ('approved', 'paid')
         AND l.event_type = 'sale_commission'
     ), 0)
     - COALESCE((
@@ -129,7 +129,7 @@ BEGIN
   IF p_approve IS TRUE THEN
     SELECT GREATEST(0,
       COALESCE((SELECT SUM(l.amount) FROM public.mlm_ledger l
-        WHERE l.beneficiary_user_id = r.partner_user_id AND l.status = 'approved'
+        WHERE l.beneficiary_user_id = r.partner_user_id AND l.status IN ('approved', 'paid')
         AND l.event_type = 'sale_commission'), 0)
       - COALESCE((SELECT SUM(w.amount_ars) FROM public.ferriol_partner_withdrawal_requests w
         WHERE w.partner_user_id = r.partner_user_id AND w.status = 'paid'), 0)
@@ -192,7 +192,7 @@ BEGIN
   END IF;
   SELECT GREATEST(0,
     COALESCE((SELECT SUM(l.amount) FROM public.mlm_ledger l
-      WHERE l.beneficiary_user_id = r.partner_user_id AND l.status = 'approved'
+      WHERE l.beneficiary_user_id = r.partner_user_id AND l.status IN ('approved', 'paid')
       AND l.event_type = 'sale_commission'), 0)
     - COALESCE((SELECT SUM(w.amount_ars) FROM public.ferriol_partner_withdrawal_requests w
       WHERE w.partner_user_id = r.partner_user_id AND w.status = 'paid'), 0)
