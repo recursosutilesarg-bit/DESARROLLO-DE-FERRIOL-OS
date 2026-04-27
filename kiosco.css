@@ -924,7 +924,11 @@ textarea:focus-visible {
   inset: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 1rem 1rem max(6.5rem, env(safe-area-inset-bottom, 0) + 6rem);
+  /* Lateral: solo safe area. Abajo: hueco para barra de navegación / gestos (móvil). */
+  padding-top: 1rem;
+  padding-right: env(safe-area-inset-right, 0px);
+  padding-bottom: max(6.5rem, env(safe-area-inset-bottom, 0) + 6rem);
+  padding-left: env(safe-area-inset-left, 0px);
 }
 
 /* Sin animación en el panel para evitar parpadeos con actualizaciones de datos */
@@ -1111,10 +1115,10 @@ body[data-panel="inventory"] #panel-inventory {
     padding-bottom: max(6rem, env(safe-area-inset-bottom, 0) + 5.25rem) !important;
   }
 
-  /* Paneles: respetar notch y gestos del sistema */
+  /* Paneles: ancho útil completo; solo notch / home indicator */
   .panel {
-    padding-left: max(0.85rem, env(safe-area-inset-left, 0px) + 0.35rem);
-    padding-right: max(0.85rem, env(safe-area-inset-right, 0px) + 0.35rem);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
     overscroll-behavior-y: contain;
   }
 
@@ -1245,13 +1249,16 @@ body[data-panel="inventory"] #panel-inventory {
     padding-top: 0;
   }
 
-  /* Paneles con más aire (carril izquierdo en PC: sin gran padding inferior) */
+  /* Paneles: borde a borde en el área de contenido; solo safe areas y aire inferior */
   .panel {
-    padding: 1.5rem 2rem 1.5rem;
+    padding: 1rem 0 max(1rem, env(safe-area-inset-bottom, 0px));
+    padding-right: env(safe-area-inset-right, 0px);
+    padding-left: 0;
   }
   #panel-inventory {
-    padding: 0 0 1.25rem;
+    padding: 0 0 max(1rem, env(safe-area-inset-bottom, 0px));
     padding-top: env(safe-area-inset-top, 0);
+    padding-right: env(safe-area-inset-right, 0px);
   }
 
   /* Carril fijo a la IZQUIERDA, alto completo (solo ≥768px). En celular sigue abajo. */
@@ -1377,8 +1384,8 @@ body[data-panel="inventory"] #panel-inventory {
     max-width: none;
     margin-left: 0;
     margin-right: 0;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
   }
   #inventoryList {
     max-width: none;
@@ -1392,7 +1399,7 @@ body[data-panel="inventory"] #panel-inventory {
   .inv-item-price { font-size: 1rem; }
   .inv-item-stock { font-size: 0.85rem; min-width: 4rem; }
 
-  /* Restaurar glass en paneles (mobile tenía todo transparent) */
+  /* Glass a ancho completo del panel (sin columna centrada ni max-width) */
   #panel-scanner > .glass,
   #panel-caja    > .glass,
   #panel-mas     > .glass,
@@ -1405,9 +1412,11 @@ body[data-panel="inventory"] #panel-inventory {
     border-radius: 1rem !important;
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
-    max-width: 860px;
-    margin-left: auto;
-    margin-right: auto;
+    max-width: none !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box;
   }
   #panel-super > .relative > .super-section {
     background: var(--glass-bg) !important;
@@ -1416,6 +1425,36 @@ body[data-panel="inventory"] #panel-inventory {
     border-radius: 1rem !important;
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
+    max-width: none !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box;
+    padding-bottom: 1.25rem !important;
+  }
+
+  /* Header y avisos: ancho completo (sin max-w-7xl centrado) */
+  #mainHeader .max-w-7xl,
+  #partnerLicensePendingBanner .max-w-7xl {
+    max-width: none !important;
+    width: 100%;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  }
+
+  /* Escáner: vista previa a todo el ancho disponible */
+  #panel-scanner .aspect-square.max-w-sm {
+    max-width: none !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* Admin: menos padding inferior en PC (barra de iconos va al costado, no abajo) */
+  #panel-super > .relative.pb-24 {
+    padding-bottom: 1rem !important;
   }
 
   /* Panel de detalle de producto: modal centrado en tablet */
