@@ -712,13 +712,23 @@
           ? ('$ ' + sumRej.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS')
           : '$ 0,00 ARS';
         if (kpiPending) {
-          supabaseClient
-            .from('ferriol_payments')
-            .select('id', { count: 'exact', head: true })
-            .eq('seller_user_id', uid)
-            .eq('status', 'pending')
-            .then(function(rPend) { kpiPending.textContent = (rPend.count != null) ? String(rPend.count) : '—'; })
-            .catch(function() { kpiPending.textContent = '—'; });
+          Promise.all([
+            supabaseClient
+              .from('ferriol_kiosquero_provision_requests')
+              .select('id', { count: 'exact', head: true })
+              .eq('requested_by', uid)
+              .eq('status', 'pending'),
+            supabaseClient
+              .from('ferriol_partner_provision_requests')
+              .select('id', { count: 'exact', head: true })
+              .eq('requested_by', uid)
+              .eq('status', 'pending')
+          ]).then(function(results) {
+            var total = (results[0].count || 0) + (results[1].count || 0);
+            kpiPending.textContent = String(total);
+          }).catch(function() {
+            kpiPending.textContent = '—';
+          });
         }
         var dayKeys = [];
         var cur = new Date(startD);
