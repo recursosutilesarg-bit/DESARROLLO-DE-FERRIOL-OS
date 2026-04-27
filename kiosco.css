@@ -1259,9 +1259,18 @@ body[data-panel="inventory"] #panel-inventory {
     --ferriol-rail-w: 4.25rem;
   }
 
+  /*
+   * Margen (no padding): los paneles usan position:absolute + inset:0 y el origen
+   * es el borde del padding box; con solo padding-left el contenido seguía dibujándose
+   * debajo del carril. El margen desplaza todo #mainContent a la derecha del carril.
+   */
   #mainContent {
+    padding-left: 0;
     padding-right: 0;
-    padding-left: calc(var(--ferriol-rail-w) + env(safe-area-inset-left, 0px));
+    margin-left: calc(var(--ferriol-rail-w) + env(safe-area-inset-left, 0px));
+    width: calc(100% - var(--ferriol-rail-w) - env(safe-area-inset-left, 0px));
+    max-width: calc(100% - var(--ferriol-rail-w) - env(safe-area-inset-left, 0px));
+    box-sizing: border-box;
   }
 
   #navKiosquero.ferriol-bottom-nav,
