@@ -1203,11 +1203,17 @@
       var m = document.getElementById('founderWithdrawPayModal');
       if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
     }
+    function canUserRequestCommissionWithdrawal() {
+      return !!(currentUser && (currentUser.role === 'partner' || currentUser.role === 'super') && !isEmpresaLensSuper());
+    }
     (function setupPartnerWithdrawAndFounderPayModals() {
       var btnOpen = document.getElementById('btnPartnerWithdrawOpen');
       if (btnOpen) {
         btnOpen.addEventListener('click', function () {
-          if (!currentUser || currentUser.role !== 'partner' || isEmpresaLensSuper()) return;
+          if (!canUserRequestCommissionWithdrawal()) {
+            try { alert('No podés pedir retiro en esta vista. Usá la cuenta de administrador o la vista administración del fundador.'); } catch (_) {}
+            return;
+          }
           openPartnerWithdrawModal();
         });
       }
@@ -1221,8 +1227,8 @@
           var err = document.getElementById('partnerWithdrawModalErr');
           var amtIn = document.getElementById('partnerWithdrawAmount');
           if (err) { err.classList.add('hidden'); err.textContent = ''; }
-          if (!supabaseClient || !currentUser || currentUser.role !== 'partner' || isEmpresaLensSuper()) {
-            if (err) { err.textContent = 'Solo podés pedir retiros como administrador de red (no en vista fundador).'; err.classList.remove('hidden'); }
+          if (!supabaseClient || !canUserRequestCommissionWithdrawal()) {
+            if (err) { err.textContent = 'Solo podés pedir retiros como partner o fundador en vista administración (no en vista empresa).'; err.classList.remove('hidden'); }
             return;
           }
           var raw = amtIn ? String(amtIn.value || '').replace(/\./g, '').replace(',', '.') : '';
@@ -1366,14 +1372,14 @@
         if (rq.error) throw rq.error;
         var rows = rq.data || [];
         if (btnW) {
-          if (currentUser.role === 'partner') {
+          if (currentUser.role === 'partner' || currentUser.role === 'super') {
             btnW.disabled = false;
             btnW.classList.remove('opacity-50');
             btnW.removeAttribute('title');
           } else {
             btnW.disabled = true;
             btnW.classList.add('opacity-50');
-            btnW.setAttribute('title', 'Las solicitudes de retiro solo las puede enviar una cuenta con rol administrador de red (partner), no la cuenta fundador.');
+            btnW.setAttribute('title', 'Solo cuentas partner o fundador (vista administración) pueden solicitar retiro.');
           }
         }
         if (currentUser.role === 'super' && isSuperSocioLens() && br) {
@@ -1398,8 +1404,9 @@
       } catch (e) {
         av.textContent = '—';
         if (btnW && isPartnerLens() && !isEmpresaLensSuper()) {
-          btnW.disabled = currentUser.role !== 'partner';
-          btnW.classList.toggle('opacity-50', currentUser.role !== 'partner');
+          var canW = currentUser.role === 'partner' || currentUser.role === 'super';
+          btnW.disabled = !canW;
+          btnW.classList.toggle('opacity-50', !canW);
         }
         hist.innerHTML = '<p class="text-red-300/90 text-xs py-2">No se pudo cargar la billetera. ¿Ejecutaste <code class="text-white/80">supabase-ferriol-partner-withdrawals.sql</code>? ' + String(e.message || e) + '</p>';
       }
