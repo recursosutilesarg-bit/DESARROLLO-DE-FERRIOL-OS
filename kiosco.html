@@ -195,7 +195,7 @@
         <button type="button" id="appReloadBtn" class="btn-neomorphic rounded-xl p-2.5 transition-all duration-300 hover:scale-105 active:scale-95 touch-target" title="Recargar la app (útil tras actualizar en el servidor)" aria-label="Recargar la aplicación">
           <i data-lucide="refresh-cw" class="w-5 h-5"></i>
         </button>
-        <button type="button" id="headerProfileBtn" class="relative w-10 h-10 rounded-full border-2 border-white/30 bg-gradient-to-br from-emerald-600/40 to-violet-600/35 overflow-hidden shrink-0 touch-target shadow-md hover:border-emerald-300/50 active:scale-95 transition-all cursor-pointer z-[51]" title="Mi cuenta · editar datos personales" aria-label="Abrir mi cuenta para editar datos">
+        <button type="button" id="headerProfileBtn" class="relative w-10 h-10 rounded-full border-2 border-white/30 bg-gradient-to-br from-emerald-600/40 to-violet-600/35 overflow-hidden shrink-0 touch-target shadow-md hover:border-emerald-300/50 active:scale-95 transition-all cursor-pointer z-[51]" title="Mi cuenta" aria-label="Abrir menú de mi cuenta">
           <img id="headerProfileImg" alt="" class="hidden absolute inset-0 w-full h-full object-cover z-10 pointer-events-none select-none" draggable="false">
           <span id="headerProfileInitials" class="absolute inset-0 flex items-center justify-center text-sm font-bold text-white/95 pointer-events-none z-0 select-none">?</span>
         </button>
@@ -2728,6 +2728,30 @@
   </div>
   </div><!-- /#appWrap -->
   <script src="kiosco-config.js"></script>
+  <!-- Menú cuenta: columna desde la derecha -->
+  <div id="accountMenuDrawer" class="fixed inset-0 z-[88] hidden" aria-hidden="true">
+    <button type="button" id="accountMenuDrawerOverlay" class="absolute inset-0 z-0 bg-black/60 backdrop-blur-[2px] border-0 cursor-default" aria-label="Cerrar menú"></button>
+    <div id="accountMenuDrawerPanel" class="absolute top-0 right-0 z-[1] h-full w-full max-w-[320px] flex flex-col glass-strong border-l border-white/15 shadow-2xl translate-x-full transition-transform duration-300 ease-out" style="padding-bottom: env(safe-area-inset-bottom, 0)" role="dialog" aria-labelledby="accountMenuDrawerTitle">
+      <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-white/10 shrink-0" style="padding-top: max(0.75rem, env(safe-area-inset-top, 0))">
+        <h2 id="accountMenuDrawerTitle" class="font-bold text-base text-white tracking-tight">Mi cuenta</h2>
+        <button type="button" id="accountMenuDrawerClose" class="btn-neomorphic rounded-xl p-2 touch-target shrink-0" title="Cerrar"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <nav class="flex flex-col gap-2.5 p-4 flex-1 overflow-y-auto overscroll-contain" aria-label="Opciones de cuenta">
+        <button type="button" id="accountMenuBtnPersonal" class="w-full text-left btn-neomorphic rounded-xl py-3.5 px-4 font-medium text-sm touch-target flex items-center gap-3">
+          <i data-lucide="user-circle" class="w-5 h-5 text-emerald-300 shrink-0"></i>
+          <span>Datos personales</span>
+        </button>
+        <button type="button" id="accountMenuBtnBank" class="w-full text-left btn-neomorphic rounded-xl py-3.5 px-4 font-medium text-sm touch-target flex items-center gap-3 hidden">
+          <i data-lucide="landmark" class="w-5 h-5 text-amber-200 shrink-0"></i>
+          <span>Datos bancarios</span>
+        </button>
+        <button type="button" id="accountMenuBtnLogout" class="w-full text-left rounded-xl py-3.5 px-4 font-semibold text-sm touch-target flex items-center gap-3 border border-red-500/45 bg-red-950/35 text-red-100 hover:bg-red-950/50 transition-colors mt-auto">
+          <i data-lucide="log-out" class="w-5 h-5 shrink-0"></i>
+          <span>Cerrar sesión / Salir</span>
+        </button>
+      </nav>
+    </div>
+  </div>
   <!-- Pantalla Mi cuenta (foto + datos editables; en celular ocupa casi toda la pantalla) -->
   <div id="accountProfileModal" class="fixed inset-0 z-[90] hidden flex flex-col sm:items-center sm:justify-center sm:p-4" aria-hidden="true">
     <button type="button" class="absolute inset-0 bg-black/70 backdrop-blur-sm border-0 cursor-default" id="accountProfileModalOverlay" aria-label="Cerrar panel"></button>
@@ -2790,7 +2814,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426profileheaderfix"></script>
+  <script defer src="kiosco-app.js?v=20260426accountdrawer"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>
