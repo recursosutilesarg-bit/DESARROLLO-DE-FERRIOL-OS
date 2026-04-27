@@ -1245,7 +1245,7 @@ body[data-panel="inventory"] #panel-inventory {
     padding-top: 0;
   }
 
-  /* Paneles con más aire (carril derecho en PC: sin gran padding inferior) */
+  /* Paneles con más aire (carril izquierdo en PC: sin gran padding inferior) */
   .panel {
     padding: 1.5rem 2rem 1.5rem;
   }
@@ -1254,28 +1254,28 @@ body[data-panel="inventory"] #panel-inventory {
     padding-top: env(safe-area-inset-top, 0);
   }
 
-  /* Carril fijo a la DERECHA, alto completo (solo ≥768px). En celular sigue abajo. */
+  /* Carril fijo a la IZQUIERDA, alto completo (solo ≥768px). En celular sigue abajo. */
   :root {
     --ferriol-rail-w: 4.25rem;
   }
 
   #mainContent {
-    padding-left: 0;
-    padding-right: calc(var(--ferriol-rail-w) + env(safe-area-inset-right, 0px));
+    padding-right: 0;
+    padding-left: calc(var(--ferriol-rail-w) + env(safe-area-inset-left, 0px));
   }
 
   #navKiosquero.ferriol-bottom-nav,
   #navSuperBottom.ferriol-bottom-nav {
     top: 0;
     bottom: 0;
-    left: auto;
-    right: 0;
+    left: 0;
+    right: auto;
     box-sizing: border-box;
-    width: calc(var(--ferriol-rail-w) + env(safe-area-inset-right, 0px));
+    width: calc(var(--ferriol-rail-w) + env(safe-area-inset-left, 0px));
     padding-top: env(safe-area-inset-top, 0);
     padding-bottom: env(safe-area-inset-bottom, 0);
-    padding-left: 0;
-    padding-right: env(safe-area-inset-right, 0);
+    padding-left: env(safe-area-inset-left, 0);
+    padding-right: 0;
   }
 
   /* Con header visible (Inicio kiosquero / panel admin): carril empieza bajo el header */
@@ -1289,11 +1289,11 @@ body[data-panel="inventory"] #panel-inventory {
     height: 100%;
     max-width: none !important;
     margin: 0;
-    border-radius: 1rem 0 0 1rem;
+    border-radius: 0 1rem 1rem 0;
     border-top: none;
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
-    border-right: none;
-    box-shadow: -8px 0 28px rgba(0, 0, 0, 0.32);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: none;
+    box-shadow: 8px 0 28px rgba(0, 0, 0, 0.32);
     display: flex;
     flex-direction: column;
     align-items: stretch;
@@ -1357,10 +1357,10 @@ body[data-panel="inventory"] #panel-inventory {
     height: 1.35rem !important;
   }
 
-  /* Ítem activo: acento en el borde interior derecho (carril a la derecha) */
+  /* Ítem activo: acento en el borde interior izquierdo (carril a la izquierda) */
   #navKiosquero .bottom-nav-btn.active,
   #navSuperBottom .bottom-nav-btn.active {
-    box-shadow: inset -3px 0 0 rgba(134, 239, 172, 0.9);
+    box-shadow: inset 3px 0 0 rgba(134, 239, 172, 0.9);
   }
 
   /* Productos: borde a borde (sin columna centrada ni bordes laterales) */
