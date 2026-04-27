@@ -3379,6 +3379,12 @@
       if (pal) { pal.classList.add('hidden'); pal.classList.remove('flex'); }
       var pti = document.getElementById('partnerTransferInfoModal');
       if (pti) { pti.classList.add('hidden'); pti.classList.remove('flex'); }
+      var apm = document.getElementById('accountProfileModal');
+      if (apm && !apm.classList.contains('hidden')) {
+        apm.classList.add('hidden');
+        apm.setAttribute('aria-hidden', 'true');
+        try { document.body.style.overflow = _accountProfileBodyOverflow || ''; } catch (_) {}
+      }
       var csrM = document.getElementById('clientSaleRequestModal');
       if (csrM) { csrM.classList.add('hidden'); csrM.classList.remove('flex'); }
       var sud = document.getElementById('superUserDetailModal');
@@ -3420,6 +3426,131 @@
           if (navIcon) navIcon.setAttribute('data-lucide', 'wallet');
         }
       }
+    }
+
+    function ferriolHeaderProfileInitials(kioscoName, email) {
+      var s = (kioscoName || '').trim();
+      if (s) {
+        var parts = s.split(/\s+/).filter(Boolean);
+        if (parts.length >= 2 && parts[0][0] && parts[1][0]) return (parts[0][0] + parts[1][0]).toUpperCase();
+        return s.slice(0, 2).toUpperCase();
+      }
+      var e = (email || '').trim();
+      return e.length >= 2 ? e.slice(0, 2).toUpperCase() : '?';
+    }
+    function ferriolAccountProfileRoleLabel(role) {
+      if (role === 'super') return 'Fundador / empresa';
+      if (role === 'partner') return 'Administrador de red';
+      if (role === 'kiosquero') return 'Kiosquero / negocio';
+      return role || '—';
+    }
+    var _accountProfileRemoveAvatarFlag = false;
+    var _accountProfileBodyOverflow = '';
+    function syncHeaderProfileAvatar() {
+      var btn = document.getElementById('headerProfileBtn');
+      var img = document.getElementById('headerProfileImg');
+      var ini = document.getElementById('headerProfileInitials');
+      if (!btn || !img || !ini) return;
+      if (!currentUser) {
+        btn.classList.add('hidden');
+        return;
+      }
+      btn.classList.remove('hidden');
+      var url = (currentUser.avatarUrl || '').trim();
+      if (url) {
+        img.onerror = function () {
+          img.classList.add('hidden');
+          img.removeAttribute('src');
+          ini.classList.remove('hidden');
+          ini.textContent = ferriolHeaderProfileInitials(currentUser.kioscoName, currentUser.email);
+        };
+        img.onload = function () { img.classList.remove('hidden'); ini.classList.add('hidden'); };
+        if (img.getAttribute('src') !== url) img.src = url;
+        else { img.classList.remove('hidden'); ini.classList.add('hidden'); }
+      } else {
+        img.classList.add('hidden');
+        img.removeAttribute('src');
+        ini.classList.remove('hidden');
+        ini.textContent = ferriolHeaderProfileInitials(currentUser.kioscoName, currentUser.email);
+      }
+    }
+    function syncAccountProfileModalPreview(urlOverride) {
+      var img = document.getElementById('accountProfilePreviewImg');
+      var ini = document.getElementById('accountProfilePreviewInitials');
+      if (!img || !ini || !currentUser) return;
+      var url = urlOverride != null ? String(urlOverride).trim() : (currentUser.avatarUrl || '').trim();
+      if (_accountProfileRemoveAvatarFlag) url = '';
+      if (url) {
+        img.onerror = function () {
+          img.classList.add('hidden');
+          ini.classList.remove('hidden');
+          ini.textContent = ferriolHeaderProfileInitials(
+            document.getElementById('accountProfileKioscoName') && document.getElementById('accountProfileKioscoName').value,
+            currentUser.email
+          );
+        };
+        img.onload = function () { img.classList.remove('hidden'); ini.classList.add('hidden'); };
+        img.src = url;
+      } else {
+        img.classList.add('hidden');
+        img.removeAttribute('src');
+        ini.classList.remove('hidden');
+        var kn = document.getElementById('accountProfileKioscoName');
+        ini.textContent = ferriolHeaderProfileInitials(kn ? kn.value : currentUser.kioscoName, currentUser.email);
+      }
+    }
+    function closeAccountProfileModal() {
+      var m = document.getElementById('accountProfileModal');
+      if (m) {
+        m.classList.add('hidden');
+        m.setAttribute('aria-hidden', 'true');
+      }
+      try {
+        document.body.style.overflow = _accountProfileBodyOverflow || '';
+      } catch (_) {}
+    }
+    function openAccountProfileModal(focusBank) {
+      if (!currentUser) return;
+      var m = document.getElementById('accountProfileModal');
+      var msg = document.getElementById('accountProfileMsg');
+      if (msg) { msg.classList.add('hidden'); msg.textContent = ''; }
+      _accountProfileRemoveAvatarFlag = false;
+      var fi = document.getElementById('accountProfileAvatarInput');
+      if (fi) fi.value = '';
+      var em = document.getElementById('accountProfileEmail');
+      if (em) em.value = currentUser.email || '';
+      var rl = document.getElementById('accountProfileRole');
+      if (rl) rl.value = ferriolAccountProfileRoleLabel(currentUser.role);
+      var kn = document.getElementById('accountProfileKioscoName');
+      if (kn) kn.value = currentUser.kioscoName || '';
+      var ph = document.getElementById('accountProfilePhone');
+      if (ph) ph.value = currentUser.phone != null ? String(currentUser.phone) : '';
+      var wWrap = document.getElementById('accountProfileWhatsappWrap');
+      var wTa = document.getElementById('accountProfileWhatsappMsg');
+      var showWa = currentUser.role === 'kiosquero' || isSuperKioscoPreviewMode();
+      if (wWrap) wWrap.classList.toggle('hidden', !showWa);
+      if (wTa && showWa) wTa.value = currentUser.whatsappMessage || DEFAULT_WHATSAPP;
+      var bWrap = document.getElementById('accountProfileBankWrap');
+      var bTa = document.getElementById('accountProfileBankText');
+      var showBank = isNetworkAdminRole(currentUser.role) && !isSuperKioscoPreviewMode();
+      if (bWrap) bWrap.classList.toggle('hidden', !showBank);
+      if (bTa && showBank) bTa.value = currentUser.partnerTransferInfo != null ? String(currentUser.partnerTransferInfo) : '';
+      syncAccountProfileModalPreview();
+      if (m) {
+        m.classList.remove('hidden');
+        m.setAttribute('aria-hidden', 'false');
+        try {
+          _accountProfileBodyOverflow = document.body.style.overflow;
+          document.body.style.overflow = 'hidden';
+        } catch (_) {}
+      }
+      if (focusBank && bWrap && showBank) {
+        setTimeout(function () {
+          try { bWrap.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) { bWrap.scrollIntoView(true); }
+          if (bTa) try { bTa.focus(); } catch (_) {}
+        }, 300);
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
 
     function applyAppShell() {
@@ -3516,6 +3647,7 @@
       if (currentUser && (currentUser.role === 'kiosquero' || isSuperKioscoPreviewMode())) {
         loadKioscoLicensePaymentInfo();
       }
+      syncHeaderProfileAvatar();
       try {
         if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
       } catch (_) {}
@@ -3707,20 +3839,7 @@
     var btnSuperAjustesVolverMas = document.getElementById('btnSuperAjustesVolverMas');
     if (btnSuperAjustesVolverMas) btnSuperAjustesVolverMas.addEventListener('click', function () { switchSuperSection('mas'); });
     function openPartnerTransferInfoModal() {
-      var m = document.getElementById('partnerTransferInfoModal');
-      var ta = document.getElementById('partnerTransferInfoTextarea');
-      var msg = document.getElementById('partnerTransferInfoMsg');
-      if (msg) {
-        msg.classList.add('hidden');
-        msg.textContent = '';
-        msg.classList.remove('text-red-300', 'text-emerald-300');
-      }
-      if (ta && currentUser) ta.value = currentUser.partnerTransferInfo != null ? String(currentUser.partnerTransferInfo) : '';
-      if (m) {
-        m.classList.remove('hidden');
-        m.classList.add('flex');
-      }
-      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+      openAccountProfileModal(true);
     }
     function closePartnerTransferInfoModal() {
       var m = document.getElementById('partnerTransferInfoModal');
@@ -3732,7 +3851,129 @@
     var btnOpenPartnerTransferModal = document.getElementById('btnOpenPartnerTransferModal');
     if (btnOpenPartnerTransferModal) {
       btnOpenPartnerTransferModal.addEventListener('click', function () {
-        if (currentUser && currentUser.role === 'partner') openPartnerTransferInfoModal();
+        if (currentUser && isNetworkAdminRole(currentUser.role) && !isSuperKioscoPreviewMode()) openPartnerTransferInfoModal();
+      });
+    }
+    var headerProfileBtn = document.getElementById('headerProfileBtn');
+    if (headerProfileBtn) {
+      headerProfileBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        openAccountProfileModal(false);
+      });
+    }
+    var accountProfileModalClose = document.getElementById('accountProfileModalClose');
+    var accountProfileModalOverlay = document.getElementById('accountProfileModalOverlay');
+    if (accountProfileModalClose) accountProfileModalClose.addEventListener('click', closeAccountProfileModal);
+    if (accountProfileModalOverlay) accountProfileModalOverlay.addEventListener('click', closeAccountProfileModal);
+    var accountProfileAvatarInput = document.getElementById('accountProfileAvatarInput');
+    if (accountProfileAvatarInput) {
+      accountProfileAvatarInput.addEventListener('change', function () {
+        var f = accountProfileAvatarInput.files && accountProfileAvatarInput.files[0];
+        _accountProfileRemoveAvatarFlag = false;
+        if (!f) {
+          syncAccountProfileModalPreview();
+          return;
+        }
+        try {
+          var u = URL.createObjectURL(f);
+          syncAccountProfileModalPreview(u);
+        } catch (_) {
+          syncAccountProfileModalPreview();
+        }
+      });
+    }
+    var accountProfileRemovePhoto = document.getElementById('accountProfileRemovePhoto');
+    if (accountProfileRemovePhoto) {
+      accountProfileRemovePhoto.addEventListener('click', function () {
+        _accountProfileRemoveAvatarFlag = true;
+        if (accountProfileAvatarInput) accountProfileAvatarInput.value = '';
+        syncAccountProfileModalPreview('');
+      });
+    }
+    var accountProfileKioscoNameEl = document.getElementById('accountProfileKioscoName');
+    if (accountProfileKioscoNameEl) {
+      accountProfileKioscoNameEl.addEventListener('input', function () {
+        if (!document.getElementById('accountProfileAvatarInput') || !document.getElementById('accountProfileAvatarInput').files || !document.getElementById('accountProfileAvatarInput').files[0]) {
+          syncAccountProfileModalPreview(_accountProfileRemoveAvatarFlag ? '' : null);
+        }
+      });
+    }
+    var accountProfileSaveBtn = document.getElementById('accountProfileSaveBtn');
+    if (accountProfileSaveBtn) {
+      accountProfileSaveBtn.addEventListener('click', async function () {
+        var msg = document.getElementById('accountProfileMsg');
+        if (!supabaseClient || !currentUser) return;
+        if (msg) { msg.classList.add('hidden'); msg.textContent = ''; }
+        var kioscoName = (document.getElementById('accountProfileKioscoName') && document.getElementById('accountProfileKioscoName').value || '').trim();
+        var phoneVal = (document.getElementById('accountProfilePhone') && document.getElementById('accountProfilePhone').value || '').trim();
+        var payload = { kiosco_name: kioscoName || null, phone: phoneVal || null };
+        var showWa = currentUser.role === 'kiosquero' || isSuperKioscoPreviewMode();
+        if (showWa) {
+          var wa = (document.getElementById('accountProfileWhatsappMsg') && document.getElementById('accountProfileWhatsappMsg').value || '').trim() || DEFAULT_WHATSAPP;
+          payload.whatsapp_message = wa;
+        }
+        var showBank = isNetworkAdminRole(currentUser.role) && !isSuperKioscoPreviewMode();
+        if (showBank) {
+          payload.partner_transfer_info = document.getElementById('accountProfileBankText') ? String(document.getElementById('accountProfileBankText').value || '') : '';
+        }
+        var fileIn = document.getElementById('accountProfileAvatarInput');
+        var file = fileIn && fileIn.files && fileIn.files[0];
+        if (_accountProfileRemoveAvatarFlag) {
+          payload.avatar_url = null;
+        }
+        if (file) {
+          if (file.size > 3 * 1024 * 1024) {
+            if (msg) {
+              msg.textContent = 'La imagen supera 3 MB. Elegí un archivo más liviano.';
+              msg.classList.remove('hidden', 'text-emerald-300'); msg.classList.add('text-red-300');
+            }
+            return;
+          }
+          var ext = (file.name && file.name.lastIndexOf('.') > 0) ? file.name.slice(file.name.lastIndexOf('.')).toLowerCase() : '.jpg';
+          if (ext.length > 6) ext = '.jpg';
+          var fileId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now());
+          var path = currentUser.id + '/profile-avatar/' + fileId + ext;
+          try {
+            var up = await supabaseClient.storage.from('comprobantes-ferriol').upload(path, file, { contentType: file.type || 'image/jpeg', upsert: false });
+            if (up.error) throw up.error;
+            var pub = supabaseClient.storage.from('comprobantes-ferriol').getPublicUrl(path);
+            payload.avatar_url = (pub && pub.data && pub.data.publicUrl) ? pub.data.publicUrl : path;
+          } catch (e) {
+            if (msg) {
+              msg.textContent = 'No se pudo subir la foto: ' + String(e.message || e);
+              msg.classList.remove('hidden', 'text-emerald-300'); msg.classList.add('text-red-300');
+            }
+            return;
+          }
+        }
+        accountProfileSaveBtn.disabled = true;
+        try {
+          var upProf = await supabaseClient.from('profiles').update(payload).eq('id', currentUser.id);
+          if (upProf.error) throw upProf.error;
+          currentUser.kioscoName = kioscoName;
+          currentUser.phone = phoneVal;
+          if (showWa) currentUser.whatsappMessage = payload.whatsapp_message;
+          if (showBank) currentUser.partnerTransferInfo = payload.partner_transfer_info != null ? String(payload.partner_transfer_info) : '';
+          if (payload.avatar_url !== undefined) currentUser.avatarUrl = payload.avatar_url ? String(payload.avatar_url).trim() : '';
+          if (fileIn) fileIn.value = '';
+          _accountProfileRemoveAvatarFlag = false;
+          applyAppShell();
+          fillConfigForm();
+          await loadSuperMasBankingSection();
+          if (msg) {
+            msg.textContent = 'Cambios guardados.';
+            msg.classList.remove('hidden', 'text-red-300'); msg.classList.add('text-emerald-300');
+          }
+          closeAccountProfileModal();
+        } catch (e2) {
+          if (msg) {
+            msg.textContent = String(e2.message || e2);
+            msg.classList.remove('hidden', 'text-emerald-300'); msg.classList.add('text-red-300');
+          }
+        } finally {
+          accountProfileSaveBtn.disabled = false;
+        }
       });
     }
     var partnerTransferInfoModalClose = document.getElementById('partnerTransferInfoModalClose');
@@ -3744,9 +3985,9 @@
       partnerTransferInfoSave.addEventListener('click', async function () {
         var msg = document.getElementById('partnerTransferInfoMsg');
         var ta = document.getElementById('partnerTransferInfoTextarea');
-        if (!supabaseClient || !currentUser || currentUser.role !== 'partner') {
+        if (!supabaseClient || !currentUser || !isNetworkAdminRole(currentUser.role) || isSuperKioscoPreviewMode()) {
           if (msg) {
-            msg.textContent = 'Solo un administrador de red (socio) puede guardar esto.';
+            msg.textContent = 'Solo un administrador (partner o fundador, sin modo tienda) puede guardar esto.';
             msg.classList.remove('hidden', 'text-emerald-300');
             msg.classList.add('text-red-300');
           }
@@ -6020,7 +6261,7 @@ async function showApp() {
           return;
         }
         var userCreatedAt = (authData && authData.user && authData.user.created_at) ? authData.user.created_at : null;
-        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '' };
+        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '', phone: profile.phone != null ? String(profile.phone) : '', avatarUrl: profile.avatar_url != null ? String(profile.avatar_url).trim() : '' };
         await showApp();
       } catch (err) {
         console.error('Error en login:', err);
@@ -8615,7 +8856,7 @@ async function showApp() {
           return;
         }
         var userCreatedAt = (session && session.user && session.user.created_at) ? session.user.created_at : null;
-        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '' };
+        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '', phone: profile.phone != null ? String(profile.phone) : '', avatarUrl: profile.avatar_url != null ? String(profile.avatar_url).trim() : '' };
         await showApp();
       } catch (e) {
         console.error('Error en init:', e);
