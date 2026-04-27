@@ -1100,41 +1100,6 @@
           </h2>
           <p id="superDirectoryStats" class="hidden text-xs text-white/45 mb-2 super-only super-main-only"></p>
           <p class="text-xs text-white/50 mb-3 super-only super-main-only">Directorio global: filtro <strong class="text-white/65">Sin referidor</strong> y asignación desde el detalle de cada fila.</p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-            <div class="ferriol-partner-affiliate-links-wrap hidden sm:col-span-2">
-              <button type="button" id="btnOpenPartnerAffiliateLinks" class="glass rounded-2xl p-5 border border-cyan-400/35 bg-cyan-500/[0.07] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-cyan-400/55 active:scale-[0.98] touch-target">
-                <div class="w-12 h-12 rounded-xl bg-cyan-500/25 flex items-center justify-center shrink-0">
-                  <i data-lucide="link-2" class="w-6 h-6 text-cyan-200"></i>
-                </div>
-                <div class="min-w-0 flex-1">
-                  <span class="font-semibold text-sm text-white block">Enlaces de afiliación</span>
-                  <span class="text-xs text-white/55 mt-0.5 block">Enlaces para negocios (kioscos) y para socios (membresía).</span>
-                </div>
-              </button>
-            </div>
-            <div class="ferriol-partner-client-sale-wrap hidden sm:col-span-2">
-              <button type="button" id="btnOpenClientSaleRequestModal" class="glass rounded-2xl p-5 border border-emerald-400/40 bg-emerald-500/[0.1] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-emerald-400/60 active:scale-[0.98] touch-target">
-                <div class="w-12 h-12 rounded-xl bg-emerald-500/25 flex items-center justify-center shrink-0">
-                  <i data-lucide="receipt" class="w-6 h-6 text-emerald-200"></i>
-                </div>
-                <div class="min-w-0 flex-1">
-                  <span class="font-semibold text-sm text-white block">Enviar venta con comprobante</span>
-                  <span class="text-xs text-white/55 mt-0.5 block">Datos del cliente, monto, tipo de producto e imagen del comprobante. La empresa la revisa en Solicitudes y acredita tu comisión al aprobar.</span>
-                </div>
-              </button>
-            </div>
-            <div class="ferriol-partner-provision-btn-wrap hidden sm:col-span-2">
-              <button type="button" id="btnOpenPartnerProvisionModal" class="glass rounded-2xl p-5 border border-violet-400/35 bg-violet-500/[0.08] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-violet-400/55 active:scale-[0.98] touch-target">
-                <div class="w-12 h-12 rounded-xl bg-violet-500/25 flex items-center justify-center shrink-0">
-                  <i data-lucide="user-plus" class="w-6 h-6 text-violet-200"></i>
-                </div>
-                <div class="min-w-0 flex-1">
-                  <span class="font-semibold text-sm text-white block">Solicitar alta de administrador de red</span>
-                  <span class="text-xs text-white/55 mt-0.5 block">Requiere aprobación de la empresa y acreditación del pago a Ferriol.</span>
-                </div>
-              </button>
-            </div>
-          </div>
           <p class="text-xs text-white/50 mb-3">Pestañas <strong class="text-white/70">Usuarios</strong> / <strong class="text-white/70">Distribuidores</strong>: tocá una fila para detalle y membresía. Quitar cuentas: contraseña en <strong class="text-white/65">Más → Ajustes</strong>.</p>
           <input type="text" id="superSearchEmail" placeholder="Buscar por email o nombre..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm mb-3" autocomplete="off">
           <div class="flex flex-wrap gap-2 mb-2">
@@ -2021,7 +1986,7 @@
             <i data-lucide="clipboard-list" class="w-5 h-5 text-[#86efac]"></i>
             Solicitudes
           </h2>
-          <p class="text-xs text-white/50 mb-3">Gestioná <strong class="text-white/70">pendientes</strong> (aprobá o rechazá) y consultá el <strong class="text-white/65">historial</strong> por estado. El alta de negocio (kiosco) la iniciás con el botón de abajo; las altas de administrador de red siguen en <strong class="text-white/65">Afiliados</strong>.</p>
+          <p class="text-xs text-white/50 mb-3">Gestioná <strong class="text-white/70">pendientes</strong> (aprobá o rechazá) y consultá el <strong class="text-white/65">historial</strong> por estado. El alta de negocio (kiosco) la iniciás con el botón de abajo; las altas de administrador de red se solicitan en <strong class="text-white/65">Más</strong>.</p>
           <div class="mb-4 super-only super-main-only">
             <button type="button" id="btnOpenNewKiosqueroModal" class="glass rounded-2xl p-5 border border-[#22c55e]/40 bg-[#22c55e]/[0.08] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-[#22c55e]/60 active:scale-[0.98] touch-target">
               <div class="w-12 h-12 rounded-xl bg-[#22c55e]/25 flex items-center justify-center shrink-0">
@@ -2062,7 +2027,42 @@
             <i data-lucide="menu" class="w-5 h-5 text-[#86efac]"></i>
             Más opciones
           </h2>
-          <p class="text-xs text-white/50 mb-4">Datos bancarios y, si sos fundador, más abajo: herramientas globales.</p>
+          <p class="text-xs text-white/50 mb-4">Las primeras tarjetas son para <strong class="text-white/65">administrador de red</strong> (enlaces, venta con comprobante, alta de otro socio). Después: datos bancarios. <strong class="text-white/65">Fundador</strong>: herramientas globales más abajo.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+            <div class="ferriol-partner-affiliate-links-wrap hidden sm:col-span-2">
+              <button type="button" id="btnOpenPartnerAffiliateLinks" class="glass rounded-2xl p-5 border border-cyan-400/35 bg-cyan-500/[0.07] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-cyan-400/55 active:scale-[0.98] touch-target">
+                <div class="w-12 h-12 rounded-xl bg-cyan-500/25 flex items-center justify-center shrink-0">
+                  <i data-lucide="link-2" class="w-6 h-6 text-cyan-200"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <span class="font-semibold text-sm text-white block">Enlaces de afiliación</span>
+                  <span class="text-xs text-white/55 mt-0.5 block">Enlaces para negocios (kioscos) y para socios (membresía).</span>
+                </div>
+              </button>
+            </div>
+            <div class="ferriol-partner-client-sale-wrap hidden sm:col-span-2">
+              <button type="button" id="btnOpenClientSaleRequestModal" class="glass rounded-2xl p-5 border border-emerald-400/40 bg-emerald-500/[0.1] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-emerald-400/60 active:scale-[0.98] touch-target">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/25 flex items-center justify-center shrink-0">
+                  <i data-lucide="receipt" class="w-6 h-6 text-emerald-200"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <span class="font-semibold text-sm text-white block">Enviar venta con comprobante</span>
+                  <span class="text-xs text-white/55 mt-0.5 block">Datos del cliente, monto, tipo de producto e imagen del comprobante. La empresa la revisa en Solicitudes y acredita tu comisión al aprobar.</span>
+                </div>
+              </button>
+            </div>
+            <div class="ferriol-partner-provision-btn-wrap hidden sm:col-span-2">
+              <button type="button" id="btnOpenPartnerProvisionModal" class="glass rounded-2xl p-5 border border-violet-400/35 bg-violet-500/[0.08] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-violet-400/55 active:scale-[0.98] touch-target">
+                <div class="w-12 h-12 rounded-xl bg-violet-500/25 flex items-center justify-center shrink-0">
+                  <i data-lucide="user-plus" class="w-6 h-6 text-violet-200"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <span class="font-semibold text-sm text-white block">Solicitar alta de administrador de red</span>
+                  <span class="text-xs text-white/55 mt-0.5 block">Requiere aprobación de la empresa y acreditación del pago a Ferriol.</span>
+                </div>
+              </button>
+            </div>
+          </div>
           <div id="superMasFerriolBankingCard" class="mb-5 rounded-xl border border-cyan-500/35 bg-cyan-500/10 p-4 sm:p-5 hidden">
             <h3 class="font-bold text-base mb-1 flex items-center gap-2 text-cyan-100/95">
               <i data-lucide="landmark" class="w-5 h-5 text-cyan-200"></i>
@@ -2128,7 +2128,7 @@
               <i data-lucide="user-cog" class="w-5 h-5 text-[#86efac]"></i>
               Otro administrador global
             </h3>
-            <p class="text-xs text-white/55 mb-3">El alta de negocio (kiosco) se inicia en <strong class="text-white/70">Solicitudes</strong>. Los socios solicitan altas de red desde <strong class="text-white/70">Afiliados</strong>. Usá SQL solo para promover a <strong class="text-white/70">super</strong> cuando haga falta.</p>
+            <p class="text-xs text-white/55 mb-3">El alta de negocio (kiosco) se inicia en <strong class="text-white/70">Solicitudes</strong>. Los socios solicitan altas de red desde <strong class="text-white/70">Más</strong>. Usá SQL solo para promover a <strong class="text-white/70">super</strong> cuando haga falta.</p>
             <p class="text-xs text-white/50 mb-2">Supabase → SQL Editor (cambiá el email):</p>
             <pre class="text-xs bg-black/30 rounded-lg p-3 overflow-x-auto text-[#86efac]" id="sqlAddAdmin">UPDATE profiles SET role = 'super' WHERE id = (SELECT id FROM auth.users WHERE email = 'tu-email@ejemplo.com');</pre>
           </div>
