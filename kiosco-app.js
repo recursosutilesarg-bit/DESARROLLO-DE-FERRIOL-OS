@@ -3510,7 +3510,12 @@
       } catch (_) {}
     }
     function openAccountProfileModal(focusBank) {
-      if (!currentUser) return;
+      if (!currentUser) {
+        try {
+          console.warn('Ferriol: perfil no disponible (sesión no cargada).');
+        } catch (_) {}
+        return;
+      }
       var m = document.getElementById('accountProfileModal');
       var msg = document.getElementById('accountProfileMsg');
       if (msg) { msg.classList.add('hidden'); msg.textContent = ''; }
@@ -3854,13 +3859,33 @@
         if (currentUser && isNetworkAdminRole(currentUser.role) && !isSuperKioscoPreviewMode()) openPartnerTransferInfoModal();
       });
     }
-    var headerProfileBtn = document.getElementById('headerProfileBtn');
-    if (headerProfileBtn) {
-      headerProfileBtn.addEventListener('click', function (e) {
+    var _ferriolProfileHeaderOpenedAt = 0;
+    function ferriolOpenAccountProfileFromHeader(e) {
+      if (e) {
         e.preventDefault();
         e.stopPropagation();
-        openAccountProfileModal(false);
+      }
+      var now = Date.now();
+      if (now - _ferriolProfileHeaderOpenedAt < 450) return;
+      _ferriolProfileHeaderOpenedAt = now;
+      openAccountProfileModal(false);
+    }
+    var headerProfileBtn = document.getElementById('headerProfileBtn');
+    var mainHeaderEl = document.getElementById('mainHeader');
+    if (mainHeaderEl) {
+      mainHeaderEl.addEventListener('click', function (e) {
+        var t = e.target && e.target.closest && e.target.closest('#headerProfileBtn');
+        if (!t) return;
+        ferriolOpenAccountProfileFromHeader(e);
       });
+      mainHeaderEl.addEventListener('touchend', function (e) {
+        var t = e.target && e.target.closest && e.target.closest('#headerProfileBtn');
+        if (!t) return;
+        ferriolOpenAccountProfileFromHeader(e);
+      }, { passive: false });
+    } else if (headerProfileBtn) {
+      headerProfileBtn.addEventListener('click', ferriolOpenAccountProfileFromHeader);
+      headerProfileBtn.addEventListener('touchend', ferriolOpenAccountProfileFromHeader, { passive: false });
     }
     var accountProfileModalClose = document.getElementById('accountProfileModalClose');
     var accountProfileModalOverlay = document.getElementById('accountProfileModalOverlay');
