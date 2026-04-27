@@ -1171,6 +1171,322 @@
         }
       });
     })();
+    function openPartnerWithdrawModal() {
+      var m = document.getElementById('partnerWithdrawModal');
+      var err = document.getElementById('partnerWithdrawModalErr');
+      var amt = document.getElementById('partnerWithdrawAmount');
+      if (err) { err.classList.add('hidden'); err.textContent = ''; }
+      if (amt) amt.value = '';
+      if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    function closePartnerWithdrawModal() {
+      var m = document.getElementById('partnerWithdrawModal');
+      if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+    }
+    function openFounderWithdrawPayModal(reqId, summaryHtml) {
+      var m = document.getElementById('founderWithdrawPayModal');
+      var hid = document.getElementById('founderWithdrawPayRequestId');
+      var sum = document.getElementById('founderWithdrawPayModalSummary');
+      var err = document.getElementById('founderWithdrawPayModalErr');
+      var tx = document.getElementById('founderWithdrawPayCongrats');
+      var fi = document.getElementById('founderWithdrawPayFile');
+      if (err) { err.classList.add('hidden'); err.textContent = ''; }
+      if (tx) tx.value = '';
+      if (fi) fi.value = '';
+      if (hid) hid.value = reqId || '';
+      if (sum) sum.innerHTML = summaryHtml || '';
+      if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    function closeFounderWithdrawPayModal() {
+      var m = document.getElementById('founderWithdrawPayModal');
+      if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+    }
+    (function setupPartnerWithdrawAndFounderPayModals() {
+      var btnOpen = document.getElementById('btnPartnerWithdrawOpen');
+      if (btnOpen) {
+        btnOpen.addEventListener('click', function () {
+          if (!currentUser || currentUser.role !== 'partner' || isEmpresaLensSuper()) return;
+          openPartnerWithdrawModal();
+        });
+      }
+      var pwClose = document.getElementById('partnerWithdrawModalClose');
+      var pwOv = document.getElementById('partnerWithdrawModalOverlay');
+      if (pwClose) pwClose.addEventListener('click', closePartnerWithdrawModal);
+      if (pwOv) pwOv.addEventListener('click', closePartnerWithdrawModal);
+      var pwSub = document.getElementById('partnerWithdrawModalSubmit');
+      if (pwSub) {
+        pwSub.addEventListener('click', async function () {
+          var err = document.getElementById('partnerWithdrawModalErr');
+          var amtIn = document.getElementById('partnerWithdrawAmount');
+          if (err) { err.classList.add('hidden'); err.textContent = ''; }
+          if (!supabaseClient || !currentUser || currentUser.role !== 'partner' || isEmpresaLensSuper()) {
+            if (err) { err.textContent = 'Solo podés pedir retiros como administrador de red (no en vista fundador).'; err.classList.remove('hidden'); }
+            return;
+          }
+          var raw = amtIn ? String(amtIn.value || '').replace(/\./g, '').replace(',', '.') : '';
+          var amt = parseFloat(raw, 10);
+          if (isNaN(amt) || amt <= 0) {
+            if (err) { err.textContent = 'Ingresá un monto válido en ARS.'; err.classList.remove('hidden'); }
+            return;
+          }
+          pwSub.disabled = true;
+          try {
+            var rpc = await supabaseClient.rpc('ferriol_partner_create_withdrawal_request', { p_amount_ars: amt });
+            if (rpc.error) throw rpc.error;
+            var out = rpc.data;
+            if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+            if (!out || out.ok !== true) {
+              if (err) { err.textContent = (out && out.error) ? out.error : 'No se pudo crear la solicitud.'; err.classList.remove('hidden'); }
+              return;
+            }
+            closePartnerWithdrawModal();
+            await loadPartnerBilleteraSection();
+            alert('Solicitud enviada. La empresa revisará que tengas fondos y te avisará.');
+          } catch (e) {
+            if (err) { err.textContent = String(e.message || e); err.classList.remove('hidden'); }
+          } finally {
+            pwSub.disabled = false;
+          }
+        });
+      }
+      var fpClose = document.getElementById('founderWithdrawPayModalClose');
+      var fpOv = document.getElementById('founderWithdrawPayModalOverlay');
+      if (fpClose) fpClose.addEventListener('click', closeFounderWithdrawPayModal);
+      if (fpOv) fpOv.addEventListener('click', closeFounderWithdrawPayModal);
+      var fpSub = document.getElementById('founderWithdrawPayModalSubmit');
+      if (fpSub) {
+        fpSub.addEventListener('click', async function () {
+          var err = document.getElementById('founderWithdrawPayModalErr');
+          var hid = document.getElementById('founderWithdrawPayRequestId');
+          var fi = document.getElementById('founderWithdrawPayFile');
+          var tx = document.getElementById('founderWithdrawPayCongrats');
+          if (err) { err.classList.add('hidden'); err.textContent = ''; }
+          if (!supabaseClient || !isEmpresaLensSuper()) {
+            if (err) { err.textContent = 'Solo la cuenta fundador puede registrar el pago.'; err.classList.remove('hidden'); }
+            return;
+          }
+          var reqId = hid ? String(hid.value || '').trim() : '';
+          var file = fi && fi.files && fi.files[0];
+          if (!reqId) {
+            if (err) { err.textContent = 'Falta el identificador de la solicitud.'; err.classList.remove('hidden'); }
+            return;
+          }
+          if (!file) {
+            if (err) { err.textContent = 'Adjuntá el comprobante de transferencia.'; err.classList.remove('hidden'); }
+            return;
+          }
+          if (file.size > 5 * 1024 * 1024) {
+            if (err) { err.textContent = 'La imagen supera 5 MB.'; err.classList.remove('hidden'); }
+            return;
+          }
+          var msg = tx ? String(tx.value || '').trim() : '';
+          fpSub.disabled = true;
+          try {
+            var ext = (file.name && file.name.lastIndexOf('.') > 0) ? file.name.slice(file.name.lastIndexOf('.')).toLowerCase() : '.jpg';
+            if (ext.length > 6) ext = '.jpg';
+            var fileId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now());
+            var path = 'withdrawal-proofs/' + reqId + '/' + fileId + ext;
+            var up = await supabaseClient.storage.from('comprobantes-ferriol').upload(path, file, { contentType: file.type || 'image/jpeg', upsert: false });
+            if (up.error) throw up.error;
+            var rpc = await supabaseClient.rpc('ferriol_founder_mark_withdrawal_paid', {
+              p_request_id: reqId,
+              p_proof_path: path,
+              p_congrats_message: msg || null
+            });
+            if (rpc.error) {
+              try { await supabaseClient.storage.from('comprobantes-ferriol').remove([path]); } catch (_) {}
+              throw rpc.error;
+            }
+            var out = rpc.data;
+            if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+            if (!out || out.ok !== true) {
+              try { await supabaseClient.storage.from('comprobantes-ferriol').remove([path]); } catch (_) {}
+              if (err) { err.textContent = (out && out.error) ? out.error : 'No se pudo registrar el pago.'; err.classList.remove('hidden'); }
+              return;
+            }
+            closeFounderWithdrawPayModal();
+            await loadFounderPagosPendientesSection();
+            alert('Pago registrado. El socio verá la solicitud como pagada y se actualizará su billetera.');
+          } catch (e) {
+            if (err) { err.textContent = String(e.message || e); err.classList.remove('hidden'); }
+          } finally {
+            fpSub.disabled = false;
+          }
+        });
+      }
+    })();
+    async function loadPartnerBilleteraSection() {
+      var av = document.getElementById('partnerWalletAvailable');
+      var br = document.getElementById('partnerWalletBreakdown');
+      var hist = document.getElementById('partnerWithdrawHistory');
+      if (!av || !hist) return;
+      if (!supabaseClient || !currentUser || currentUser.role !== 'partner') {
+        av.textContent = '—';
+        if (br) br.textContent = '';
+        if (hist) {
+          hist.innerHTML = currentUser && currentUser.role === 'super' && isSuperSocioLens()
+            ? '<p class="text-amber-200/90 text-xs py-2">En vista fundador no se solicitan retiros. Usá una cuenta de administrador de red (socio) para la billetera.</p>'
+            : '<p class="text-white/45 text-xs py-2 text-center">—</p>';
+        }
+        return;
+      }
+      av.textContent = '…';
+      if (br) br.textContent = '';
+      hist.innerHTML = '<p class="text-white/45 text-xs py-2 text-center">Cargando…</p>';
+      try {
+        var balRpc = await supabaseClient.rpc('ferriol_partner_withdrawable_balance', { p_partner_id: currentUser.id });
+        if (balRpc.error) throw balRpc.error;
+        var bal = Number(balRpc.data != null ? balRpc.data : 0);
+        av.textContent = '$ ' + bal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS';
+        var led = await supabaseClient.from('mlm_ledger').select('amount').eq('beneficiary_user_id', currentUser.id).in('status', ['approved', 'paid']).in('event_type', ['sale_commission', 'renewal']);
+        var gross = 0;
+        (led.data || []).forEach(function (L) { gross += Number(L.amount || 0); });
+        var paidQ = await supabaseClient.from('ferriol_partner_withdrawal_requests').select('amount_ars').eq('partner_user_id', currentUser.id).eq('status', 'paid');
+        var paidSum = 0;
+        (paidQ.data || []).forEach(function (r) { paidSum += Number(r.amount_ars || 0); });
+        if (br) {
+          br.textContent = 'Comisiones acreditadas (libro): $ ' + gross.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + ' · Ya pagado a vos: $ ' + paidSum.toLocaleString('es-AR', { minimumFractionDigits: 2 });
+        }
+        var rq = await supabaseClient.from('ferriol_partner_withdrawal_requests').select('*').eq('partner_user_id', currentUser.id).order('created_at', { ascending: false }).limit(40);
+        if (rq.error) throw rq.error;
+        var rows = rq.data || [];
+        if (!rows.length) {
+          hist.innerHTML = '<p class="text-xs text-white/45 py-3 text-center">Todavía no tenés solicitudes de retiro.</p>';
+        } else {
+          hist.innerHTML = '<div class="space-y-2 max-h-[40vh] overflow-y-auto">' + rows.map(function (w) {
+            var st = w.status === 'paid' ? 'text-emerald-200' : w.status === 'rejected' ? 'text-red-200/90' : w.status === 'approved_pending_payout' ? 'text-cyan-200' : 'text-amber-200';
+            var lab = w.status === 'pending_review' ? 'En revisión empresa' : w.status === 'approved_pending_payout' ? 'Aprobado · pendiente transferencia' : w.status === 'paid' ? 'Pagado' : 'Rechazado';
+            var dt = String(w.created_at || '').slice(0, 16).replace('T', ' ');
+            var extra = '';
+            if (w.status === 'paid' && w.founder_congrats_message) extra = '<p class="text-[10px] text-emerald-100/80 mt-1">' + String(w.founder_congrats_message).replace(/</g, '&lt;') + '</p>';
+            if (w.status === 'rejected' && w.reject_note) extra = '<p class="text-[10px] text-red-200/80 mt-1">Motivo: ' + String(w.reject_note).replace(/</g, '&lt;') + '</p>';
+            return '<div class="rounded-lg border border-white/10 bg-black/25 px-3 py-2"><p class="text-xs"><span class="' + st + ' font-medium">' + lab + '</span> · ' + dt + '</p><p class="text-sm text-white/90 font-semibold">$ ' + Number(w.amount_ars || 0).toLocaleString('es-AR') + ' ARS</p>' + extra + '</div>';
+          }).join('') + '</div>';
+        }
+      } catch (e) {
+        av.textContent = '—';
+        hist.innerHTML = '<p class="text-red-300/90 text-xs py-2">No se pudo cargar la billetera. ¿Ejecutaste <code class="text-white/80">supabase-ferriol-partner-withdrawals.sql</code>? ' + String(e.message || e) + '</p>';
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    async function loadFounderWithdrawalReviewList() {
+      var box = document.getElementById('founderWithdrawalReviewBox');
+      var list = document.getElementById('founderWithdrawalReviewList');
+      if (!box || !list || !supabaseClient || !isEmpresaLensSuper()) return;
+      box.classList.remove('hidden');
+      list.innerHTML = '<p class="text-white/45 text-xs py-2">Cargando…</p>';
+      try {
+        var r = await supabaseClient.from('ferriol_partner_withdrawal_requests').select('*').eq('status', 'pending_review').order('created_at', { ascending: true }).limit(50);
+        if (r.error) throw r.error;
+        var rows = r.data || [];
+        if (!rows.length) {
+          list.innerHTML = '<p class="text-xs text-white/45 py-2">No hay retiros pendientes de revisión.</p>';
+          return;
+        }
+        var pool = window._ferriolAllProfilesCache || [];
+        function nameOf(id) {
+          var p = pool.find(function (x) { return x.id === id; });
+          return p ? ((p.kiosco_name || '').trim() || p.email || id) : id;
+        }
+        var parts = [];
+        for (var i = 0; i < rows.length; i++) {
+          var row = rows[i];
+          var balRpc = await supabaseClient.rpc('ferriol_partner_withdrawable_balance', { p_partner_id: row.partner_user_id });
+          var bal = (balRpc.error || balRpc.data == null) ? null : Number(balRpc.data);
+          var nm = String(nameOf(row.partner_user_id)).replace(/</g, '&lt;');
+          var dt = String(row.created_at || '').slice(0, 16).replace('T', ' ');
+          var balStr = bal != null ? ('$ ' + bal.toLocaleString('es-AR', { minimumFractionDigits: 2 }) + ' ARS disponibles') : '—';
+          parts.push(
+            '<div class="rounded-xl border border-white/15 bg-black/30 p-3">' +
+            '<p class="text-sm text-white/90 font-medium">' + nm + '</p>' +
+            '<p class="text-xs text-white/55">' + dt + '</p>' +
+            '<p class="text-lg font-bold text-amber-100 mt-1">$ ' + Number(row.amount_ars || 0).toLocaleString('es-AR') + ' ARS</p>' +
+            '<p class="text-[10px] text-cyan-200/80 mt-1">Saldo retirable (estim.): ' + balStr + '</p>' +
+            '<div class="flex flex-wrap gap-2 mt-2">' +
+            '<button type="button" class="ferriol-wr-approve btn-glow rounded-lg py-1.5 px-3 text-[11px] font-semibold touch-target" data-wr-id="' + row.id + '">Aprobar (pasa a Pagos)</button>' +
+            '<button type="button" class="ferriol-wr-reject rounded-lg py-1.5 px-3 text-[11px] font-semibold touch-target border border-red-400/50 text-red-200" data-wr-id="' + row.id + '">Rechazar</button>' +
+            '</div></div>'
+          );
+        }
+        list.innerHTML = parts.join('');
+        list.querySelectorAll('.ferriol-wr-approve').forEach(function (btn) {
+          btn.onclick = async function () {
+            var id = btn.getAttribute('data-wr-id');
+            if (!id || !confirm('¿Aprobar este retiro? Pasará a Pagos pendientes para transferir y adjuntar comprobante.')) return;
+            var rpc = await supabaseClient.rpc('ferriol_founder_review_partner_withdrawal', { p_request_id: id, p_approve: true, p_reject_note: null });
+            if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+            var out = rpc.data;
+            if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+            if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo aprobar.'); return; }
+            await loadFounderWithdrawalReviewList();
+            await loadFounderPagosPendientesSection();
+          };
+        });
+        list.querySelectorAll('.ferriol-wr-reject').forEach(function (btn) {
+          btn.onclick = async function () {
+            var id = btn.getAttribute('data-wr-id');
+            if (!id) return;
+            var note = (typeof window.prompt === 'function') ? window.prompt('Motivo del rechazo (opcional):', '') : '';
+            if (note === null) return;
+            var rpc = await supabaseClient.rpc('ferriol_founder_review_partner_withdrawal', { p_request_id: id, p_approve: false, p_reject_note: note || null });
+            if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+            var out = rpc.data;
+            if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+            if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo rechazar.'); return; }
+            await loadFounderWithdrawalReviewList();
+          };
+        });
+      } catch (e) {
+        list.innerHTML = '<p class="text-red-300/90 text-xs py-2">' + String(e.message || e) + '</p>';
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    async function loadFounderPagosPendientesSection() {
+      var wrap = document.getElementById('founderPagosPendientesList');
+      if (!wrap || !supabaseClient || !isEmpresaLensSuper()) return;
+      wrap.innerHTML = '<p class="text-white/45 text-xs py-4 text-center">Cargando…</p>';
+      try {
+        var r = await supabaseClient.from('ferriol_partner_withdrawal_requests').select('*').eq('status', 'approved_pending_payout').order('created_at', { ascending: true }).limit(80);
+        if (r.error) throw r.error;
+        var rows = r.data || [];
+        if (!rows.length) {
+          wrap.innerHTML = '<p class="text-xs text-white/45 py-6 text-center">No hay pagos pendientes. Los retiros aprobados en Solicitudes aparecen acá.</p>';
+          return;
+        }
+        var ids = Array.from(new Set(rows.map(function (x) { return x.partner_user_id; }).filter(Boolean)));
+        var pr = await supabaseClient.from('profiles').select('id, email, kiosco_name, partner_transfer_info').in('id', ids);
+        var byId = {};
+        (pr.data || []).forEach(function (p) { if (p && p.id) byId[p.id] = p; });
+        wrap.innerHTML = rows.map(function (row) {
+          var p = byId[row.partner_user_id] || {};
+          var legal = ((p.kiosco_name || '').trim() || p.email || '—').replace(/</g, '&lt;');
+          var bank = (p.partner_transfer_info != null && String(p.partner_transfer_info).trim()) ? String(p.partner_transfer_info).replace(/</g, '&lt;').replace(/\n/g, '<br>') : '<span class="text-amber-200/90">Sin datos bancarios cargados en Más · pedile al socio que los complete.</span>';
+          var dt = String(row.created_at || '').slice(0, 16).replace('T', ' ');
+          return '<div class="rounded-xl border border-cyan-500/35 bg-black/25 p-4 space-y-2">' +
+            '<p class="text-sm font-semibold text-white/90">Socio: ' + legal + '</p>' +
+            '<p class="text-xs text-white/50">' + (p.email ? String(p.email).replace(/</g, '&lt;') : '') + '</p>' +
+            '<p class="text-lg font-bold text-[#86efac]">$ ' + Number(row.amount_ars || 0).toLocaleString('es-AR') + ' ARS</p>' +
+            '<p class="text-[10px] text-amber-200/90">Verificá que el titular de la cuenta coincida con: <strong class="text-white/80">' + legal + '</strong></p>' +
+            '<div class="text-xs text-white/75 bg-black/30 rounded-lg p-3 border border-white/10 max-h-40 overflow-y-auto">' + bank + '</div>' +
+            '<p class="text-[10px] text-white/45">Solicitado: ' + dt + '</p>' +
+            '<button type="button" class="ferriol-wr-pay w-full btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target" data-wr-pay-id="' + row.id + '" data-wr-pay-name="' + legal.replace(/"/g, '&quot;') + '" data-wr-pay-amt="' + String(Number(row.amount_ars || 0)) + '">Registrar transferencia y comprobante</button>' +
+            '</div>';
+        }).join('');
+        wrap.querySelectorAll('.ferriol-wr-pay').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var id = btn.getAttribute('data-wr-pay-id');
+            var nm = btn.getAttribute('data-wr-pay-name') || '';
+            var am = btn.getAttribute('data-wr-pay-amt') || '';
+            openFounderWithdrawPayModal(id, '<strong>Monto:</strong> $ ' + Number(am).toLocaleString('es-AR') + ' ARS<br><strong>Socio:</strong> ' + nm);
+          });
+        });
+      } catch (e) {
+        wrap.innerHTML = '<p class="text-red-300/90 text-sm py-4">' + String(e.message || e) + '</p>';
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
     async function loadSuperSolicitudesSection() {
       var elP = document.getElementById('superSolicitudesPendientes');
       var elA = document.getElementById('superSolicitudesAprobadas');
@@ -1184,6 +1500,9 @@
         if (clWrap) clWrap.classList.add('hidden');
         return;
       }
+      if (isPartnerLens() && !isEmpresaLensSuper()) {
+        void loadPartnerBilleteraSection();
+      }
       if (isEmpresaLensSuper() && clWrap) {
         clWrap.classList.remove('hidden');
         await loadFounderClientSaleRequestsPanel();
@@ -1195,6 +1514,7 @@
         elP.innerHTML = elA.innerHTML = elR.innerHTML = '';
         return;
       }
+      void loadFounderWithdrawalReviewList();
       var loading = '<p class="text-white/45 text-xs py-3 text-center">Cargando…</p>';
       elP.innerHTML = elA.innerHTML = elR.innerHTML = loading;
       var pool = window._ferriolAllProfilesCache || [];
@@ -1765,7 +2085,7 @@
       _restoringFromHistory: false,
       _suppressCajaHistoryPush: false,
       historialFilter: 'hoy',
-      superSection: 'ingresos',  // afiliados | ingresos | sistema | ajustes | solicitudes | mas
+      superSection: 'ingresos',  // afiliados | ingresos | sistema | ajustes | solicitudes | pagos-pendientes | mas
       afiliadosSubTab: 'usuarios',  // usuarios (kiosquero) | distribuidores (partner)
       superUiMode: 'empresa'  // empresa | socio | negocio — solo si role === 'super'
     };
@@ -3034,6 +3354,33 @@
       if (terms) { terms.classList.add('hidden'); terms.classList.remove('flex'); }
     }
 
+    function syncPartnerBilleteraShell() {
+      var pan = document.getElementById('partnerBilleteraPanel');
+      if (pan) {
+        if (!currentUser || !isNetworkAdminRole(currentUser.role)) {
+          pan.style.display = 'none';
+        } else if (isSuperKioscoPreviewMode()) {
+          pan.style.display = 'none';
+        } else {
+          pan.style.display = (isPartnerLens() && !isEmpresaLensSuper()) ? 'block' : 'none';
+        }
+      }
+      var navLbl = document.getElementById('navSuperWalletOrSolicitudesLabel');
+      var navBtn = document.getElementById('navSuperWalletOrSolicitudesBtn');
+      var navIcon = document.getElementById('navSuperWalletOrSolicitudesIcon');
+      if (navLbl && navBtn && currentUser && isNetworkAdminRole(currentUser.role) && !isSuperKioscoPreviewMode()) {
+        if (isEmpresaLensSuper()) {
+          navLbl.textContent = 'Solicitudes';
+          navBtn.title = 'Solicitudes';
+          if (navIcon) navIcon.setAttribute('data-lucide', 'clipboard-list');
+        } else if (isPartnerLens()) {
+          navLbl.textContent = 'Billetera';
+          navBtn.title = 'Billetera · comisiones';
+          if (navIcon) navIcon.setAttribute('data-lucide', 'wallet');
+        }
+      }
+    }
+
     function applyAppShell() {
       if (!currentUser) return;
       var isSuper = currentUser.role === 'super';
@@ -3144,6 +3491,7 @@
         }
       }
       updateSuperMasBankingShell();
+      syncPartnerBilleteraShell();
     }
 
     function showPanel(name, cajaTabOverride) {
@@ -3152,7 +3500,7 @@
         try { sessionStorage.setItem('ferriol_super_ui', 'empresa'); } catch (_) {}
         applyAppShell();
       }
-      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'afiliados' && state.superSection !== 'ingresos' && state.superSection !== 'solicitudes' && state.superSection !== 'mas') {
+      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'afiliados' && state.superSection !== 'ingresos' && state.superSection !== 'solicitudes' && state.superSection !== 'pagos-pendientes' && state.superSection !== 'mas') {
         switchSuperSection('ingresos');
       }
       if (name !== 'scanner') window._scanForProductCode = false;
@@ -3181,7 +3529,8 @@
         renderIngresosBienvenida();
         var landSuper = state.superSection || 'ingresos';
         if (landSuper === 'balance') landSuper = 'ingresos';
-        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'ingresos' && landSuper !== 'solicitudes' && landSuper !== 'mas') landSuper = 'ingresos';
+        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'ingresos' && landSuper !== 'solicitudes' && landSuper !== 'pagos-pendientes' && landSuper !== 'mas') landSuper = 'ingresos';
+        if (currentUser && currentUser.role === 'partner' && landSuper === 'pagos-pendientes') landSuper = 'ingresos';
         switchSuperSection(landSuper);
       } else {
         if (superListCountdownInterval) { clearInterval(superListCountdownInterval); superListCountdownInterval = null; }
@@ -3246,6 +3595,7 @@
       var sn = sectionName || 'ingresos';
       if (sn === 'balance') sn = 'ingresos';
       if (sn === 'cobros') sn = 'sistema';
+      if (sn === 'pagos-pendientes' && !isEmpresaLensSuper()) sn = 'ingresos';
       state.superSection = sn;
       var reqSuper = state.superSection === 'sistema';
       if (reqSuper && currentUser && (currentUser.role !== 'super' || !isEmpresaLensSuper())) {
@@ -3271,7 +3621,10 @@
       if (state.superSection === 'ingresos') void loadSuperIngresosSection();
       if (state.superSection === 'solicitudes') {
         void renderSuperMembershipDayRequestBanners();
-        if (isEmpresaLensSuper()) loadSuperSolicitudesSection();
+        void loadSuperSolicitudesSection();
+      }
+      if (state.superSection === 'pagos-pendientes' && isEmpresaLensSuper()) {
+        void loadFounderPagosPendientesSection();
       }
       if (state.superSection === 'mas') {
         void loadSuperMasBankingSection();

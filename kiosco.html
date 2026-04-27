@@ -239,9 +239,13 @@
           <i data-lucide="git-fork" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Sistema</span>
         </button>
-        <button data-super-section="solicitudes" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Solicitudes">
-          <i data-lucide="clipboard-list" class="w-5 h-5 shrink-0"></i>
-          <span class="truncate w-full text-center">Solicitudes</span>
+        <button type="button" data-super-section="solicitudes" id="navSuperWalletOrSolicitudesBtn" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Billetera o solicitudes">
+          <i data-lucide="wallet" id="navSuperWalletOrSolicitudesIcon" class="w-5 h-5 shrink-0"></i>
+          <span class="truncate w-full text-center" id="navSuperWalletOrSolicitudesLabel">Billetera</span>
+        </button>
+        <button type="button" data-super-section="pagos-pendientes" class="super-nav-btn super-only super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Pagos de retiros a socios">
+          <i data-lucide="banknote" class="w-5 h-5 shrink-0"></i>
+          <span class="truncate w-full text-center">Pagos</span>
         </button>
         <button data-super-section="mas" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Más opciones">
           <i data-lucide="menu" class="w-5 h-5 shrink-0"></i>
@@ -1982,11 +1986,38 @@
         </div>
         <!-- Sección Solicitudes: colas de acción + historial (fundador) -->
         <div id="super-section-solicitudes" class="super-section super-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; min-height: 100%; max-height: 85vh; padding-bottom: 6rem;">
-          <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
+          <div id="partnerBilleteraPanel" class="partner-billetera-panel mb-6" style="display: none;">
+            <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
+              <i data-lucide="wallet" class="w-5 h-5 text-[#86efac]"></i>
+              Billetera
+            </h2>
+            <p class="text-xs text-white/50 mb-4">Saldo disponible según comisiones acreditadas en el libro MLM, menos retiros ya pagados y solicitudes en curso. La empresa valida fondos y luego transfiere a los datos bancarios que cargaste en <strong class="text-white/65">Más</strong> (el titular debe coincidir con el nombre de tu cuenta).</p>
+            <div class="rounded-2xl border border-emerald-500/35 bg-emerald-500/[0.08] p-4 mb-4">
+              <p class="text-xs text-white/50 mb-1">Disponible para retirar</p>
+              <p id="partnerWalletAvailable" class="text-2xl font-bold text-[#86efac] tabular-nums">—</p>
+              <p id="partnerWalletBreakdown" class="text-[10px] text-white/40 mt-2"></p>
+              <button type="button" id="btnPartnerWithdrawOpen" class="btn-glow rounded-xl py-3 w-full font-semibold mt-4 touch-target">Retirar dinero</button>
+            </div>
+            <div class="rounded-xl border border-white/10 bg-black/20 p-3 mb-4">
+              <h3 class="text-sm font-semibold text-white/90 mb-2">Historial de retiros</h3>
+              <div id="partnerWithdrawHistory" class="text-sm min-h-[3rem]"><p class="text-white/45 text-xs py-2 text-center">Cargando…</p></div>
+            </div>
+            <div class="rounded-xl border border-cyan-500/25 bg-cyan-500/05 p-3 mb-2">
+              <h3 class="text-xs font-semibold text-cyan-200/90 mb-2">Seguimiento de otros trámites</h3>
+              <p class="text-[10px] text-white/45 mb-2">Solicitudes de días, altas de negocio, etc.</p>
+            </div>
+            <div id="superDayRequestsPartnerBox" class="hidden rounded-xl border border-cyan-500/35 bg-cyan-500/08 px-3 py-3 text-sm"></div>
+          </div>
+          <h2 class="founder-solicitudes-heading font-bold text-xl mb-1 flex items-center gap-2 super-only super-main-only">
             <i data-lucide="clipboard-list" class="w-5 h-5 text-[#86efac]"></i>
             Solicitudes
           </h2>
-          <p class="text-xs text-white/50 mb-3">Gestioná <strong class="text-white/70">pendientes</strong> (aprobá o rechazá) y consultá el <strong class="text-white/65">historial</strong> por estado. Más abajo, <strong class="text-emerald-200/90">Ventas con comprobante (socios)</strong>: son las ventas que cargan los administradores de red desde su <strong class="text-white/65">Más</strong>. El alta de negocio (kiosco) la iniciás con el botón de abajo. Los nuevos socios se registran con el <strong class="text-white/65">enlace de afiliación para vendedores</strong>.</p>
+          <p class="text-xs text-white/50 mb-3 super-only super-main-only">Gestioná <strong class="text-white/70">pendientes</strong> (aprobá o rechazá) y consultá el <strong class="text-white/65">historial</strong> por estado. <strong class="text-amber-200/90">Retiros de socios</strong>: revisá fondos en el libro y aprobá; el pago bancario lo registrás en <strong class="text-white/65">Pagos</strong>. Más abajo, <strong class="text-emerald-200/90">Ventas con comprobante (socios)</strong>. El alta de negocio (kiosco) la iniciás con el botón de abajo. Los nuevos socios se registran con el <strong class="text-white/65">enlace de afiliación para vendedores</strong>.</p>
+          <div id="founderWithdrawalReviewBox" class="hidden mb-5 rounded-2xl border border-amber-500/45 bg-amber-500/[0.1] p-3 sm:p-4 super-only super-main-only">
+            <h3 class="text-sm font-semibold text-amber-200 mb-2 flex items-center gap-2"><i data-lucide="wallet" class="w-4 h-4"></i> Retiros de comisiones (revisión)</h3>
+            <p class="text-[11px] text-white/50 mb-3">Solicitudes enviadas por administradores de red. Verificá que el saldo en el libro alcance; al aprobar pasan a <strong class="text-white/70">Pagos</strong> para transferir y adjuntar comprobante.</p>
+            <div id="founderWithdrawalReviewList" class="space-y-2 text-sm min-h-[2rem]"></div>
+          </div>
           <div class="mb-4 super-only super-main-only">
             <button type="button" id="btnOpenNewKiosqueroModal" class="glass rounded-2xl p-5 border border-[#22c55e]/40 bg-[#22c55e]/[0.08] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-[#22c55e]/60 active:scale-[0.98] touch-target">
               <div class="w-12 h-12 rounded-xl bg-[#22c55e]/25 flex items-center justify-center shrink-0">
@@ -2005,7 +2036,6 @@
             <p id="superClientSaleRequestsMsg" class="text-xs mt-2 text-emerald-200/80 hidden"></p>
           </div>
           <div id="superDayRequestsFounderBox" class="hidden mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-3 text-sm super-only super-main-only"></div>
-          <div id="superDayRequestsPartnerBox" class="hidden mb-4 rounded-xl border border-cyan-500/35 bg-cyan-500/08 px-3 py-3 text-sm"></div>
           <div class="space-y-5 super-solicitudes-historial super-only super-main-only">
             <div>
               <h3 class="text-sm font-semibold text-amber-200/95 mb-2 flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4"></i> Pendientes</h3>
@@ -2020,6 +2050,15 @@
               <div id="superSolicitudesRechazadas" class="min-h-[3rem]"><p class="text-white/45 text-xs py-3 text-center">Cargando…</p></div>
             </div>
           </div>
+        </div>
+        <!-- Pagos pendientes: retiros aprobados → transferencia + comprobante (solo fundador) -->
+        <div id="super-section-pagos-pendientes" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; min-height: 100%; max-height: 85vh; padding-bottom: 6rem;">
+          <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
+            <i data-lucide="banknote" class="w-5 h-5 text-[#86efac]"></i>
+            Pagos pendientes
+          </h2>
+          <p class="text-xs text-white/50 mb-4">Retiros de socios ya <strong class="text-amber-200/90">aprobados</strong> en Solicitudes. Verificá que el titular bancario coincida con el nombre del perfil, transferí el importe, adjuntá el comprobante y registrá el pago.</p>
+          <div id="founderPagosPendientesList" class="space-y-3 text-sm min-h-[4rem]"><p class="text-white/45 text-xs py-4 text-center">Cargando…</p></div>
         </div>
         <!-- Sección Más (hub + bloques, estilo panel kiosquero) -->
         <div id="super-section-mas" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
@@ -2173,6 +2212,39 @@
         <label class="block text-xs text-white/55 mb-1">Contraseña (mín. 6)</label>
         <input type="password" id="kiosqueroProvisionCompletePassword" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-4" minlength="6" autocomplete="new-password">
         <button type="button" id="kiosqueroProvisionCompleteSubmit" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target">Crear usuario kiosquero</button>
+      </div>
+    </div>
+
+    <!-- Modal: socio solicita retiro de comisiones -->
+    <div id="partnerWithdrawModal" class="fixed inset-0 z-[78] hidden items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="partnerWithdrawModalOverlay"></div>
+      <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md scale-in">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="wallet" class="w-5 h-5 text-emerald-300"></i> Solicitar retiro</h3>
+          <button type="button" id="partnerWithdrawModalClose" class="btn-neomorphic rounded-xl p-2 touch-target"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div id="partnerWithdrawModalErr" class="text-xs text-red-300 mb-3 hidden"></div>
+        <p class="text-xs text-white/55 mb-2">Monto en ARS (no puede superar tu saldo disponible).</p>
+        <input type="number" id="partnerWithdrawAmount" min="1" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-4" placeholder="0">
+        <button type="button" id="partnerWithdrawModalSubmit" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target">Enviar solicitud a la empresa</button>
+      </div>
+    </div>
+    <!-- Modal: fundador registra pago de retiro (comprobante) -->
+    <div id="founderWithdrawPayModal" class="fixed inset-0 z-[79] hidden items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="founderWithdrawPayModalOverlay"></div>
+      <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto scale-in">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-lg">Registrar pago al socio</h3>
+          <button type="button" id="founderWithdrawPayModalClose" class="btn-neomorphic rounded-xl p-2 touch-target"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <p id="founderWithdrawPayModalSummary" class="text-sm text-white/70 mb-3"></p>
+        <div id="founderWithdrawPayModalErr" class="text-xs text-red-300 mb-3 hidden"></div>
+        <label class="block text-xs text-white/55 mb-1">Mensaje / felicitación (opcional, verá el socio)</label>
+        <textarea id="founderWithdrawPayCongrats" rows="3" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-sm mb-3 resize-y" placeholder="Ej.: ¡Listo el pago! Seguimos sumando."></textarea>
+        <label class="block text-xs text-white/55 mb-1">Comprobante de transferencia (imagen)</label>
+        <input type="file" id="founderWithdrawPayFile" accept="image/jpeg,image/png,image/webp,image/gif" class="w-full text-sm text-white/80 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-white/10 file:text-white mb-4">
+        <input type="hidden" id="founderWithdrawPayRequestId" value="">
+        <button type="button" id="founderWithdrawPayModalSubmit" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target">Enviar y registrar como pagado</button>
       </div>
     </div>
 
