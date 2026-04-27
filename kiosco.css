@@ -1257,7 +1257,7 @@ body[data-panel="inventory"] #panel-inventory {
 
   /* Carril fijo a la IZQUIERDA, alto completo (solo ≥768px). En celular sigue abajo. */
   :root {
-    --ferriol-rail-w: 4.25rem;
+    --ferriol-rail-w: 5.5rem;
   }
 
   /*
@@ -1288,7 +1288,7 @@ body[data-panel="inventory"] #panel-inventory {
     padding-right: 0;
   }
 
-  /* Con header visible (Inicio kiosquero / panel admin): carril empieza bajo el header */
+  /* Carril bajo header cuando aplicable; contenido pegado ARRIBA, no centrado vertical */
   body[data-panel="dashboard"] #navKiosquero.ferriol-bottom-nav,
   body[data-panel="super"] #navSuperBottom.ferriol-bottom-nav {
     padding-top: calc(3.5rem + max(0.75rem, env(safe-area-inset-top, 0px)));
@@ -1307,21 +1307,20 @@ body[data-panel="inventory"] #panel-inventory {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    justify-content: center;
-    padding: 0.5rem 0.25rem;
+    justify-content: flex-start;
+    padding: 0.65rem 0.35rem 0.5rem;
   }
 
   #navKiosquero .bottom-nav-bar > div,
   #navSuperBottom .bottom-nav-bar > div {
     flex-direction: column !important;
-    flex: 1 1 auto;
-    justify-content: center;
+    flex: 0 1 auto;
+    justify-content: flex-start;
     align-items: stretch;
-    gap: 0.35rem;
+    gap: 0.5rem;
     overflow-x: hidden;
     overflow-y: auto;
     flex-wrap: nowrap !important;
-    justify-content: center;
   }
 
   #navKiosquero .bottom-nav-bar > div > .flex-shrink-0 {
@@ -1348,15 +1347,29 @@ body[data-panel="inventory"] #panel-inventory {
   #navSuperBottom .bottom-nav-btn {
     min-height: 0;
     flex: 0 0 auto;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-    gap: 0;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    gap: 0.18rem;
   }
 
-  /* Solo íconos en carril (texto en title del botón) */
+  /* Icono + nombre visibles en el carril (kiosco y admin) */
   #navKiosquero .bottom-nav-btn span,
   #navSuperBottom .bottom-nav-btn span {
-    display: none;
+    display: block;
+    font-size: 0.5875rem;
+    line-height: 1.2;
+    max-width: 5.25rem;
+    margin: 0 auto;
+    padding: 0 0.125rem;
+    text-align: center;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  #navKiosquero .bottom-nav-btn.active span,
+  #navSuperBottom .bottom-nav-btn.active span {
+    color: rgba(134, 239, 172, 0.98);
   }
 
   #navKiosquero .bottom-nav-btn i,

@@ -2148,51 +2148,15 @@
     function isEmpresaLensSuper() {
       return !!(currentUser && currentUser.role === 'super' && state.superUiMode === 'empresa');
     }
-    /** Tarjeta “Pagar a Ferriol” en Más: socios; fundador en vista Empresa la oculta (usa Ajustes). */
-    function shouldShowFerriolCompanyCardInMas() {
-      if (!currentUser) return false;
-      if (currentUser.role === 'partner') return true;
-      if (currentUser.role === 'super' && isSuperSocioLens()) return true;
-      return false;
-    }
-    function updateSuperMasBankingShell() {
-      var cF = document.getElementById('superMasFerriolBankingCard');
-      var cP = document.getElementById('superMasPartnerBankingCard');
-      if (cF) cF.classList.toggle('hidden', !shouldShowFerriolCompanyCardInMas());
-      if (cP) cP.classList.toggle('hidden', !(currentUser && currentUser.role === 'partner'));
-    }
     async function loadSuperMasBankingSection() {
-      if (!currentUser) return;
-      updateSuperMasBankingShell();
-      var preF = document.getElementById('superMasFerriolTransferText');
-      if (preF && shouldShowFerriolCompanyCardInMas() && supabaseClient) {
-        try {
-          var r = await supabaseClient.from('app_settings').select('value').eq('key', 'ferriol_transfer_info').maybeSingle();
-          preF.textContent = (r.data && r.data.value) ? String(r.data.value) : 'Aún no hay datos de cuenta cargados. Pedí a la empresa que completen Ajustes (fundador) o contactá a soporte.';
-        } catch (_) {
-          preF.textContent = 'No se pudieron cargar los datos de la empresa.';
-        }
-      } else if (preF) preF.textContent = '—';
-      if (currentUser.role === 'partner' && supabaseClient) {
+      if (!currentUser || !supabaseClient) return;
+      if (currentUser.role === 'partner') {
         try {
           var pr = await supabaseClient.from('profiles').select('partner_transfer_info').eq('id', currentUser.id).maybeSingle();
           if (!pr.error && pr.data) {
             currentUser.partnerTransferInfo = pr.data.partner_transfer_info != null ? String(pr.data.partner_transfer_info) : '';
           }
         } catch (_) {}
-      }
-      var prev = document.getElementById('superMasPartnerTransferPreview');
-      if (prev) {
-        var t = (currentUser && currentUser.partnerTransferInfo) ? String(currentUser.partnerTransferInfo).trim() : '';
-        if (t) {
-          var short = t.length > 200 ? t.slice(0, 200) + '…' : t;
-          prev.textContent = 'Guardado: ' + short;
-          prev.classList.remove('hidden', 'text-amber-200/70');
-        } else {
-          prev.textContent = 'Todavía no cargaste datos. Tus referidos solo verán los datos de la empresa en Caja.';
-          prev.classList.add('text-amber-200/70');
-          prev.classList.remove('hidden');
-        }
       }
       var ta = document.getElementById('partnerTransferInfoTextarea');
       if (ta && currentUser && currentUser.role === 'partner') {
@@ -3855,7 +3819,6 @@
           ingNav.style.display = '';
         }
       }
-      updateSuperMasBankingShell();
       syncPartnerBilleteraShell();
     }
 
@@ -4051,12 +4014,6 @@
         m.classList.add('hidden');
         m.classList.remove('flex');
       }
-    }
-    var btnOpenPartnerTransferModal = document.getElementById('btnOpenPartnerTransferModal');
-    if (btnOpenPartnerTransferModal) {
-      btnOpenPartnerTransferModal.addEventListener('click', function () {
-        if (currentUser && isNetworkAdminRole(currentUser.role) && !isSuperKioscoPreviewMode()) openPartnerTransferInfoModal();
-      });
     }
     var _ferriolProfileHeaderOpenedAt = 0;
     function ferriolOpenAccountProfileFromHeader(e) {
