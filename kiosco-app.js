@@ -664,7 +664,7 @@
           .from('mlm_ledger')
           .select('id, created_at, amount, status, metadata, event_type')
           .eq('beneficiary_user_id', uid)
-          .eq('event_type', 'sale_commission')
+          .in('event_type', ['sale_commission', 'renewal'])
           .eq('status', 'approved')
           .gte('created_at', startIsoP)
           .lte('created_at', endIsoP)
@@ -1340,7 +1340,7 @@
         if (balRpc.error) throw balRpc.error;
         var bal = Number(balRpc.data != null ? balRpc.data : 0);
         av.textContent = '$ ' + bal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS';
-        var led = await supabaseClient.from('mlm_ledger').select('amount').eq('beneficiary_user_id', currentUser.id).eq('event_type', 'sale_commission').in('status', ['approved', 'paid']);
+        var led = await supabaseClient.from('mlm_ledger').select('amount').eq('beneficiary_user_id', currentUser.id).in('event_type', ['sale_commission', 'renewal']).in('status', ['approved', 'paid']);
         if (led.error) throw led.error;
         var ingresosTotal = 0;
         (led.data || []).forEach(function (L) { ingresosTotal += Number(L.amount || 0); });
@@ -1355,7 +1355,7 @@
         });
         if (br) {
           br.innerHTML =
-            'Comisiones en libro (sale_commission, estados approved o paid, histórico): $ ' +
+            'Comisiones en libro (sale_commission + renewal, approved o paid, histórico): $ ' +
             ingresosTotal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
             ' · Retiros en historial (pagados + en trámite, sin rechazados): $ ' +
             historialComprometido.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
@@ -1380,7 +1380,7 @@
           br.innerHTML = '<p class="text-[10px] text-amber-200/90 mb-1.5">Cuenta fundador (vista administración): ves el saldo de tu usuario. Para pedir retiros a la empresa hace falta una cuenta con rol <strong class="text-amber-100/90">partner</strong>.</p>' + br.innerHTML;
         }
         if (currentUser.role === 'partner' && bal === 0 && ingresosTotal === 0 && br) {
-          br.innerHTML += '<p class="text-[10px] text-white/35 mt-1.5">Si creés que deberías tener saldo: confirmá que en Supabase corriste <code class="text-white/50">supabase-ferriol-partner-withdrawals.sql</code> y que en el libro ya hay comisiones <code class="text-white/50">sale_commission</code> en estado <code class="text-white/50">approved</code> o <code class="text-white/50">paid</code> a tu nombre.</p>';
+          br.innerHTML += '<p class="text-[10px] text-white/35 mt-1.5">Si creés que deberías tener saldo: corré de nuevo <code class="text-white/50">supabase-ferriol-partner-withdrawals.sql</code> en Supabase (funciones) y revisá en <code class="text-white/50">mlm_ledger</code> que tu usuario sea <code class="text-white/50">beneficiary_user_id</code> con <code class="text-white/50">sale_commission</code> o <code class="text-white/50">renewal</code> y estado <code class="text-white/50">approved</code>/<code class="text-white/50">paid</code>. Forzá recarga del sitio (Ctrl+F5) por si el navegador usa un <code class="text-white/50">kiosco-app.js</code> viejo.</p>';
         }
         if (!rows.length) {
           hist.innerHTML = '<p class="text-xs text-white/45 py-3 text-center">Todavía no tenés solicitudes de retiro.</p>';
