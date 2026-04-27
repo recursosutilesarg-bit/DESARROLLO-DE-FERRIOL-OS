@@ -395,7 +395,7 @@
       if (cl) {
         cl.textContent = founder
           ? 'Verde: facturación bruta · Cyan: reserva empresa · Violeta: comisiones a la red'
-          : 'Leyenda: verde = comisión; rojo = rech.; azul = nº acreditaciones / día';
+          : 'Leyenda: verde = comisión; rojo = rech. ($); azul = nº ventas (acred. + rech.) / día';
       }
     }
     async function loadSuperIngresosFounderSection() {
@@ -678,36 +678,90 @@
           var a = Number(L.amount || 0);
           sumCom += a;
           var dk = ferriolIngresosDayKeyFromIso(L.created_at);
-          if (!byDay[dk]) byDay[dk] = { net: 0, rej: 0, n: 0 };
+          if (!byDay[dk]) byDay[dk] = { net: 0, rej: 0, n: 0, nRej: 0 };
           byDay[dk].net += a;
           byDay[dk].n += 1;
         });
         kpiN.textContent = '$ ' + sumCom.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS';
-        kpiC.textContent = String(ledOk.length);
         var resPay = await supabaseClient
           .from('ferriol_payments')
-          .select('id, created_at, payment_type, amount, status, payer_user_id')
+          .select('id, created_at, payment_type, amount, status, payer_user_id, external_note, period_month')
           .eq('seller_user_id', uid)
           .gte('created_at', startIsoP)
           .lte('created_at', endIsoP)
           .order('created_at', { ascending: false })
           .limit(800);
         if (resPay.error) throw resPay.error;
+        var resCsrRej = await supabaseClient
+          .from('ferriol_client_sale_requests')
+          .select('id, created_at, client_name, client_email, amount_ars, payment_type, period_month, reject_note, comprobante_path, ferriol_payment_id')
+          .eq('partner_id', uid)
+          .eq('status', 'rejected')
+          .gte('created_at', startIsoP)
+          .lte('created_at', endIsoP)
+          .order('created_at', { ascending: false })
+          .limit(200);
+        if (resCsrRej.error) throw resCsrRej.error;
         var pRows = resPay.data || [];
+        var csrRejRows = resCsrRej.data || [];
+        var rejPayRows = pRows.filter(function (r) { return r.status === 'rejected'; });
         var sumRej = 0;
-        var nRej = 0;
-        pRows.forEach(function (r) {
-          if (r.status === 'rejected') {
-            sumRej += Number(r.amount || 0);
-            nRej += 1;
-            var dk = ferriolIngresosDayKeyFromIso(r.created_at);
-            if (!byDay[dk]) byDay[dk] = { net: 0, rej: 0, n: 0 };
-            byDay[dk].rej += Number(r.amount || 0);
+        rejPayRows.forEach(function (r) { sumRej += Number(r.amount || 0); });
+        csrRejRows.forEach(function (r) { sumRej += Number(r.amount_ars || 0); });
+        var nRej = rejPayRows.length + csrRejRows.length;
+        var rejPayerIds = Array.from(new Set(rejPayRows.map(function (r) { return r.payer_user_id; }).filter(Boolean)));
+        var rejPayMeta = {};
+        if (rejPayerIds.length) {
+          var prRej = await supabaseClient.from('profiles').select('id, email, kiosco_name').in('id', rejPayerIds);
+          if (!prRej.error && prRej.data) {
+            prRej.data.forEach(function (p) {
+              if (p && p.id) {
+                rejPayMeta[p.id] = {
+                  label: ((p.kiosco_name || '').trim() || p.email || p.id),
+                  email: (p.email || '').trim()
+                };
+              }
+            });
           }
+        }
+        var enrichedRejPayments = rejPayRows.map(function (r) {
+          var meta = r.payer_user_id ? rejPayMeta[r.payer_user_id] : null;
+          return {
+            id: r.id,
+            created_at: r.created_at,
+            payment_type: r.payment_type,
+            amount: r.amount,
+            period_month: r.period_month,
+            external_note: r.external_note,
+            payer_user_id: r.payer_user_id,
+            payer_label: meta ? meta.label : '—',
+            payer_email: meta ? meta.email : ''
+          };
         });
-        kpiR.textContent = nRej > 0
-          ? ('$ ' + sumRej.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS')
-          : '$ 0,00 ARS';
+        window._ferriolIngresosRejectedDetail = {
+          payments: enrichedRejPayments,
+          csrs: csrRejRows.slice()
+        };
+        rejPayRows.forEach(function (r) {
+          var dk = ferriolIngresosDayKeyFromIso(r.created_at);
+          if (!byDay[dk]) byDay[dk] = { net: 0, rej: 0, n: 0, nRej: 0 };
+          byDay[dk].rej += Number(r.amount || 0);
+          byDay[dk].nRej += 1;
+        });
+        csrRejRows.forEach(function (r) {
+          var dk = ferriolIngresosDayKeyFromIso(r.created_at);
+          if (!byDay[dk]) byDay[dk] = { net: 0, rej: 0, n: 0, nRej: 0 };
+          byDay[dk].rej += Number(r.amount_ars || 0);
+          byDay[dk].nRej += 1;
+        });
+        kpiC.textContent = String(ledOk.length + nRej);
+        kpiR.textContent = String(nRej);
+        var rejSub = document.getElementById('ingresosKpiRejSub');
+        if (rejSub) {
+          rejSub.innerHTML = nRej > 0
+            ? ('Total declarado (rechazado): <strong class="text-red-200/80">$ ' + sumRej.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS</strong> · tocá para ver motivo y reenviar')
+            : 'Sin rechazos en el período';
+        }
         if (kpiPending) {
           Promise.all([
             supabaseClient
@@ -748,7 +802,11 @@
         });
         var dataNet = dayKeys.map(function (k) { return byDay[k] ? byDay[k].net : 0; });
         var dataRej = dayKeys.map(function (k) { return byDay[k] ? byDay[k].rej : 0; });
-        var dataCnt = dayKeys.map(function (k) { return byDay[k] ? byDay[k].n : 0; });
+        var dataCnt = dayKeys.map(function (k) {
+          var b = byDay[k];
+          if (!b) return 0;
+          return (b.n || 0) + (b.nRej || 0);
+        });
         if (typeof window.Chart === 'undefined') {
           if (canvas) canvas.classList.add('hidden');
           if (fb) { fb.classList.remove('hidden'); fb.textContent = 'Gráfico no disponible (librería de gráficos). Revisá la conexión a internet.'; }
@@ -766,7 +824,7 @@
                 datasets: [
                   { label: 'Tu comisión (verif.)', data: dataNet, borderColor: 'rgb(134, 239, 172)', backgroundColor: 'rgba(134, 239, 172, 0.12)', tension: 0.25, fill: true, pointRadius: 0, yAxisID: 'y' },
                   { label: 'Cobros rechazados (bruto)', data: dataRej, borderColor: 'rgb(248, 113, 113)', backgroundColor: 'rgba(248, 113, 113, 0.08)', tension: 0.25, fill: true, pointRadius: 0, yAxisID: 'y' },
-                  { label: 'Nº acreditaciones', data: dataCnt, borderColor: 'rgb(56, 189, 248)', backgroundColor: 'rgba(56, 189, 248, 0.06)', tension: 0.2, fill: false, pointRadius: 0, yAxisID: 'y1' }
+                  { label: 'Nº ventas (acred. + rech.)', data: dataCnt, borderColor: 'rgb(56, 189, 248)', backgroundColor: 'rgba(56, 189, 248, 0.06)', tension: 0.2, fill: false, pointRadius: 0, yAxisID: 'y1' }
                 ]
               },
               options: {
@@ -831,6 +889,9 @@
         }
       } catch (e) {
         kpiN.textContent = kpiC.textContent = kpiR.textContent = '—';
+        var rejSubErr = document.getElementById('ingresosKpiRejSub');
+        if (rejSubErr) rejSubErr.textContent = '—';
+        window._ferriolIngresosRejectedDetail = { payments: [], csrs: [] };
         wrap.innerHTML = '<p class="text-red-300/90 text-sm py-4 px-2">No se pudieron cargar los ingresos. ' + (e && e.message ? String(e.message) : '') + ' ¿Ejecutaste <code class="text-white/80">supabase-ferriol-payments.sql</code> y las políticas RLS?</p>';
         if (typeof window !== 'undefined' && window.Chart && canvas && window._ferriolIngresosChart) {
           try { window._ferriolIngresosChart.destroy(); } catch (_) {}
@@ -849,6 +910,146 @@
     }
     function escHtmlCsr(s) {
       return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+    }
+    function ferriolCsrComprobantePublicUrl(path) {
+      if (!path || !supabaseClient) return '';
+      try {
+        var x = supabaseClient.storage.from('comprobantes-ferriol').getPublicUrl(path);
+        return x && x.data && x.data.publicUrl ? x.data.publicUrl : '';
+      } catch (_) {
+        return '';
+      }
+    }
+    function closeIngresosRechazadasModal() {
+      var m = document.getElementById('ingresosRechazadasModal');
+      if (!m) return;
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+    function ferriolRenderIngresosRechazadasModalBody() {
+      var body = document.getElementById('ingresosRechazadasModalBody');
+      if (!body) return;
+      var data = window._ferriolIngresosRejectedDetail || { payments: [], csrs: [] };
+      var pays = data.payments || [];
+      var csrs = data.csrs || [];
+      if (!pays.length && !csrs.length) {
+        body.innerHTML = '<p class="text-white/50 text-sm py-4 text-center">No hay rechazos en el período seleccionado. Cambiá el rango arriba en Ingresos y volvé a intentar.</p>';
+        return;
+      }
+      var blocks = [];
+      csrs.forEach(function (row) {
+        var d = String(row.created_at || '').slice(0, 16).replace('T', ' ');
+        var reason = (row.reject_note && String(row.reject_note).trim()) ? escHtmlCsr(row.reject_note) : '<span class="text-white/45">Sin motivo detallado.</span>';
+        var img = ferriolCsrComprobantePublicUrl(row.comprobante_path);
+        blocks.push(
+          '<div class="rounded-xl border border-red-400/25 bg-black/35 p-3 space-y-2">' +
+          '<p class="text-[10px] text-white/45 uppercase tracking-wide">Solicitud con comprobante · ' + escHtmlCsr(d) + '</p>' +
+          '<p class="text-white/90"><strong>Cliente:</strong> ' + escHtmlCsr(row.client_name) + '</p>' +
+          '<p class="text-white/75 text-xs"><strong>Email:</strong> ' + escHtmlCsr(row.client_email) + '</p>' +
+          '<p class="text-xs text-white/55">' + escHtmlCsr(ferriolIngresosPaymentTypeLabel(row.payment_type)) + (row.period_month ? ' · Mes: ' + escHtmlCsr(String(row.period_month).slice(0, 7)) : '') + ' · <strong class="text-red-200/90">$ ' + Number(row.amount_ars || 0).toLocaleString('es-AR') + '</strong></p>' +
+          '<p class="text-xs text-amber-100/90"><strong>Motivo:</strong> ' + reason + '</p>' +
+          (img ? '<a href="' + escHtmlCsr(img) + '" target="_blank" rel="noopener" class="text-xs text-cyan-300 underline">Ver comprobante enviado</a>' : '') +
+          '<button type="button" class="ferriol-rej-prefill-csr w-full mt-1 py-2 rounded-lg border border-emerald-400/35 text-emerald-200 text-xs font-semibold touch-target" data-csr-id="' + escHtmlCsr(row.id) + '">Corregir y reenviar (cargar formulario)</button>' +
+          '</div>'
+        );
+      });
+      pays.forEach(function (r) {
+        var d = String(r.created_at || '').slice(0, 16).replace('T', ' ');
+        var reason = (r.external_note && String(r.external_note).trim()) ? escHtmlCsr(r.external_note) : '<span class="text-white/45">Sin motivo detallado.</span>';
+        blocks.push(
+          '<div class="rounded-xl border border-red-400/25 bg-black/35 p-3 space-y-2">' +
+          '<p class="text-[10px] text-white/45 uppercase tracking-wide">Cobro en cuenta · ' + escHtmlCsr(d) + '</p>' +
+          '<p class="text-xs text-white/55">' + escHtmlCsr(ferriolIngresosPaymentTypeLabel(r.payment_type)) + (r.period_month ? ' · Mes: ' + escHtmlCsr(String(r.period_month).slice(0, 7)) : '') + ' · <strong class="text-red-200/90">$ ' + Number(r.amount || 0).toLocaleString('es-AR') + '</strong></p>' +
+          '<p class="text-white/75 text-xs"><strong>Comprador:</strong> ' + escHtmlCsr(r.payer_label || '—') + (r.payer_email ? ' · ' + escHtmlCsr(r.payer_email) : '') + '</p>' +
+          '<p class="text-xs text-amber-100/90"><strong>Motivo:</strong> ' + reason + '</p>' +
+          '<button type="button" class="ferriol-rej-prefill-pay w-full mt-1 py-2 rounded-lg border border-emerald-400/35 text-emerald-200 text-xs font-semibold touch-target" data-pay-id="' + escHtmlCsr(r.id) + '">Nueva solicitud con estos datos</button>' +
+          '</div>'
+        );
+      });
+      body.innerHTML = blocks.join('');
+      body.querySelectorAll('.ferriol-rej-prefill-csr').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = btn.getAttribute('data-csr-id');
+          var row = (window._ferriolIngresosRejectedDetail && window._ferriolIngresosRejectedDetail.csrs || []).find(function (x) { return String(x.id) === String(id); });
+          if (!row) return;
+          closeIngresosRechazadasModal();
+          ferriolPrefillClientSaleFromRejectedCsr(row);
+        });
+      });
+      body.querySelectorAll('.ferriol-rej-prefill-pay').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = btn.getAttribute('data-pay-id');
+          var row = (window._ferriolIngresosRejectedDetail && window._ferriolIngresosRejectedDetail.payments || []).find(function (x) { return String(x.id) === String(id); });
+          if (!row) return;
+          closeIngresosRechazadasModal();
+          ferriolPrefillClientSaleFromRejectedPayment(row);
+        });
+      });
+    }
+    function openIngresosRechazadasModal() {
+      var m = document.getElementById('ingresosRechazadasModal');
+      if (!m) return;
+      ferriolRenderIngresosRechazadasModalBody();
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    function ferriolPrefillClientSaleFromRejectedCsr(row) {
+      switchSuperSection('mas');
+      setTimeout(function () {
+        try { superMasScrollTo('superMasBlockAdmin'); } catch (_) {}
+      }, 120);
+      var nm = document.getElementById('clientSaleClientName');
+      var em = document.getElementById('clientSaleClientEmail');
+      var pt = document.getElementById('clientSalePaymentType');
+      var am = document.getElementById('clientSaleAmount');
+      var vm = document.getElementById('clientSaleVendorMonth');
+      var fi = document.getElementById('clientSaleComprobante');
+      if (nm) nm.value = row.client_name || '';
+      if (em) em.value = row.client_email || '';
+      if (pt) pt.value = row.payment_type || 'kiosco_licencia';
+      if (am) am.value = String(Number(row.amount_ars) || '');
+      if (fi) fi.value = '';
+      if (vm) {
+        if (row.period_month) {
+          var pm = String(row.period_month);
+          if (pm.length >= 7) vm.value = pm.slice(0, 7);
+        } else if (row.payment_type !== 'vendor_mantenimiento') {
+          vm.value = '';
+        }
+      }
+      syncClientSaleVendorMonthVisibility();
+      openClientSaleRequestModal();
+    }
+    function ferriolPrefillClientSaleFromRejectedPayment(row) {
+      switchSuperSection('mas');
+      setTimeout(function () {
+        try { superMasScrollTo('superMasBlockAdmin'); } catch (_) {}
+      }, 120);
+      var nm = document.getElementById('clientSaleClientName');
+      var em = document.getElementById('clientSaleClientEmail');
+      var pt = document.getElementById('clientSalePaymentType');
+      var am = document.getElementById('clientSaleAmount');
+      var vm = document.getElementById('clientSaleVendorMonth');
+      var fi = document.getElementById('clientSaleComprobante');
+      if (nm) nm.value = row.payer_label || '';
+      if (em) em.value = row.payer_email || '';
+      if (pt) pt.value = row.payment_type || 'kiosco_licencia';
+      if (am) am.value = String(Number(row.amount) || '');
+      if (fi) fi.value = '';
+      if (vm) {
+        if (row.period_month) {
+          var pm = String(row.period_month);
+          if (pm.length >= 7) vm.value = pm.slice(0, 7);
+        } else if (row.payment_type === 'vendor_mantenimiento') {
+          var d = new Date();
+          vm.value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+        } else {
+          vm.value = '';
+        }
+      }
+      syncClientSaleVendorMonthVisibility();
+      openClientSaleRequestModal();
     }
     async function loadFounderClientSaleRequestsPanel() {
       var clBox = document.getElementById('superClientSaleRequestsList');
@@ -7165,6 +7366,33 @@ async function showApp() {
     if (ingresosRangeFilter) {
       ingresosRangeFilter.addEventListener('change', function () {
         if (state.superSection === 'ingresos') loadSuperIngresosSection();
+      });
+    }
+    var ingresosKpiRejCard = document.getElementById('ingresosKpiRejCard');
+    if (ingresosKpiRejCard) {
+      ingresosKpiRejCard.addEventListener('click', function () {
+        openIngresosRechazadasModal();
+      });
+      ingresosKpiRejCard.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openIngresosRechazadasModal();
+        }
+      });
+    }
+    var ingresosRechazadasModalClose = document.getElementById('ingresosRechazadasModalClose');
+    if (ingresosRechazadasModalClose) ingresosRechazadasModalClose.addEventListener('click', closeIngresosRechazadasModal);
+    var ingresosRechazadasModalOverlay = document.getElementById('ingresosRechazadasModalOverlay');
+    if (ingresosRechazadasModalOverlay) ingresosRechazadasModalOverlay.addEventListener('click', closeIngresosRechazadasModal);
+    var ingresosRechazadasModalNewSale = document.getElementById('ingresosRechazadasModalNewSale');
+    if (ingresosRechazadasModalNewSale) {
+      ingresosRechazadasModalNewSale.addEventListener('click', function () {
+        closeIngresosRechazadasModal();
+        switchSuperSection('mas');
+        setTimeout(function () {
+          try { superMasScrollTo('superMasBlockAdmin'); } catch (_) {}
+          openClientSaleRequestModal();
+        }, 120);
       });
     }
     document.getElementById('saveAdminContact').onclick = async () => {
