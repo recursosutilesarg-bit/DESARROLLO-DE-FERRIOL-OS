@@ -3626,6 +3626,63 @@
         if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
       } catch (_) {}
     }
+    function ferriolParsePartnerBankingInfo(raw) {
+      var s = raw != null ? String(raw).trim() : '';
+      var out = { titular: '', banco: '', tipo: '', cbu: '', alias: '', cuit: '', notas: '' };
+      if (!s) return out;
+      var lines = s.split(/\r?\n/);
+      var anyLabel = false;
+      var unmatched = [];
+      lines.forEach(function (line) {
+        var t = line.trim();
+        if (!t) return;
+        var m = t.match(/^([^:]+):\s*(.*)$/);
+        if (m) {
+          var label = m[1].trim().toLowerCase();
+          var val = m[2].trim();
+          if (label === 'titular') { out.titular = val; anyLabel = true; }
+          else if (label === 'banco') { out.banco = val; anyLabel = true; }
+          else if (label === 'tipo de cuenta') { out.tipo = val; anyLabel = true; }
+          else if (label === 'cbu/cvu' || label === 'cbu') { out.cbu = val; anyLabel = true; }
+          else if (label === 'alias') { out.alias = val; anyLabel = true; }
+          else if (label === 'cuit/cuil' || label === 'cuit') { out.cuit = val; anyLabel = true; }
+          else if (label === 'notas') {
+            out.notas = out.notas ? (out.notas + '\n' + val) : val;
+            anyLabel = true;
+          } else unmatched.push(t);
+        } else unmatched.push(t);
+      });
+      if (!anyLabel) {
+        out.notas = s;
+      } else if (unmatched.length) {
+        out.notas = (out.notas ? out.notas + '\n' : '') + unmatched.join('\n');
+      }
+      return out;
+    }
+    function ferriolBuildPartnerBankingInfo(fields) {
+      var lines = [];
+      if (fields.titular) lines.push('Titular: ' + String(fields.titular).trim());
+      if (fields.banco) lines.push('Banco: ' + String(fields.banco).trim());
+      if (fields.tipo) lines.push('Tipo de cuenta: ' + String(fields.tipo).trim());
+      if (fields.cbu) lines.push('CBU/CVU: ' + String(fields.cbu).replace(/\s/g, ''));
+      if (fields.alias) lines.push('Alias: ' + String(fields.alias).trim());
+      if (fields.cuit) lines.push('CUIT/CUIL: ' + String(fields.cuit).trim());
+      if (fields.notas) lines.push('Notas: ' + String(fields.notas).trim());
+      return lines.join('\n');
+    }
+    function ferriolFillAccountProfileBankForm(parsed) {
+      var set = function (id, v) {
+        var el = document.getElementById(id);
+        if (el) el.value = v != null ? String(v) : '';
+      };
+      set('accountProfileBankTitular', parsed.titular);
+      set('accountProfileBankBanco', parsed.banco);
+      set('accountProfileBankTipo', parsed.tipo);
+      set('accountProfileBankCbu', parsed.cbu);
+      set('accountProfileBankAlias', parsed.alias);
+      set('accountProfileBankCuit', parsed.cuit);
+      set('accountProfileBankNotas', parsed.notas);
+    }
     function openAccountProfileModal(focusBank) {
       if (!currentUser) {
         try {
@@ -3653,10 +3710,12 @@
       if (wWrap) wWrap.classList.toggle('hidden', !showWa);
       if (wTa && showWa) wTa.value = currentUser.whatsappMessage || DEFAULT_WHATSAPP;
       var bWrap = document.getElementById('accountProfileBankWrap');
-      var bTa = document.getElementById('accountProfileBankText');
       var showBank = isNetworkAdminRole(currentUser.role) && !isSuperKioscoPreviewMode();
       if (bWrap) bWrap.classList.toggle('hidden', !showBank);
-      if (bTa && showBank) bTa.value = currentUser.partnerTransferInfo != null ? String(currentUser.partnerTransferInfo) : '';
+      if (showBank) {
+        var bankParsed = ferriolParsePartnerBankingInfo(currentUser.partnerTransferInfo);
+        ferriolFillAccountProfileBankForm(bankParsed);
+      }
       syncAccountProfileModalPreview();
       if (m) {
         m.classList.remove('hidden');
@@ -3669,7 +3728,8 @@
       if (focusBank && bWrap && showBank) {
         setTimeout(function () {
           try { bWrap.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) { bWrap.scrollIntoView(true); }
-          if (bTa) try { bTa.focus(); } catch (_) {}
+          var bt = document.getElementById('accountProfileBankTitular');
+          if (bt) try { bt.focus(); } catch (_) {}
         }, 300);
       }
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
@@ -3839,9 +3899,21 @@
         if (ferriolNotificationRecipientShell()) loadNotifications();
       }
       if (name === 'scanner') {
+        if (typeof window._ferriolFlushUsbBarcode === 'function') window._ferriolFlushUsbBarcode();
         if (typeof window._startScannerCamera === 'function') window._startScannerCamera();
         if (typeof window._stopScannerInterval === 'function') window._stopScannerInterval();
-      } else if (typeof window._stopScannerInterval === 'function') window._stopScannerInterval();
+        var ps = document.getElementById('panel-scanner');
+        if (ps) {
+          try {
+            ps.focus({ preventScroll: true });
+          } catch (_) {
+            try { ps.focus(); } catch (_) {}
+          }
+        }
+      } else {
+        if (typeof window._ferriolFlushUsbBarcode === 'function') window._ferriolFlushUsbBarcode();
+        if (typeof window._stopScannerInterval === 'function') window._stopScannerInterval();
+      }
       if (name === 'caja') {
         state._suppressCajaHistoryPush = true;
         var ctab = cajaTabOverride != null && cajaTabOverride !== '' ? cajaTabOverride : 'hub';
@@ -4080,7 +4152,37 @@
         }
         var showBank = isNetworkAdminRole(currentUser.role) && !isSuperKioscoPreviewMode();
         if (showBank) {
-          payload.partner_transfer_info = document.getElementById('accountProfileBankText') ? String(document.getElementById('accountProfileBankText').value || '') : '';
+          var bankTit = (document.getElementById('accountProfileBankTitular') && document.getElementById('accountProfileBankTitular').value || '').trim();
+          var bankBco = (document.getElementById('accountProfileBankBanco') && document.getElementById('accountProfileBankBanco').value || '').trim();
+          var bankCbu = (document.getElementById('accountProfileBankCbu') && document.getElementById('accountProfileBankCbu').value || '').replace(/\s/g, '');
+          var bankAlias = (document.getElementById('accountProfileBankAlias') && document.getElementById('accountProfileBankAlias').value || '').trim();
+          if (!bankTit || !bankBco || (!bankCbu && !bankAlias)) {
+            if (msg) {
+              msg.textContent = 'Completá titular, banco y CBU/CVU o alias en datos bancarios.';
+              msg.classList.remove('hidden', 'text-emerald-300');
+              msg.classList.add('text-red-300');
+            }
+            var bw = document.getElementById('accountProfileBankWrap');
+            if (bw) try { bw.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
+            return;
+          }
+          if (bankCbu && !/^\d+$/.test(bankCbu)) {
+            if (msg) {
+              msg.textContent = 'El CBU/CVU solo debe contener números (sin guiones).';
+              msg.classList.remove('hidden', 'text-emerald-300');
+              msg.classList.add('text-red-300');
+            }
+            return;
+          }
+          payload.partner_transfer_info = ferriolBuildPartnerBankingInfo({
+            titular: bankTit,
+            banco: bankBco,
+            tipo: (document.getElementById('accountProfileBankTipo') && document.getElementById('accountProfileBankTipo').value || '').trim(),
+            cbu: bankCbu,
+            alias: bankAlias,
+            cuit: (document.getElementById('accountProfileBankCuit') && document.getElementById('accountProfileBankCuit').value || '').trim(),
+            notas: (document.getElementById('accountProfileBankNotas') && document.getElementById('accountProfileBankNotas').value || '').trim()
+          });
         }
         var fileIn = document.getElementById('accountProfileAvatarInput');
         var file = fileIn && fileIn.files && fileIn.files[0];
@@ -4710,6 +4812,42 @@
       return null;
     }
 
+    function applyDetectedBarcode(rawCode) {
+      const norm = normalizeBarcode(rawCode);
+      if (!norm) return;
+      const now = Date.now();
+      if (norm === normalizeBarcode(lastScannedCode) && now - lastScanTime < SCAN_COOLDOWN_MS) return;
+      if (window._scanForProductCode) {
+        lastScannedCode = norm;
+        lastScanTime = now;
+        var prodCodigoEl = document.getElementById('prodCodigo');
+        if (prodCodigoEl) prodCodigoEl.value = norm;
+        window._scanForProductCode = false;
+        goToPanel('inventory');
+        document.getElementById('productModal').classList.remove('hidden');
+        document.getElementById('productModal').classList.add('flex');
+        lucide.createIcons();
+        return;
+      }
+      const data = getData();
+      const found = findProductByCode(data.products, norm);
+      if (found && found.product.stock > 0) {
+        lastScannedCode = norm;
+        lastScanTime = now;
+        addToCart(found.codigo);
+        playBeep();
+        showScanToast('Agregado: ' + found.product.nombre, false);
+      } else if (found && found.product.stock <= 0) {
+        lastScannedCode = norm;
+        lastScanTime = now;
+        showScanToast('Sin stock: ' + found.product.nombre, true);
+      } else {
+        lastScannedCode = norm;
+        lastScanTime = now;
+        showScanToast('Producto no encontrado (código: ' + norm + ')', true);
+      }
+    }
+
     async function scanFrame() {
       if (!scannerStream || video.readyState !== 4) return;
       if (typeof BarcodeDetector === 'undefined') return;
@@ -4718,40 +4856,7 @@
       ctx.drawImage(video, 0, 0);
       try {
         const codes = await new BarcodeDetector().detect(canvas);
-        if (codes.length) {
-          const rawCode = codes[0].rawValue;
-          const now = Date.now();
-          if (rawCode === lastScannedCode && now - lastScanTime < SCAN_COOLDOWN_MS) return;
-          if (window._scanForProductCode) {
-            lastScannedCode = rawCode;
-            lastScanTime = now;
-            var prodCodigoEl = document.getElementById('prodCodigo');
-            if (prodCodigoEl) prodCodigoEl.value = rawCode;
-            window._scanForProductCode = false;
-            goToPanel('inventory');
-            document.getElementById('productModal').classList.remove('hidden');
-            document.getElementById('productModal').classList.add('flex');
-            lucide.createIcons();
-            return;
-          }
-          const data = getData();
-          const found = findProductByCode(data.products, rawCode);
-          if (found && found.product.stock > 0) {
-            lastScannedCode = rawCode;
-            lastScanTime = now;
-            addToCart(found.codigo);
-            playBeep();
-            showScanToast('Agregado: ' + found.product.nombre, false);
-          } else if (found && found.product.stock <= 0) {
-            lastScannedCode = rawCode;
-            lastScanTime = now;
-            showScanToast('Sin stock: ' + found.product.nombre, true);
-          } else {
-            lastScannedCode = rawCode;
-            lastScanTime = now;
-            showScanToast('Producto no encontrado (código: ' + normalizeBarcode(rawCode) + ')', true);
-          }
-        }
+        if (codes.length) applyDetectedBarcode(codes[0].rawValue);
       } catch (_) {}
     }
 
@@ -4759,6 +4864,73 @@
       if (scanInterval) { clearInterval(scanInterval); scanInterval = null; }
     }
     window._stopScannerInterval = stopScanInterval;
+
+    /* Lector USB (HID modo teclado): acumula tecleo rápido y cierra con Enter o Tab — misma lógica que la cámara */
+    var usbWedgeBuffer = '';
+    var usbWedgeTimer = null;
+    var USB_WEDGE_IDLE_MS = 220;
+    var USB_WEDGE_MAX_LEN = 64;
+    function flushUsbWedgeBuffer() {
+      usbWedgeBuffer = '';
+      if (usbWedgeTimer) {
+        clearTimeout(usbWedgeTimer);
+        usbWedgeTimer = null;
+      }
+    }
+    window._ferriolFlushUsbBarcode = flushUsbWedgeBuffer;
+    function ferriolUsbWedgeIgnoreTarget(target) {
+      if (!target || target.nodeType !== 1) return false;
+      if (target.id === 'manualCode') return true;
+      var cart = document.getElementById('cartPanel');
+      if (cart && cart.classList.contains('translate-x-0')) return true;
+      var tag = (target.tagName || '').toLowerCase();
+      if (tag === 'textarea' || tag === 'select') return true;
+      if (target.isContentEditable) return true;
+      if (tag === 'input') {
+        var typ = (target.type || '').toLowerCase();
+        if (typ === 'button' || typ === 'submit' || typ === 'checkbox' || typ === 'radio' || typ === 'hidden') return false;
+        return true;
+      }
+      return false;
+    }
+    function onUsbWedgeKeydown(ev) {
+      if (document.body.getAttribute('data-panel') !== 'scanner') return;
+      if (ferriolUsbWedgeIgnoreTarget(ev.target)) return;
+      if (ev.key === 'Escape') {
+        flushUsbWedgeBuffer();
+        return;
+      }
+      if (ev.key === 'Enter' || ev.key === 'Tab') {
+        var code = normalizeBarcode(usbWedgeBuffer);
+        flushUsbWedgeBuffer();
+        if (code.length < 1) return;
+        ev.preventDefault();
+        ev.stopPropagation();
+        applyDetectedBarcode(code);
+        return;
+      }
+      if (ev.key === 'Backspace') {
+        if (usbWedgeBuffer.length) {
+          usbWedgeBuffer = usbWedgeBuffer.slice(0, -1);
+          if (usbWedgeTimer) clearTimeout(usbWedgeTimer);
+          usbWedgeTimer = setTimeout(flushUsbWedgeBuffer, USB_WEDGE_IDLE_MS);
+          ev.preventDefault();
+          ev.stopPropagation();
+        }
+        return;
+      }
+      if (ev.key === ' ') return;
+      if (ev.key.length === 1 && !ev.ctrlKey && !ev.metaKey && !ev.altKey) {
+        if (usbWedgeBuffer.length >= USB_WEDGE_MAX_LEN) usbWedgeBuffer = '';
+        usbWedgeBuffer += ev.key;
+        if (usbWedgeTimer) clearTimeout(usbWedgeTimer);
+        usbWedgeTimer = setTimeout(flushUsbWedgeBuffer, USB_WEDGE_IDLE_MS);
+        ev.preventDefault();
+        ev.stopPropagation();
+      }
+    }
+    window.addEventListener('keydown', onUsbWedgeKeydown, true);
+
     async function startScannerCamera() {
       if (scannerStream) return;
       try {

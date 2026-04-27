@@ -2792,10 +2792,31 @@
           <label class="block text-xs text-white/55 mb-1" for="accountProfileWhatsappMsg">Mensaje predeterminado WhatsApp (desde caja)</label>
           <textarea id="accountProfileWhatsappMsg" rows="3" class="w-full glass rounded-xl px-3 py-2 border border-white/20 text-white text-sm resize-y"></textarea>
         </div>
-        <div id="accountProfileBankWrap" class="hidden mb-4 scroll-mt-4">
-          <label class="block text-xs text-white/55 mb-1" for="accountProfileBankText">Datos bancarios (retiros de comisiones y acuerdos de red)</label>
-          <p class="text-[11px] text-amber-200/85 mb-1.5">Titular de la cuenta debe coincidir con tu nombre de cuenta. No incluyas claves bancarias.</p>
-          <textarea id="accountProfileBankText" rows="6" class="w-full glass rounded-xl px-3 py-2 border border-white/20 text-white text-sm resize-y" placeholder="Banco, CBU/CVU, alias, titular…"></textarea>
+        <div id="accountProfileBankWrap" class="hidden mb-4 scroll-mt-4 space-y-3 rounded-xl border border-amber-400/25 bg-amber-500/[0.06] p-3 sm:p-4">
+          <h4 class="text-sm font-semibold text-amber-100/95 flex items-center gap-2"><i data-lucide="landmark" class="w-4 h-4 shrink-0"></i> Datos bancarios</h4>
+          <p class="text-[11px] text-amber-200/85 leading-snug">Para retiros de comisiones y acuerdos de red. El <strong class="text-white/80">titular</strong> debe coincidir con tu identidad en la cuenta. No cargues claves ni tokens.</p>
+          <label class="block text-xs text-white/55 mb-1" for="accountProfileBankTitular">Titular de la cuenta <span class="text-amber-200/80">*</span></label>
+          <input type="text" id="accountProfileBankTitular" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm" placeholder="Como figura en el banco" autocomplete="name">
+          <label class="block text-xs text-white/55 mb-1" for="accountProfileBankBanco">Banco o entidad <span class="text-amber-200/80">*</span></label>
+          <input type="text" id="accountProfileBankBanco" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm" placeholder="Ej: Banco Nación, Mercado Pago…" autocomplete="organization">
+          <p class="text-[10px] text-white/45 -mt-1">Indicá <strong class="text-white/60">CBU/CVU</strong> o <strong class="text-white/60">alias</strong> (al menos uno).</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-white/55 mb-1" for="accountProfileBankCbu">CBU o CVU</label>
+              <input type="text" id="accountProfileBankCbu" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm tabular-nums" placeholder="22 dígitos" inputmode="numeric" maxlength="32" autocomplete="off">
+            </div>
+            <div>
+              <label class="block text-xs text-white/55 mb-1" for="accountProfileBankAlias">Alias</label>
+              <input type="text" id="accountProfileBankAlias" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm" placeholder="Ej: mi.alias.mp" autocomplete="off">
+            </div>
+          </div>
+          <label class="block text-xs text-white/55 mb-1" for="accountProfileBankTipo">Tipo de cuenta</label>
+          <input type="text" id="accountProfileBankTipo" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm" placeholder="Ej: Caja de ahorro, cuenta corriente, CVU…" autocomplete="off">
+          <label class="block text-xs text-white/55 mb-1" for="accountProfileBankCuit">CUIT / CUIL (opcional)</label>
+          <input type="text" id="accountProfileBankCuit" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm" placeholder="Si aplica a la cuenta" inputmode="numeric" autocomplete="off">
+          <label class="block text-xs text-white/55 mb-1" for="accountProfileBankNotas">Observaciones</label>
+          <textarea id="accountProfileBankNotas" rows="2" class="w-full glass rounded-xl px-3 py-2 border border-white/20 text-white text-sm resize-y" placeholder="Dato adicional que deba ver quien te transfiere (opcional)"></textarea>
+          <p class="text-[10px] text-white/40">Los cambios se guardan con el botón <strong class="text-white/55">Guardar cambios</strong> al final de esta pantalla.</p>
         </div>
         <button type="button" id="accountProfileSaveBtn" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target mb-2">Guardar cambios</button>
       </div>
