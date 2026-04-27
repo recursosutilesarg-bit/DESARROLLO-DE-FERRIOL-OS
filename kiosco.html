@@ -35,7 +35,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-  <link rel="stylesheet" href="kiosco.css?v=20260426selectdark">
+  <link rel="stylesheet" href="kiosco.css?v=20260427railnav">
 </head>
 <body class="relative">
   <!-- Banner instalar como app (PWA) — visible al abrir el link -->
@@ -192,13 +192,13 @@
             <p id="notifEmpty" class="p-4 text-center text-white/60 text-sm hidden">No hay notificaciones.</p>
           </div>
         </div>
-        <button type="button" id="headerProfileBtn" class="relative w-10 h-10 rounded-full border-2 border-white/30 bg-gradient-to-br from-emerald-600/40 to-violet-600/35 overflow-hidden shrink-0 touch-target shadow-md hover:border-emerald-300/50 active:scale-95 transition-all cursor-pointer z-[51]" title="Mi cuenta" aria-label="Abrir menú de mi cuenta">
-          <img id="headerProfileImg" alt="" class="hidden absolute inset-0 w-full h-full object-cover z-10 pointer-events-none select-none" draggable="false">
-          <span id="headerProfileInitials" class="absolute inset-0 flex items-center justify-center text-sm font-bold text-white/95 pointer-events-none z-0 select-none">?</span>
-        </button>
         <button id="cartBtn" class="btn-neomorphic rounded-xl p-2.5 relative transition-all duration-300 hover:scale-105 active:scale-95 touch-target kiosquero-only">
           <i data-lucide="shopping-cart" class="w-5 h-5"></i>
           <span id="cartCount" class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#dc2626] text-xs font-bold flex items-center justify-center">0</span>
+        </button>
+        <button type="button" id="headerProfileBtn" class="relative w-10 h-10 rounded-full border-2 border-white/30 bg-gradient-to-br from-emerald-600/40 to-violet-600/35 overflow-hidden shrink-0 touch-target shadow-md hover:border-emerald-300/50 active:scale-95 transition-all cursor-pointer z-[51]" title="Mi cuenta" aria-label="Abrir menú de mi cuenta">
+          <img id="headerProfileImg" alt="" class="hidden absolute inset-0 w-full h-full object-cover z-10 pointer-events-none select-none" draggable="false">
+          <span id="headerProfileInitials" class="absolute inset-0 flex items-center justify-center text-sm font-bold text-white/95 pointer-events-none z-0 select-none">?</span>
         </button>
       </div>
     </div>
@@ -222,7 +222,7 @@
   </div>
 
   <!-- Barra inferior admin (panel de control): secciones al pie, como la app de negocios -->
-  <nav id="navSuperBottom" class="fixed bottom-0 left-0 right-0 z-40 super-only hidden" style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0)); padding-left: env(safe-area-inset-left, 0); padding-right: env(safe-area-inset-right, 0);">
+  <nav id="navSuperBottom" class="ferriol-bottom-nav fixed bottom-0 left-0 right-0 z-40 super-only hidden">
     <div class="bottom-nav-bar glass-strong border-t border-white/10 px-2 py-3 max-w-2xl mx-auto">
       <div class="flex items-stretch justify-between gap-0.5 sm:gap-1 flex-nowrap overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <button type="button" id="navSuperIngresosBtn" data-super-section="ingresos" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Ingresos · ventas como vendedor">
@@ -254,7 +254,7 @@
   </nav>
 
   <!-- Barra inferior kiosquero: 4 botones + círculo escáner al centro -->
-  <nav id="navKiosquero" class="fixed bottom-0 left-0 right-0 z-40 kiosquero-only" style="padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0)); padding-left: env(safe-area-inset-left, 0); padding-right: env(safe-area-inset-right, 0);">
+  <nav id="navKiosquero" class="ferriol-bottom-nav fixed bottom-0 left-0 right-0 z-40 kiosquero-only">
     <div class="bottom-nav-bar glass-strong border-t border-white/10 px-2 py-3 max-w-2xl mx-auto">
       <div class="flex items-center justify-between gap-1">
         <button data-nav="dashboard" class="bottom-nav-btn nav-item flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Inicio">

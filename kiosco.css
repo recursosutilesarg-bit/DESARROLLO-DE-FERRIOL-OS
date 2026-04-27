@@ -320,6 +320,13 @@ button.header-sub.header-sub--toggle:active {
   color: #86efac;
 }
 
+/* Móvil: áreas seguras; en escritorio el bloque ≥768px redefine posición */
+.ferriol-bottom-nav {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0));
+  padding-left: env(safe-area-inset-left, 0);
+  padding-right: env(safe-area-inset-right, 0);
+}
+
 .bottom-nav-bar {
   border-radius: 1.35rem 1.35rem 0 0;
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.35);
@@ -1238,12 +1245,108 @@ body[data-panel="inventory"] #panel-inventory {
     padding-top: 0;
   }
 
-  /* Paneles con más aire */
+  /* Paneles con más aire (barra de nav va a la derecha en PC: sin gran padding inferior) */
   .panel {
-    padding: 1.5rem 2rem max(5.5rem, env(safe-area-inset-bottom, 0) + 5rem);
+    padding: 1.5rem 2rem 1.5rem;
   }
   #panel-inventory {
-    padding: 0 0 max(5.5rem, env(safe-area-inset-bottom, 0) + 5rem);
+    padding: 0 0 1.25rem;
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  /* Carril de navegación fijo a la derecha, alto completo (solo ≥768px) */
+  :root {
+    --ferriol-rail-w: 6rem;
+  }
+
+  #mainContent {
+    padding-right: calc(var(--ferriol-rail-w) + env(safe-area-inset-right, 0px));
+  }
+
+  #navKiosquero.ferriol-bottom-nav,
+  #navSuperBottom.ferriol-bottom-nav {
+    top: 0;
+    bottom: 0;
+    left: auto;
+    right: 0;
+    box-sizing: border-box;
+    width: calc(var(--ferriol-rail-w) + env(safe-area-inset-right, 0px));
+    padding-top: env(safe-area-inset-top, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    padding-left: 0;
+    padding-right: env(safe-area-inset-right, 0);
+  }
+
+  /* Con header visible (Inicio kiosquero / panel admin): carril empieza bajo el header */
+  body[data-panel="dashboard"] #navKiosquero.ferriol-bottom-nav,
+  body[data-panel="super"] #navSuperBottom.ferriol-bottom-nav {
+    padding-top: calc(3.5rem + max(0.75rem, env(safe-area-inset-top, 0px)));
+  }
+
+  #navKiosquero .bottom-nav-bar,
+  #navSuperBottom .bottom-nav-bar {
+    height: 100%;
+    max-width: none !important;
+    margin: 0;
+    border-radius: 1rem 0 0 1rem;
+    border-top: none;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: -8px 0 28px rgba(0, 0, 0, 0.38);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    padding: 0.5rem 0.3rem;
+  }
+
+  #navKiosquero .bottom-nav-bar > div,
+  #navSuperBottom .bottom-nav-bar > div {
+    flex-direction: column !important;
+    flex: 1 1 auto;
+    justify-content: center;
+    align-items: stretch;
+    gap: 0.35rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    flex-wrap: nowrap !important;
+    justify-content: center;
+  }
+
+  #navKiosquero .bottom-nav-bar > div > .flex-shrink-0 {
+    display: flex;
+    justify-content: center;
+    padding: 0.2rem 0;
+    flex-shrink: 0;
+  }
+
+  #navKiosquero #scannerCircleBtn {
+    width: 2.85rem !important;
+    height: 2.85rem !important;
+    min-width: 2.85rem;
+    min-height: 2.85rem;
+  }
+
+  #navKiosquero #scannerCircleBtn i,
+  #navKiosquero #scannerCircleBtn svg {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+  }
+
+  #navKiosquero .bottom-nav-btn,
+  #navSuperBottom .bottom-nav-btn {
+    min-height: 0;
+    flex: 0 0 auto;
+    padding-top: 0.45rem;
+    padding-bottom: 0.45rem;
+  }
+
+  #navKiosquero .bottom-nav-btn span,
+  #navSuperBottom .bottom-nav-btn span {
+    font-size: 0.6rem;
+    line-height: 1.15;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
   }
 
   /* Productos: borde a borde (sin columna centrada ni bordes laterales) */
@@ -1301,12 +1404,7 @@ body[data-panel="inventory"] #panel-inventory {
 /* ── PC GRANDE (≥1100px) ── */
 @media (min-width: 1100px) {
 
-  /* Nav inferior más estrecha y centrada */
-  #navKiosquero .bottom-nav-bar,
-  #navSuperBottom .bottom-nav-bar {
-    max-width: 600px;
-    border-radius: 1rem 1rem 0 0;
-  }
+  /* Nav: desde 768px va como carril derecho; sin dock inferior centrado */
 
   /* Lista de productos: ancho completo en PC */
   .inv-topbar, .inv-searchbar {
