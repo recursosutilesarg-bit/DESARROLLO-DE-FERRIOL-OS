@@ -3699,10 +3699,6 @@
         }
         if (el.classList.contains('super-section')) return;
         if (el.id === 'navSuperBottom') return;
-        if (el.id === 'logoutBtn') {
-          el.style.display = 'inline-flex';
-          return;
-        }
         el.style.display = uiNegocio ? 'none' : (el.tagName === 'BUTTON' ? 'inline-flex' : 'block');
       });
       var navS = document.getElementById('navSuperBottom');
@@ -6717,7 +6713,8 @@ async function showApp() {
     var appReloadBtn = document.getElementById('appReloadBtn');
     if (appReloadBtn) appReloadBtn.onclick = function () { ferriolReloadAppForUpdate(); };
 
-    document.getElementById('logoutBtn').onclick = doLogout;
+    var logoutHdr = document.getElementById('logoutBtn');
+    if (logoutHdr) logoutHdr.onclick = doLogout;
     var logoutConfigEl = document.getElementById('logoutBtnConfig');
     if (logoutConfigEl) logoutConfigEl.onclick = doLogout;
     window._superIrModoNegocio = async function () {
