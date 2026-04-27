@@ -3447,6 +3447,7 @@
       return role || '—';
     }
     var _accountProfileRemoveAvatarFlag = false;
+    var _accountProfileModalMode = 'personal';
     var _accountProfileBodyOverflow = '';
     var _accountMenuDrawerBodyOverflow = '';
     function syncHeaderProfileAvatar() {
@@ -3551,6 +3552,9 @@
       }
     }
     function closeAccountProfileModal() {
+      _accountProfileModalMode = 'personal';
+      var saveBtn = document.getElementById('accountProfileSaveBtn');
+      if (saveBtn) saveBtn.textContent = 'Guardar cambios';
       var m = document.getElementById('accountProfileModal');
       if (m) {
         m.classList.add('hidden');
@@ -3683,40 +3687,68 @@
       set('accountProfileBankCuit', parsed.cuit);
       set('accountProfileBankNotas', parsed.notas);
     }
-    function openAccountProfileModal(focusBank) {
+    function openAccountProfileModal(modeOpt) {
       if (!currentUser) {
         try {
           console.warn('Ferriol: perfil no disponible (sesión no cargada).');
         } catch (_) {}
         return;
       }
+      var mode = 'personal';
+      if (modeOpt === 'bank' || modeOpt === true) mode = 'bank';
+      var showBank = isNetworkAdminRole(currentUser.role) && !isSuperKioscoPreviewMode();
+      if (mode === 'bank' && !showBank) mode = 'personal';
+      _accountProfileModalMode = mode;
+
       var m = document.getElementById('accountProfileModal');
       var msg = document.getElementById('accountProfileMsg');
       if (msg) { msg.classList.add('hidden'); msg.textContent = ''; }
       _accountProfileRemoveAvatarFlag = false;
       var fi = document.getElementById('accountProfileAvatarInput');
       if (fi) fi.value = '';
-      var em = document.getElementById('accountProfileEmail');
-      if (em) em.value = currentUser.email || '';
-      var rl = document.getElementById('accountProfileRole');
-      if (rl) rl.value = ferriolAccountProfileRoleLabel(currentUser.role);
-      var kn = document.getElementById('accountProfileKioscoName');
-      if (kn) kn.value = currentUser.kioscoName || '';
-      var ph = document.getElementById('accountProfilePhone');
-      if (ph) ph.value = currentUser.phone != null ? String(currentUser.phone) : '';
-      var wWrap = document.getElementById('accountProfileWhatsappWrap');
-      var wTa = document.getElementById('accountProfileWhatsappMsg');
-      var showWa = currentUser.role === 'kiosquero' || isSuperKioscoPreviewMode();
-      if (wWrap) wWrap.classList.toggle('hidden', !showWa);
-      if (wTa && showWa) wTa.value = currentUser.whatsappMessage || DEFAULT_WHATSAPP;
+      var pBlock = document.getElementById('accountProfilePersonalBlock');
       var bWrap = document.getElementById('accountProfileBankWrap');
-      var showBank = isNetworkAdminRole(currentUser.role) && !isSuperKioscoPreviewMode();
-      if (bWrap) bWrap.classList.toggle('hidden', !showBank);
-      if (showBank) {
-        var bankParsed = ferriolParsePartnerBankingInfo(currentUser.partnerTransferInfo);
-        ferriolFillAccountProfileBankForm(bankParsed);
+      var titleEl = document.getElementById('accountProfileTitle');
+      var emailHint = document.getElementById('accountProfileBankEmailHint');
+      var saveBtn = document.getElementById('accountProfileSaveBtn');
+
+      if (mode === 'bank') {
+        if (pBlock) pBlock.classList.add('hidden');
+        if (bWrap) bWrap.classList.remove('hidden');
+        if (emailHint) {
+          emailHint.textContent = 'Sesión: ' + (currentUser.email || '—');
+          emailHint.classList.remove('hidden');
+        }
+        if (titleEl) titleEl.innerHTML = '<i data-lucide="landmark" class="w-5 h-5 text-amber-200"></i> Datos bancarios';
+        if (saveBtn) saveBtn.textContent = 'Guardar datos bancarios';
+        var bankParsedBk = ferriolParsePartnerBankingInfo(currentUser.partnerTransferInfo);
+        ferriolFillAccountProfileBankForm(bankParsedBk);
+      } else {
+        if (pBlock) pBlock.classList.remove('hidden');
+        if (bWrap) bWrap.classList.add('hidden');
+        if (emailHint) emailHint.classList.add('hidden');
+        if (titleEl) titleEl.innerHTML = '<i data-lucide="user-circle" class="w-5 h-5 text-emerald-300"></i> Mis datos personales';
+        if (saveBtn) saveBtn.textContent = 'Guardar cambios';
+        var em = document.getElementById('accountProfileEmail');
+        if (em) em.value = currentUser.email || '';
+        var rl = document.getElementById('accountProfileRole');
+        if (rl) rl.value = ferriolAccountProfileRoleLabel(currentUser.role);
+        var kn = document.getElementById('accountProfileKioscoName');
+        if (kn) kn.value = currentUser.kioscoName || '';
+        var ph = document.getElementById('accountProfilePhone');
+        if (ph) ph.value = currentUser.phone != null ? String(currentUser.phone) : '';
+        var wWrap = document.getElementById('accountProfileWhatsappWrap');
+        var wTa = document.getElementById('accountProfileWhatsappMsg');
+        var showWa = currentUser.role === 'kiosquero' || isSuperKioscoPreviewMode();
+        if (wWrap) wWrap.classList.toggle('hidden', !showWa);
+        if (wTa && showWa) wTa.value = currentUser.whatsappMessage || DEFAULT_WHATSAPP;
+        if (showBank) {
+          var bankParsedPr = ferriolParsePartnerBankingInfo(currentUser.partnerTransferInfo);
+          ferriolFillAccountProfileBankForm(bankParsedPr);
+        }
+        syncAccountProfileModalPreview();
       }
-      syncAccountProfileModalPreview();
+
       if (m) {
         m.classList.remove('hidden');
         m.setAttribute('aria-hidden', 'false');
@@ -3725,12 +3757,12 @@
           document.body.style.overflow = 'hidden';
         } catch (_) {}
       }
-      if (focusBank && bWrap && showBank) {
+      if (mode === 'bank' && bWrap) {
         setTimeout(function () {
-          try { bWrap.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) { bWrap.scrollIntoView(true); }
+          try { bWrap.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) { bWrap.scrollIntoView(true); }
           var bt = document.getElementById('accountProfileBankTitular');
           if (bt) try { bt.focus(); } catch (_) {}
-        }, 300);
+        }, 200);
       }
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
@@ -4030,7 +4062,7 @@
     var btnSuperAjustesVolverMas = document.getElementById('btnSuperAjustesVolverMas');
     if (btnSuperAjustesVolverMas) btnSuperAjustesVolverMas.addEventListener('click', function () { switchSuperSection('mas'); });
     function openPartnerTransferInfoModal() {
-      openAccountProfileModal(true);
+      openAccountProfileModal('bank');
     }
     function closePartnerTransferInfoModal() {
       var m = document.getElementById('partnerTransferInfoModal');
@@ -4081,7 +4113,7 @@
     if (accountMenuBtnPersonal) {
       accountMenuBtnPersonal.addEventListener('click', function () {
         closeAccountMenuDrawer(true);
-        openAccountProfileModal(false);
+        openAccountProfileModal('personal');
       });
     }
     var accountMenuBtnBank = document.getElementById('accountMenuBtnBank');
@@ -4089,7 +4121,7 @@
       accountMenuBtnBank.addEventListener('click', function () {
         if (!currentUser || !isNetworkAdminRole(currentUser.role) || isSuperKioscoPreviewMode()) return;
         closeAccountMenuDrawer(true);
-        openAccountProfileModal(true);
+        openAccountProfileModal('bank');
       });
     }
     var accountMenuBtnLogout = document.getElementById('accountMenuBtnLogout');
@@ -4142,31 +4174,23 @@
         var msg = document.getElementById('accountProfileMsg');
         if (!supabaseClient || !currentUser) return;
         if (msg) { msg.classList.add('hidden'); msg.textContent = ''; }
-        var kioscoName = (document.getElementById('accountProfileKioscoName') && document.getElementById('accountProfileKioscoName').value || '').trim();
-        var phoneVal = (document.getElementById('accountProfilePhone') && document.getElementById('accountProfilePhone').value || '').trim();
-        var payload = { kiosco_name: kioscoName || null, phone: phoneVal || null };
-        var showWa = currentUser.role === 'kiosquero' || isSuperKioscoPreviewMode();
-        if (showWa) {
-          var wa = (document.getElementById('accountProfileWhatsappMsg') && document.getElementById('accountProfileWhatsappMsg').value || '').trim() || DEFAULT_WHATSAPP;
-          payload.whatsapp_message = wa;
-        }
-        var showBank = isNetworkAdminRole(currentUser.role) && !isSuperKioscoPreviewMode();
-        if (showBank) {
-          var bankTit = (document.getElementById('accountProfileBankTitular') && document.getElementById('accountProfileBankTitular').value || '').trim();
-          var bankBco = (document.getElementById('accountProfileBankBanco') && document.getElementById('accountProfileBankBanco').value || '').trim();
-          var bankCbu = (document.getElementById('accountProfileBankCbu') && document.getElementById('accountProfileBankCbu').value || '').replace(/\s/g, '');
-          var bankAlias = (document.getElementById('accountProfileBankAlias') && document.getElementById('accountProfileBankAlias').value || '').trim();
-          if (!bankTit || !bankBco || (!bankCbu && !bankAlias)) {
+
+        if (_accountProfileModalMode === 'bank') {
+          var showBankOnly = isNetworkAdminRole(currentUser.role) && !isSuperKioscoPreviewMode();
+          if (!showBankOnly) return;
+          var bankTitB = (document.getElementById('accountProfileBankTitular') && document.getElementById('accountProfileBankTitular').value || '').trim();
+          var bankBcoB = (document.getElementById('accountProfileBankBanco') && document.getElementById('accountProfileBankBanco').value || '').trim();
+          var bankCbuB = (document.getElementById('accountProfileBankCbu') && document.getElementById('accountProfileBankCbu').value || '').replace(/\s/g, '');
+          var bankAliasB = (document.getElementById('accountProfileBankAlias') && document.getElementById('accountProfileBankAlias').value || '').trim();
+          if (!bankTitB || !bankBcoB || (!bankCbuB && !bankAliasB)) {
             if (msg) {
-              msg.textContent = 'Completá titular, banco y CBU/CVU o alias en datos bancarios.';
+              msg.textContent = 'Completá titular, banco y CBU/CVU o alias.';
               msg.classList.remove('hidden', 'text-emerald-300');
               msg.classList.add('text-red-300');
             }
-            var bw = document.getElementById('accountProfileBankWrap');
-            if (bw) try { bw.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (_) {}
             return;
           }
-          if (bankCbu && !/^\d+$/.test(bankCbu)) {
+          if (bankCbuB && !/^\d+$/.test(bankCbuB)) {
             if (msg) {
               msg.textContent = 'El CBU/CVU solo debe contener números (sin guiones).';
               msg.classList.remove('hidden', 'text-emerald-300');
@@ -4174,15 +4198,49 @@
             }
             return;
           }
-          payload.partner_transfer_info = ferriolBuildPartnerBankingInfo({
-            titular: bankTit,
-            banco: bankBco,
-            tipo: (document.getElementById('accountProfileBankTipo') && document.getElementById('accountProfileBankTipo').value || '').trim(),
-            cbu: bankCbu,
-            alias: bankAlias,
-            cuit: (document.getElementById('accountProfileBankCuit') && document.getElementById('accountProfileBankCuit').value || '').trim(),
-            notas: (document.getElementById('accountProfileBankNotas') && document.getElementById('accountProfileBankNotas').value || '').trim()
-          });
+          var bankPayload = {
+            partner_transfer_info: ferriolBuildPartnerBankingInfo({
+              titular: bankTitB,
+              banco: bankBcoB,
+              tipo: (document.getElementById('accountProfileBankTipo') && document.getElementById('accountProfileBankTipo').value || '').trim(),
+              cbu: bankCbuB,
+              alias: bankAliasB,
+              cuit: (document.getElementById('accountProfileBankCuit') && document.getElementById('accountProfileBankCuit').value || '').trim(),
+              notas: (document.getElementById('accountProfileBankNotas') && document.getElementById('accountProfileBankNotas').value || '').trim()
+            })
+          };
+          accountProfileSaveBtn.disabled = true;
+          try {
+            var upBank = await supabaseClient.from('profiles').update(bankPayload).eq('id', currentUser.id);
+            if (upBank.error) throw upBank.error;
+            currentUser.partnerTransferInfo = bankPayload.partner_transfer_info != null ? String(bankPayload.partner_transfer_info) : '';
+            applyAppShell();
+            await loadSuperMasBankingSection();
+            if (msg) {
+              msg.textContent = 'Datos bancarios guardados.';
+              msg.classList.remove('hidden', 'text-red-300');
+              msg.classList.add('text-emerald-300');
+            }
+            closeAccountProfileModal();
+          } catch (eB) {
+            if (msg) {
+              msg.textContent = String(eB.message || eB);
+              msg.classList.remove('hidden', 'text-emerald-300');
+              msg.classList.add('text-red-300');
+            }
+          } finally {
+            accountProfileSaveBtn.disabled = false;
+          }
+          return;
+        }
+
+        var kioscoName = (document.getElementById('accountProfileKioscoName') && document.getElementById('accountProfileKioscoName').value || '').trim();
+        var phoneVal = (document.getElementById('accountProfilePhone') && document.getElementById('accountProfilePhone').value || '').trim();
+        var payload = { kiosco_name: kioscoName || null, phone: phoneVal || null };
+        var showWa = currentUser.role === 'kiosquero' || isSuperKioscoPreviewMode();
+        if (showWa) {
+          var wa = (document.getElementById('accountProfileWhatsappMsg') && document.getElementById('accountProfileWhatsappMsg').value || '').trim() || DEFAULT_WHATSAPP;
+          payload.whatsapp_message = wa;
         }
         var fileIn = document.getElementById('accountProfileAvatarInput');
         var file = fileIn && fileIn.files && fileIn.files[0];
@@ -4221,7 +4279,6 @@
           currentUser.kioscoName = kioscoName;
           currentUser.phone = phoneVal;
           if (showWa) currentUser.whatsappMessage = payload.whatsapp_message;
-          if (showBank) currentUser.partnerTransferInfo = payload.partner_transfer_info != null ? String(payload.partner_transfer_info) : '';
           if (payload.avatar_url !== undefined) currentUser.avatarUrl = payload.avatar_url ? String(payload.avatar_url).trim() : '';
           if (fileIn) fileIn.value = '';
           _accountProfileRemoveAvatarFlag = false;
