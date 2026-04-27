@@ -696,7 +696,6 @@
         var pRows = resPay.data || [];
         var sumRej = 0;
         var nRej = 0;
-        var nPending = 0;
         pRows.forEach(function (r) {
           if (r.status === 'rejected') {
             sumRej += Number(r.amount || 0);
@@ -704,8 +703,6 @@
             var dk = ferriolIngresosDayKeyFromIso(r.created_at);
             if (!byDay[dk]) byDay[dk] = { net: 0, rej: 0, n: 0 };
             byDay[dk].rej += Number(r.amount || 0);
-          } else if (r.status === 'pending') {
-            nPending += 1;
           }
         });
         kpiR.textContent = nRej > 0
@@ -722,11 +719,19 @@
               .from('ferriol_partner_provision_requests')
               .select('id', { count: 'exact', head: true })
               .eq('requested_by', uid)
+              .eq('status', 'pending'),
+            supabaseClient
+              .from('ferriol_client_sale_requests')
+              .select('id', { count: 'exact', head: true })
+              .eq('partner_id', uid)
               .eq('status', 'pending')
-          ]).then(function(results) {
-            var total = (results[0].count || 0) + (results[1].count || 0);
+          ]).then(function (results) {
+            var total = 0;
+            results.forEach(function (r) {
+              if (r && !r.error && r.count != null) total += r.count;
+            });
             kpiPending.textContent = String(total);
-          }).catch(function() {
+          }).catch(function () {
             kpiPending.textContent = '—';
           });
         }
