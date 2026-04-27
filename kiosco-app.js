@@ -3632,11 +3632,9 @@
     }
     function ferriolParsePartnerBankingInfo(raw) {
       var s = raw != null ? String(raw).trim() : '';
-      var out = { titular: '', banco: '', tipo: '', cbu: '', alias: '', cuit: '', notas: '' };
+      var out = { titular: '', banco: '', cbu: '', alias: '' };
       if (!s) return out;
       var lines = s.split(/\r?\n/);
-      var anyLabel = false;
-      var unmatched = [];
       lines.forEach(function (line) {
         var t = line.trim();
         if (!t) return;
@@ -3644,34 +3642,20 @@
         if (m) {
           var label = m[1].trim().toLowerCase();
           var val = m[2].trim();
-          if (label === 'titular') { out.titular = val; anyLabel = true; }
-          else if (label === 'banco') { out.banco = val; anyLabel = true; }
-          else if (label === 'tipo de cuenta') { out.tipo = val; anyLabel = true; }
-          else if (label === 'cbu/cvu' || label === 'cbu') { out.cbu = val; anyLabel = true; }
-          else if (label === 'alias') { out.alias = val; anyLabel = true; }
-          else if (label === 'cuit/cuil' || label === 'cuit') { out.cuit = val; anyLabel = true; }
-          else if (label === 'notas') {
-            out.notas = out.notas ? (out.notas + '\n' + val) : val;
-            anyLabel = true;
-          } else unmatched.push(t);
-        } else unmatched.push(t);
+          if (label === 'titular') out.titular = val;
+          else if (label === 'banco') out.banco = val;
+          else if (label === 'cbu/cvu' || label === 'cbu') out.cbu = val;
+          else if (label === 'alias') out.alias = val;
+        }
       });
-      if (!anyLabel) {
-        out.notas = s;
-      } else if (unmatched.length) {
-        out.notas = (out.notas ? out.notas + '\n' : '') + unmatched.join('\n');
-      }
       return out;
     }
     function ferriolBuildPartnerBankingInfo(fields) {
       var lines = [];
       if (fields.titular) lines.push('Titular: ' + String(fields.titular).trim());
       if (fields.banco) lines.push('Banco: ' + String(fields.banco).trim());
-      if (fields.tipo) lines.push('Tipo de cuenta: ' + String(fields.tipo).trim());
       if (fields.cbu) lines.push('CBU/CVU: ' + String(fields.cbu).replace(/\s/g, ''));
       if (fields.alias) lines.push('Alias: ' + String(fields.alias).trim());
-      if (fields.cuit) lines.push('CUIT/CUIL: ' + String(fields.cuit).trim());
-      if (fields.notas) lines.push('Notas: ' + String(fields.notas).trim());
       return lines.join('\n');
     }
     function ferriolFillAccountProfileBankForm(parsed) {
@@ -3681,11 +3665,8 @@
       };
       set('accountProfileBankTitular', parsed.titular);
       set('accountProfileBankBanco', parsed.banco);
-      set('accountProfileBankTipo', parsed.tipo);
       set('accountProfileBankCbu', parsed.cbu);
       set('accountProfileBankAlias', parsed.alias);
-      set('accountProfileBankCuit', parsed.cuit);
-      set('accountProfileBankNotas', parsed.notas);
     }
     function openAccountProfileModal(modeOpt) {
       if (!currentUser) {
@@ -4202,11 +4183,8 @@
             partner_transfer_info: ferriolBuildPartnerBankingInfo({
               titular: bankTitB,
               banco: bankBcoB,
-              tipo: (document.getElementById('accountProfileBankTipo') && document.getElementById('accountProfileBankTipo').value || '').trim(),
               cbu: bankCbuB,
-              alias: bankAliasB,
-              cuit: (document.getElementById('accountProfileBankCuit') && document.getElementById('accountProfileBankCuit').value || '').trim(),
-              notas: (document.getElementById('accountProfileBankNotas') && document.getElementById('accountProfileBankNotas').value || '').trim()
+              alias: bankAliasB
             })
           };
           accountProfileSaveBtn.disabled = true;
