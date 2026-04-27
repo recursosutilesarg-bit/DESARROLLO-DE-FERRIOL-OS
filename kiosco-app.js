@@ -626,6 +626,7 @@
       var kpiN = document.getElementById('ingresosKpiNet');
       var kpiC = document.getElementById('ingresosKpiCount');
       var kpiR = document.getElementById('ingresosKpiRej');
+      var kpiPending = document.getElementById('ingresosKpiPending');
       var wrap = document.getElementById('ingresosTableWrap');
       var canvas = document.getElementById('ingresosChartCanvas');
       var fb = document.getElementById('ingresosChartFallback');
@@ -647,6 +648,7 @@
       var rangeDays = rangeSel && rangeSel.value ? parseInt(rangeSel.value, 10) : 30;
       if (isNaN(rangeDays) || rangeDays < 1) rangeDays = 30;
       kpiN.textContent = kpiC.textContent = kpiR.textContent = '…';
+      if (kpiPending) kpiPending.textContent = '…';
       wrap.innerHTML = '<p class="text-white/45 text-xs py-5 text-center">Cargando…</p>';
       if (fb) { fb.classList.add('hidden'); if (canvas) canvas.classList.remove('hidden'); }
       var uid = currentUser.id;
@@ -694,6 +696,7 @@
         var pRows = resPay.data || [];
         var sumRej = 0;
         var nRej = 0;
+        var nPending = 0;
         pRows.forEach(function (r) {
           if (r.status === 'rejected') {
             sumRej += Number(r.amount || 0);
@@ -701,11 +704,22 @@
             var dk = ferriolIngresosDayKeyFromIso(r.created_at);
             if (!byDay[dk]) byDay[dk] = { net: 0, rej: 0, n: 0 };
             byDay[dk].rej += Number(r.amount || 0);
+          } else if (r.status === 'pending') {
+            nPending += 1;
           }
         });
         kpiR.textContent = nRej > 0
           ? ('$ ' + sumRej.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS')
           : '$ 0,00 ARS';
+        if (kpiPending) {
+          supabaseClient
+            .from('ferriol_payments')
+            .select('id', { count: 'exact', head: true })
+            .eq('seller_user_id', uid)
+            .eq('status', 'pending')
+            .then(function(rPend) { kpiPending.textContent = (rPend.count != null) ? String(rPend.count) : '—'; })
+            .catch(function() { kpiPending.textContent = '—'; });
+        }
         var dayKeys = [];
         var cur = new Date(startD);
         while (cur.getTime() <= endD.getTime()) {

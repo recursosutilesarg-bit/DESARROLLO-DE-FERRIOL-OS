@@ -1198,21 +1198,26 @@
               </select>
             </div>
           </div>
-          <div id="ingresosKpiPartnerRow" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+          <div id="ingresosKpiPartnerRow" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
             <div class="rounded-2xl border border-white/12 bg-gradient-to-b from-white/[0.08] to-transparent p-4">
-              <p class="text-xs text-white/50 flex items-center gap-1.5 mb-1">Tu comisión acreditada <span class="text-white/35" title="Suma en el libro MLM (sale_commission aprobado)">ⓘ</span></p>
+              <p class="text-xs text-white/50 flex items-center gap-1.5 mb-1">Comisión acreditada <span class="text-white/35" title="Suma en el libro MLM (sale_commission aprobado)">ⓘ</span></p>
               <p id="ingresosKpiNet" class="text-2xl font-bold text-[#86efac] tabular-nums">—</p>
-              <p class="text-[10px] text-white/40 mt-1">Comisiones por ventas <strong class="text-white/55">verificadas</strong> (tu % del bruto)</p>
+              <p class="text-[10px] text-white/40 mt-1">Comisiones de ventas <strong class="text-white/55">aprobadas</strong></p>
             </div>
             <div class="rounded-2xl border border-white/12 bg-gradient-to-b from-white/[0.08] to-transparent p-4">
-              <p class="text-xs text-white/50 mb-1">Acreditaciones</p>
+              <p class="text-xs text-white/50 mb-1">Ventas</p>
               <p id="ingresosKpiCount" class="text-2xl font-bold text-cyan-200 tabular-nums">—</p>
-              <p class="text-[10px] text-white/40 mt-1">Movimientos <code class="text-white/50">sale_commission</code> en el período</p>
+              <p class="text-[10px] text-white/40 mt-1">Ventas verificadas en el período</p>
+            </div>
+            <div class="rounded-2xl border border-amber-500/20 bg-gradient-to-b from-amber-500/10 to-transparent p-4">
+              <p class="text-xs text-white/50 mb-1 flex items-center gap-1">Ventas pendientes <span class="text-white/35" title="Comprobantes enviados a Ferriol OS, aún sin aprobar">ⓘ</span></p>
+              <p id="ingresosKpiPending" class="text-2xl font-bold text-amber-200 tabular-nums">—</p>
+              <p class="text-[10px] text-white/40 mt-1">Esperando aprobación de <strong class="text-amber-200/60">Ferriol OS</strong></p>
             </div>
             <div class="rounded-2xl border border-white/12 bg-gradient-to-b from-red-500/10 to-transparent p-4">
-              <p class="text-xs text-white/50 mb-1">Rechazos / anulado</p>
+              <p class="text-xs text-white/50 mb-1">Rechazadas</p>
               <p id="ingresosKpiRej" class="text-2xl font-bold text-red-200/90 tabular-nums">—</p>
-              <p class="text-[10px] text-white/40 mt-1">Montos de cobros <strong class="text-red-200/80">rechazados</strong> donde figurás como vendedor</p>
+              <p class="text-[10px] text-white/40 mt-1">Cobros <strong class="text-red-200/80">rechazados</strong> o anulados</p>
             </div>
           </div>
           <div id="ingresosKpiFounderRow" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
