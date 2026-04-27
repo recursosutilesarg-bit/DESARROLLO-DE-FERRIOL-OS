@@ -3379,6 +3379,8 @@
       if (pal) { pal.classList.add('hidden'); pal.classList.remove('flex'); }
       var pti = document.getElementById('partnerTransferInfoModal');
       if (pti) { pti.classList.add('hidden'); pti.classList.remove('flex'); }
+      var amd = document.getElementById('accountMenuDrawer');
+      if (amd && !amd.classList.contains('hidden')) closeAccountMenuDrawer(true);
       var apm = document.getElementById('accountProfileModal');
       if (apm && !apm.classList.contains('hidden')) {
         apm.classList.add('hidden');
@@ -3446,6 +3448,7 @@
     }
     var _accountProfileRemoveAvatarFlag = false;
     var _accountProfileBodyOverflow = '';
+    var _accountMenuDrawerBodyOverflow = '';
     function syncHeaderProfileAvatar() {
       var btn = document.getElementById('headerProfileBtn');
       var img = document.getElementById('headerProfileImg');
@@ -3507,6 +3510,56 @@
       }
       try {
         document.body.style.overflow = _accountProfileBodyOverflow || '';
+      } catch (_) {}
+    }
+    function syncAccountMenuDrawerShell() {
+      var bankBtn = document.getElementById('accountMenuBtnBank');
+      if (!bankBtn) return;
+      var show = !!(currentUser && isNetworkAdminRole(currentUser.role) && !isSuperKioscoPreviewMode());
+      bankBtn.classList.toggle('hidden', !show);
+    }
+    function closeAccountMenuDrawer(instant) {
+      var root = document.getElementById('accountMenuDrawer');
+      var panel = document.getElementById('accountMenuDrawerPanel');
+      if (!root || !panel) return;
+      panel.classList.remove('translate-x-0');
+      panel.classList.add('translate-x-full');
+      function finish() {
+        root.classList.add('hidden');
+        root.setAttribute('aria-hidden', 'true');
+        try {
+          document.body.style.overflow = _accountMenuDrawerBodyOverflow || '';
+        } catch (_) {}
+      }
+      if (instant) finish();
+      else setTimeout(finish, 280);
+    }
+    function openAccountMenuDrawer() {
+      if (!currentUser) {
+        try {
+          console.warn('Ferriol: menú cuenta no disponible (sesión no cargada).');
+        } catch (_) {}
+        return;
+      }
+      try {
+        if (typeof closeNotifDropdown === 'function') closeNotifDropdown();
+      } catch (_) {}
+      var root = document.getElementById('accountMenuDrawer');
+      var panel = document.getElementById('accountMenuDrawerPanel');
+      if (!root || !panel) return;
+      syncAccountMenuDrawerShell();
+      root.classList.remove('hidden');
+      root.setAttribute('aria-hidden', 'false');
+      try {
+        _accountMenuDrawerBodyOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+      } catch (_) {}
+      requestAnimationFrame(function () {
+        panel.classList.remove('translate-x-full');
+        panel.classList.add('translate-x-0');
+      });
+      try {
+        if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
       } catch (_) {}
     }
     function openAccountProfileModal(focusBank) {
@@ -3653,6 +3706,7 @@
         loadKioscoLicensePaymentInfo();
       }
       syncHeaderProfileAvatar();
+      syncAccountMenuDrawerShell();
       try {
         if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
       } catch (_) {}
@@ -3868,7 +3922,7 @@
       var now = Date.now();
       if (now - _ferriolProfileHeaderOpenedAt < 450) return;
       _ferriolProfileHeaderOpenedAt = now;
-      openAccountProfileModal(false);
+      openAccountMenuDrawer();
     }
     var headerProfileBtn = document.getElementById('headerProfileBtn');
     var mainHeaderEl = document.getElementById('mainHeader');
@@ -3886,6 +3940,32 @@
     } else if (headerProfileBtn) {
       headerProfileBtn.addEventListener('click', ferriolOpenAccountProfileFromHeader);
       headerProfileBtn.addEventListener('touchend', ferriolOpenAccountProfileFromHeader, { passive: false });
+    }
+    var accountMenuDrawerClose = document.getElementById('accountMenuDrawerClose');
+    var accountMenuDrawerOverlay = document.getElementById('accountMenuDrawerOverlay');
+    if (accountMenuDrawerClose) accountMenuDrawerClose.addEventListener('click', function () { closeAccountMenuDrawer(false); });
+    if (accountMenuDrawerOverlay) accountMenuDrawerOverlay.addEventListener('click', function () { closeAccountMenuDrawer(false); });
+    var accountMenuBtnPersonal = document.getElementById('accountMenuBtnPersonal');
+    if (accountMenuBtnPersonal) {
+      accountMenuBtnPersonal.addEventListener('click', function () {
+        closeAccountMenuDrawer(true);
+        openAccountProfileModal(false);
+      });
+    }
+    var accountMenuBtnBank = document.getElementById('accountMenuBtnBank');
+    if (accountMenuBtnBank) {
+      accountMenuBtnBank.addEventListener('click', function () {
+        if (!currentUser || !isNetworkAdminRole(currentUser.role) || isSuperKioscoPreviewMode()) return;
+        closeAccountMenuDrawer(true);
+        openAccountProfileModal(true);
+      });
+    }
+    var accountMenuBtnLogout = document.getElementById('accountMenuBtnLogout');
+    if (accountMenuBtnLogout) {
+      accountMenuBtnLogout.addEventListener('click', function () {
+        closeAccountMenuDrawer(true);
+        doLogout();
+      });
     }
     var accountProfileModalClose = document.getElementById('accountProfileModalClose');
     var accountProfileModalOverlay = document.getElementById('accountProfileModalOverlay');
@@ -6543,6 +6623,9 @@ async function showApp() {
     };
 
     function doLogout() {
+      try {
+        closeAccountMenuDrawer(true);
+      } catch (_) {}
       if (window._trialCountdownInterval) { clearInterval(window._trialCountdownInterval); window._trialCountdownInterval = null; }
       if (supabaseClient) supabaseClient.auth.signOut();
       ferriolStopNotificationPolling();
