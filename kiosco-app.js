@@ -15,7 +15,7 @@
     // CREATE TABLE notifications ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now(), message text NOT NULL );
     // ALTER TABLE notifications ENABLE ROW LEVEL SECURITY; políticas SELECT según tu proyecto + INSERT solo super en el SQL anterior.
     // Recordatorios de fin de prueba (mensajes por día + ventana): guardá en app_settings una fila key = 'trial_reminder_config', value = JSON, ej. {"windowDays":5,"messages":{"5":"...","4":"..."}}. Placeholders en textos: {dias}, {dias_restantes}, {nombre}, {negocio}.
-    // Red de referidos: solo role 'partner' o 'super' tienen código y enlaces (kiosquero no refiere). SQL: supabase-referral-network.sql, supabase-mlm-foundation.sql, supabase-ferriol-payments.sql (cobros + RPC ferriol_verify_payment). Solicitudes de días (socio → empresa): supabase-ferriol-membership-day-requests.sql. Alta de otro socio/admin: supabase-ferriol-partner-provision-requests.sql. Objeto FerriolMlm en este archivo.
+    // Red de referidos: solo role 'partner' o 'super' tienen código y enlaces (kiosquero no refiere). SQL: supabase-referral-network.sql, supabase-mlm-foundation.sql, supabase-ferriol-payments.sql (cobros + RPC ferriol_verify_payment). Solicitudes de días (socio → empresa): supabase-ferriol-membership-day-requests.sql. Tabla ferriol_partner_provision_requests (SQL supabase-ferriol-partner-provision-requests.sql) puede seguir usándose desde panel fundador o flujos legacy; el alta vía formulario en Más fue retirado (altas por enlace de afiliación). Objeto FerriolMlm en este archivo.
     // Enlaces: ?ref=CÓDIGO&nicho=kiosco (alta negocio) | ?ref=CÓDIGO&nicho=socio (membresía vendedor). Aliases: nicho=vendedor|red|membresia, membresia=1, tipo=...
     // Historial de cierres de caja (facturación y ganancia por día):
     // CREATE TABLE cierres_caja ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE, fecha date NOT NULL, fecha_cierre timestamptz NOT NULL DEFAULT now(), total_facturado numeric NOT NULL DEFAULT 0, ganancia numeric NOT NULL DEFAULT 0, created_at timestamptz DEFAULT now() );
@@ -3131,8 +3131,6 @@
       try {
         if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
       } catch (_) {}
-      var provWrap = document.querySelector('.ferriol-partner-provision-btn-wrap');
-      if (provWrap) provWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper()));
       var clientSaleWrap = document.querySelector('.ferriol-partner-client-sale-wrap');
       if (clientSaleWrap) clientSaleWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper()));
       var affWrap = document.querySelector('.ferriol-partner-affiliate-links-wrap');
@@ -3289,6 +3287,22 @@
         el.scrollIntoView(true);
       }
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    var btnSuperMasGoSolicitudesVentas = document.getElementById('btnSuperMasGoSolicitudesVentas');
+    if (btnSuperMasGoSolicitudesVentas) {
+      btnSuperMasGoSolicitudesVentas.addEventListener('click', function () {
+        switchSuperSection('solicitudes');
+        setTimeout(function () {
+          var el = document.getElementById('superClientSaleRequestsBox');
+          if (el) {
+            try {
+              el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (_) {
+              el.scrollIntoView(true);
+            }
+          }
+        }, 450);
+      });
     }
     var btnSuperMasOpenAjustes = document.getElementById('btnSuperMasOpenAjustes');
     if (btnSuperMasOpenAjustes) btnSuperMasOpenAjustes.addEventListener('click', function () { switchSuperSection('ajustes'); });
@@ -6796,23 +6810,6 @@ async function showApp() {
 
     var superFilterState = 'todos';
 
-    function openPartnerProvisionRequestModal() {
-      var m = document.getElementById('partnerProvisionRequestModal');
-      if (!m) return;
-      var err = document.getElementById('partnerProvisionRequestErr');
-      if (err) err.classList.add('hidden');
-      m.classList.remove('hidden');
-      m.classList.add('flex');
-      var pay = document.getElementById('partnerProvisionClientPay');
-      if (pay) pay.dispatchEvent(new Event('input', { bubbles: true }));
-      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
-    }
-    function closePartnerProvisionRequestModal() {
-      var m = document.getElementById('partnerProvisionRequestModal');
-      if (!m) return;
-      m.classList.add('hidden');
-      m.classList.remove('flex');
-    }
     function openClientSaleRequestModal() {
       var m = document.getElementById('clientSaleRequestModal');
       if (!m) return;
@@ -8068,79 +8065,6 @@ async function showApp() {
         alert('Enviado. La empresa lo revisa en Solicitudes. Cuando apruebe, verás la comisión en Ingresos.');
       };
     }
-    var btnOpenProv = document.getElementById('btnOpenPartnerProvisionModal');
-    if (btnOpenProv) btnOpenProv.onclick = function () { openPartnerProvisionRequestModal(); };
-    var provReqClose = document.getElementById('partnerProvisionRequestModalClose');
-    if (provReqClose) provReqClose.onclick = closePartnerProvisionRequestModal;
-    var provReqOv = document.getElementById('partnerProvisionRequestModalOverlay');
-    if (provReqOv) provReqOv.onclick = closePartnerProvisionRequestModal;
-    var provPayEl = document.getElementById('partnerProvisionClientPay');
-    var provPctEl = document.getElementById('partnerProvisionCompanyPct');
-    function syncPartnerProvisionPct() {
-      if (!provPayEl || !provPctEl) return;
-      var n = parseFloat(String(provPayEl.value || '').replace(',', '.'), 10);
-      if (isNaN(n) || n <= 0) { provPctEl.textContent = '—'; return; }
-      provPctEl.textContent = String(Math.round(n * 0.2 * 100) / 100);
-    }
-    if (provPayEl) {
-      provPayEl.addEventListener('input', syncPartnerProvisionPct);
-      provPayEl.addEventListener('change', syncPartnerProvisionPct);
-    }
-    var provSubmitBtn = document.getElementById('partnerProvisionSubmitRequest');
-    if (provSubmitBtn) provSubmitBtn.onclick = async function () {
-      var errBox = document.getElementById('partnerProvisionRequestErr');
-      if (errBox) { errBox.classList.add('hidden'); errBox.classList.remove('show'); }
-      if (!supabaseClient || !currentUser) return;
-      if (!isPartnerLens() || isEmpresaLensSuper()) return;
-      var email = (document.getElementById('partnerProvisionEmail') && document.getElementById('partnerProvisionEmail').value || '').trim().toLowerCase();
-      var dname = (document.getElementById('partnerProvisionDisplayName') && document.getElementById('partnerProvisionDisplayName').value || '').trim();
-      var phone = (document.getElementById('partnerProvisionPhone') && document.getElementById('partnerProvisionPhone').value || '').trim();
-      var pay = parseFloat(String((provPayEl && provPayEl.value) || '').replace(',', '.'), 10);
-      var note = (document.getElementById('partnerProvisionCompanyNote') && document.getElementById('partnerProvisionCompanyNote').value || '').trim();
-      if (!email || email.indexOf('@') < 1) {
-        if (errBox) { errBox.textContent = 'Email válido obligatorio.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
-        return;
-      }
-      if (!dname) {
-        if (errBox) { errBox.textContent = 'Nombre para mostrar obligatorio.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
-        return;
-      }
-      if (isNaN(pay) || pay <= 0) {
-        if (errBox) { errBox.textContent = 'Indicá el monto cobrado al nuevo socio.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
-        return;
-      }
-      var ex = await ferriolResolveProfileIdByEmail(email);
-      if (ex) {
-        if (errBox) { errBox.textContent = 'Ya existe una cuenta con ese email.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
-        return;
-      }
-      if (email === String(currentUser.email || '').toLowerCase()) {
-        if (errBox) { errBox.textContent = 'No podés usar tu propio email.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
-        return;
-      }
-      var share = Math.round(pay * 0.2 * 100) / 100;
-      if (!confirm('Se enviará la solicitud de alta a la empresa. Hasta la aprobación no podés crear el usuario. ¿Continuar?')) return;
-      var ins = await supabaseClient.from('ferriol_partner_provision_requests').insert({
-        requested_by: currentUser.id,
-        target_email: email,
-        display_name: dname,
-        phone: phone || null,
-        client_payment_ars: pay,
-        company_share_ars: share,
-        company_transfer_note: note || null
-      });
-      if (ins.error) {
-        if (errBox) {
-          errBox.textContent = ins.error.message + (String(ins.error.message || '').indexOf('ferriol_partner') !== -1 ? '' : ' · Ejecutá supabase-ferriol-partner-provision-requests.sql');
-          errBox.classList.remove('hidden');
-          errBox.classList.add('show');
-        }
-        return;
-      }
-      closePartnerProvisionRequestModal();
-      alert('Solicitud enviada. Cuando Ferriol apruebe, aparecerá el botón para definir la contraseña del nuevo socio.');
-      renderSuper();
-    };
     var provCompClose = document.getElementById('partnerProvisionCompleteModalClose');
     if (provCompClose) provCompClose.onclick = closePartnerProvisionCompleteModal;
     var provCompOv = document.getElementById('partnerProvisionCompleteModalOverlay');

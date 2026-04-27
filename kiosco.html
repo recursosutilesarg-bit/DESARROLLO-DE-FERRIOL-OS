@@ -1986,7 +1986,7 @@
             <i data-lucide="clipboard-list" class="w-5 h-5 text-[#86efac]"></i>
             Solicitudes
           </h2>
-          <p class="text-xs text-white/50 mb-3">Gestioná <strong class="text-white/70">pendientes</strong> (aprobá o rechazá) y consultá el <strong class="text-white/65">historial</strong> por estado. El alta de negocio (kiosco) la iniciás con el botón de abajo; las altas de administrador de red se solicitan en <strong class="text-white/65">Más</strong>.</p>
+          <p class="text-xs text-white/50 mb-3">Gestioná <strong class="text-white/70">pendientes</strong> (aprobá o rechazá) y consultá el <strong class="text-white/65">historial</strong> por estado. Más abajo, <strong class="text-emerald-200/90">Ventas con comprobante (socios)</strong>: son las ventas que cargan los administradores de red desde su <strong class="text-white/65">Más</strong>. El alta de negocio (kiosco) la iniciás con el botón de abajo. Los nuevos socios se registran con el <strong class="text-white/65">enlace de afiliación para vendedores</strong>.</p>
           <div class="mb-4 super-only super-main-only">
             <button type="button" id="btnOpenNewKiosqueroModal" class="glass rounded-2xl p-5 border border-[#22c55e]/40 bg-[#22c55e]/[0.08] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-[#22c55e]/60 active:scale-[0.98] touch-target">
               <div class="w-12 h-12 rounded-xl bg-[#22c55e]/25 flex items-center justify-center shrink-0">
@@ -1998,7 +1998,7 @@
               </div>
             </button>
           </div>
-          <div id="superClientSaleRequestsBox" class="hidden mb-5 rounded-2xl border border-emerald-500/40 bg-emerald-500/[0.08] p-3 sm:p-4 super-only super-main-only">
+          <div id="superClientSaleRequestsBox" class="hidden mb-5 rounded-2xl border border-emerald-500/40 bg-emerald-500/[0.08] p-3 sm:p-4 super-only super-main-only scroll-mt-8">
             <h3 class="text-sm font-semibold text-emerald-200 mb-2 flex items-center gap-2"><i data-lucide="image-plus" class="w-4 h-4"></i> Ventas con comprobante (socios)</h3>
             <p class="text-[11px] text-white/50 mb-3">Revisá nombre, email y monto, mirá el comprobante, y aprobá para generar el cobro y la <strong class="text-white/70">comisión del administrador en Ingresos</strong> (mismo flujo que verificar pago en Cobros).</p>
             <div id="superClientSaleRequestsList" class="space-y-3 text-sm min-h-[2rem]"></div>
@@ -2027,7 +2027,7 @@
             <i data-lucide="menu" class="w-5 h-5 text-[#86efac]"></i>
             Más opciones
           </h2>
-          <p class="text-xs text-white/50 mb-4">Las primeras tarjetas son para <strong class="text-white/65">administrador de red</strong> (enlaces, venta con comprobante, alta de otro socio). Después: datos bancarios. <strong class="text-white/65">Fundador</strong>: herramientas globales más abajo.</p>
+          <p class="text-xs text-white/50 mb-4">Tarjetas para <strong class="text-white/65">administrador de red</strong>: enlaces de afiliación (negocios y socios) y venta con comprobante. Después: datos bancarios. <strong class="text-white/65">Fundador</strong>: primero la tarjeta verde para revisar las ventas con comprobante que envían los socios; más abajo, el resto de herramientas.</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
             <div class="ferriol-partner-affiliate-links-wrap hidden sm:col-span-2">
               <button type="button" id="btnOpenPartnerAffiliateLinks" class="glass rounded-2xl p-5 border border-cyan-400/35 bg-cyan-500/[0.07] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-cyan-400/55 active:scale-[0.98] touch-target">
@@ -2051,17 +2051,6 @@
                 </div>
               </button>
             </div>
-            <div class="ferriol-partner-provision-btn-wrap hidden sm:col-span-2">
-              <button type="button" id="btnOpenPartnerProvisionModal" class="glass rounded-2xl p-5 border border-violet-400/35 bg-violet-500/[0.08] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-violet-400/55 active:scale-[0.98] touch-target">
-                <div class="w-12 h-12 rounded-xl bg-violet-500/25 flex items-center justify-center shrink-0">
-                  <i data-lucide="user-plus" class="w-6 h-6 text-violet-200"></i>
-                </div>
-                <div class="min-w-0 flex-1">
-                  <span class="font-semibold text-sm text-white block">Solicitar alta de administrador de red</span>
-                  <span class="text-xs text-white/55 mt-0.5 block">Requiere aprobación de la empresa y acreditación del pago a Ferriol.</span>
-                </div>
-              </button>
-            </div>
           </div>
           <div id="superMasFerriolBankingCard" class="mb-5 rounded-xl border border-cyan-500/35 bg-cyan-500/10 p-4 sm:p-5 hidden">
             <h3 class="font-bold text-base mb-1 flex items-center gap-2 text-cyan-100/95">
@@ -2081,6 +2070,15 @@
             <p id="superMasPartnerTransferPreview" class="text-xs text-white/45 mt-2 hidden"></p>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 super-only super-main-only">
+            <button type="button" id="btnSuperMasGoSolicitudesVentas" class="glass rounded-2xl p-5 border border-emerald-500/45 bg-emerald-500/[0.12] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-emerald-400/65 active:scale-[0.98] touch-target sm:col-span-2">
+              <div class="w-12 h-12 rounded-xl bg-emerald-500/25 flex items-center justify-center shrink-0">
+                <i data-lucide="clipboard-check" class="w-6 h-6 text-emerald-200"></i>
+              </div>
+              <div class="min-w-0 flex-1">
+                <span class="font-semibold text-base text-white block">Ventas con comprobante de administradores</span>
+                <span class="text-xs text-white/55 mt-0.5 block">Abrí <strong class="text-white/70">Solicitudes</strong> y el listado donde cada socio adjunta la venta para que la empresa la apruebe y acredite comisiones.</span>
+              </div>
+            </button>
             <button type="button" id="btnSuperMasOpenAjustes" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
               <div class="w-12 h-12 rounded-xl bg-[#22c55e]/25 flex items-center justify-center shrink-0">
                 <i data-lucide="settings" class="w-6 h-6 text-[#86efac]"></i>
@@ -2254,32 +2252,7 @@
       </div>
     </div>
 
-    <!-- Modal: solicitar alta de otro administrador de red (socio → empresa aprueba) -->
-    <div id="partnerProvisionRequestModal" class="fixed inset-0 z-[74] hidden items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="partnerProvisionRequestModalOverlay"></div>
-      <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto scale-in">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-bold text-lg">Alta de administrador de red</h3>
-          <button type="button" id="partnerProvisionRequestModalClose" class="btn-neomorphic rounded-xl p-2 touch-target"><i data-lucide="x" class="w-5 h-5"></i></button>
-        </div>
-        <p class="text-sm text-white/65 mb-3">Completá el cobro y el pago del <strong class="text-white/80">20%</strong> a la empresa. Sin aprobación de Ferriol no se puede crear el usuario.</p>
-        <div id="partnerProvisionRequestErr" class="login-err hidden mb-3"></div>
-        <label class="block text-xs text-white/55 mb-1">Email del nuevo socio (será su usuario de acceso)</label>
-        <input type="email" id="partnerProvisionEmail" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-3" placeholder="nuevo@ejemplo.com" autocomplete="off">
-        <label class="block text-xs text-white/55 mb-1">Nombre para mostrar</label>
-        <input type="text" id="partnerProvisionDisplayName" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-3" placeholder="Nombre y apellido">
-        <label class="block text-xs text-white/55 mb-1">Teléfono (opcional)</label>
-        <input type="tel" id="partnerProvisionPhone" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-3" placeholder="WhatsApp">
-        <label class="block text-xs text-white/55 mb-1">Monto cobrado al nuevo socio (ARS)</label>
-        <input type="number" id="partnerProvisionClientPay" min="1" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-1" value="20000">
-        <p class="text-[10px] text-white/50 mb-2">20% empresa: <strong class="text-cyan-200/90" id="partnerProvisionCompanyPct">—</strong> ARS</p>
-        <label class="block text-xs text-white/55 mb-1">Referencia del pago del 20% a empresa (opcional)</label>
-        <input type="text" id="partnerProvisionCompanyNote" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-4" placeholder="Transferencia, fecha, banco…">
-        <button type="button" id="partnerProvisionSubmitRequest" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target">Enviar solicitud a la empresa</button>
-      </div>
-    </div>
-
-    <!-- Modal: completar alta (contraseña) tras aprobación -->
+    <!-- Modal: completar alta (contraseña) tras aprobación (flujo histórico / excepcional) -->
     <div id="partnerProvisionCompleteModal" class="fixed inset-0 z-[75] hidden items-center justify-center p-4">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="partnerProvisionCompleteModalOverlay"></div>
       <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md scale-in">
