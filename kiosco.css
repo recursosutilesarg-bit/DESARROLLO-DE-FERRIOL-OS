@@ -1245,7 +1245,7 @@ body[data-panel="inventory"] #panel-inventory {
     padding-top: 0;
   }
 
-  /* Paneles con más aire (barra de nav va a la derecha en PC: sin gran padding inferior) */
+  /* Paneles con más aire (carril izquierdo en PC: sin gran padding inferior) */
   .panel {
     padding: 1.5rem 2rem 1.5rem;
   }
@@ -1254,27 +1254,27 @@ body[data-panel="inventory"] #panel-inventory {
     padding-top: env(safe-area-inset-top, 0);
   }
 
-  /* Carril de navegación fijo a la derecha, alto completo (solo ≥768px) */
+  /* Carril fijo a la IZQUIERDA, alto completo — referencia Hotmart (solo ≥768px) */
   :root {
-    --ferriol-rail-w: 6rem;
+    --ferriol-rail-w: 4.25rem;
   }
 
   #mainContent {
-    padding-right: calc(var(--ferriol-rail-w) + env(safe-area-inset-right, 0px));
+    padding-left: calc(var(--ferriol-rail-w) + env(safe-area-inset-left, 0px));
   }
 
   #navKiosquero.ferriol-bottom-nav,
   #navSuperBottom.ferriol-bottom-nav {
     top: 0;
     bottom: 0;
-    left: auto;
-    right: 0;
+    left: 0;
+    right: auto;
     box-sizing: border-box;
-    width: calc(var(--ferriol-rail-w) + env(safe-area-inset-right, 0px));
+    width: calc(var(--ferriol-rail-w) + env(safe-area-inset-left, 0px));
     padding-top: env(safe-area-inset-top, 0);
     padding-bottom: env(safe-area-inset-bottom, 0);
-    padding-left: 0;
-    padding-right: env(safe-area-inset-right, 0);
+    padding-left: env(safe-area-inset-left, 0);
+    padding-right: 0;
   }
 
   /* Con header visible (Inicio kiosquero / panel admin): carril empieza bajo el header */
@@ -1288,15 +1288,16 @@ body[data-panel="inventory"] #panel-inventory {
     height: 100%;
     max-width: none !important;
     margin: 0;
-    border-radius: 1rem 0 0 1rem;
+    border-radius: 0 1rem 1rem 0;
     border-top: none;
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: -8px 0 28px rgba(0, 0, 0, 0.38);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: none;
+    box-shadow: 8px 0 28px rgba(0, 0, 0, 0.32);
     display: flex;
     flex-direction: column;
     align-items: stretch;
     justify-content: center;
-    padding: 0.5rem 0.3rem;
+    padding: 0.5rem 0.25rem;
   }
 
   #navKiosquero .bottom-nav-bar > div,
@@ -1320,33 +1321,45 @@ body[data-panel="inventory"] #panel-inventory {
   }
 
   #navKiosquero #scannerCircleBtn {
-    width: 2.85rem !important;
-    height: 2.85rem !important;
-    min-width: 2.85rem;
-    min-height: 2.85rem;
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
   }
 
   #navKiosquero #scannerCircleBtn i,
   #navKiosquero #scannerCircleBtn svg {
-    width: 1.25rem !important;
-    height: 1.25rem !important;
+    width: 1.15rem !important;
+    height: 1.15rem !important;
   }
 
   #navKiosquero .bottom-nav-btn,
   #navSuperBottom .bottom-nav-btn {
     min-height: 0;
     flex: 0 0 auto;
-    padding-top: 0.45rem;
-    padding-bottom: 0.45rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    gap: 0;
   }
 
+  /* Solo íconos en carril (texto en title del botón) */
   #navKiosquero .bottom-nav-btn span,
   #navSuperBottom .bottom-nav-btn span {
-    font-size: 0.6rem;
-    line-height: 1.15;
-    white-space: normal;
-    overflow: visible;
-    text-overflow: unset;
+    display: none;
+  }
+
+  #navKiosquero .bottom-nav-btn i,
+  #navKiosquero .bottom-nav-btn svg,
+  #navSuperBottom .bottom-nav-btn i,
+  #navSuperBottom .bottom-nav-btn svg {
+    width: 1.35rem !important;
+    height: 1.35rem !important;
+  }
+
+  /* Activo tipo Hotmart: acento en el borde izquierdo del carril */
+  #navKiosquero .bottom-nav-btn.active,
+  #navSuperBottom .bottom-nav-btn.active {
+    box-shadow: inset 3px 0 0 rgba(134, 239, 172, 0.9);
   }
 
   /* Productos: borde a borde (sin columna centrada ni bordes laterales) */

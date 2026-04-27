@@ -42,8 +42,9 @@ CREATE POLICY "fpwr_partner_select" ON public.ferriol_partner_withdrawal_request
 
 GRANT SELECT ON public.ferriol_partner_withdrawal_requests TO authenticated;
 
--- ——— Saldo retirable = comisiones sale_commission en libro (approved o paid), histórico,
---     menos retiros pagados y montos reservados (pending_review + approved_pending_payout). ———
+-- ——— Saldo retirable = comisiones al socio en libro: sale_commission + renewal (approved/paid),
+--     histórico; renewal = upline en pagos vendor_mantenimiento (ver ferriol_verify_payment).
+--     Menos retiros pagados y reservas (pending_review + approved_pending_payout). ———
 CREATE OR REPLACE FUNCTION public.ferriol_partner_withdrawable_balance(p_partner_id uuid)
 RETURNS numeric
 LANGUAGE sql
@@ -56,7 +57,7 @@ AS $$
       SELECT SUM(l.amount) FROM public.mlm_ledger l
       WHERE l.beneficiary_user_id = p_partner_id
         AND l.status IN ('approved', 'paid')
-        AND l.event_type = 'sale_commission'
+        AND l.event_type IN ('sale_commission', 'renewal')
     ), 0)
     - COALESCE((
       SELECT SUM(w.amount_ars) FROM public.ferriol_partner_withdrawal_requests w
@@ -83,8 +84,8 @@ DECLARE
   v_id uuid;
 BEGIN
   SELECT role INTO v_role FROM public.profiles WHERE id = v_uid LIMIT 1;
-  IF v_role IS DISTINCT FROM 'partner' THEN
-    RETURN jsonb_build_object('ok', false, 'error', 'Solo administradores de red (socio) pueden solicitar retiros.');
+  IF v_role IS NULL OR (v_role IS DISTINCT FROM 'partner' AND v_role IS DISTINCT FROM 'super') THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'Solo cuentas administrador de red (partner) o fundador (super) pueden solicitar retiros a la empresa.');
   END IF;
   IF p_amount_ars IS NULL OR p_amount_ars <= 0 THEN
     RETURN jsonb_build_object('ok', false, 'error', 'Monto inválido.');
@@ -130,7 +131,7 @@ BEGIN
     SELECT GREATEST(0,
       COALESCE((SELECT SUM(l.amount) FROM public.mlm_ledger l
         WHERE l.beneficiary_user_id = r.partner_user_id AND l.status IN ('approved', 'paid')
-        AND l.event_type = 'sale_commission'), 0)
+        AND l.event_type IN ('sale_commission', 'renewal')), 0)
       - COALESCE((SELECT SUM(w.amount_ars) FROM public.ferriol_partner_withdrawal_requests w
         WHERE w.partner_user_id = r.partner_user_id AND w.status = 'paid'), 0)
       - COALESCE((SELECT SUM(w.amount_ars) FROM public.ferriol_partner_withdrawal_requests w
@@ -193,7 +194,7 @@ BEGIN
   SELECT GREATEST(0,
     COALESCE((SELECT SUM(l.amount) FROM public.mlm_ledger l
       WHERE l.beneficiary_user_id = r.partner_user_id AND l.status IN ('approved', 'paid')
-      AND l.event_type = 'sale_commission'), 0)
+      AND l.event_type IN ('sale_commission', 'renewal')), 0)
     - COALESCE((SELECT SUM(w.amount_ars) FROM public.ferriol_partner_withdrawal_requests w
       WHERE w.partner_user_id = r.partner_user_id AND w.status = 'paid'), 0)
     - COALESCE((SELECT SUM(w.amount_ars) FROM public.ferriol_partner_withdrawal_requests w
