@@ -933,49 +933,43 @@ textarea:focus-visible {
 
 /* Sin animación en el panel para evitar parpadeos con actualizaciones de datos */
 
-/* ── Sin límites visuales: paneles seleccionados ── */
-/* Solo los paneles que NO son dashboard tienen look abierto */
-#panel-inventory > .glass,
-#panel-inventory > div.glass,
-#panel-scanner > .glass,
-#panel-scanner > div.glass,
-#panel-caja > .glass,
-#panel-caja > div.glass,
-#panel-mas > .glass,
-#panel-mas > div.glass,
-#panel-historial > .glass,
-#panel-historial > div.glass,
-#panel-clientes > .glass,
-#panel-clientes > div.glass,
-#panel-config > .glass,
-#panel-config > div.glass {
+/* ── Sin “cajas” en paneles: contenedores glass grandes a borde (sin tarjeta) ── */
+section.panel div.glass.rounded-2xl {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
   border-radius: 0 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+  width: 100%;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  box-sizing: border-box;
 }
 
-/* Panel super */
-#panel-super > .relative > .super-section {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-/* Dashboard (Inicio): conserva sus tarjetas con bordes y glass */
-#panel-dashboard > .space-y-6 > .glass,
-#panel-dashboard > .space-y-6 > div.glass {
+/* Modales dentro del panel (p. ej. Renovar): mantener caja glass */
+section.panel .fixed div.glass.rounded-2xl,
+section.panel .fixed div.glass-strong.rounded-2xl,
+section.panel .fixed div.glass-strong.rounded-t-3xl {
   background: var(--glass-bg) !important;
   border: 1px solid var(--glass-border) !important;
   box-shadow: var(--shadow-soft), var(--shadow-inset) !important;
-  border-radius: 1rem !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
+}
+section.panel .fixed div.glass.rounded-2xl,
+section.panel .fixed div.glass-strong.rounded-2xl {
+  border-radius: 1rem !important;
+}
+section.panel .fixed div.glass-strong.rounded-t-3xl {
+  border-radius: 1.5rem 1.5rem 0 0 !important;
+}
+section.panel .fixed div.glass-strong.rounded-2xl {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
 }
 
 /* ===== PANEL PRODUCTOS: PANTALLA COMPLETA ===== */
@@ -1399,19 +1393,13 @@ body[data-panel="inventory"] #panel-inventory {
   .inv-item-price { font-size: 1rem; }
   .inv-item-stock { font-size: 0.85rem; min-width: 4rem; }
 
-  /* Glass a ancho completo del panel (sin columna centrada ni max-width) */
+  /* Contenedor principal de cada panel: ancho completo (sin tarjeta; ver reglas globales de glass) */
   #panel-scanner > .glass,
   #panel-caja    > .glass,
   #panel-mas     > .glass,
   #panel-historial > .glass,
   #panel-clientes  > .glass,
   #panel-config    > .glass {
-    background: var(--glass-bg) !important;
-    border: 1px solid var(--glass-border) !important;
-    box-shadow: var(--shadow-soft), var(--shadow-inset) !important;
-    border-radius: 1rem !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
     max-width: none !important;
     width: 100% !important;
     margin-left: 0 !important;
@@ -1419,12 +1407,6 @@ body[data-panel="inventory"] #panel-inventory {
     box-sizing: border-box;
   }
   #panel-super > .relative > .super-section {
-    background: var(--glass-bg) !important;
-    border: 1px solid var(--glass-border) !important;
-    box-shadow: var(--shadow-soft), var(--shadow-inset) !important;
-    border-radius: 1rem !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
     max-width: none !important;
     width: 100% !important;
     margin-left: 0 !important;
