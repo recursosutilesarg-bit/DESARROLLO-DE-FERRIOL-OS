@@ -1097,12 +1097,20 @@
       <div class="relative isolate min-h-[70vh] pb-24">
         <!-- Sección Afiliados (usuarios kiosco / distribuidores) -->
         <div id="super-section-afiliados" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up absolute inset-x-0 top-0 z-0 overflow-y-auto" style="max-height: 85vh; padding-bottom: 6rem;">
-          <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
-            <i data-lucide="users" class="w-5 h-5 text-[#86efac]"></i>
-            Afiliados
-          </h2>
+          <div class="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+            <h2 class="font-bold text-xl flex min-w-0 items-center gap-2 shrink-0">
+              <i data-lucide="users" class="w-5 h-5 shrink-0 text-[#86efac]"></i>
+              Afiliados
+            </h2>
+            <div class="ferriol-partner-affiliate-links-wrap hidden w-full min-w-0 sm:w-auto sm:max-w-md sm:shrink-0">
+              <button type="button" id="btnOpenPartnerAffiliateLinks" title="Enlaces para negocios (kioscos) y para socios (membresía)" class="glass inline-flex w-full min-w-0 items-center justify-center gap-2 rounded-xl border border-cyan-400/35 bg-cyan-500/[0.07] px-3 py-2.5 transition-all hover:border-cyan-400/55 active:scale-[0.98] touch-target sm:w-auto">
+                <i data-lucide="link-2" class="h-5 w-5 shrink-0 text-cyan-200"></i>
+                <span class="font-semibold text-sm text-white">Enlaces de afiliación</span>
+              </button>
+            </div>
+          </div>
           <p id="superDirectoryStats" class="hidden text-xs text-white/45 mb-2 super-only super-main-only"></p>
-          <p class="text-xs text-white/50 mb-3 super-only super-main-only">Directorio global: filtro <strong class="text-white/65">Sin referidor</strong> y asignación desde el detalle de cada fila.</p>
+          <p class="text-xs text-white/50 mb-2 super-only super-main-only">Directorio global: filtro <strong class="text-white/65">Sin referidor</strong> y asignación desde el detalle de cada fila.</p>
           <p class="text-xs text-white/50 mb-3">Pestañas <strong class="text-white/70">Usuarios</strong> / <strong class="text-white/70">Distribuidores</strong>: tocá una fila para detalle y membresía. Quitar cuentas: contraseña en <strong class="text-white/65">Más → Ajustes</strong>.</p>
           <input type="text" id="superSearchEmail" placeholder="Buscar por email o nombre..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm mb-3" autocomplete="off">
           <div class="flex flex-wrap gap-2 mb-2">
@@ -1115,17 +1123,6 @@
           <div class="flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 mb-3" role="tablist" aria-label="Tipo de afiliado">
             <button type="button" id="superAfiliadosTabUsuarios" role="tab" aria-selected="true" class="super-afiliados-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-[#22c55e]/50 bg-[#22c55e]/20 text-white transition-all">Usuarios</button>
             <button type="button" id="superAfiliadosTabDistribuidores" role="tab" aria-selected="false" class="super-afiliados-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-transparent text-white/55 hover:text-white/80 transition-all">Distribuidores</button>
-          </div>
-          <div class="ferriol-partner-affiliate-links-wrap hidden w-full mb-3">
-            <button type="button" id="btnOpenPartnerAffiliateLinks" class="glass rounded-2xl p-5 border border-cyan-400/35 bg-cyan-500/[0.07] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-cyan-400/55 active:scale-[0.98] touch-target">
-              <div class="w-12 h-12 rounded-xl bg-cyan-500/25 flex items-center justify-center shrink-0">
-                <i data-lucide="link-2" class="w-6 h-6 text-cyan-200"></i>
-              </div>
-              <div class="min-w-0 flex-1">
-                <span class="font-semibold text-sm text-white block">Enlaces de afiliación</span>
-                <span class="text-xs text-white/55 mt-0.5 block">Enlaces para negocios (kioscos) y para socios (membresía).</span>
-              </div>
-            </button>
           </div>
           <div id="superUsersList" class="max-h-[50vh] overflow-y-auto pr-1 rounded-xl border border-white/10 bg-black/15">
             <!-- Lista por JS (filas estilo inventory-item) -->
