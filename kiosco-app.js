@@ -2285,6 +2285,9 @@
       try { sessionStorage.setItem('ferriol_super_ui', lens); } catch (_) {}
       state.superUiMode = lens;
       if (window._trialCountdownInterval) { clearInterval(window._trialCountdownInterval); window._trialCountdownInterval = null; }
+      window._trialCountdownInterval = setInterval(ferriolTickCountdowns, 1000);
+      await loadTrialReminderConfigFromSupabase();
+      ferriolTickCountdowns();
       applyAppShell();
       state._restoringFromHistory = true;
       showPanel('super');
@@ -3246,6 +3249,22 @@
     function ferriolTickCountdowns() {
       updatePartnerLicensePendingBanner();
       updateTrialCountdown();
+      updateTrialCountdownSuperFundador();
+    }
+
+    function showLoginScreenTrialEndedFundador() {
+      document.getElementById('appWrap').classList.add('hidden');
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('loginFormWrap').classList.remove('hidden');
+      document.getElementById('signUpBox').classList.add('hidden');
+      var errEl = document.getElementById('loginErr');
+      errEl.textContent = 'Venció la vigencia de tu cuenta como administrador (fundador). La cuenta fue bloqueada. Coordiná renovación con el otro administrador empresa o pedí que actualicen la fecha de vigencia en el sistema.';
+      errEl.classList.add('show');
+      var wrap = document.getElementById('loginContactAdminWrap');
+      if (wrap) {
+        fillLoginContactLinks('Hola, venció mi vigencia de administrador empresa en Ferriol OS y necesito coordinar.');
+        wrap.classList.remove('hidden');
+      }
     }
 
     function showLoginScreenTrialEnded() {
@@ -3318,6 +3337,58 @@
       var subEl = document.getElementById('headerSub');
       if (subEl) subEl.textContent = 'Sistema de prueba';
     }
+    /** Vigencia administrador empresa (fundador, role super): mismo criterio que kioscos (trial_ends_at). Al vencer: active=false y cierre de sesión. El banner solo se muestra en vista empresa. */
+    function updateTrialCountdownSuperFundador() {
+      var banner = document.getElementById('trialCountdownBannerSuper');
+      var textEl = document.getElementById('trialCountdownTextSuper');
+      var daysEl = document.getElementById('trialCountdownDaysSuper');
+      if (!currentUser || currentUser.role !== 'super') {
+        if (banner) banner.classList.add('hidden');
+        return;
+      }
+      var endsAt = currentUser.trialEndsAt;
+      if (!endsAt) {
+        if (banner) banner.classList.add('hidden');
+        return;
+      }
+      var end = new Date(endsAt);
+      var now = new Date();
+      var msLeft = end - now;
+      if (msLeft <= 0) {
+        if (banner) banner.classList.add('hidden');
+        if (supabaseClient && currentUser.id && !currentUser._fundadorTrialBlockTriggered) {
+          currentUser._fundadorTrialBlockTriggered = true;
+          supabaseClient.from('profiles').update({ active: false }).eq('id', currentUser.id).then(function () {
+            supabaseClient.auth.signOut().then(showLoginScreenTrialEndedFundador);
+          });
+        }
+        return;
+      }
+      if (!isEmpresaLensSuper() || !banner || !textEl || !daysEl) {
+        if (banner) banner.classList.add('hidden');
+        return;
+      }
+      var daysLeft = Math.ceil(msLeft / (24 * 60 * 60 * 1000));
+      var win = getTrialReminderWindowDays();
+      var inReminderWindow = daysLeft >= 1 && daysLeft <= win;
+      banner.classList.remove('hidden');
+      banner.classList.toggle('trial-countdown-banner--urgent', inReminderWindow);
+      daysEl.textContent = daysLeft;
+      textEl.textContent = daysLeft === 1 ? 'Último día · administración empresa' : (daysLeft + ' días de vigencia (admin empresa)');
+      var subTxt = document.getElementById('trialCountdownSubtextSuper');
+      if (subTxt) {
+        if (inReminderWindow) {
+          var cfg = window._trialReminderConfig || { messages: {} };
+          var custom = (cfg.messages && (cfg.messages[String(daysLeft)] != null ? cfg.messages[String(daysLeft)] : cfg.messages[daysLeft])) || '';
+          var line = applyTrialReminderTokens(custom, daysLeft, '') || '';
+          subTxt.textContent = line || 'Tu acceso como fundador tiene fecha de renovación registrada.';
+          subTxt.classList.remove('hidden');
+        } else {
+          subTxt.textContent = '';
+          subTxt.classList.add('hidden');
+        }
+      }
+    }
     document.getElementById('trialRenovarBtn') && document.getElementById('trialRenovarBtn').addEventListener('click', function () {
       if (!currentUser) return;
       refreshViewerHelpWhatsApp(currentUser).then(function () {
@@ -3326,6 +3397,22 @@
         var hasMail = viewerHelpWhatsApp.note === 'sponsor_no_phone' && viewerHelpWhatsApp.sponsorEmail;
         if (!hasWa && !hasMail) {
           alert(currentUser.role === 'kiosquero' ? 'No hay WhatsApp de tu referidor cargado. Pedile que actualice su perfil o contactá al soporte.' : 'La empresa aún no configuró números de contacto para administradores.');
+          return;
+        }
+        document.getElementById('renovarModal').classList.remove('hidden');
+        document.getElementById('renovarModal').classList.add('flex');
+        if (!state._restoringFromHistory) pushHistoryExtra({ modal: 'renovar' });
+        lucide.createIcons();
+      });
+    });
+    document.getElementById('trialRenovarBtnSuper') && document.getElementById('trialRenovarBtnSuper').addEventListener('click', function () {
+      if (!currentUser || currentUser.role !== 'super') return;
+      refreshViewerHelpWhatsApp(currentUser).then(function () {
+        fillRenovarWhatsAppLinks();
+        var hasWa = viewerHelpWhatsApp.list && viewerHelpWhatsApp.list.length > 0;
+        var hasMail = viewerHelpWhatsApp.note === 'sponsor_no_phone' && viewerHelpWhatsApp.sponsorEmail;
+        if (!hasWa && !hasMail) {
+          alert('Configurá en Ajustes del sistema los números empresa (WhatsApp) para coordinar renovación entre administradores.');
           return;
         }
         document.getElementById('renovarModal').classList.remove('hidden');
@@ -6574,10 +6661,14 @@ async function showApp() {
       ferriolStartNotificationPolling();
       lucide.createIcons();
     } else if (isSuper) {
+      if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
+      window._trialCountdownInterval = setInterval(ferriolTickCountdowns, 1000);
+      await Promise.all([loadTrialReminderConfigFromSupabase(), refreshViewerHelpWhatsApp(currentUser)]);
       if (state.superUiMode === 'socio') ferriolStartNotificationPolling();
       else ferriolStopNotificationPolling();
       goToPanel('super');
       if (ferriolNotificationRecipientShell()) loadNotifications();
+      ferriolTickCountdowns();
       lucide.createIcons();
     } else if (isPartner) {
       if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
@@ -6678,7 +6769,7 @@ async function showApp() {
           var r3 = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
           if (r3.data) profile = r3.data;
         }
-        if ((profile.role === 'kiosquero' || profile.role === 'partner') && !profile.active) {
+        if ((profile.role === 'kiosquero' || profile.role === 'partner' || profile.role === 'super') && !profile.active) {
           try {
             await refreshViewerHelpWhatsApp(profile);
           } catch (_) {}
@@ -6687,11 +6778,15 @@ async function showApp() {
           document.getElementById('signUpBox').classList.add('hidden');
           errEl.textContent = profile.role === 'kiosquero'
             ? 'Tu cuenta está desactivada. Contactá a tu referidor por WhatsApp para regularizar.'
-            : 'Tu cuenta está desactivada. Contactá por WhatsApp a los números que configuró la empresa (fundadores).';
+            : (profile.role === 'super'
+              ? 'Tu cuenta administrador está desactivada. Coordiná con el otro administrador empresa o la renovación en el sistema.'
+              : 'Tu cuenta está desactivada. Contactá por WhatsApp a los números que configuró la empresa (fundadores).');
           errEl.classList.add('show');
           var wrap = document.getElementById('loginContactAdminWrap');
           if (wrap) {
-            fillLoginContactLinks('Hola, mi cuenta de Ferriol OS está desactivada y quiero darme de alta.');
+            fillLoginContactLinks(profile.role === 'super'
+              ? 'Hola, mi cuenta administrador Ferriol OS está desactivada y necesito coordinar renovación.'
+              : 'Hola, mi cuenta de Ferriol OS está desactivada y quiero darme de alta.');
             wrap.classList.remove('hidden');
           }
           return;
@@ -6710,6 +6805,22 @@ async function showApp() {
             errEl.classList.add('show');
             return;
           }
+        }
+        if (profile.role === 'super' && trialEndsAt && new Date(trialEndsAt) < new Date()) {
+          try {
+            await supabaseClient.from('profiles').update({ active: false }).eq('id', uid);
+          } catch (_) {}
+          await supabaseClient.auth.signOut();
+          document.getElementById('loginFormWrap').classList.remove('hidden');
+          document.getElementById('signUpBox').classList.add('hidden');
+          errEl.textContent = 'Venció la vigencia de tu cuenta como administrador (fundador). La cuenta se desactivó. Coordiná renovación con el otro administrador empresa.';
+          errEl.classList.add('show');
+          var wrapSu = document.getElementById('loginContactAdminWrap');
+          if (wrapSu) {
+            fillLoginContactLinks('Hola, venció la vigencia de mi cuenta administrador Ferriol OS y necesito coordinar.');
+            wrapSu.classList.remove('hidden');
+          }
+          return;
         }
         if (profile.role === 'kiosquero' && trialEndsAt && new Date(trialEndsAt) < new Date()) {
           try {
@@ -7027,6 +7138,8 @@ async function showApp() {
       applyAppShell();
       if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
       window._trialCountdownInterval = setInterval(ferriolTickCountdowns, 1000);
+      await loadTrialReminderConfigFromSupabase();
+      ferriolTickCountdowns();
       await initData();
       renderInventory();
       updateCartUI();
@@ -9323,7 +9436,7 @@ async function showApp() {
           var rEns = await supabaseClient.from('profiles').select('*').eq('id', uid).single();
           if (rEns.data) profile = rEns.data;
         }
-        if ((profile.role === 'kiosquero' || profile.role === 'partner') && !profile.active) {
+        if ((profile.role === 'kiosquero' || profile.role === 'partner' || profile.role === 'super') && !profile.active) {
           try {
             await refreshViewerHelpWhatsApp(profile);
           } catch (_) {}
@@ -9331,11 +9444,15 @@ async function showApp() {
           document.getElementById('loginFormWrap').classList.remove('hidden');
           document.getElementById('loginErr').textContent = profile.role === 'kiosquero'
             ? 'Tu cuenta está desactivada. Contactá a tu referidor por WhatsApp para regularizar.'
-            : 'Tu cuenta está desactivada. Contactá por WhatsApp a los números que configuró la empresa (fundadores).';
+            : (profile.role === 'super'
+              ? 'Tu cuenta administrador está desactivada. Coordiná con el otro administrador empresa o la renovación en el sistema.'
+              : 'Tu cuenta está desactivada. Contactá por WhatsApp a los números que configuró la empresa (fundadores).');
           document.getElementById('loginErr').classList.add('show');
           var wrap = document.getElementById('loginContactAdminWrap');
           if (wrap) {
-            fillLoginContactLinks('Hola, mi cuenta de Ferriol OS está desactivada y quiero darme de alta.');
+            fillLoginContactLinks(profile.role === 'super'
+              ? 'Hola, mi cuenta administrador Ferriol OS está desactivada y necesito coordinar renovación.'
+              : 'Hola, mi cuenta de Ferriol OS está desactivada y quiero darme de alta.');
             wrap.classList.remove('hidden');
           }
           document.getElementById('appWrap').classList.add('hidden');
@@ -9357,6 +9474,23 @@ async function showApp() {
             document.getElementById('loginScreen').classList.remove('hidden');
             return;
           }
+        }
+        if (profile.role === 'super' && trialEndsAt && new Date(trialEndsAt) < new Date()) {
+          try {
+            await supabaseClient.from('profiles').update({ active: false }).eq('id', uid);
+          } catch (_) {}
+          await supabaseClient.auth.signOut();
+          document.getElementById('loginFormWrap').classList.remove('hidden');
+          document.getElementById('loginErr').textContent = 'Venció la vigencia de tu cuenta como administrador (fundador). La cuenta se desactivó. Coordiná renovación con el otro administrador empresa.';
+          document.getElementById('loginErr').classList.add('show');
+          var wrapS2 = document.getElementById('loginContactAdminWrap');
+          if (wrapS2) {
+            fillLoginContactLinks('Hola, venció la vigencia de mi cuenta administrador Ferriol OS y necesito coordinar.');
+            wrapS2.classList.remove('hidden');
+          }
+          document.getElementById('appWrap').classList.add('hidden');
+          document.getElementById('loginScreen').classList.remove('hidden');
+          return;
         }
         if (profile.role === 'kiosquero' && trialEndsAt && new Date(trialEndsAt) < new Date()) {
           try {

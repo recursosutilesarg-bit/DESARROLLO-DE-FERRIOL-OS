@@ -1,14 +1,8 @@
--- Ferriol OS · Datos bancarios del referidor (partner) visibles a sus kiosqueros
+-- Ferriol OS · Datos bancarios opcionales en el perfil del socio (partner)
 -- Ejecutá en Supabase → SQL Editor (una vez).
 
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS partner_transfer_info text;
 
-COMMENT ON COLUMN profiles.partner_transfer_info IS 'Datos bancarios del socio (referidor) para abonos de cuota; lo ven los usuarios cuyo sponsor_id apunta a este perfil, además de los datos de empresa.';
+COMMENT ON COLUMN profiles.partner_transfer_info IS 'Texto opcional para el socio (CBU/datos útiles). La app Ferriol no lo muestra al kiosco referido; uso interno/socio‑empresa/retiros.';
 
--- Si al kiosquero le falla RLS al leer al sponsor, descomentá y ejecutá:
--- Los SELECT existentes a profiles con OR; esto añade lectura al referidor inmediato.
--- CREATE POLICY "profiles_kiosquero_read_sponsor_row" ON public.profiles
--- FOR SELECT TO authenticated
--- USING (
---   id IN (SELECT p.sponsor_id FROM public.profiles p WHERE p.id = auth.uid() AND p.sponsor_id IS NOT NULL)
--- );
+-- Si falta función de contacto sponsor: ejecutá supabase-ferriol-kiosquero-sponsor-display.sql

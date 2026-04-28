@@ -1152,6 +1152,29 @@
         <!-- Ingresos: ventas del socio como vendedor (ferriol_payments) estilo resumen comercial -->
         <div id="super-section-ingresos" class="super-section glass rounded-2xl p-4 sm:p-5 slide-up hidden absolute inset-x-0 top-0 z-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
 
+          <div id="trialCountdownBannerSuper" class="trial-countdown-banner glass rounded-2xl p-4 sm:p-5 mb-5 slide-up hidden border border-amber-400/35 relative overflow-hidden">
+            <div class="trial-countdown-banner-glow pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300"></div>
+            <div class="relative flex flex-col gap-4">
+              <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                <div class="flex items-start gap-3 flex-1 min-w-0">
+                  <div class="trial-countdown-icon-wrap flex items-center justify-center rounded-2xl w-12 h-12 sm:w-14 sm:h-14 shrink-0 bg-amber-500/20 border border-amber-400/35">
+                    <i data-lucide="crown" class="w-6 h-6 sm:w-7 sm:h-7 text-amber-200 shrink-0"></i>
+                  </div>
+                  <div class="min-w-0 flex-1 pt-0.5">
+                    <p id="trialCountdownTextSuper" class="font-semibold text-white text-base sm:text-lg leading-snug">Administración empresa</p>
+                    <p id="trialCountdownSubtextSuper" class="text-sm text-amber-200/95 mt-1.5 leading-snug hidden"></p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3 w-full sm:w-auto shrink-0 sm:ml-auto">
+                  <span id="trialCountdownDaysSuper" class="trial-countdown-days-pill px-4 py-2 rounded-2xl bg-amber-500/25 text-amber-100 font-black text-xl sm:text-2xl tabular-nums shrink-0 border border-amber-400/40 shadow-[0_0_24px_rgba(245,158,11,0.15)]">—</span>
+                  <button type="button" id="trialRenovarBtnSuper" class="trial-renovar-btn flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 rounded-2xl py-3 px-5 text-sm sm:text-base font-bold touch-target shrink-0 bg-gradient-to-br from-amber-500 to-amber-800 hover:brightness-110 text-white shadow-lg shadow-amber-900/35 border border-amber-200/30 active:scale-[0.98]">
+                    <i data-lucide="refresh-cw" class="w-5 h-5"></i> Renovar / Coordinar</button>
+                </div>
+              </div>
+              <p class="text-[10px] text-white/45 leading-snug">Los <strong class="text-white/60">dos administradores fundadores</strong> pueden tener cada uno su ciclo (<code class="text-white/50 text-[9px]">trial_ends_at</code>). Al vencer, esta cuenta queda bloqueada hasta renovar en base de datos.</p>
+            </div>
+          </div>
+
           <!-- ── Banner de bienvenida ──────────────────────────── -->
           <div id="ingresosBienvenidaBanner" class="hidden mb-5 rounded-2xl overflow-hidden relative">
             <div class="ingresos-welcome-bg absolute inset-0 pointer-events-none"></div>
@@ -2831,7 +2854,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426prov_banner"></script>
+  <script defer src="kiosco-app.js?v=20260426fund_admin_trial"></script>
   <script defer src="kiosco-pwa.js?v=20260426pullfix"></script>
 </body>
 </html>

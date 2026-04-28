@@ -1,0 +1,36 @@
+-- Ferriol OS · Cuentas administrador empresa (fundadores), dos por ahora — misma lógica de vigencia que kioscos (trial_ends_at).
+-- Cuando llega esa fecha sin renovar: la app pone active = false y no deja iniciar hasta que actualicemos trial_ends_at y active en public.profiles.
+--
+-- PASOS MANUALES
+-- 1) Supabase → Authentication → Users: crear DOS usuarios (email + contraseña o magic link).
+-- 2) Copiar cada UUID desde la tabla auth.users (SQL Editor puede listar ids).
+-- 3) Sustituir abajo UUID_... y emails; ejecutar una sola vez.
+--
+-- Vigencia de ejemplo: 365 días desde ahora UTC (cambiá interval o fijá una fecha ISO).
+
+-- Descomenta y adapta antes de ejecutar:
+
+-- INSERT INTO public.profiles (
+--   id,
+--   email,
+--   role,
+--   active,
+--   trial_ends_at
+-- ) VALUES
+-- (
+--   'UUID_FUNDADOR_1'::uuid,
+--   'fundador1@tu-dominio.com',
+--   'super',
+--   true,
+--   ((now() AT TIME ZONE 'utc') + interval '365 days')
+-- ),
+-- (
+--   'UUID_FUNDADOR_2'::uuid,
+--   'fundador2@tu-dominio.com',
+--   'super',
+--   true,
+--   ((now() AT TIME ZONE 'utc') + interval '365 days')
+-- );
+
+-- Renovación rápida (cuando llegue la fecha o antes):
+-- UPDATE public.profiles SET active = true, trial_ends_at = ((now() AT TIME ZONE 'utc') + interval '180 days') WHERE id = 'UUID'::uuid AND role = 'super';
