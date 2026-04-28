@@ -431,12 +431,11 @@
       <div id="kioscoLicensePaymentBlock" class="kiosquero-only mx-4 mt-4 mb-3 rounded-2xl border border-[#22c55e]/25 bg-gradient-to-br from-[#0a2e18]/95 to-[#052a14]/90 p-4 sm:p-5 shadow-lg shadow-black/20">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div class="min-w-0 flex-1">
-            <h3 class="font-semibold mb-1 flex items-center gap-2 text-base text-[#86efac]">
+            <h3 class="font-semibold mb-2 flex items-center gap-2 text-base text-[#86efac]">
               <i data-lucide="sparkles" class="w-5 h-5 shrink-0"></i>
               Suscripción mensual Ferriol OS
             </h3>
-            <p class="text-sm text-white/75 leading-snug">Este abono mantiene activa la licencia del software para tu negocio: usá solo la cuenta oficial de la empresa indicada al tocar el botón.</p>
-            <p id="kioscoLicensePriceHint" class="text-xs text-white/60 mt-3 leading-relaxed"></p>
+            <p id="kioscoLicensePriceHint" class="text-xs text-white/55"></p>
           </div>
           <div class="shrink-0 sm:pt-1 w-full sm:w-auto">
             <button type="button" id="btnOpenKioscoSubscriptionModal" class="w-full sm:w-auto rounded-2xl px-5 py-3.5 font-bold text-sm sm:text-base text-white shadow-lg shadow-amber-600/40 bg-gradient-to-br from-amber-400 via-orange-500 to-rose-600 ring-2 ring-amber-200/50 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2">
@@ -447,28 +446,20 @@
         </div>
         <p id="kioscoLicenseSponsorHint" class="text-xs text-white/60 mb-2 mt-4 border-t border-white/10 pt-3"></p>
         <div id="kioscoLicenseReferidorWhatsApp" class="hidden mb-1"></div>
-        <p class="text-xs text-white/45 leading-snug mb-2">Si tu banco pide <strong class="text-white/60">concepto</strong> o comprobante, acordalo con tu referidor por el contacto de arriba. Ese contacto <strong class="text-white/70">no sustituye</strong> el envío del dinero a la cuenta oficial de Ferriol.</p>
         <div id="kioscoPartnerTransferWrap" class="hidden mt-3 rounded-lg border border-amber-500/30 bg-amber-500/06 p-3">
-          <p class="text-xs font-medium text-amber-200/90 mb-2 flex items-center gap-1.5"><i data-lucide="user" class="w-3.5 h-3.5 shrink-0"></i> Dato adicional de tu referidor (red comercial, no reemplaza el pago a Ferriol)</p>
+          <p class="text-xs font-medium text-amber-200/90 mb-2 flex items-center gap-1.5"><i data-lucide="user" class="w-3.5 h-3.5 shrink-0"></i> Dato de tu referidor</p>
           <pre id="kioscoPartnerTransferText" class="text-xs whitespace-pre-wrap text-white/90 font-sans max-h-36 overflow-y-auto"></pre>
         </div>
-        <p class="text-[10px] text-white/35 mt-3">En Caja no ves comisiones ni repartos 20/80: eso gestiona la red por aparte.</p>
       </div>
 
-      <!-- Modal: instrucciones suscripción + datos bancarios empresa (kiosquero) -->
+      <!-- Modal: datos bancarios empresa (kiosquero) -->
       <div id="kioscoSubscriptionPayModal" class="fixed inset-0 z-[72] hidden flex items-center justify-center p-4" aria-modal="true" role="dialog">
         <div class="absolute inset-0 bg-black/65 backdrop-blur-sm" id="kioscoSubscriptionPayModalOverlay"></div>
         <div class="relative glass-strong rounded-2xl p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto scale-in border border-amber-400/25 shadow-xl shadow-amber-900/30">
-          <div class="flex items-start justify-between gap-2 mb-3">
-            <h3 class="font-bold text-lg leading-snug pr-2 text-amber-100 drop-shadow-md">Cómo abonar tu mensualidad</h3>
+          <div class="flex items-start justify-between gap-2 mb-4">
+            <h3 class="font-bold text-lg leading-snug pr-2 text-amber-100 drop-shadow-md">Suscripción Ferriol</h3>
             <button type="button" id="kioscoSubscriptionPayModalClose" class="btn-neomorphic rounded-xl p-2 touch-target shrink-0" title="Cerrar"><i data-lucide="x" class="w-5 h-5"></i></button>
           </div>
-          <p class="text-sm text-white/70 mb-3 leading-relaxed">La mensualidad cubre el uso de Ferriol OS en tu local. Hacé una <strong class="text-white/90">transferencia bancaria</strong> desde tu cuenta al <strong class="text-emerald-200/90">titular y datos oficiales</strong> de Ferriol que figuran abajo (no uses cuentas que no estén publicadas acá).</p>
-          <ul class="text-xs text-white/55 space-y-1.5 mb-4 list-disc pl-4">
-            <li>Podés copiar <strong class="text-emerald-200/90">CBU</strong> y <strong class="text-emerald-200/90">Alias</strong> con un toque.</li>
-            <li>Enviá el comprobante a tu referidor o según te indique la empresa para registrar el pago.</li>
-            <li>El monto exacto y la periodicidad los confirma tu red; el valor referencia está en Caja arriba.</li>
-          </ul>
           <div id="kioscoSubPayBankFields"></div>
           <button type="button" id="kioscoSubscriptionPayModalDone" class="mt-4 w-full py-3 rounded-xl border border-white/15 bg-white/[0.08] hover:bg-white/[0.14] font-semibold touch-target active:scale-[0.99] text-white/90">Listo</button>
         </div>
@@ -2837,7 +2828,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426suscripcion"></script>
+  <script defer src="kiosco-app.js?v=20260426subsmin"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>

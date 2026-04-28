@@ -1643,7 +1643,7 @@
     }
     function ferriolKioscoSponsorHintHtml() {
       if (!currentUser || !currentUser.sponsorId) {
-        return 'No figura referidor en tu perfil. Si entraste por invitación, pedí que lo carguen en administración. <span class="text-white/60">El pago de la licencia sigue yendo a <strong class="text-white/75">Ferriol (empresa)</strong> con los datos oficiales de arriba.</span>';
+        return 'No figura referidor en tu perfil. Pedí en administración si hace falta.';
       }
       return null;
     }
@@ -1653,14 +1653,14 @@
       if (!supabaseClient) return { html: 'Configurá Supabase para ver datos del referidor.', ok: false, partnerTransferInfo: '' };
       try {
         var sp = await supabaseClient.from('profiles').select('kiosco_name, email, role, partner_transfer_info').eq('id', currentUser.sponsorId).maybeSingle();
-        if (sp.error || !sp.data) return { html: 'Tenés referidor asignado. Si no sabés quién es, consultá con el administrador. <span class="text-white/60">El pago de la licencia es <strong class="text-white/75">siempre a Ferriol</strong> (datos oficiales arriba).</span>', ok: true, partnerTransferInfo: '' };
+        if (sp.error || !sp.data) return { html: 'Consultá con el administrador por el contacto de tu red.', ok: true, partnerTransferInfo: '' };
         var d = sp.data;
         var partnerTI = d.partner_transfer_info != null && String(d.partner_transfer_info).trim() ? String(d.partner_transfer_info).trim() : '';
         var nm = (d.kiosco_name || '').trim() || (d.email ? String(d.email).split('@')[0] : '') || '—';
         var roleL = d.role === 'super' ? 'Administrador' : (d.role === 'partner' ? 'Socio vendedor' : 'Referidor');
         var em = d.email ? String(d.email).replace(/</g, '&lt;').replace(/&/g, '&amp;') : '';
         var nmEsc = String(nm).replace(/</g, '&lt;').replace(/&/g, '&amp;');
-        var html = 'Contacto de tu red: <strong class="text-[#86efac]/95">' + nmEsc + '</strong>' + (em ? ' · ' + em : '') + ' <span class="text-white/45">(' + roleL + ')</span>. <span class="text-white/60">Consultas y envío del comprobante. El abono mensual lo hacés con <strong class="text-amber-200/90">Abonar suscripción</strong>: ahí están los datos oficiales de la empresa.</span>';
+        var html = 'Contacto de tu red: <strong class="text-[#86efac]/95">' + nmEsc + '</strong>' + (em ? ' · ' + em : '') + ' <span class="text-white/45">(' + roleL + ')</span>';
         return { html: html, ok: true, partnerTransferInfo: partnerTI };
       } catch (_) {
         return { html: 'Consultá con el administrador quién es tu referidor.', ok: false, partnerTransferInfo: '' };
@@ -1677,7 +1677,7 @@
       var amt = FERRIOL_PLAN_AMOUNTS.kioscoMonthly;
       var amtStr = amt.toLocaleString('es-AR');
       if (priceEl) {
-        priceEl.innerHTML = 'La referencia suele ser el <strong class="text-white/85">importe mensual orientativo $ ' + amtStr + ' ARS</strong> por tu negocio (la empresa y tu red pueden confirmarte el monto vigente). Lo importante es que el depósito llegue a la cuenta que figura al tocar <strong class="text-amber-200">Abonar suscripción</strong>.';
+        priceEl.innerHTML = 'Referencia mensual <strong class="text-[#86efac]">$ ' + amtStr + ' ARS</strong>';
       }
       var transferBody = 'Falta cargar en Ajustes (fundador) los datos oficiales de la cuenta de Ferriol (empresa) a la que se transfiere la licencia de todos los negocios.';
       if (!supabaseClient) {
@@ -3604,6 +3604,15 @@
         .replace(/>/g, '&gt;');
     }
 
+    /** Quita una envoltura [ ... ] típica de plantillas (ej. [COMPLETAR]) para copiar solo el contenido útil */
+    function ferriolStripOuterSquareBrackets(val) {
+      var t = String(val != null ? val : '').trim();
+      while (t.length >= 2 && t.charAt(0) === '[' && t.charAt(t.length - 1) === ']') {
+        t = t.slice(1, -1).trim();
+      }
+      return t;
+    }
+
     /** Datos públicos empresa (cuenta donde abona mensualidad el kiosco) — mismo formato que partner_transfer_info si es posible */
     function ferriolParseEmpresaTransferInfo(raw) {
       var s = raw != null ? String(raw).trim() : '';
@@ -3613,6 +3622,10 @@
         var m = compact.match(/\d{22}/);
         if (m) p.cbu = m[0];
       }
+      if (p.titular) p.titular = ferriolStripOuterSquareBrackets(p.titular);
+      if (p.banco) p.banco = ferriolStripOuterSquareBrackets(p.banco);
+      if (p.alias) p.alias = ferriolStripOuterSquareBrackets(p.alias);
+      if (p.cbu) p.cbu = ferriolStripOuterSquareBrackets(p.cbu).replace(/\s/g, '');
       return p;
     }
 
@@ -3636,12 +3649,6 @@
           '<button type="button" class="kiosco-subpay-copy-trigger shrink-0 rounded-lg px-3 py-2 text-xs font-semibold bg-emerald-500/25 hover:bg-emerald-500/40 border border-emerald-400/50 text-emerald-100 touch-target active:scale-95"' +
           ' data-kcopy-slot="' + slot + '">' +
           '<i data-lucide="copy" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Copiar</button></div></div>';
-      }
-
-      var hasParsed = !!(p.titular || p.banco || p.cbu || p.alias);
-      if (!hasParsed && txt) {
-        html += '<div class="rounded-xl border border-amber-500/35 bg-amber-500/[0.12] p-3 mb-3">' +
-          '<p class="text-xs text-amber-100/90">No pudimos separar automáticamente CBU y alias. Usá «Copiar datos completos» más abajo y pegá el bloque en tu banco o consultá a tu referidor.</p></div>';
       }
 
       if (p.titular) {
