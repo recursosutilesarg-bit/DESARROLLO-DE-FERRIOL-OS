@@ -11,6 +11,7 @@
     // ALTER TABLE clientes ENABLE ROW LEVEL SECURITY; CREATE POLICY "clientes_policy" ON clientes FOR ALL USING (auth.uid() = user_id);
     // Fiados y cuentas corrientes: Caja → Libreta (libreta_clientes / libreta_items en Supabase).
     // Tabla legacy saldos_acobrar: ya no la usa la app; podés ignorarla o borrarla en Supabase si no la necesitás.
+    // Si el kiosquero no ve datos del referidor por RLS: ejecutá supabase-ferriol-kiosquero-sponsor-display.sql (función ferriol_get_my_sponsor_display).
     // Notificaciones globales: las inserta solo role super (RLS: supabase-ferriol-notifications-rls.sql). Las leen kiosqueros y socios en la campana.
     // CREATE TABLE notifications ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now(), message text NOT NULL );
     // ALTER TABLE notifications ENABLE ROW LEVEL SECURITY; políticas SELECT según tu proyecto + INSERT solo super en el SQL anterior.
@@ -1647,14 +1648,35 @@
       }
       return null;
     }
+    /** Lee la fila del sponsor (nombre, mail, WhatsApp, CBU socio). RPC ferriol_get_my_sponsor_display si existe; si no, SELECT (requiere política RLS o falla vacío). */
+    async function ferriolResolveSponsorProfile(profile) {
+      profile = profile || currentUser;
+      if (!profile || !supabaseClient) return null;
+      var sid = profile.sponsor_id != null ? profile.sponsor_id : profile.sponsorId;
+      if (!sid) return null;
+      var useRpc = !!(profile.id && currentUser && profile.id === currentUser.id && profile.role === 'kiosquero');
+      if (useRpc) {
+        try {
+          var rpc = await supabaseClient.rpc('ferriol_get_my_sponsor_display');
+          if (!rpc.error && rpc.data !== null && rpc.data !== undefined) {
+            var row = Array.isArray(rpc.data) ? rpc.data[0] : rpc.data;
+            if (row && typeof row === 'object') return row;
+          }
+        } catch (_) {}
+      }
+      try {
+        var fq = await supabaseClient.from('profiles').select('kiosco_name, email, role, partner_transfer_info, phone').eq('id', sid).maybeSingle();
+        if (!fq.error && fq.data) return fq.data;
+      } catch (_) {}
+      return null;
+    }
     async function ferriolFetchSponsorHintText() {
       var fallback = ferriolKioscoSponsorHintHtml();
       if (fallback !== null) return { html: fallback, ok: true, partnerTransferInfo: '' };
       if (!supabaseClient) return { html: 'Configurá Supabase para ver datos del referidor.', ok: false, partnerTransferInfo: '' };
       try {
-        var sp = await supabaseClient.from('profiles').select('kiosco_name, email, role, partner_transfer_info').eq('id', currentUser.sponsorId).maybeSingle();
-        if (sp.error || !sp.data) return { html: 'Consultá con el administrador por el contacto de tu red.', ok: true, partnerTransferInfo: '' };
-        var d = sp.data;
+        var d = await ferriolResolveSponsorProfile(currentUser);
+        if (!d) return { html: 'Consultá con el administrador por el contacto de tu red.', ok: true, partnerTransferInfo: '' };
         var partnerTI = d.partner_transfer_info != null && String(d.partner_transfer_info).trim() ? String(d.partner_transfer_info).trim() : '';
         var nm = (d.kiosco_name || '').trim() || (d.email ? String(d.email).split('@')[0] : '') || '—';
         var roleL = d.role === 'super' ? 'Administrador' : (d.role === 'partner' ? 'Socio vendedor' : 'Referidor');
@@ -7182,12 +7204,11 @@ async function showApp() {
         return;
       }
       try {
-        var sp = await supabaseClient.from('profiles').select('phone, email, kiosco_name').eq('id', sid).maybeSingle();
-        if (sp.error || !sp.data) {
+        var d = await ferriolResolveSponsorProfile(profile);
+        if (!d) {
           viewerHelpWhatsApp.note = 'sponsor_not_found';
           return;
         }
-        var d = sp.data;
         var digits = String(d.phone || '').replace(/\D/g, '');
         if (digits) {
           viewerHelpWhatsApp.list = [digits];
