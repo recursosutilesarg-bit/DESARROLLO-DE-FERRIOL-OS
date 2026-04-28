@@ -95,8 +95,12 @@
     function copyTextToClipboard(text, doneMsg) {
       var t = text || '';
       if (!t) return;
+      var done = function () {
+        if (typeof showScanToast === 'function') showScanToast(doneMsg || 'Copiado.', false);
+        else alert(doneMsg || 'Copiado.');
+      };
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(t).then(function () { alert(doneMsg || 'Copiado.'); }).catch(function () { window.prompt('Copiá:', t); });
+        navigator.clipboard.writeText(t).then(done).catch(function () { window.prompt('Copiá:', t); });
       } else window.prompt('Copiá:', t);
     }
 
@@ -1656,7 +1660,7 @@
         var roleL = d.role === 'super' ? 'Administrador' : (d.role === 'partner' ? 'Socio vendedor' : 'Referidor');
         var em = d.email ? String(d.email).replace(/</g, '&lt;').replace(/&/g, '&amp;') : '';
         var nmEsc = String(nm).replace(/</g, '&lt;').replace(/&/g, '&amp;');
-        var html = 'Contacto de tu red: <strong class="text-[#86efac]/95">' + nmEsc + '</strong>' + (em ? ' · ' + em : '') + ' <span class="text-white/45">(' + roleL + ')</span>. <span class="text-white/60">Dudas y seguimiento. El pago de la <strong class="text-white/75">licencia a Ferriol</strong> hacelo con los <strong class="text-cyan-200/80">datos oficiales de la empresa</strong> (arriba en esta misma tarjeta).</span>';
+        var html = 'Contacto de tu red: <strong class="text-[#86efac]/95">' + nmEsc + '</strong>' + (em ? ' · ' + em : '') + ' <span class="text-white/45">(' + roleL + ')</span>. <span class="text-white/60">Consultas y envío del comprobante. El abono mensual lo hacés con <strong class="text-amber-200/90">Abonar suscripción</strong>: ahí están los datos oficiales de la empresa.</span>';
         return { html: html, ok: true, partnerTransferInfo: partnerTI };
       } catch (_) {
         return { html: 'Consultá con el administrador quién es tu referidor.', ok: false, partnerTransferInfo: '' };
@@ -1664,7 +1668,6 @@
     }
     async function loadKioscoLicensePaymentInfo() {
       var block = document.getElementById('kioscoLicensePaymentBlock');
-      var pre = document.getElementById('kioscoTransferInfoText');
       var priceEl = document.getElementById('kioscoLicensePriceHint');
       var sponsorEl = document.getElementById('kioscoLicenseSponsorHint');
       if (!currentUser) return;
@@ -1674,7 +1677,7 @@
       var amt = FERRIOL_PLAN_AMOUNTS.kioscoMonthly;
       var amtStr = amt.toLocaleString('es-AR');
       if (priceEl) {
-        priceEl.innerHTML = 'Cuota orientativa: <strong class="text-[#86efac]">$ ' + amtStr + ' ARS</strong> por mes. <strong class="text-white/90">Ese pago</strong> (licencia) va a <strong class="text-cyan-200/90">Ferriol (empresa)</strong> con los datos oficiales. Monto y comprobante: acordalos con tu <strong class="text-white/80">referidor o administración</strong> si hace falta.';
+        priceEl.innerHTML = 'La referencia suele ser el <strong class="text-white/85">importe mensual orientativo $ ' + amtStr + ' ARS</strong> por tu negocio (la empresa y tu red pueden confirmarte el monto vigente). Lo importante es que el depósito llegue a la cuenta que figura al tocar <strong class="text-amber-200">Abonar suscripción</strong>.';
       }
       var transferBody = 'Falta cargar en Ajustes (fundador) los datos oficiales de la cuenta de Ferriol (empresa) a la que se transfiere la licencia de todos los negocios.';
       if (!supabaseClient) {
@@ -1687,7 +1690,7 @@
           transferBody = 'No se pudieron cargar los datos de transferencia.';
         }
       }
-      if (pre) pre.textContent = transferBody;
+      if (typeof window._populateKioscoSubscriptionPayModal === 'function') window._populateKioscoSubscriptionPayModal(transferBody);
       var spHint = await ferriolFetchSponsorHintText();
       if (sponsorEl) sponsorEl.innerHTML = spHint.html;
       var ptw = document.getElementById('kioscoPartnerTransferWrap');
@@ -3594,6 +3597,90 @@
         if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
       } catch (_) {}
     }
+    function ferriolEscapeHtmlLite(s) {
+      return String(s != null ? s : '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    /** Datos públicos empresa (cuenta donde abona mensualidad el kiosco) — mismo formato que partner_transfer_info si es posible */
+    function ferriolParseEmpresaTransferInfo(raw) {
+      var s = raw != null ? String(raw).trim() : '';
+      var p = ferriolParsePartnerBankingInfo(raw);
+      if (!p.cbu && s) {
+        var compact = s.replace(/\s/g, '');
+        var m = compact.match(/\d{22}/);
+        if (m) p.cbu = m[0];
+      }
+      return p;
+    }
+
+    /** Rellena el modal «Abonar suscripción» desde el texto cargado desde app_settings */
+    window._populateKioscoSubscriptionPayModal = function (raw) {
+      window._ferriolKioscoEmpresaTransferRaw = raw != null ? String(raw) : '';
+      var container = document.getElementById('kioscoSubPayBankFields');
+      if (!container) return;
+      var txt = window._ferriolKioscoEmpresaTransferRaw;
+      var p = ferriolParseEmpresaTransferInfo(txt);
+      var html = '';
+
+      function rowCopiable(label, slot, value) {
+        if (!value) return '';
+        var vEsc = ferriolEscapeHtmlLite(value).replace(/\r?\n/g, '<br>');
+        return '<div class="rounded-xl border border-emerald-500/35 bg-black/35 p-3 mb-3">' +
+          '<div class="flex items-start justify-between gap-2">' +
+          '<div class="min-w-0 flex-1">' +
+          '<p class="text-[10px] uppercase tracking-wide text-emerald-200/85 font-semibold mb-1">' + ferriolEscapeHtmlLite(label) + '</p>' +
+          '<p class="text-sm text-white font-mono break-all leading-snug">' + vEsc + '</p></div>' +
+          '<button type="button" class="kiosco-subpay-copy-trigger shrink-0 rounded-lg px-3 py-2 text-xs font-semibold bg-emerald-500/25 hover:bg-emerald-500/40 border border-emerald-400/50 text-emerald-100 touch-target active:scale-95"' +
+          ' data-kcopy-slot="' + slot + '">' +
+          '<i data-lucide="copy" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Copiar</button></div></div>';
+      }
+
+      var hasParsed = !!(p.titular || p.banco || p.cbu || p.alias);
+      if (!hasParsed && txt) {
+        html += '<div class="rounded-xl border border-amber-500/35 bg-amber-500/[0.12] p-3 mb-3">' +
+          '<p class="text-xs text-amber-100/90">No pudimos separar automáticamente CBU y alias. Usá «Copiar datos completos» más abajo y pegá el bloque en tu banco o consultá a tu referidor.</p></div>';
+      }
+
+      if (p.titular) {
+        html += '<div class="rounded-xl border border-white/15 bg-black/25 p-3 mb-3"><p class="text-[10px] uppercase tracking-wide text-white/50 font-semibold mb-1">Titular cuenta</p><p class="text-sm text-white/90">' + ferriolEscapeHtmlLite(p.titular) + '</p></div>';
+      }
+      if (p.banco) {
+        html += '<div class="rounded-xl border border-white/15 bg-black/25 p-3 mb-3"><p class="text-[10px] uppercase tracking-wide text-white/50 font-semibold mb-1">Banco</p><p class="text-sm text-white/85">' + ferriolEscapeHtmlLite(p.banco) + '</p></div>';
+      }
+      html += rowCopiable('CBU / CVU', 'cbu', p.cbu);
+      html += rowCopiable('Alias', 'alias', p.alias);
+
+      html += '<div class="rounded-xl border border-cyan-500/25 bg-black/35 p-3 mb-1">' +
+        '<p class="text-[10px] uppercase tracking-wide text-cyan-200/80 font-semibold mb-1">Todos los datos (referencia)</p>' +
+        '<pre class="text-xs whitespace-pre-wrap text-white/75 font-mono leading-relaxed max-h-44 overflow-y-auto">' + ferriolEscapeHtmlLite(txt || '—') + '</pre>' +
+        '<button type="button" id="kioscoSubPayCopyFull" class="mt-3 w-full rounded-xl py-2.5 px-4 text-sm font-semibold border border-white/20 bg-white/10 hover:bg-white/15 touch-target active:scale-[0.99]">Copiar datos completos</button></div>';
+
+      container.innerHTML = html;
+
+      container.onclick = function (ev) {
+        var btn = ev.target.closest('.kiosco-subpay-copy-trigger');
+        if (!btn) return;
+        var slot = btn.getAttribute('data-kcopy-slot');
+        var val = slot === 'cbu' ? p.cbu : slot === 'alias' ? p.alias : '';
+        if (!val) return;
+        var plain = slot === 'cbu' ? String(val).replace(/\s/g, '') : String(val);
+        var msg = slot === 'cbu' ? 'CBU copiado.' : slot === 'alias' ? 'Alias copiado.' : 'Copiado.';
+        copyTextToClipboard(plain, msg);
+      };
+
+      var fullBtn = document.getElementById('kioscoSubPayCopyFull');
+      if (fullBtn) {
+        fullBtn.onclick = function () {
+          copyTextToClipboard(txt, 'Datos copiados. Pegá en tu banca o donde te lo pidan.');
+        };
+      }
+      try {
+        if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
+      } catch (_) {}
+    };
     function ferriolParsePartnerBankingInfo(raw) {
       var s = raw != null ? String(raw).trim() : '';
       var out = { titular: '', banco: '', cbu: '', alias: '' };
@@ -8963,6 +9050,39 @@ async function showApp() {
     if (btnAffDone) btnAffDone.onclick = closePartnerAffiliateLinksModal;
     var btnAffOv = document.getElementById('partnerAffiliateLinksModalOverlay');
     if (btnAffOv) btnAffOv.onclick = closePartnerAffiliateLinksModal;
+    (function bindKioscoSubscriptionPayModal() {
+      var m = document.getElementById('kioscoSubscriptionPayModal');
+      function closeModal() {
+        if (m) {
+          m.classList.add('hidden');
+          try {
+            document.body.style.overflow = '';
+          } catch (_) {}
+        }
+      }
+      function openModal() {
+        if (typeof window._populateKioscoSubscriptionPayModal === 'function') {
+          window._populateKioscoSubscriptionPayModal(window._ferriolKioscoEmpresaTransferRaw != null ? window._ferriolKioscoEmpresaTransferRaw : '');
+        }
+        if (m) {
+          m.classList.remove('hidden');
+          try {
+            document.body.style.overflow = 'hidden';
+          } catch (_) {}
+        }
+        try {
+          if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
+        } catch (_) {}
+      }
+      var op = document.getElementById('btnOpenKioscoSubscriptionModal');
+      if (op) op.addEventListener('click', openModal);
+      var ov = document.getElementById('kioscoSubscriptionPayModalOverlay');
+      if (ov) ov.addEventListener('click', closeModal);
+      var cl = document.getElementById('kioscoSubscriptionPayModalClose');
+      if (cl) cl.addEventListener('click', closeModal);
+      var dn = document.getElementById('kioscoSubscriptionPayModalDone');
+      if (dn) dn.addEventListener('click', closeModal);
+    })();
     var btnOpenClientSale = document.getElementById('btnOpenClientSaleRequestModal');
     if (btnOpenClientSale) btnOpenClientSale.onclick = function () { openClientSaleRequestModal(); };
     var clientSaleClose = document.getElementById('clientSaleRequestModalClose');
