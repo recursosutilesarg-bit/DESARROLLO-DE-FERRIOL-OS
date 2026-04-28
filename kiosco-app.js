@@ -56,22 +56,52 @@
       } catch (_) {}
     })();
 
+    /** URL estable para registrarse (?ref=&nicho=). Nunca debe terminar en / después de .html — GitHub Pages da 404. */
+    function ferriolNormalizeSignupEntryUrl(raw) {
+      try {
+        var s = String(raw || '').trim();
+        if (!s) return '';
+        s = s.split('#')[0].split('?')[0];
+        var u = null;
+        try {
+          u = new URL(s);
+        } catch (e1) {
+          try {
+            u = new URL(s, typeof window !== 'undefined' && window.location.href ? window.location.href : undefined);
+          } catch (e2) {
+            return '';
+          }
+        }
+        var pathname = (u.pathname || '/').replace(/\/+$/, '');
+        if (/kiosco\.html$/i.test(pathname)) {
+          return u.origin + pathname;
+        }
+        /** Raíz del sitio sin archivo (p. ej. …/nombre-repo/) → entrada real kiosco.html */
+        var withFile = pathname + '/kiosco.html';
+        return u.origin + withFile;
+      } catch (_) {
+        return '';
+      }
+    }
+
     function ferriolPublicSignupBaseUrl() {
       try {
         if (typeof APP_URL !== 'undefined' && APP_URL && String(APP_URL).indexOf('TU-USUARIO') === -1) {
-          return String(APP_URL).replace(/\/?$/, '/');
+          return ferriolNormalizeSignupEntryUrl(APP_URL);
         }
       } catch (_) {}
       try {
         if (typeof window !== 'undefined' && window.location && window.location.href) {
-          return window.location.href.split('#')[0].replace(/\?.*$/, '');
+          return ferriolNormalizeSignupEntryUrl(window.location.href.split('#')[0]);
         }
       } catch (_) {}
       return '';
     }
     function ferriolReferralInviteUrl(code, nicho) {
       var base = ferriolPublicSignupBaseUrl() || '';
-      if (!base) base = (typeof window !== 'undefined' && window.location) ? (window.location.origin + '/') : '';
+      if (!base && typeof window !== 'undefined' && window.location && window.location.href) {
+        base = ferriolNormalizeSignupEntryUrl(window.location.href.split('#')[0]);
+      }
       var sep = base.indexOf('?') >= 0 ? '&' : '?';
       return base + sep + 'ref=' + encodeURIComponent(code || '') + '&nicho=' + (nicho === 'socio' ? 'socio' : 'kiosco');
     }
