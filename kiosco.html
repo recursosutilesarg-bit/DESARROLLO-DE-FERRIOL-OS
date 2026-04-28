@@ -444,8 +444,14 @@
             </button>
           </div>
         </div>
-        <p id="kioscoLicenseSponsorHint" class="text-xs text-white/60 mb-2 mt-4 border-t border-white/10 pt-3"></p>
-        <div id="kioscoLicenseReferidorWhatsApp" class="hidden mb-1"></div>
+        <div class="mt-4 rounded-xl border border-emerald-500/25 bg-black/30 p-3 sm:p-4">
+          <p class="text-[10px] font-semibold uppercase tracking-wide text-emerald-200/85 mb-2 flex items-center gap-2">
+            <i data-lucide="users" class="w-4 h-4 shrink-0 text-[#86efac]"></i>
+            Administrador · referidor
+          </p>
+          <div id="kioscoLicenseSponsorHint" class="text-sm text-white/80 leading-snug"></div>
+          <div id="kioscoLicenseReferidorWhatsApp" class="hidden mt-3 pt-3 border-t border-white/10"></div>
+        </div>
         <div id="kioscoPartnerTransferWrap" class="hidden mt-3 rounded-lg border border-amber-500/30 bg-amber-500/06 p-3">
           <p class="text-xs font-medium text-amber-200/90 mb-2 flex items-center gap-1.5"><i data-lucide="user" class="w-3.5 h-3.5 shrink-0"></i> Dato de tu referidor</p>
           <pre id="kioscoPartnerTransferText" class="text-xs whitespace-pre-wrap text-white/90 font-sans max-h-36 overflow-y-auto"></pre>
@@ -2828,7 +2834,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426subsmin"></script>
+  <script defer src="kiosco-app.js?v=20260426referidorcard"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>

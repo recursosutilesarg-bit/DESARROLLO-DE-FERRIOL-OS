@@ -1660,7 +1660,7 @@
         var roleL = d.role === 'super' ? 'Administrador' : (d.role === 'partner' ? 'Socio vendedor' : 'Referidor');
         var em = d.email ? String(d.email).replace(/</g, '&lt;').replace(/&/g, '&amp;') : '';
         var nmEsc = String(nm).replace(/</g, '&lt;').replace(/&/g, '&amp;');
-        var html = 'Contacto de tu red: <strong class="text-[#86efac]/95">' + nmEsc + '</strong>' + (em ? ' · ' + em : '') + ' <span class="text-white/45">(' + roleL + ')</span>';
+        var html = '<span class="text-white/50">Nombre en la red · </span><strong class="text-[#86efac]/95">' + nmEsc + '</strong>' + (em ? ' · <span class="text-white/55">' + em + '</span>' : '') + ' <span class="text-white/40">· ' + roleL + '</span>';
         return { html: html, ok: true, partnerTransferInfo: partnerTI };
       } catch (_) {
         return { html: 'Consultá con el administrador quién es tu referidor.', ok: false, partnerTransferInfo: '' };
@@ -1710,13 +1710,32 @@
         await refreshViewerHelpWhatsApp(currentUser);
         var waNum = viewerHelpWhatsApp.list && viewerHelpWhatsApp.list[0];
         if (waNum) {
-          var waUrl = getWhatsAppUrl(waNum, 'Hola, consulto por el pago de la licencia de mi negocio en Ferriol OS.');
-          waWrap.innerHTML = '<a href="' + waUrl + '" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm font-semibold text-[#86efac] touch-target py-1"><i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp de tu referidor</a>';
+          var disp = ferriolFormatPhoneForDisplay(waNum);
+          var txtComp = 'Hola, te envío el comprobante del pago de la suscripción Ferriol OS de mi negocio.';
+          var waUrl = getWhatsAppUrl(waNum, txtComp);
+          waWrap.innerHTML = '<p class="text-[10px] font-semibold uppercase tracking-wide text-white/45 mb-1.5">WhatsApp para el comprobante</p>' +
+            '<p class="text-lg font-semibold font-mono text-[#86efac] mb-3 tracking-wide select-all">' + String(disp).replace(/</g, '&lt;') + '</p>' +
+            '<div class="flex flex-col sm:flex-row gap-2">' +
+            '<a href="' + waUrl.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-3 px-4 bg-[#22c55e]/25 hover:bg-[#22c55e]/38 border border-[#22c55e]/45 text-sm font-semibold text-[#86efac] touch-target active:scale-[0.98]">' +
+            '<i data-lucide="message-circle" class="w-5 h-5 shrink-0"></i> Abrir WhatsApp · comprobante</a>' +
+            '<button type="button" id="btnKioscoCopyWaComprobante" class="rounded-xl py-3 px-4 border border-white/20 bg-white/[0.08] hover:bg-white/15 text-sm font-semibold touch-target active:scale-[0.98]">Copiar número</button>' +
+            '</div>';
           waWrap.classList.remove('hidden');
+          var btnCopyWa = document.getElementById('btnKioscoCopyWaComprobante');
+          if (btnCopyWa) {
+            btnCopyWa.onclick = function () {
+              copyTextToClipboard(waNum, 'Número copiado (solo dígitos para pegar donde haga falta).');
+            };
+          }
           try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
         } else if (viewerHelpWhatsApp.note === 'sponsor_no_phone' && viewerHelpWhatsApp.sponsorEmail) {
           var rm = String(viewerHelpWhatsApp.sponsorEmail).trim();
-          waWrap.innerHTML = '<a href="mailto:' + rm.replace(/"/g, '') + '" class="inline-flex items-center gap-2 text-sm font-medium text-white/80 touch-target py-1"><i data-lucide="mail" class="w-4 h-4"></i> Email del referidor (sin WhatsApp cargado)</a>';
+          var subj = encodeURIComponent('Comprobante suscripción Ferriol OS');
+          var bod = encodeURIComponent('Hola, adjunto el comprobante del pago de la suscripción de mi negocio.\n\nSaludos.');
+          waWrap.innerHTML = '<p class="text-[10px] font-semibold uppercase tracking-wide text-white/45 mb-1.5">Email para el comprobante</p>' +
+            '<p class="text-sm font-mono text-white/85 mb-3 break-all">' + rm.replace(/</g, '&lt;') + '</p>' +
+            '<a href="mailto:' + rm.replace(/"/g, '').replace(/\?/g, '%3F') + '?subject=' + subj + '&body=' + bod + '" class="inline-flex w-full items-center justify-center gap-2 rounded-xl py-3 px-4 bg-white/[0.12] hover:bg-white/18 border border-white/25 text-sm font-semibold touch-target">' +
+            '<i data-lucide="mail" class="w-5 h-5"></i> Redactar correo · comprobante</a>';
           waWrap.classList.remove('hidden');
           try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
         } else {
@@ -7210,6 +7229,23 @@ async function showApp() {
       var url = 'https://wa.me/' + digits;
       if (text) url += '?text=' + encodeURIComponent(text);
       return url;
+    }
+
+    /** WhatsApp en tarjeta kiosquero: legible en pantalla (sin copiar mal el +) */
+    function ferriolFormatPhoneForDisplay(digitsOnly) {
+      var d = String(digitsOnly || '').replace(/\D/g, '');
+      if (!d) return '—';
+      if (d.length >= 10 && d.slice(0, 2) === '54') {
+        var rest = d.slice(2);
+        var chunks = [];
+        chunks.push(rest.slice(0, 2));
+        if (rest.length > 2) chunks.push(rest.slice(2, 6));
+        if (rest.length > 6) chunks.push(rest.slice(6));
+        return '+54 ' + chunks.filter(Boolean).join(' ');
+      }
+      var out = '';
+      for (var j = 0; j < d.length; j += 4) out += (out ? ' ' : '') + d.slice(j, j + 4);
+      return out;
     }
     function parseTrialReminderConfigValue(val) {
       var def = { windowDays: 5, messages: {} };
