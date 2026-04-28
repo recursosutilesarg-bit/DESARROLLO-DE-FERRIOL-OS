@@ -2069,7 +2069,7 @@
             <i data-lucide="clipboard-list" class="w-5 h-5 text-[#86efac]"></i>
             Solicitudes
           </h2>
-          <p class="text-xs text-white/50 mb-3 super-only super-main-only">Gestioná <strong class="text-white/70">pendientes</strong> (aprobá o rechazá) y consultá el <strong class="text-white/65">historial</strong> por estado. <strong class="text-amber-200/90">Retiros de socios</strong>: revisá fondos en el libro y aprobá; el pago bancario lo registrás en <strong class="text-white/65">Pagos</strong>. Más abajo, <strong class="text-emerald-200/90">Ventas con comprobante (socios)</strong>. El alta de negocio (kiosco) la iniciás con el botón de abajo. Los nuevos socios se registran con el <strong class="text-white/65">enlace de afiliación para vendedores</strong>.</p>
+          <p class="text-xs text-white/50 mb-3 super-only super-main-only"><strong class="text-amber-200/90">Retiros de socios</strong>: revisá fondos en el libro y aprobá; el pago bancario lo registrás en <strong class="text-white/65">Pagos</strong>. <strong class="text-emerald-200/90">Ventas con comprobante (socios)</strong> están abajo. El alta de negocio (kiosco) la iniciás con el botón de abajo. Los nuevos socios se registran con el <strong class="text-white/65">enlace de afiliación para vendedores</strong>.</p>
           <div id="founderWithdrawalReviewBox" class="hidden mb-5 rounded-2xl border border-amber-500/45 bg-amber-500/[0.1] p-3 sm:p-4 super-only super-main-only">
             <h3 class="text-sm font-semibold text-amber-200 mb-2 flex items-center gap-2"><i data-lucide="wallet" class="w-4 h-4"></i> Retiros de comisiones (revisión)</h3>
             <p class="text-[11px] text-white/50 mb-3">Solicitudes enviadas por administradores de red. Verificá que el saldo en el libro alcance; al aprobar pasan a <strong class="text-white/70">Pagos</strong> para transferir y adjuntar comprobante.</p>
@@ -2093,20 +2093,6 @@
             <p id="superClientSaleRequestsMsg" class="text-xs mt-2 text-emerald-200/80 hidden"></p>
           </div>
           <div id="superDayRequestsFounderBox" class="hidden mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-3 text-sm super-only super-main-only"></div>
-          <div class="space-y-5 super-solicitudes-historial super-only super-main-only">
-            <div>
-              <h3 class="text-sm font-semibold text-amber-200/95 mb-2 flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4"></i> Pendientes</h3>
-              <div id="superSolicitudesPendientes" class="min-h-[3rem]"><p class="text-white/45 text-xs py-3 text-center">Cargando…</p></div>
-            </div>
-            <div>
-              <h3 class="text-sm font-semibold text-emerald-200/95 mb-2 flex items-center gap-2"><i data-lucide="check-circle" class="w-4 h-4"></i> Aprobadas y completadas</h3>
-              <div id="superSolicitudesAprobadas" class="min-h-[3rem]"><p class="text-white/45 text-xs py-3 text-center">Cargando…</p></div>
-            </div>
-            <div>
-              <h3 class="text-sm font-semibold text-red-200/90 mb-2 flex items-center gap-2"><i data-lucide="x-circle" class="w-4 h-4"></i> Rechazadas</h3>
-              <div id="superSolicitudesRechazadas" class="min-h-[3rem]"><p class="text-white/45 text-xs py-3 text-center">Cargando…</p></div>
-            </div>
-          </div>
         </div>
         <!-- Pagos pendientes: retiros aprobados → transferencia + comprobante (solo fundador) -->
         <div id="super-section-pagos-pendientes" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; min-height: 100%; max-height: 85vh; padding-bottom: 6rem;">
@@ -2854,7 +2840,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426no_ingresos_admin_card"></script>
+  <script defer src="kiosco-app.js?v=20260426solicitudes_sin_historial"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_release"></script>
 </body>
 </html>
