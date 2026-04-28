@@ -1330,17 +1330,12 @@ body[data-panel="inventory"] #panel-inventory {
     flex-shrink: 0;
   }
 
-  #navKiosquero #scannerCircleBtn {
-    width: 2.5rem !important;
-    height: 2.5rem !important;
-    min-width: 2.5rem;
-    min-height: 2.5rem;
-  }
-
-  #navKiosquero #scannerCircleBtn i,
-  #navKiosquero #scannerCircleBtn svg {
-    width: 1.15rem !important;
-    height: 1.15rem !important;
+  /*
+   * Cámara/barra “Escanéar” en medio: ocultar en escritorio/tablet — en PC suele no haber cámara;
+   * el código se ingresa con lector láser USB (modo teclado); ver kiosco-app.js (wedge PC).
+   */
+  #navKiosquero .bottom-nav-bar > div > .flex-shrink-0:has(#scannerCircleBtn) {
+    display: none !important;
   }
 
   #navKiosquero .bottom-nav-btn,

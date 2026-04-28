@@ -4885,8 +4885,22 @@
       }
       return false;
     }
+
+    /** Lector USB (modo teclado): en pantalla Escáner, o —en PC/ancho carril— en paneles típicos del kiosco sin pasar por la cámara. */
+    function ferriolUsbWedgePanelsActive() {
+      var p = document.body.getAttribute('data-panel') || '';
+      if (p === 'scanner') return true;
+      try {
+        if (typeof window.matchMedia === 'function' && window.matchMedia('(min-width: 768px)').matches) {
+          var kioscoPanels = ['dashboard', 'inventory', 'caja', 'mas', 'historial', 'clientes', 'config'];
+          return kioscoPanels.indexOf(p) !== -1;
+        }
+      } catch (e) {}
+      return false;
+    }
+
     function onUsbWedgeKeydown(ev) {
-      if (document.body.getAttribute('data-panel') !== 'scanner') return;
+      if (!ferriolUsbWedgePanelsActive()) return;
       if (ferriolUsbWedgeIgnoreTarget(ev.target)) return;
       if (ev.key === 'Escape') {
         flushUsbWedgeBuffer();
