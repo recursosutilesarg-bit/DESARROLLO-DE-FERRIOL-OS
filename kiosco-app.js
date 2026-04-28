@@ -6342,6 +6342,9 @@
         return;
       }
       _switchCajaTabOrig(tab);
+      if (tab === 'proveedores') {
+        if (typeof loadKioscoLicensePaymentInfo === 'function') loadKioscoLicensePaymentInfo().catch(function () {});
+      }
       maybePushCajaHistory();
     };
     // ============================================================
