@@ -227,6 +227,12 @@
         ensureUserReferralCode(currentUser.id).then(function (cc) {
           if (cc) currentUser.referralCode = cc;
           bindCopyAndShow(cc);
+          if (!cc) {
+            try {
+              if (typeof showScanToast === 'function') showScanToast('No se pudo generar tu código de referido. Revisá la conexión o el permiso de actualización en Supabase (profiles).', true);
+              else alert('No se pudo generar tu código de referido. Revisá la conexión o permisos en Supabase.');
+            } catch (_) {}
+          }
         });
       } else bindCopyAndShow(cShow);
     }
@@ -2091,6 +2097,13 @@
     function isEmpresaLensSuper() {
       return !!(currentUser && currentUser.role === 'super' && state.superUiMode === 'empresa');
     }
+    /** Enlaces copiables para ref: socios sí; fundador en empresa o modo socio (no en “negocio”, que simula kiosco). */
+    function shouldShowPartnerAffiliateLinksUi() {
+      if (!currentUser) return false;
+      if (currentUser.role === 'partner') return true;
+      if (currentUser.role === 'super') return state.superUiMode === 'empresa' || state.superUiMode === 'socio';
+      return false;
+    }
     async function loadSuperMasBankingSection() {
       if (!currentUser || !supabaseClient) return;
       if (currentUser.role === 'partner') {
@@ -3931,7 +3944,7 @@
       var clientSaleWrap = document.querySelector('.ferriol-partner-client-sale-wrap');
       if (clientSaleWrap) clientSaleWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper()));
       var affWrap = document.querySelector('.ferriol-partner-affiliate-links-wrap');
-      if (affWrap) affWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper()));
+      if (affWrap) affWrap.classList.toggle('hidden', !shouldShowPartnerAffiliateLinksUi());
       var ingNav = document.getElementById('navSuperIngresosBtn');
       if (ingNav) {
         if (!isNetworkAdmin || uiNegocio) {
