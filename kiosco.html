@@ -1171,8 +1171,22 @@
                     <i data-lucide="refresh-cw" class="w-5 h-5"></i> Renovar / Coordinar</button>
                 </div>
               </div>
-              <p class="text-[10px] text-white/45 leading-snug">Los <strong class="text-white/60">dos administradores fundadores</strong> pueden tener cada uno su ciclo (<code class="text-white/50 text-[9px]">trial_ends_at</code>). Al vencer, esta cuenta queda bloqueada hasta renovar en base de datos.</p>
+              <p class="text-[10px] text-white/45 leading-snug"><strong class="text-white/60">No hay administradores aparte de los fundadores:</strong> los dos que dirigen la empresa (vos y tu compañero, p. ej. tu hermano) sois esta administración — cada cuenta <code class="text-white/50 text-[9px]">super</code> tiene su cuenta regresiva (<code class="text-white/50 text-[9px]">trial_ends_at</code>). Al vencer la vigencia de una, esa sesión queda bloqueada hasta renovar datos en el sistema.</p>
             </div>
+          </div>
+
+          <!-- Lista = los dos fundadores (rol super); no hay staff admin aparte -->
+          <div id="founderAdminsCard" class="rounded-2xl border border-amber-500/20 bg-gradient-to-b from-amber-500/[0.06] to-black/15 p-4 sm:p-5 mb-5 hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <i data-lucide="shield-check" class="w-4 h-4 text-amber-200 shrink-0"></i>
+                Fundadores — lista de administradores
+              </h3>
+              <span id="founderAdminsCountBadge" class="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-lg border border-amber-400/35 text-amber-100/90 whitespace-nowrap" title="Fundadores registrados como super (esperados: 2)">—</span>
+            </div>
+            <p class="text-[11px] text-white/50 mb-3">Esta lista <strong class="text-white/65">son ustedes dos</strong> los fundadores: no existe otro tipo de «administrador empresa». Cada uno tiene su usuario en Authentication y en <code class="text-white/55 text-[10px]">profiles</code> con <code class="text-white/55 text-[10px]">role = super</code> y su propia vigencia. Lo que ves abajo sale de la base de datos.</p>
+            <ul id="founderAdminsList" class="space-y-2 text-sm"></ul>
+            <p id="founderAdminsHint" class="text-[11px] text-amber-200/80 mt-3 leading-snug hidden">Faltan fundadores en la lista: tiene que haber <strong class="text-amber-100/90">2</strong> cuentas <code class="text-white/55">super</code> (vos y el otro fundador). Creá los usuarios en Auth y las filas en <code class="text-white/55">profiles</code> (archivo SQL del repo).</p>
           </div>
 
           <!-- ── Banner de bienvenida ──────────────────────────── -->
@@ -2854,7 +2868,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426fund_admin_trial"></script>
+  <script defer src="kiosco-app.js?v=20260426founders_are_admins"></script>
   <script defer src="kiosco-pwa.js?v=20260426pullfix"></script>
 </body>
 </html>

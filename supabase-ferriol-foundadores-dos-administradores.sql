@@ -1,10 +1,11 @@
--- Ferriol OS · Cuentas administrador empresa (fundadores), dos por ahora — misma lógica de vigencia que kioscos (trial_ends_at).
--- Cuando llega esa fecha sin renovar: la app pone active = false y no deja iniciar hasta que actualicemos trial_ends_at y active en public.profiles.
+-- Ferriol OS · Los DOS fundadores SON los administradores empresa (no hay otro rol aparte)
+-- Cada persona (ej. vos y tu hermano) = usuario en Authentication + fila en public.profiles con role = 'super', active true, trial_ends_at (cuenta regresiva; al vencer, la app bloquea esa sesión como con kioscos).
+-- Si no renovás trial_ends_at: la app marca active = false y no deja entrar hasta actualizar perfiles.
 --
 -- PASOS MANUALES
--- 1) Supabase → Authentication → Users: crear DOS usuarios (email + contraseña o magic link).
--- 2) Copiar cada UUID desde la tabla auth.users (SQL Editor puede listar ids).
--- 3) Sustituir abajo UUID_... y emails; ejecutar una sola vez.
+-- 1) Authentication → crear EXACTAMENTE DOS usuarios (los dos fundadores como administradores).
+-- 2) Copiar cada UUID desde auth.users.
+-- 3) Sustituir UUID_... y emails en el INSERT; ejecutar una sola vez.
 --
 -- Vigencia de ejemplo: 365 días desde ahora UTC (cambiá interval o fijá una fecha ISO).
 
