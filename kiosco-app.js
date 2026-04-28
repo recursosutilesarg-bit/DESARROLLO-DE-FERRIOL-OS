@@ -8287,7 +8287,7 @@ async function showApp() {
             var krows = r2k.data || [];
             h2 += '<p class="text-xs text-emerald-200/90 font-medium mb-2 mt-2">Altas de negocios (kioscos)</p>';
             if (krows.length === 0) {
-              h2 += '<p class="text-[10px] text-white/50">Usá el botón verde «Solicitar alta de negocio»; la empresa debe aprobar antes de crear el usuario.</p>';
+              h2 += '<p class="text-[10px] text-white/50">Las solicitudes las cargan los partners desde el panel correspondiente; la empresa aprueba antes de crear el usuario.</p>';
             } else {
               h2 += '<div class="space-y-1.5 max-h-[22vh] overflow-y-auto text-[11px]">';
               krows.forEach(function (kr) {
@@ -8880,8 +8880,6 @@ async function showApp() {
       lucide.createIcons();
     };
 
-    var btnOpenKiosqueroProv = document.getElementById('btnOpenNewKiosqueroModal');
-    if (btnOpenKiosqueroProv) btnOpenKiosqueroProv.onclick = function () { openKiosqueroProvisionRequestModal(); };
     var btnExportDir = document.getElementById('btnExportDirectorioCSV');
     if (btnExportDir) btnExportDir.onclick = function () { exportSuperDirectorioCSV(); };
     var ferriolPayTypeEl = document.getElementById('ferriolNewPayType');

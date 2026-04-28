@@ -96,7 +96,7 @@
       }
     })();
 
-    /** Pull-to-refresh en móvil: deslizar hacia abajo desde el tope y soltar (sustituto visual de F5). */
+    /** Pull-to-refresh en móvil: solo desde el tope del scroll; al soltar, solo si seguís “tirando abajo” lo suficiente (si volvés el dedo hacia arriba antes de soltar, no recarga). */
     (function () {
       var CAN_TOUCH = 'ontouchstart' in window || (typeof navigator !== 'undefined' && (navigator.maxTouchPoints || 0) > 0);
       if (!CAN_TOUCH) return;
@@ -118,7 +118,7 @@
       var tracking = false;
       var startY = 0;
       var startX = 0;
-      var maxPull = 0;
+      var lastDy = 0;
       var ind = null;
 
       function loginVisible() {
@@ -158,7 +158,7 @@
         ind = document.createElement('div');
         ind.id = 'ferriolPullIndicator';
         ind.setAttribute('aria-hidden', 'true');
-        ind.innerHTML = '<div class="ferriol-pull-inner"><span class="ferriol-pull-spinner" aria-hidden="true"></span><span class="ferriol-pull-text">Deslizá para actualizar</span></div>';
+        ind.innerHTML = '<div class="ferriol-pull-inner"><span class="ferriol-pull-spinner" aria-hidden="true"></span><span class="ferriol-pull-text">Seguí deslizando…</span></div>';
         document.body.appendChild(ind);
         return ind;
       }
@@ -169,14 +169,14 @@
         ind.style.opacity = '0';
       }
 
-      function updateIndicator(ratio) {
+      function updateIndicator(dyPx) {
         var el = ensureIndicator();
-        var r = Math.min(Math.max(ratio, 0), 1);
+        var r = Math.min(Math.max(dyPx, 0) / THRESH, 1);
         el.classList.add('ferriol-pull-active');
         el.style.opacity = String(Math.min(r * 0.95, 0.95));
         var tx = el.querySelector('.ferriol-pull-text');
         if (tx) {
-          tx.textContent = r >= 0.95 ? 'Soltá para actualizar' : 'Deslizá para actualizar';
+          tx.textContent = r >= 1 ? 'Soltá para actualizar' : 'Seguí deslizando…';
         }
       }
 
@@ -184,25 +184,26 @@
         if (!allowsPTR() || e.touches.length !== 1) return;
         if (blocksPTR(e)) {
           tracking = false;
-          maxPull = 0;
+          lastDy = 0;
           return;
         }
         if (!atScrollTop()) {
           tracking = false;
-          maxPull = 0;
+          lastDy = 0;
           return;
         }
 
         tracking = true;
+        lastDy = 0;
         startY = e.touches[0].clientY;
         startX = e.touches[0].clientX;
-        maxPull = 0;
       }, { passive: true });
 
       document.addEventListener('touchmove', function (e) {
         if (!tracking || !e.touches.length) return;
         if (blocksPTR(e)) {
           tracking = false;
+          lastDy = 0;
           hideIndicator();
           return;
         }
@@ -212,28 +213,43 @@
         var dy = y - startY;
         var dx = Math.abs(x - startX);
 
-        if (dx > Math.abs(dy) && dx > 22) {
+        if (!atScrollTop() && dy < 28) {
           tracking = false;
+          lastDy = 0;
           hideIndicator();
           return;
         }
 
-        if (dy > 6) {
-          maxPull = Math.max(maxPull, dy);
-          updateIndicator(maxPull / THRESH);
+        if (dx > Math.abs(dy) && dx > 22) {
+          tracking = false;
+          lastDy = 0;
+          hideIndicator();
+          return;
         }
 
-        if (dy < -10 && currentScrollTop() > 48) {
-          tracking = false;
+        lastDy = Math.max(0, dy);
+
+        if (lastDy <= 6) {
           hideIndicator();
+          return;
         }
+
+        updateIndicator(lastDy);
       }, { passive: true });
 
-      function finalize() {
-        var go = maxPull >= THRESH;
+      function finalize(e) {
+        var dyEnd = 0;
+        if (e.changedTouches && e.changedTouches.length) {
+          dyEnd = e.changedTouches[0].clientY - startY;
+        }
+
+        /* Decisión solo con la posición al soltar: si antes tiraste fuerte pero soltás habiendo vuelto arriba el dedo → no hay recarga */
+        var go = tracking && dyEnd >= THRESH && allowsPTR();
+
         tracking = false;
+        lastDy = 0;
         hideIndicator();
-        maxPull = 0;
+
         if (go) {
           window.location.reload();
         }

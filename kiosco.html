@@ -2069,22 +2069,11 @@
             <i data-lucide="clipboard-list" class="w-5 h-5 text-[#86efac]"></i>
             Solicitudes
           </h2>
-          <p class="text-xs text-white/50 mb-3 super-only super-main-only"><strong class="text-amber-200/90">Retiros de socios</strong>: revisá fondos en el libro y aprobá; el pago bancario lo registrás en <strong class="text-white/65">Pagos</strong>. <strong class="text-emerald-200/90">Ventas con comprobante (socios)</strong> están abajo. El alta de negocio (kiosco) la iniciás con el botón de abajo. Los nuevos socios se registran con el <strong class="text-white/65">enlace de afiliación para vendedores</strong>.</p>
+          <p class="text-xs text-white/50 mb-3 super-only super-main-only"><strong class="text-amber-200/90">Retiros de socios</strong>: revisá fondos en el libro y aprobá; el pago bancario lo registrás en <strong class="text-white/65">Pagos</strong>. <strong class="text-emerald-200/90">Ventas con comprobante (socios)</strong> están abajo. Las solicitudes de <strong class="text-white/70">alta de negocio (kiosco)</strong> los cargan los <strong class="text-white/70">partners desde su panel</strong>. Los nuevos socios se registran con el <strong class="text-white/65">enlace de afiliación para vendedores</strong>.</p>
           <div id="founderWithdrawalReviewBox" class="hidden mb-5 rounded-2xl border border-amber-500/45 bg-amber-500/[0.1] p-3 sm:p-4 super-only super-main-only">
             <h3 class="text-sm font-semibold text-amber-200 mb-2 flex items-center gap-2"><i data-lucide="wallet" class="w-4 h-4"></i> Retiros de comisiones (revisión)</h3>
             <p class="text-[11px] text-white/50 mb-3">Solicitudes enviadas por administradores de red. Verificá que el saldo en el libro alcance; al aprobar pasan a <strong class="text-white/70">Pagos</strong> para transferir y adjuntar comprobante.</p>
             <div id="founderWithdrawalReviewList" class="space-y-2 text-sm min-h-[2rem]"></div>
-          </div>
-          <div class="mb-4 super-only super-main-only">
-            <button type="button" id="btnOpenNewKiosqueroModal" class="glass rounded-2xl p-5 border border-[#22c55e]/40 bg-[#22c55e]/[0.08] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-[#22c55e]/60 active:scale-[0.98] touch-target">
-              <div class="w-12 h-12 rounded-xl bg-[#22c55e]/25 flex items-center justify-center shrink-0">
-                <i data-lucide="store" class="w-6 h-6 text-[#86efac]"></i>
-              </div>
-              <div class="min-w-0 flex-1">
-                <span class="font-semibold text-sm text-white block">Solicitar alta de negocio (kiosco)</span>
-                <span class="text-xs text-white/55 mt-0.5 block">Queda pendiente hasta que Ferriol apruebe y constate el pago.</span>
-              </div>
-            </button>
           </div>
           <div id="superClientSaleRequestsBox" class="hidden mb-5 rounded-2xl border border-emerald-500/40 bg-emerald-500/[0.08] p-3 sm:p-4 super-only super-main-only scroll-mt-8">
             <h3 class="text-sm font-semibold text-emerald-200 mb-2 flex items-center gap-2"><i data-lucide="image-plus" class="w-4 h-4"></i> Ventas con comprobante (socios)</h3>
@@ -2167,7 +2156,7 @@
               <i data-lucide="user-cog" class="w-5 h-5 text-[#86efac]"></i>
               Otro administrador global
             </h3>
-            <p class="text-xs text-white/55 mb-3">El alta de negocio (kiosco) se inicia en <strong class="text-white/70">Solicitudes</strong>. Los socios solicitan altas de red desde esta sección (<strong class="text-white/70">Ajustes</strong>). Usá SQL solo para promover a <strong class="text-white/70">super</strong> cuando haga falta.</p>
+            <p class="text-xs text-white/55 mb-3">Las altas de negocio (kiosco) las piden los <strong class="text-white/70">socios / partners</strong> desde su cuenta (no desde acá). En <strong class="text-white/70">Solicitudes</strong> vos aprobás o gestionás lo pendiente para la empresa. Usá SQL solo para promover a <strong class="text-white/70">super</strong> cuando haga falta.</p>
             <p class="text-xs text-white/50 mb-2">Supabase → SQL Editor (cambiá el email):</p>
             <pre class="text-xs bg-black/30 rounded-lg p-3 overflow-x-auto text-[#86efac]" id="sqlAddAdmin">UPDATE profiles SET role = 'super' WHERE id = (SELECT id FROM auth.users WHERE email = 'tu-email@ejemplo.com');</pre>
           </div>
@@ -2840,7 +2829,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426solicitudes_sin_historial"></script>
+  <script defer src="kiosco-app.js?v=20260426no_btn_alta_kiosco"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_release"></script>
 </body>
 </html>
