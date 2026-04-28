@@ -1648,7 +1648,7 @@
       }
       return null;
     }
-    /** Lee la fila del sponsor (nombre, mail, WhatsApp, CBU socio). RPC ferriol_get_my_sponsor_display si existe; si no, SELECT (requiere política RLS o falla vacío). */
+    /** Lee datos de contacto del sponsor (nombre, mail, WhatsApp). Sin partner_transfer_info: los datos bancarios del socio no se muestran al referido. */
     async function ferriolResolveSponsorProfile(profile) {
       profile = profile || currentUser;
       if (!profile || !supabaseClient) return null;
@@ -1665,7 +1665,7 @@
         } catch (_) {}
       }
       try {
-        var fq = await supabaseClient.from('profiles').select('kiosco_name, email, role, partner_transfer_info, phone').eq('id', sid).maybeSingle();
+        var fq = await supabaseClient.from('profiles').select('kiosco_name, email, role, phone').eq('id', sid).maybeSingle();
         if (!fq.error && fq.data) return fq.data;
       } catch (_) {}
       return null;
@@ -1677,13 +1677,12 @@
       try {
         var d = await ferriolResolveSponsorProfile(currentUser);
         if (!d) return { html: 'Consultá con el administrador por el contacto de tu red.', ok: true, partnerTransferInfo: '' };
-        var partnerTI = d.partner_transfer_info != null && String(d.partner_transfer_info).trim() ? String(d.partner_transfer_info).trim() : '';
         var nm = (d.kiosco_name || '').trim() || (d.email ? String(d.email).split('@')[0] : '') || '—';
         var roleL = d.role === 'super' ? 'Administrador' : (d.role === 'partner' ? 'Socio vendedor' : 'Referidor');
         var em = d.email ? String(d.email).replace(/</g, '&lt;').replace(/&/g, '&amp;') : '';
         var nmEsc = String(nm).replace(/</g, '&lt;').replace(/&/g, '&amp;');
         var html = '<span class="text-white/50">Nombre en la red · </span><strong class="text-[#86efac]/95">' + nmEsc + '</strong>' + (em ? ' · <span class="text-white/55">' + em + '</span>' : '') + ' <span class="text-white/40">· ' + roleL + '</span>';
-        return { html: html, ok: true, partnerTransferInfo: partnerTI };
+        return { html: html, ok: true, partnerTransferInfo: '' };
       } catch (_) {
         return { html: 'Consultá con el administrador quién es tu referidor.', ok: false, partnerTransferInfo: '' };
       }
@@ -1715,18 +1714,6 @@
       if (typeof window._populateKioscoSubscriptionPayModal === 'function') window._populateKioscoSubscriptionPayModal(transferBody);
       var spHint = await ferriolFetchSponsorHintText();
       if (sponsorEl) sponsorEl.innerHTML = spHint.html;
-      var ptw = document.getElementById('kioscoPartnerTransferWrap');
-      var ptx = document.getElementById('kioscoPartnerTransferText');
-      if (ptw && ptx) {
-        var pti = (spHint && spHint.partnerTransferInfo) ? String(spHint.partnerTransferInfo).trim() : '';
-        if (pti) {
-          ptx.textContent = pti;
-          ptw.classList.remove('hidden');
-        } else {
-          ptx.textContent = '';
-          ptw.classList.add('hidden');
-        }
-      }
       var waWrap = document.getElementById('kioscoLicenseReferidorWhatsApp');
       if (waWrap && currentUser && currentUser.role === 'kiosquero') {
         await refreshViewerHelpWhatsApp(currentUser);
@@ -4403,7 +4390,7 @@
         }
         currentUser.partnerTransferInfo = val;
         if (msg) {
-          msg.textContent = 'Listo. Tus referidos lo verán en Caja.';
+          msg.textContent = 'Listo. Guardado en tu perfil (no visible para el negocio referido).';
           msg.classList.remove('hidden', 'text-red-300');
           msg.classList.add('text-emerald-300');
         }

@@ -452,10 +452,6 @@
           <div id="kioscoLicenseSponsorHint" class="text-sm text-white/80 leading-snug"></div>
           <div id="kioscoLicenseReferidorWhatsApp" class="hidden mt-3 pt-3 border-t border-white/10"></div>
         </div>
-        <div id="kioscoPartnerTransferWrap" class="hidden mt-3 rounded-lg border border-amber-500/30 bg-amber-500/06 p-3">
-          <p class="text-xs font-medium text-amber-200/90 mb-2 flex items-center gap-1.5"><i data-lucide="user" class="w-3.5 h-3.5 shrink-0"></i> Dato de tu referidor</p>
-          <pre id="kioscoPartnerTransferText" class="text-xs whitespace-pre-wrap text-white/90 font-sans max-h-36 overflow-y-auto"></pre>
-        </div>
       </div>
 
       <!-- Modal: datos bancarios empresa (kiosquero) -->
@@ -1958,7 +1954,7 @@
                 <i data-lucide="landmark" class="w-4 h-4 text-[#86efac]"></i>
                 Datos de transferencia (licencia kioscos / socios)
               </h3>
-              <p class="text-xs text-white/50 mb-2">Lo ven los kiosqueros en Inicio y Configuración: es la cuenta a la que deben transferir la <strong class="text-white/70">cuota al referidor/administrador</strong> (vos centralizás lo que corresponda a Ferriol). CBU, alias, titular, concepto, etc.</p>
+              <p class="text-xs text-white/50 mb-2">Los kiosqueros ven estos datos solo como <strong class="text-white/70">instrucciones de pago de la empresa (Ferriol)</strong> donde corresponde abonar la licencia según política oficial. Los datos bancarios personales que el socio cargue en su cuenta <strong class="text-white/70">no se muestran</strong> al negocio referido.</p>
               <textarea id="adminTransferInfo" rows="5" placeholder="Titular, CBU, alias, instrucciones..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm resize-y mb-2"></textarea>
             </div>
             <div class="border-t border-white/10 pt-4 mt-4">
@@ -2816,17 +2812,17 @@
       </div>
     </div>
   </div>
-  <!-- Modal: datos bancarios del socio (para referidos) -->
+  <!-- Modal: datos bancarios del socio (no visibles para el referido en su cuenta) -->
   <div id="partnerTransferInfoModal" class="fixed inset-0 z-[74] hidden items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="partnerTransferInfoModalOverlay"></div>
     <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto scale-in">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 text-amber-200"></i> Datos bancarios (referidos)</h3>
+        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 text-amber-200"></i> Datos bancarios del socio</h3>
         <button type="button" id="partnerTransferInfoModalClose" class="btn-neomorphic rounded-xl p-2 touch-target" title="Cerrar"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-      <p class="text-sm text-white/60 mb-3">En Caja, <strong class="text-cyan-200/85">siempre</strong> aparece primero el pago a <strong class="text-white/85">Ferriol (empresa)</strong>. Lo que escribas acá se muestra <strong class="text-white/80">aparte</strong>, para acuerdos de red. No reemplaza la licencia a la empresa. No incluyas contraseñas; solo datos para transferirte (CBU, CVU, alias, titular, banco, etc.).</p>
+      <p class="text-sm text-white/60 mb-3">En la cuenta del <strong class="text-white/85">kiosco referido</strong> <strong class="text-amber-200/95">no</strong> aparecen tus datos personales ni bancarios. El referido solo ve cómo pagar la licencia a <strong class="text-cyan-200/85">Ferriol (empresa)</strong> según la configuración oficial. Este campo es para <strong class="text-white/80">tu registro y acuerdos con la empresa o la red</strong> (transferencias autorizadas, retiros). No incluyas contraseñas.</p>
       <div id="partnerTransferInfoMsg" class="text-xs text-amber-200 mb-2 hidden"></div>
-      <label class="block text-xs text-white/55 mb-1" for="partnerTransferInfoTextarea">Texto a mostrar</label>
+      <label class="block text-xs text-white/55 mb-1" for="partnerTransferInfoTextarea">Texto para tu archivo / operaciones autorizadas</label>
       <textarea id="partnerTransferInfoTextarea" rows="8" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-sm resize-y min-h-[140px] mb-4" placeholder="Alias…&#10;CBU…"></textarea>
       <div class="flex flex-col sm:flex-row gap-2 sm:justify-end">
         <button type="button" id="partnerTransferInfoSave" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold touch-target">Guardar</button>
@@ -2834,7 +2830,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426sponsor_rpc"></script>
+  <script defer src="kiosco-app.js?v=20260426no_bank_ref"></script>
   <script defer src="kiosco-pwa.js?v=20260426pullfix"></script>
 </body>
 </html>
