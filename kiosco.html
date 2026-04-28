@@ -245,9 +245,9 @@
           <i data-lucide="banknote" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Pagos</span>
         </button>
-        <button data-super-section="mas" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Más opciones">
-          <i data-lucide="menu" class="w-5 h-5 shrink-0"></i>
-          <span class="truncate w-full text-center">Más</span>
+        <button data-super-section="mas" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Ajustes y herramientas">
+          <i data-lucide="settings" class="w-5 h-5 shrink-0"></i>
+          <span class="truncate w-full text-center">Ajustes</span>
         </button>
       </div>
     </div>
@@ -1092,7 +1092,7 @@
       </div>
     </section>
 
-    <!-- Panel Admin: secciones al pie (Afiliados, Cobros, Avisos, Más) -->
+    <!-- Panel Admin: secciones al pie (Afiliados, Ingresos, …, Ajustes) -->
     <section id="panel-super" class="panel hidden">
       <div class="relative isolate min-h-[70vh] pb-24">
         <!-- Sección Afiliados (usuarios kiosco / distribuidores) -->
@@ -1111,7 +1111,7 @@
           </div>
           <p id="superDirectoryStats" class="hidden text-xs text-white/45 mb-2 super-only super-main-only"></p>
           <p class="text-xs text-white/50 mb-2 super-only super-main-only">Directorio global: filtro <strong class="text-white/65">Sin referidor</strong> y asignación desde el detalle de cada fila.</p>
-          <p class="text-xs text-white/50 mb-3">Pestañas <strong class="text-white/70">Usuarios</strong> / <strong class="text-white/70">Distribuidores</strong>: tocá una fila para detalle y membresía. Quitar cuentas: contraseña en <strong class="text-white/65">Más → Ajustes</strong>.</p>
+          <p class="text-xs text-white/50 mb-3">Pestañas <strong class="text-white/70">Usuarios</strong> / <strong class="text-white/70">Distribuidores</strong>: tocá una fila para detalle y membresía. Quitar cuentas: contraseña en la tarjeta <strong class="text-white/65">Ajustes del sistema</strong> (pestaña <strong class="text-white/65">Ajustes</strong>).</p>
           <input type="text" id="superSearchEmail" placeholder="Buscar por email o nombre..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm mb-3" autocomplete="off">
           <div class="flex flex-wrap gap-2 mb-2">
             <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-[#22c55e]/50 bg-[#22c55e]/30" data-filter="todos">Todos</button>
@@ -1172,6 +1172,12 @@
                 <option value="180">Últimos 6 meses</option>
                 <option value="365">Últimos 12 meses</option>
               </select>
+              <div class="ferriol-partner-client-sale-wrap hidden min-w-0">
+                <button type="button" id="btnOpenClientSaleRequestModal" title="Enviar datos del cliente, monto e imagen del comprobante. La empresa revisa en Solicitudes y acredita tu comisión si aprueba." class="glass inline-flex max-w-full items-center justify-center gap-2 rounded-xl border border-emerald-400/40 bg-emerald-500/[0.1] px-3 py-2.5 text-sm font-semibold text-white transition-all hover:border-emerald-400/60 active:scale-[0.98] touch-target">
+                  <i data-lucide="receipt" class="h-4 w-4 shrink-0 text-emerald-200"></i>
+                  <span>Venta con comprobante</span>
+                </button>
+              </div>
             </div>
           </div>
           <div id="ingresosKpiPartnerRow" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
@@ -1186,7 +1192,7 @@
               <p class="text-[10px] text-white/40 mt-1">Comisiones acreditadas <strong class="text-white/50">más</strong> operaciones rechazadas (mismo período)</p>
             </div>
             <div class="rounded-2xl border border-amber-500/20 bg-gradient-to-b from-amber-500/10 to-transparent p-4">
-              <p class="text-xs text-white/50 mb-1 flex items-center gap-1">Ventas pendientes <span class="text-white/35" title="Suma: ventas con comprobante (Más) + solicitudes de alta kiosco/socio enviadas y aún sin aprobar por Ferriol OS">ⓘ</span></p>
+              <p class="text-xs text-white/50 mb-1 flex items-center gap-1">Ventas pendientes <span class="text-white/35" title="Suma: ventas con comprobante (Ingresos) + solicitudes de alta kiosco/socio enviadas y aún sin aprobar por Ferriol OS">ⓘ</span></p>
               <p id="ingresosKpiPending" class="text-2xl font-bold text-amber-200 tabular-nums">—</p>
               <p class="text-[10px] text-white/40 mt-1">Hasta que <strong class="text-amber-200/60">Ferriol OS</strong> apruebe y acredite (desaparecen al aprobarse)</p>
             </div>
@@ -1901,7 +1907,7 @@
         <div id="super-section-ajustes" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <button type="button" id="btnSuperAjustesVolverMas" class="mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5 super-only super-main-only">
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
-            Volver a Más opciones
+            Volver a opciones principales
           </button>
           <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
             <i data-lucide="settings" class="w-5 h-5 text-[#86efac]"></i>
@@ -1998,7 +2004,7 @@
               <i data-lucide="wallet" class="w-5 h-5 text-[#86efac]"></i>
               Billetera
             </h2>
-            <p class="text-xs text-white/50 mb-4">El monto verde es <strong class="text-white/70">todo lo acreditado en Ingresos</strong> (mismo criterio: comisiones de venta aprobadas, histórico) <strong class="text-white/70">menos</strong> lo que ya figura en tu historial de retiros (pagados y pedidos en curso; los rechazados no restan). En <strong class="text-white/65">Ingresos</strong> el gráfico usa el período del filtro; acá el saldo es siempre <strong class="text-white/65">histórico completo</strong>. La empresa valida fondos y transfiere a los datos de <strong class="text-white/65">Más</strong> (titular = nombre de tu cuenta).</p>
+            <p class="text-xs text-white/50 mb-4">El monto verde es <strong class="text-white/70">todo lo acreditado en Ingresos</strong> (mismo criterio: comisiones de venta aprobadas, histórico) <strong class="text-white/70">menos</strong> lo que ya figura en tu historial de retiros (pagados y pedidos en curso; los rechazados no restan). En <strong class="text-white/65">Ingresos</strong> el gráfico usa el período del filtro; acá el saldo es siempre <strong class="text-white/65">histórico completo</strong>. La empresa valida fondos y transfiere según los datos que cargaste en <strong class="text-white/65">Ajustes del sistema</strong> o en tu perfil (titular = nombre de tu cuenta).</p>
             <div class="rounded-2xl border border-emerald-500/35 bg-emerald-500/[0.08] p-4 mb-4">
               <p class="text-xs text-white/50 mb-1">Disponible para retirar</p>
               <p id="partnerWalletAvailable" class="text-2xl font-bold text-[#86efac] tabular-nums">—</p>
@@ -2067,26 +2073,13 @@
           <p class="text-xs text-white/50 mb-4">Retiros de socios ya <strong class="text-amber-200/90">aprobados</strong> en Solicitudes. Verificá que el titular bancario coincida con el nombre del perfil, transferí el importe, adjuntá el comprobante y registrá el pago.</p>
           <div id="founderPagosPendientesList" class="space-y-3 text-sm min-h-[4rem]"><p class="text-white/45 text-xs py-4 text-center">Cargando…</p></div>
         </div>
-        <!-- Sección Más (hub + bloques, estilo panel kiosquero) -->
+        <!-- Sección hub (pestaña Ajustes; id mas por compatibilidad con switchSuperSection) -->
         <div id="super-section-mas" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
-            <i data-lucide="menu" class="w-5 h-5 text-[#86efac]"></i>
-            Más opciones
+            <i data-lucide="settings" class="w-5 h-5 text-[#86efac]"></i>
+            Ajustes
           </h2>
-          <p class="text-xs text-white/50 mb-4">Tarjetas de accesos: venta con comprobante, <strong class="text-white/65">Ajustes</strong>, aviso global y exportación. Los <strong class="text-white/65">enlaces para referir negocios o socios</strong> están en <strong class="text-white/65">Afiliados</strong>. <strong class="text-white/65">Fundador</strong>: usá la tarjeta verde para revisar ventas con comprobante. Los <strong class="text-white/65">datos bancarios</strong> (tuyos) los cargás en el menú de tu perfil.</p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
-            <div class="ferriol-partner-client-sale-wrap hidden sm:col-span-2">
-              <button type="button" id="btnOpenClientSaleRequestModal" class="glass rounded-2xl p-5 border border-emerald-400/40 bg-emerald-500/[0.1] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-emerald-400/60 active:scale-[0.98] touch-target">
-                <div class="w-12 h-12 rounded-xl bg-emerald-500/25 flex items-center justify-center shrink-0">
-                  <i data-lucide="receipt" class="w-6 h-6 text-emerald-200"></i>
-                </div>
-                <div class="min-w-0 flex-1">
-                  <span class="font-semibold text-sm text-white block">Enviar venta con comprobante</span>
-                  <span class="text-xs text-white/55 mt-0.5 block">Datos del cliente, monto, tipo de producto e imagen del comprobante. La empresa la revisa en Solicitudes y acredita tu comisión al aprobar.</span>
-                </div>
-              </button>
-            </div>
-          </div>
+          <p class="text-xs text-white/50 mb-4">Desde esta pantalla vas a <strong class="text-white/65">Ajustes del sistema</strong>, aviso global y exportación. Para <strong class="text-white/65">venta con comprobante</strong> desde la cuenta de socio, abrís <strong class="text-white/65">Ingresos</strong> junto al filtro de período. Los <strong class="text-white/65">enlaces para referir negocios o socios</strong> están en <strong class="text-white/65">Afiliados</strong>. Los <strong class="text-white/65">datos bancarios</strong> (tuyos) los cargás en el menú de tu perfil.</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 super-only super-main-only">
             <button type="button" id="btnSuperMasGoSolicitudesVentas" class="glass rounded-2xl p-5 border border-emerald-500/45 bg-emerald-500/[0.12] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-emerald-400/65 active:scale-[0.98] touch-target sm:col-span-2">
               <div class="w-12 h-12 rounded-xl bg-emerald-500/25 flex items-center justify-center shrink-0">
@@ -2144,7 +2137,7 @@
               <i data-lucide="user-cog" class="w-5 h-5 text-[#86efac]"></i>
               Otro administrador global
             </h3>
-            <p class="text-xs text-white/55 mb-3">El alta de negocio (kiosco) se inicia en <strong class="text-white/70">Solicitudes</strong>. Los socios solicitan altas de red desde <strong class="text-white/70">Más</strong>. Usá SQL solo para promover a <strong class="text-white/70">super</strong> cuando haga falta.</p>
+            <p class="text-xs text-white/55 mb-3">El alta de negocio (kiosco) se inicia en <strong class="text-white/70">Solicitudes</strong>. Los socios solicitan altas de red desde esta sección (<strong class="text-white/70">Ajustes</strong>). Usá SQL solo para promover a <strong class="text-white/70">super</strong> cuando haga falta.</p>
             <p class="text-xs text-white/50 mb-2">Supabase → SQL Editor (cambiá el email):</p>
             <pre class="text-xs bg-black/30 rounded-lg p-3 overflow-x-auto text-[#86efac]" id="sqlAddAdmin">UPDATE profiles SET role = 'super' WHERE id = (SELECT id FROM auth.users WHERE email = 'tu-email@ejemplo.com');</pre>
           </div>
@@ -2817,7 +2810,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260430scannerpc"></script>
+  <script defer src="kiosco-app.js?v=20260426ajustingresos"></script>
   <script defer src="kiosco-pwa.js?v=20260421"></script>
 </body>
 </html>
