@@ -1106,7 +1106,7 @@
           }).join('') + '</div>'
           : '';
         if (!rows.length) {
-          clBox.innerHTML = '<p class="text-white/50 text-sm py-4">Ninguna solicitud con comprobante. Los administradores envían desde <strong class="text-white/75">Ingresos</strong>: botón <strong class="text-white/75">Venta con comprobante</strong> junto al período.</p>';
+          clBox.innerHTML = '<p class="text-white/50 text-sm py-4">Ninguna solicitud con comprobante. Los administradores envían desde <strong class="text-white/75">Ingresos</strong>: botón <strong class="text-white/75">Cargar venta</strong> junto al período.</p>';
         } else {
           clBox.innerHTML = (htmlPend || '<p class="text-amber-200/90 text-sm py-2">Nada pendiente de validar en este listado.</p>') + htmlHist;
         }
