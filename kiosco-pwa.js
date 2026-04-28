@@ -115,40 +115,100 @@
       if (!allowsPTR()) return;
 
       var THRESH = 72;
+      var SCROLL_EPS = 6;
       var tracking = false;
       var startY = 0;
       var startX = 0;
       var lastDy = 0;
       var ind = null;
 
-      function loginVisible() {
-        var el = document.getElementById('loginScreen');
-        return el && !el.classList.contains('hidden');
+      function targetUnderFinger(clientX, clientY) {
+        try {
+          return document.elementFromPoint(clientX, clientY);
+        } catch (_) {
+          return null;
+        }
       }
 
-      function activePanel() {
+      /** Lista de elementos debajo del dedo (más robusto que un solo elemento en capas UI). */
+      function stacksFromPoint(clientX, clientY) {
+        try {
+          return document.elementsFromPoint(clientX, clientY) || [];
+        } catch (_) {
+          return [];
+        }
+      }
+
+      /** PTR solo dentro de la app (panel visible) o de la pantalla de login cuando está abierta; evita mezcla con otros nodos sobre la lista. */
+      function hitInsideActiveScrollSurface(hitEl) {
+        if (!hitEl || !hitEl.closest) return false;
+        var ls = hitEl.closest('#loginScreen');
+        if (ls && ls.classList && !ls.classList.contains('hidden')) return true;
+        var pnl = hitEl.closest('#mainContent section.panel');
+        return !!(pnl && pnl.classList && !pnl.classList.contains('hidden'));
+      }
+
+      function activeMainPanel() {
         return document.querySelector('#mainContent section.panel:not(.hidden)');
       }
 
-      function currentScrollTop() {
-        if (loginVisible()) {
-          var se = document.scrollingElement || document.documentElement;
-          return (se && se.scrollTop) || window.pageYOffset || 0;
+      /**
+       * Todo arriba: página + panel + cada ascendiente con scrollTop>0 desde elementsFromPoint (pile completa).
+       */
+      function scrollChainFullyAtTop(clientX, clientY) {
+        var panel = activeMainPanel();
+        if (panel && ((panel.scrollTop || 0) > SCROLL_EPS)) return false;
+
+        var pageScroll = Math.max(
+          typeof window.pageYOffset === 'number' ? window.pageYOffset : 0,
+          document.documentElement ? document.documentElement.scrollTop || 0 : 0,
+          document.body ? document.body.scrollTop || 0 : 0,
+          (document.scrollingElement && document.scrollingElement.scrollTop) || 0
+        );
+        if (pageScroll > SCROLL_EPS) return false;
+
+        var stack = stacksFromPoint(clientX, clientY);
+        if (!stack.length) return false;
+
+        var zi = void 0;
+        var hasSurface = false;
+        for (zi = 0; zi < stack.length && zi < 24; zi++) {
+          if (stack[zi] && stack[zi].nodeType === 1 && hitInsideActiveScrollSurface(stack[zi])) {
+            hasSurface = true;
+            break;
+          }
         }
-        var p = activePanel();
-        return p ? p.scrollTop : 999;
+        if (!hasSurface) return false;
+
+        var i = void 0;
+        var si = void 0;
+        var leaf = void 0;
+        var node = void 0;
+
+        for (i = 0; i < stack.length && i < 24; i++) {
+          leaf = stack[i];
+          if (!leaf || leaf.nodeType !== 1 || !hitInsideActiveScrollSurface(leaf)) continue;
+          node = leaf;
+          while (node && node !== document.documentElement) {
+            if (node.nodeType === 1) {
+              try {
+                si = Number(node.scrollTop) || 0;
+                if (si > SCROLL_EPS) return false;
+              } catch (_) {}
+            }
+            node = node.parentElement;
+          }
+        }
+
+        return true;
       }
 
-      function atScrollTop() {
-        return currentScrollTop() <= 12;
-      }
-
-      function blocksPTR(e) {
-        if (!e.target) return true;
-        if (e.target.closest('input, textarea, select, [contenteditable]')) return true;
-        if (e.target.closest('.ferriol-bottom-nav')) return true;
-        if (e.target.closest('#notifDropdown:not(.hidden)')) return true;
-        var fixed = e.target.closest('.fixed.inset-0:not(.hidden)');
+      function blocksFromEl(hit) {
+        if (!hit || !hit.closest) return true;
+        if (hit.closest('input, textarea, select, [contenteditable]')) return true;
+        if (hit.closest('.ferriol-bottom-nav')) return true;
+        if (hit.closest('#notifDropdown:not(.hidden)')) return true;
+        var fixed = hit.closest('.fixed.inset-0:not(.hidden)');
         if (fixed && fixed.id !== 'loginScreen') return true;
         return false;
       }
@@ -182,12 +242,15 @@
 
       document.addEventListener('touchstart', function (e) {
         if (!allowsPTR() || e.touches.length !== 1) return;
-        if (blocksPTR(e)) {
+        var x = e.touches[0].clientX;
+        var y = e.touches[0].clientY;
+        var hit = targetUnderFinger(x, y);
+        if (blocksFromEl(hit)) {
           tracking = false;
           lastDy = 0;
           return;
         }
-        if (!atScrollTop()) {
+        if (!scrollChainFullyAtTop(x, y)) {
           tracking = false;
           lastDy = 0;
           return;
@@ -195,30 +258,30 @@
 
         tracking = true;
         lastDy = 0;
-        startY = e.touches[0].clientY;
-        startX = e.touches[0].clientX;
+        startY = y;
+        startX = x;
       }, { passive: true });
 
       document.addEventListener('touchmove', function (e) {
         if (!tracking || !e.touches.length) return;
-        if (blocksPTR(e)) {
-          tracking = false;
-          lastDy = 0;
-          hideIndicator();
-          return;
-        }
-
         var y = e.touches[0].clientY;
         var x = e.touches[0].clientX;
-        var dy = y - startY;
-        var dx = Math.abs(x - startX);
-
-        if (!atScrollTop() && dy < 28) {
+        var hit = targetUnderFinger(x, y);
+        if (blocksFromEl(hit)) {
           tracking = false;
           lastDy = 0;
           hideIndicator();
           return;
         }
+        if (!scrollChainFullyAtTop(x, y)) {
+          tracking = false;
+          lastDy = 0;
+          hideIndicator();
+          return;
+        }
+
+        var dy = y - startY;
+        var dx = Math.abs(x - startX);
 
         if (dx > Math.abs(dy) && dx > 22) {
           tracking = false;
@@ -239,12 +302,22 @@
 
       function finalize(e) {
         var dyEnd = 0;
+        var xEnd = 0;
+        var yEnd = 0;
         if (e.changedTouches && e.changedTouches.length) {
-          dyEnd = e.changedTouches[0].clientY - startY;
+          var ct = e.changedTouches[0];
+          dyEnd = ct.clientY - startY;
+          xEnd = ct.clientX;
+          yEnd = ct.clientY;
         }
 
-        /* Decisión solo con la posición al soltar: si antes tiraste fuerte pero soltás habiendo vuelto arriba el dedo → no hay recarga */
-        var go = tracking && dyEnd >= THRESH && allowsPTR();
+        /* Decisión: umbral vertical al soltar + scroll en cadena debe seguir arriba + no bloques bajo el dedo */
+        var hitEnd = targetUnderFinger(xEnd, yEnd);
+        var go = tracking &&
+          dyEnd >= THRESH &&
+          allowsPTR() &&
+          scrollChainFullyAtTop(xEnd, yEnd) &&
+          !blocksFromEl(hitEnd);
 
         tracking = false;
         lastDy = 0;
