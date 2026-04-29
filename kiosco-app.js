@@ -8026,16 +8026,36 @@ async function showApp() {
             );
           }
         }
-        candidates.forEach(function (p) {
-          var lab = '[' + (p.role || 'kiosquero') + '] ' + (p.kiosco_name || p.email || '').slice(0, 36) + (p.email ? (' · ' + p.email) : '');
-          var sel = user.sponsor_id && p.id === user.sponsor_id ? ' selected' : '';
-          opts.push('<option value="' + p.id + '"' + sel + '>' + lab.replace(/</g, '&lt;') + '</option>');
-        });
+        var superListCand = candidates.filter(function (p) { return p.role === 'super'; });
+        var partnerListCand = candidates.filter(function (p) { return p.role === 'partner'; });
+        function pushSponsorCandOpts(list) {
+          list.forEach(function (p) {
+            var lab =
+              '[' + (p.role || '?') + '] ' +
+              (p.kiosco_name || p.email || '').slice(0, 36) +
+              (p.email ? ' · ' + p.email : '');
+            var sel = user.sponsor_id && p.id === user.sponsor_id ? ' selected' : '';
+            opts.push('<option value="' + p.id + '"' + sel + '>' + lab.replace(/</g, '&lt;') + '</option>');
+          });
+        }
+        if (superListCand.length) {
+          opts.push('<optgroup label="Fundadores (super)">');
+          pushSponsorCandOpts(superListCand);
+          opts.push('</optgroup>');
+        }
+        if (partnerListCand.length) {
+          opts.push('<optgroup label="Distribuidores (partner)">');
+          pushSponsorCandOpts(partnerListCand);
+          opts.push('</optgroup>');
+        }
         assignHtml = `
         <div class="border-t border-white/10 pt-4 space-y-2">
           <p class="text-sm font-medium text-[#86efac] flex items-center gap-2"><i data-lucide="git-branch" class="w-4 h-4"></i> Asignar referidor / admin de la red</p>
-          <p class="text-xs text-white/50">Solo cuentas <span class="text-violet-200">super</span> (fundadores) y <span class="text-violet-200">partner</span> (distribuidores) pueden patrocinar suscriptores. Aparecen primero los <span class="text-violet-200">super</span>.</p>
-          <select id="superDetailSponsorSelect" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm bg-black/20">${opts.join('')}</select>
+          <p class="text-xs text-white/50">Solo cuentas <span class="text-[#86efac]">super</span> (fundadores) y <span class="text-violet-300/95">partner</span> (distribuidores) pueden patrocinar suscriptores.</p>
+          <div class="relative">
+            <select id="superDetailSponsorSelect" class="ferriol-sponsor-select w-full rounded-xl pl-3 pr-10 py-3 text-sm appearance-none cursor-pointer min-h-[3rem]">${opts.join('')}</select>
+            <i data-lucide="chevron-down" class="ferriol-sponsor-select-chevron pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#86efac]/70"></i>
+          </div>
           <button type="button" class="super-detail-save-sponsor w-full py-2.5 rounded-xl text-sm bg-[#22c55e]/25 text-[#86efac] border border-[#22c55e]/50 touch-target font-medium">Guardar referidor</button>
         </div>`;
       }
@@ -8068,10 +8088,24 @@ async function showApp() {
           if (ra !== rb) return ra - rb;
           return (a.kiosco_name || a.email || '').localeCompare(b.kiosco_name || b.email || '');
         });
-        bulkCandidates.forEach(function (p) {
-          var lab = '[' + (p.role || 'kiosquero') + '] ' + (p.kiosco_name || p.email || '').slice(0, 36) + (p.email ? (' · ' + p.email) : '');
-          optsBulk.push('<option value="' + p.id + '">' + lab.replace(/</g, '&lt;') + '</option>');
-        });
+        var bulkSuper = bulkCandidates.filter(function (p) { return p.role === 'super'; });
+        var bulkPartner = bulkCandidates.filter(function (p) { return p.role === 'partner'; });
+        function pushBulkCandOpts(list) {
+          list.forEach(function (p) {
+            var lab = '[' + (p.role || '?') + '] ' + (p.kiosco_name || p.email || '').slice(0, 36) + (p.email ? (' · ' + p.email) : '');
+            optsBulk.push('<option value="' + p.id + '">' + lab.replace(/</g, '&lt;') + '</option>');
+          });
+        }
+        if (bulkSuper.length) {
+          optsBulk.push('<optgroup label="Fundadores (super)">');
+          pushBulkCandOpts(bulkSuper);
+          optsBulk.push('</optgroup>');
+        }
+        if (bulkPartner.length) {
+          optsBulk.push('<optgroup label="Distribuidores (partner)">');
+          pushBulkCandOpts(bulkPartner);
+          optsBulk.push('</optgroup>');
+        }
         partnerNetworkControlHtml = `
         <div class="border-t border-white/10 pt-4 space-y-3 super-partner-network-control">
           <p class="text-sm font-medium text-amber-200 flex items-center gap-2"><i data-lucide="git-branch" class="w-4 h-4"></i> Fundador — control de red y penalidades</p>
@@ -8080,7 +8114,10 @@ async function showApp() {
             <input type="checkbox" id="superBulkReassignIncludePartners" class="rounded border-white/30 bg-white/10 text-amber-500 shrink-0">
             <span>Incluir socios directos en la reasignación (además de kiosqueros)</span>
           </label>
-          <select id="superBulkReassignSponsorSelect" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm bg-black/20">${optsBulk.join('')}</select>
+          <div class="relative">
+            <select id="superBulkReassignSponsorSelect" class="ferriol-sponsor-select w-full rounded-xl pl-3 pr-10 py-3 text-sm appearance-none cursor-pointer min-h-[3rem]">${optsBulk.join('')}</select>
+            <i data-lucide="chevron-down" class="ferriol-sponsor-select-chevron pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#86efac]/70"></i>
+          </div>
           <button type="button" class="super-detail-bulk-reassign w-full py-2.5 rounded-xl text-sm bg-amber-500/20 text-amber-100 border border-amber-400/45 touch-target font-medium">Reasignar toda la línea directa</button>
           <button type="button" class="super-detail-partner-penalty w-full py-2.5 rounded-xl text-sm bg-red-600/25 text-red-200 border border-red-500/50 touch-target font-medium ${user.active ? '' : 'opacity-50 pointer-events-none'}" ${user.active ? '' : 'disabled'}>Penalidad: desactivar acceso del socio</button>
           <p class="text-[10px] text-white/40">El socio inactivo no puede entrar a la app. Comisiones/libro: gestioná aparte según política. Evitá dejar kiosqueros sin referidor si querés que sigan pagando a alguien de la red.</p>

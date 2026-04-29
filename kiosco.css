@@ -1581,6 +1581,56 @@ select.ferriol-native-select option:active {
   color: #fff;
 }
 
+/* Referidores/patrocinadores (modales fundador): select alineado al tema esmeralda + vidrio */
+select.ferriol-sponsor-select {
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.95) !important;
+  background: linear-gradient(
+    165deg,
+    rgba(5, 42, 22, 0.94) 0%,
+    rgba(8, 58, 31, 0.9) 45%,
+    rgba(5, 28, 16, 0.96) 100%
+  ) !important;
+  border: 1px solid rgba(34, 197, 94, 0.4) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 8px 26px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(134, 239, 172, 0.06);
+  transition: border-color 0.22s var(--ease-out), box-shadow 0.22s var(--ease-out);
+}
+select.ferriol-sponsor-select:hover {
+  border-color: rgba(134, 239, 172, 0.48) !important;
+}
+select.ferriol-sponsor-select:focus {
+  outline: none;
+  border-color: rgba(134, 239, 172, 0.56) !important;
+  box-shadow:
+    0 0 0 2px rgba(34, 197, 94, 0.26),
+    0 10px 32px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(134, 239, 172, 0.08);
+}
+select.ferriol-sponsor-select option {
+  background-color: #052a14 !important;
+  color: rgba(241, 250, 244, 0.98);
+  padding: 0.4rem 0.65rem;
+}
+select.ferriol-sponsor-select optgroup {
+  font-weight: 700;
+  font-size: 0.625rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #042f18 0%, #032113 100%) !important;
+  color: #86efac !important;
+  padding: 0.45rem 0.5rem 0.25rem !important;
+}
+select.ferriol-sponsor-select:-moz-focusring {
+  outline: none;
+}
+#superUserDetailModal select.ferriol-sponsor-select {
+  vertical-align: middle;
+}
+
 /* Los inputs, botones y listas dentro de los paneles conservan su estilo glass */
 .panel input,
 .panel textarea,
