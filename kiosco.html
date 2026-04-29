@@ -87,6 +87,7 @@
             <span class="login-signup-tile-label">Quiero ser distribuidor del sistema</span>
           </button>
         </div>
+        <p id="loginKiosqueroPartnerHint" class="text-[11px] text-white/45 text-center leading-snug px-2 mt-3 max-w-sm mx-auto">¿Ya tenés <strong class="text-white/60">cuenta de negocio</strong> y querés vender Ferriol? <strong class="text-[#86efac]/90">Iniciá sesión</strong> y en el inicio tocá <strong class="text-white/70">Quiero ser distribuidor</strong>.</p>
         <p class="login-hint login-hint--solo-link" id="loginHint">
           <a href="#" id="forgotPwd" class="text-[#86efac]">¿Olvidaste tu contraseña?</a>
         </p>
@@ -129,6 +130,7 @@
           <input type="text" id="signUpKioscoName" placeholder="Ej. Kiosco de la esquina" autocomplete="organization" class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white">
         </div>
         <div id="signUpWrapDistribuidor" class="hidden">
+          <p class="text-[11px] text-amber-200/90 leading-snug mb-2">Si <strong class="text-white/90">ya tenés cuenta de negocio</strong> con este email, no uses «Crear cuenta»: <strong class="text-[#86efac]/95">iniciá sesión</strong> y tocá <strong class="text-white/80">«Quiero ser distribuidor»</strong>.</p>
           <label for="signUpNombreApellido" class="block text-xs text-white/60 mb-1">Nombre y apellido</label>
           <input type="text" id="signUpNombreApellido" placeholder="Como querés que te vea la red" autocomplete="name" class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white">
           <label for="signUpReferralCode" class="block text-xs text-white/60 mb-1">Código de referido (opcional)</label>
@@ -299,6 +301,13 @@
         </div>
         <!-- Ventas del día: fuera del bloque de resumen / cobro rápido -->
         <div class="kiosquero-only mb-5 space-y-2">
+          <div id="partnerUpgradeCtaWrap" class="hidden rounded-xl border border-violet-500/35 bg-violet-950/25 p-3 space-y-2">
+            <p class="text-[11px] text-white/60 leading-snug">Sumá tu <strong class="text-violet-200/95">cuenta como distribuidor</strong> (misma sesión después de que Ferriol apruebe). Indicás quién te vendió el kit si fue distinto del referidor de tu negocio.</p>
+            <button type="button" id="btnKiosqueroPartnerUpgrade" class="w-full py-2.5 px-3 rounded-xl border border-violet-400/50 bg-violet-600/25 hover:bg-violet-600/35 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-violet-100 active:scale-[0.99]">
+              <i data-lucide="badge-check" class="w-4 h-4 shrink-0"></i>
+              Quiero ser distribuidor
+            </button>
+          </div>
           <button type="button" id="btnVentasDelDia" onclick="window._openVentasDelDia && window._openVentasDelDia()" class="w-full py-2.5 px-3 rounded-xl border border-[#22c55e]/35 bg-[#22c55e]/10 hover:bg-[#22c55e]/18 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-[#86efac] active:scale-[0.99]">
             <i data-lucide="clipboard-list" class="w-4 h-4 shrink-0"></i>
             Ventas del día
@@ -2206,6 +2215,25 @@
       </div>
     </div>
 
+    <!-- Modal: kiosquero pide upgrade a socio distribuidor -->
+    <div id="kiosqueroPartnerUpgradeModal" class="fixed inset-0 z-[77] hidden items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="kiosqueroPartnerUpgradeModalOverlay"></div>
+      <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto scale-in border border-violet-500/25">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-lg text-violet-100 pr-4">Quiero ser distribuidor</h3>
+          <button type="button" id="kiosqueroPartnerUpgradeModalClose" class="btn-neomorphic rounded-xl p-2 touch-target"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <p class="text-xs text-white/60 mb-3 leading-relaxed">Enviás la solicitud a <strong class="text-white/80">Ferriol</strong>. Cuando la aprueben, tu misma cuenta pasa a panel de socio (mismo email). La licencia de distribuidor se acredita según <code class="text-violet-200/80">partner_distribution_license_days</code> en Ajustes.</p>
+        <div id="kiosqueroPartnerUpgradeErr" class="login-err hidden mb-3"></div>
+        <label class="block text-xs text-white/55 mb-1">Email del socio que te vendió el kit (opcional)</label>
+        <input type="email" id="kiosqueroPartnerUpgradeKitEmail" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-2" placeholder="Si es distinto al referidor de tu negocio" autocomplete="off">
+        <p class="text-[10px] text-white/40 mb-3">Si lo dejás vacío, se usa la línea de tu negocio (<code class="text-white/50">sponsor_id</code>) como patrocinio de socio.</p>
+        <label class="block text-xs text-white/55 mb-1">Nota para la empresa (opcional)</label>
+        <textarea id="kiosqueroPartnerUpgradeNote" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-sm min-h-[4rem] mb-4" placeholder="Ej. ya pagué el kit, contacto del socio…"></textarea>
+        <button type="button" id="kiosqueroPartnerUpgradeSubmit" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target">Enviar solicitud</button>
+      </div>
+    </div>
+
     <!-- Modal: socio solicita retiro de comisiones -->
     <div id="partnerWithdrawModal" class="fixed inset-0 z-[78] hidden items-center justify-center p-4">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="partnerWithdrawModalOverlay"></div>
@@ -2852,7 +2880,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260429profiles_role_partner_mdr_hub"></script>
+  <script defer src="kiosco-app.js?v=20260426_partner_upgrade_kiosk_signup_hint"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>

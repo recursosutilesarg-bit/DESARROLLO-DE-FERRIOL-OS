@@ -7070,7 +7070,19 @@ async function showApp() {
       }
       const { data, error } = await supabaseClient.auth.signUp({ email, password });
       if (error) {
-        errEl.textContent = error.message;
+        var emRaw = String(error.message || '').toLowerCase();
+        var isDuplicateEmail =
+          emRaw.indexOf('already registered') !== -1 ||
+          emRaw.indexOf('already been registered') !== -1 ||
+          emRaw.indexOf('user already') !== -1 ||
+          emRaw.indexOf('already exists') !== -1 ||
+          emRaw.indexOf('email address is already') !== -1;
+        if (signupNicho === 'socio' && isDuplicateEmail) {
+          errEl.textContent =
+            'Ese correo ya tiene cuenta en Ferriol (p. ej. como negocio kiosco). No se puede crear un segundo usuario con el mismo email. Iniciá sesión con ese correo y en el inicio tocá «Quiero ser distribuidor» para pedir el upgrade con la misma cuenta; después Ferriol lo aprueba en Solicitudes.';
+        } else {
+          errEl.textContent = error.message;
+        }
         errEl.classList.add('show');
         return;
       }
