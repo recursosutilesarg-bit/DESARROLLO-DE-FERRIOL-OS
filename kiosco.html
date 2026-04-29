@@ -2350,6 +2350,28 @@
         </div>
       </div>
     </div>
+
+    <!-- Submodales desde detalle socio: suma/quita de días (menos cargado que el modal principal) -->
+    <div id="superUserMdrSumModal" class="fixed inset-0 z-[92] hidden items-center justify-center p-3 sm:p-4">
+      <div class="absolute inset-0 bg-black/65 backdrop-blur-sm" id="superUserMdrSumOverlay"></div>
+      <div class="relative glass-strong rounded-2xl p-5 sm:p-6 w-full max-w-md max-h-[92vh] overflow-y-auto shadow-2xl border border-emerald-500/25 scale-in">
+        <div class="flex items-start justify-between gap-2 mb-4">
+          <h3 id="superUserMdrSumTitle" class="font-bold text-lg text-emerald-100 pr-6">Solicitar suma de días</h3>
+          <button type="button" id="superUserMdrSumClose" class="btn-neomorphic shrink-0 rounded-xl p-2 touch-target"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div id="superUserMdrSumContent"></div>
+      </div>
+    </div>
+    <div id="superUserMdrRemModal" class="fixed inset-0 z-[92] hidden items-center justify-center p-3 sm:p-4">
+      <div class="absolute inset-0 bg-black/65 backdrop-blur-sm" id="superUserMdrRemOverlay"></div>
+      <div class="relative glass-strong rounded-2xl p-5 sm:p-6 w-full max-w-md max-h-[92vh] overflow-y-auto shadow-2xl border border-red-500/25 scale-in">
+        <div class="flex items-start justify-between gap-2 mb-4">
+          <h3 id="superUserMdrRemTitle" class="font-bold text-lg text-red-100 pr-6">Solicitar quita de días</h3>
+          <button type="button" id="superUserMdrRemClose" class="btn-neomorphic shrink-0 rounded-xl p-2 touch-target"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div id="superUserMdrRemContent"></div>
+      </div>
+    </div>
   </main>
 
   <!-- Carrito flotante -->
@@ -2830,7 +2852,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260429profiles_role_partner"></script>
+  <script defer src="kiosco-app.js?v=20260429profiles_role_partner_mdr_hub"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>

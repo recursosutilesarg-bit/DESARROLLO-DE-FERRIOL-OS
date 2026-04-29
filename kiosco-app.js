@@ -7588,6 +7588,196 @@ async function showApp() {
         '<i data-lucide="chevron-right" class="w-5 h-5 text-white/35 shrink-0"></i>' +
         '</button>';
     }
+    function closeSuperMdrSumModal() {
+      var m = document.getElementById('superUserMdrSumModal');
+      if (m) {
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+      }
+      var c = document.getElementById('superUserMdrSumContent');
+      if (c) c.innerHTML = '';
+    }
+    function closeSuperMdrRemModal() {
+      var m = document.getElementById('superUserMdrRemModal');
+      if (m) {
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+      }
+      var c = document.getElementById('superUserMdrRemContent');
+      if (c) c.innerHTML = '';
+    }
+    function closeAllSuperUserMdrSubmodals() {
+      closeSuperMdrSumModal();
+      closeSuperMdrRemModal();
+    }
+    function wireMdrSumForm(rootEl, u) {
+      var payInEl = rootEl.querySelector('.super-detail-req-client-payment');
+      var pctDispEl = rootEl.querySelector('.super-detail-req-company-pct');
+      function syncMdrCompanyShare() {
+        if (!payInEl || !pctDispEl) return;
+        var n = parseFloat(String(payInEl.value || '').replace(',', '.'), 10);
+        if (isNaN(n) || n <= 0) { pctDispEl.textContent = '—'; return; }
+        pctDispEl.textContent = String(Math.round(n * 0.2 * 100) / 100);
+      }
+      if (payInEl) {
+        payInEl.addEventListener('input', syncMdrCompanyShare);
+        payInEl.addEventListener('change', syncMdrCompanyShare);
+        syncMdrCompanyShare();
+      }
+      var reqBtn = rootEl.querySelector('.super-detail-req-submit-add');
+      if (reqBtn) {
+        reqBtn.onclick = async function () {
+          if (!supabaseClient || !currentUser) return;
+          var daysIn = rootEl.querySelector('.super-detail-req-add-days');
+          var days = Math.max(1, Math.min(365, parseInt(daysIn && daysIn.value ? daysIn.value : 30, 10) || 30));
+          var pay = parseFloat(String((payInEl && payInEl.value) || '').replace(',', '.'), 10);
+          if (isNaN(pay) || pay <= 0) { alert('Indicá el monto cobrado al cliente o socio.'); return; }
+          var share = Math.round(pay * 0.2 * 100) / 100;
+          var noteEl = rootEl.querySelector('.super-detail-req-company-note');
+          var note = noteEl ? String(noteEl.value || '').trim() : '';
+          var who = u.role === 'partner' ? 'este socio' : 'este negocio';
+          if (!confirm('Se enviará la solicitud de +' + days + ' días para ' + who + '. La empresa debe aprobar antes de cambiar el contador. ¿Continuar?')) return;
+          var ins = await supabaseClient.from('ferriol_membership_day_requests').insert({
+            requested_by: currentUser.id,
+            kiosquero_user_id: u.id,
+            days_delta: days,
+            client_payment_ars: pay,
+            company_share_ars: share,
+            company_transfer_note: note || null,
+            reason: null
+          });
+          if (ins.error) { alert('Error: ' + ins.error.message + '\n\nSi la tabla no existe, ejecutá supabase-ferriol-membership-day-requests.sql en Supabase.'); return; }
+          alert('Solicitud enviada.');
+          renderSuper();
+          closeSuperMdrSumModal();
+        };
+      }
+    }
+    function wireMdrRemForm(rootEl, u) {
+      var reqRemBtn = rootEl.querySelector('.super-detail-req-submit-remove');
+      if (reqRemBtn) {
+        reqRemBtn.onclick = async function () {
+          if (!supabaseClient || !currentUser) return;
+          var dIn = rootEl.querySelector('.super-detail-req-remove-days');
+          var daysRm = Math.max(1, Math.min(365, parseInt(dIn && dIn.value ? dIn.value : 1, 10) || 1));
+          var reasonEl = rootEl.querySelector('.super-detail-req-remove-reason');
+          var reason = reasonEl ? String(reasonEl.value || '').trim() : '';
+          if (reason.length < 5) { alert('El motivo es obligatorio (mínimo 5 caracteres).'); return; }
+          if (!confirm('Se enviará la solicitud de quitar ' + daysRm + ' días. La empresa debe aprobarla. ¿Continuar?')) return;
+          var ins = await supabaseClient.from('ferriol_membership_day_requests').insert({
+            requested_by: currentUser.id,
+            kiosquero_user_id: u.id,
+            days_delta: -daysRm,
+            client_payment_ars: null,
+            company_share_ars: null,
+            company_transfer_note: null,
+            reason: reason
+          });
+          if (ins.error) { alert('Error: ' + ins.error.message + '\n\nSi la tabla no existe, ejecutá supabase-ferriol-membership-day-requests.sql en Supabase.'); return; }
+          alert('Solicitud de quita enviada.');
+          renderSuper();
+          closeSuperMdrRemModal();
+        };
+      }
+    }
+    function buildSuperMdrSumInnerHtml(user) {
+      var isPartner = user.role === 'partner';
+      var amtDef = isPartner ? FERRIOL_PLAN_AMOUNTS.vendorMonthly : FERRIOL_PLAN_AMOUNTS.kioscoMonthly;
+      var shell = isPartner ? 'rounded-xl border border-violet-500/35 bg-violet-500/08 p-4 space-y-3' : 'rounded-xl border border-emerald-500/35 bg-emerald-500/08 p-4 space-y-3';
+      var intro = isPartner
+        ? '<p class="text-xs text-white/65 leading-relaxed">Cuando el socio ya te pagó la cuota, indicá monto y 20% a Ferriol. La empresa aprueba y recién ahí se actualiza la licencia.</p>'
+        : '<p class="text-xs text-white/65 leading-relaxed">Ej. licencia <strong class="text-white/80">$ ' + FERRIOL_PLAN_AMOUNTS.kioscoMonthly.toLocaleString('es-AR') + '</strong>. Completás el 20% a la empresa en la solicitud; Ferriol aprueba y recién ahí cambia el contador del negocio.</p>';
+      return (
+        intro +
+        '<div class="' +
+        shell +
+        '">' +
+        '<div class="flex flex-wrap items-end gap-2">' +
+        '<label class="text-[11px] text-white/55 block w-full">Días a sumar</label>' +
+        '<input type="number" min="1" max="365" value="30" class="super-detail-req-add-days w-24 px-2 py-2.5 rounded-lg text-sm bg-white/10 border border-white/20 text-white touch-target">' +
+        '</div>' +
+        '<div>' +
+        '<label class="text-[11px] text-white/55">' +
+        (isPartner ? 'Monto cobrado al socio / cuota (ARS)' : 'Monto cobrado al cliente (ARS)') +
+        '</label>' +
+        '<input type="number" min="1" step="1" class="super-detail-req-client-payment w-full glass rounded-lg px-3 py-2.5 border border-white/20 text-white text-sm mt-1" value="' +
+        amtDef +
+        '">' +
+        '</div>' +
+        '<p class="text-[11px] text-white/50">20% empresa: <strong class="text-cyan-200/90 super-detail-req-company-pct">—</strong> ARS</p>' +
+        '<div>' +
+        '<label class="text-[11px] text-white/55">Ref. del pago del 20% a empresa (opcional)</label>' +
+        '<input type="text" class="super-detail-req-company-note w-full glass rounded-lg px-3 py-2.5 border border-white/20 text-white text-sm mt-1" placeholder="Ej. transferencia, fecha, banco">' +
+        '</div>' +
+        '<button type="button" class="super-detail-req-submit-add w-full py-3 rounded-xl text-sm touch-target font-medium ' +
+        (isPartner ? 'bg-violet-500/25 text-violet-50 border border-violet-400/45' : 'bg-emerald-500/25 text-emerald-100 border border-green-500/45') +
+        '">Enviar solicitud</button>' +
+        '</div>'
+      );
+    }
+    function buildSuperMdrRemInnerHtml(user) {
+      var isPartner = user.role === 'partner';
+      var shell = isPartner ? 'rounded-xl border border-red-500/35 bg-red-500/06 p-4 space-y-3' : 'rounded-xl border border-red-500/35 bg-red-500/08 p-4 space-y-3';
+      var intro = isPartner
+        ? '<p class="text-[11px] text-white/65 leading-relaxed">Motivo obligatorio. La empresa debe aprobar antes de descontar días de la licencia de socio.</p>'
+        : '<p class="text-[11px] text-white/65 leading-relaxed">Indicá el motivo. La empresa debe aprobar antes de restar días del negocio.</p>';
+      return (
+        intro +
+        '<div class="' +
+        shell +
+        '">' +
+        '<div class="flex flex-wrap items-end gap-2">' +
+        '<label class="text-[11px] text-white/55 block w-full">Días a quitar</label>' +
+        '<input type="number" min="1" max="365" value="1" class="super-detail-req-remove-days w-24 px-2 py-2.5 rounded-lg text-sm bg-white/10 border border-white/20 text-white touch-target">' +
+        '</div>' +
+        '<div>' +
+        '<label class="text-[11px] text-white/55">Motivo obligatorio</label>' +
+        '<textarea class="super-detail-req-remove-reason w-full glass rounded-lg px-3 py-2.5 border border-white/20 text-white text-sm min-h-[5rem] mt-1" placeholder="' +
+        (isPartner ? 'Motivo (licencia distribuidor)…' : 'Por qué deben descontarse días en este negocio.') +
+        '"></textarea>' +
+        '</div>' +
+        '<button type="button" class="super-detail-req-submit-remove w-full py-3 rounded-xl text-sm bg-red-600/25 text-red-100 border border-red-500/45 touch-target font-medium">Enviar solicitud de quita</button>' +
+        '</div>'
+      );
+    }
+    function openSuperMdrSumModal(subjectUser) {
+      var ttl = document.getElementById('superUserMdrSumTitle');
+      var modal = document.getElementById('superUserMdrSumModal');
+      var cnt = document.getElementById('superUserMdrSumContent');
+      if (!modal || !cnt) return;
+      if (ttl) {
+        ttl.textContent =
+          subjectUser.role === 'partner' ? 'Solicitar suma de días (licencia socio)' : 'Solicitar suma de días';
+        ttl.className =
+          subjectUser.role === 'partner'
+            ? 'font-bold text-lg text-violet-100 pr-6'
+            : 'font-bold text-lg text-emerald-100 pr-6';
+      }
+      cnt.innerHTML = buildSuperMdrSumInnerHtml(subjectUser);
+      wireMdrSumForm(cnt, subjectUser);
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      try {
+        if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+      } catch (_) {}
+    }
+    function openSuperMdrRemModal(subjectUser) {
+      var ttl = document.getElementById('superUserMdrRemTitle');
+      var modal = document.getElementById('superUserMdrRemModal');
+      var cnt = document.getElementById('superUserMdrRemContent');
+      if (!modal || !cnt) return;
+      if (ttl) {
+        ttl.textContent =
+          subjectUser.role === 'partner' ? 'Solicitar quita de días (licencia socio)' : 'Solicitar quita de días';
+      }
+      cnt.innerHTML = buildSuperMdrRemInnerHtml(subjectUser);
+      wireMdrRemForm(cnt, subjectUser);
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      try {
+        if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+      } catch (_) {}
+    }
     function bindSuperAfiliadoRowClicks(listEl, list) {
       listEl.querySelectorAll('.super-afiliado-row').forEach(function (btn) {
         btn.onclick = function () {
@@ -7706,80 +7896,24 @@ async function showApp() {
           </div>
         </div>`;
       var socioKiosqueroActionsHtml = `
-        <div class="border-t border-white/10 pt-4 space-y-3 super-detail-actions-socio-kiosquero">
-          <p class="text-xs text-white/60 leading-relaxed">Los <strong class="text-white/75">administradores de red</strong> no modifican los días de membresía a mano: enviás una <strong class="text-[#86efac]/90">solicitud a la empresa</strong>. Cuando el cliente te paga (ej. licencia <strong class="text-white/75">$ ${FERRIOL_PLAN_AMOUNTS.kioscoMonthly.toLocaleString('es-AR')}</strong>), abonás el <strong class="text-white/75">20%</strong> a Ferriol, completás el formulario y la empresa <strong>aprueba</strong> la carga. Hasta entonces el contador del kiosco no cambia.</p>
-          <div class="rounded-xl border border-emerald-500/35 bg-emerald-500/08 p-3 space-y-2">
-            <p class="text-sm font-medium text-emerald-100/95">Solicitar suma de días</p>
-            <div class="flex flex-wrap items-end gap-2">
-              <label class="text-[10px] text-white/55 block w-full">Días a sumar</label>
-              <input type="number" min="1" max="365" value="30" class="super-detail-req-add-days w-20 px-2 py-2 rounded-lg text-sm bg-white/10 border border-white/20 text-white touch-target">
-            </div>
-            <div>
-              <label class="text-[10px] text-white/55">Monto cobrado al cliente (ARS)</label>
-              <input type="number" min="1" step="1" class="super-detail-req-client-payment w-full glass rounded-lg px-3 py-2 border border-white/20 text-white text-sm" value="${FERRIOL_PLAN_AMOUNTS.kioscoMonthly}">
-            </div>
-            <p class="text-[10px] text-white/50">20% para la empresa: <strong class="text-cyan-200/90 super-detail-req-company-pct">—</strong> ARS (se guarda en la solicitud).</p>
-            <div>
-              <label class="text-[10px] text-white/55">Referencia del pago del 20% a empresa (opcional)</label>
-              <input type="text" class="super-detail-req-company-note w-full glass rounded-lg px-3 py-2 border border-white/20 text-white text-sm" placeholder="Ej. transferencia, fecha, banco">
-            </div>
-            <button type="button" class="super-detail-req-submit-add w-full py-2.5 rounded-xl text-sm bg-green-500/25 text-green-200 border border-green-500/45 touch-target font-medium">Enviar solicitud de suma</button>
-          </div>
-          <div class="rounded-xl border border-red-500/35 bg-red-500/08 p-3 space-y-2">
-            <p class="text-sm font-medium text-red-200/95">Solicitar quita de días</p>
-            <p class="text-[10px] text-white/50">Si hubo un error u otra causa, indicá el motivo. La empresa debe aprobar antes de descontar.</p>
-            <div class="flex flex-wrap items-end gap-2">
-              <label class="text-[10px] text-white/55 block w-full">Días a quitar</label>
-              <input type="number" min="1" max="365" value="1" class="super-detail-req-remove-days w-20 px-2 py-2 rounded-lg text-sm bg-white/10 border border-white/20 text-white touch-target">
-            </div>
-            <div>
-              <label class="text-[10px] text-white/55">Motivo obligatorio</label>
-              <textarea class="super-detail-req-remove-reason w-full glass rounded-lg px-3 py-2 border border-white/20 text-white text-sm min-h-[4rem]" placeholder="Explicá por qué deben descontarse días en este kiosco."></textarea>
-            </div>
-            <button type="button" class="super-detail-req-submit-remove w-full py-2.5 rounded-xl text-sm bg-red-600/25 text-red-200 border border-red-500/45 touch-target font-medium">Enviar solicitud de quita</button>
-          </div>
-          <div class="flex flex-col gap-2 pt-2">
-            <button type="button" class="super-detail-reset w-full py-2.5 rounded-xl text-sm bg-amber-500/20 text-amber-300 border border-amber-500/40 touch-target flex items-center justify-center gap-2">
-              <i data-lucide="key" class="w-4 h-4"></i> Enviar enlace para restablecer contraseña
+        <div class="border-t border-white/10 pt-5 space-y-4 super-detail-actions-socio-kiosquero">
+          <p class="text-xs text-white/55 leading-relaxed">Los administradores de red no modifican los días a mano: cada acción abre su propia pantalla. La empresa aprueba antes de aplicar cambios al contador (licencia ejemplo <strong class="text-white/70">$ ${FERRIOL_PLAN_AMOUNTS.kioscoMonthly.toLocaleString('es-AR')}</strong>).</p>
+          <div class="flex flex-col gap-4">
+            <button type="button" class="super-detail-open-mdr-sum w-full py-3.5 rounded-xl text-sm bg-emerald-500/20 text-emerald-100 border border-emerald-500/45 touch-target font-medium shadow-sm shadow-black/15">Solicitar suma de días</button>
+            <button type="button" class="super-detail-open-mdr-rem w-full py-3.5 rounded-xl text-sm bg-red-600/22 text-red-100 border border-red-500/45 touch-target font-medium shadow-sm shadow-black/15">Solicitar quita de días</button>
+            <button type="button" class="super-detail-reset w-full py-3.5 rounded-xl text-sm bg-amber-500/20 text-amber-300 border border-amber-500/40 touch-target flex items-center justify-center gap-2 shadow-sm shadow-black/15">
+              <i data-lucide="key" class="w-4 h-4"></i> Recuperar contraseña
             </button>
           </div>
         </div>`;
       var socioPartnerLicenseHtml = `
-        <div class="border-t border-white/10 pt-4 space-y-3 super-detail-actions-socio-partner-license">
-          <p class="text-xs text-white/60 leading-relaxed">Para la <strong class="text-violet-200/95">licencia de distribución</strong> de este socio: no sumás días a mano. Enviás solicitud a la empresa con el cobro y el <strong class="text-white/75">20%</strong> a Ferriol; cuando aprueben, se actualiza el vencimiento de su membresía.</p>
-          <div class="rounded-xl border border-violet-500/35 bg-violet-500/08 p-3 space-y-2">
-            <p class="text-sm font-medium text-violet-100/95">Solicitar suma de días (licencia socio)</p>
-            <div class="flex flex-wrap items-end gap-2">
-              <label class="text-[10px] text-white/55 block w-full">Días a sumar</label>
-              <input type="number" min="1" max="365" value="30" class="super-detail-req-add-days w-20 px-2 py-2 rounded-lg text-sm bg-white/10 border border-white/20 text-white touch-target">
-            </div>
-            <div>
-              <label class="text-[10px] text-white/55">Monto cobrado al socio / cuota (ARS)</label>
-              <input type="number" min="1" step="1" class="super-detail-req-client-payment w-full glass rounded-lg px-3 py-2 border border-white/20 text-white text-sm" value="${FERRIOL_PLAN_AMOUNTS.vendorMonthly}">
-            </div>
-            <p class="text-[10px] text-white/50">20% para la empresa: <strong class="text-cyan-200/90 super-detail-req-company-pct">—</strong> ARS</p>
-            <div>
-              <label class="text-[10px] text-white/55">Referencia del pago del 20% a empresa (opcional)</label>
-              <input type="text" class="super-detail-req-company-note w-full glass rounded-lg px-3 py-2 border border-white/20 text-white text-sm" placeholder="Ej. transferencia, fecha, banco">
-            </div>
-            <button type="button" class="super-detail-req-submit-add w-full py-2.5 rounded-xl text-sm bg-violet-500/25 text-violet-100 border border-violet-500/45 touch-target font-medium">Enviar solicitud de suma</button>
-          </div>
-          <div class="rounded-xl border border-red-500/35 bg-red-500/08 p-3 space-y-2">
-            <p class="text-sm font-medium text-red-200/95">Solicitar quita de días (licencia socio)</p>
-            <p class="text-[10px] text-white/50">Motivo obligatorio. La empresa debe aprobar.</p>
-            <div class="flex flex-wrap items-end gap-2">
-              <label class="text-[10px] text-white/55 block w-full">Días a quitar</label>
-              <input type="number" min="1" max="365" value="1" class="super-detail-req-remove-days w-20 px-2 py-2 rounded-lg text-sm bg-white/10 border border-white/20 text-white touch-target">
-            </div>
-            <div>
-              <label class="text-[10px] text-white/55">Motivo obligatorio</label>
-              <textarea class="super-detail-req-remove-reason w-full glass rounded-lg px-3 py-2 border border-white/20 text-white text-sm min-h-[4rem]" placeholder="Motivo de la quita de días de licencia."></textarea>
-            </div>
-            <button type="button" class="super-detail-req-submit-remove w-full py-2.5 rounded-xl text-sm bg-red-600/25 text-red-200 border border-red-500/45 touch-target font-medium">Enviar solicitud de quita</button>
-          </div>
-          <div class="flex flex-col gap-2 pt-2">
-            <button type="button" class="super-detail-reset w-full py-2.5 rounded-xl text-sm bg-amber-500/20 text-amber-300 border border-amber-500/40 touch-target flex items-center justify-center gap-2">
-              <i data-lucide="key" class="w-4 h-4"></i> Enviar enlace para restablecer contraseña
+        <div class="border-t border-white/10 pt-5 space-y-4 super-detail-actions-socio-partner-license">
+          <p class="text-xs text-white/55 leading-relaxed"><strong class="text-violet-200/95">Licencia de distribución</strong>: sumá o quitá días solo por solicitud; la empresa debe aprobar. Usá cada botón para abrir el formulario.</p>
+          <div class="flex flex-col gap-4">
+            <button type="button" class="super-detail-open-mdr-sum w-full py-3.5 rounded-xl text-sm bg-violet-500/22 text-violet-100 border border-violet-500/45 touch-target font-medium shadow-sm shadow-black/15">Solicitar suma de días</button>
+            <button type="button" class="super-detail-open-mdr-rem w-full py-3.5 rounded-xl text-sm bg-red-600/22 text-red-100 border border-red-500/45 touch-target font-medium shadow-sm shadow-black/15">Solicitar quita de días</button>
+            <button type="button" class="super-detail-reset w-full py-3.5 rounded-xl text-sm bg-amber-500/20 text-amber-300 border border-amber-500/40 touch-target flex items-center justify-center gap-2 shadow-sm shadow-black/15">
+              <i data-lucide="key" class="w-4 h-4"></i> Recuperar contraseña
             </button>
           </div>
         </div>`;
@@ -7812,6 +7946,10 @@ async function showApp() {
       modal.classList.add('flex');
       lucide.createIcons();
       var u = user;
+      var openSumBtn = content.querySelector('.super-detail-open-mdr-sum');
+      if (openSumBtn) openSumBtn.onclick = function () { openSuperMdrSumModal(u); };
+      var openRemBtn = content.querySelector('.super-detail-open-mdr-rem');
+      if (openRemBtn) openRemBtn.onclick = function () { openSuperMdrRemModal(u); };
       var defSaleBtn = content.querySelector('.super-detail-definitive-sale');
       if (defSaleBtn) {
         defSaleBtn.onclick = async function () {
@@ -7835,71 +7973,6 @@ async function showApp() {
           await supabaseClient.from('profiles').update({ active: newActive }).eq('id', u.id);
           u.active = newActive;
           openSuperUserDetail(u);
-        };
-      }
-      var payInEl = content.querySelector('.super-detail-req-client-payment');
-      var pctDispEl = content.querySelector('.super-detail-req-company-pct');
-      function syncMdrCompanyShare() {
-        if (!payInEl || !pctDispEl) return;
-        var n = parseFloat(String(payInEl.value || '').replace(',', '.'), 10);
-        if (isNaN(n) || n <= 0) { pctDispEl.textContent = '—'; return; }
-        pctDispEl.textContent = String(Math.round(n * 0.2 * 100) / 100);
-      }
-      if (payInEl) {
-        payInEl.addEventListener('input', syncMdrCompanyShare);
-        payInEl.addEventListener('change', syncMdrCompanyShare);
-        syncMdrCompanyShare();
-      }
-      var reqAddBtn = content.querySelector('.super-detail-req-submit-add');
-      if (reqAddBtn) {
-        reqAddBtn.onclick = async function () {
-          if (!supabaseClient || !currentUser) return;
-          var daysIn = content.querySelector('.super-detail-req-add-days');
-          var days = Math.max(1, Math.min(365, parseInt(daysIn && daysIn.value ? daysIn.value : 30, 10) || 30));
-          var pay = parseFloat(String((payInEl && payInEl.value) || '').replace(',', '.'), 10);
-          if (isNaN(pay) || pay <= 0) { alert('Indicá el monto cobrado al cliente.'); return; }
-          var share = Math.round(pay * 0.2 * 100) / 100;
-          var noteEl = content.querySelector('.super-detail-req-company-note');
-          var note = noteEl ? String(noteEl.value || '').trim() : '';
-          if (!confirm('Se enviará la solicitud de +' + days + ' días. La empresa debe aprobarla antes de que cambie el contador del kiosco. ¿Continuar?')) return;
-          var ins = await supabaseClient.from('ferriol_membership_day_requests').insert({
-            requested_by: currentUser.id,
-            kiosquero_user_id: u.id,
-            days_delta: days,
-            client_payment_ars: pay,
-            company_share_ars: share,
-            company_transfer_note: note || null,
-            reason: null
-          });
-          if (ins.error) { alert('Error: ' + ins.error.message + '\n\nSi la tabla no existe, ejecutá supabase-ferriol-membership-day-requests.sql en Supabase.'); return; }
-          alert('Solicitud enviada. Cuando la empresa la apruebe, el kiosquero verá los días actualizados.');
-          renderSuper();
-          document.getElementById('superUserDetailClose').click();
-        };
-      }
-      var reqRemBtn = content.querySelector('.super-detail-req-submit-remove');
-      if (reqRemBtn) {
-        reqRemBtn.onclick = async function () {
-          if (!supabaseClient || !currentUser) return;
-          var dIn = content.querySelector('.super-detail-req-remove-days');
-          var daysRm = Math.max(1, Math.min(365, parseInt(dIn && dIn.value ? dIn.value : 1, 10) || 1));
-          var reasonEl = content.querySelector('.super-detail-req-remove-reason');
-          var reason = reasonEl ? String(reasonEl.value || '').trim() : '';
-          if (reason.length < 5) { alert('El motivo es obligatorio (mínimo 5 caracteres).'); return; }
-          if (!confirm('Se enviará la solicitud de quitar ' + daysRm + ' días. La empresa debe aprobarla. ¿Continuar?')) return;
-          var ins = await supabaseClient.from('ferriol_membership_day_requests').insert({
-            requested_by: currentUser.id,
-            kiosquero_user_id: u.id,
-            days_delta: -daysRm,
-            client_payment_ars: null,
-            company_share_ars: null,
-            company_transfer_note: null,
-            reason: reason
-          });
-          if (ins.error) { alert('Error: ' + ins.error.message + '\n\nSi la tabla no existe, ejecutá supabase-ferriol-membership-day-requests.sql en Supabase.'); return; }
-          alert('Solicitud de quita enviada.');
-          renderSuper();
-          document.getElementById('superUserDetailClose').click();
         };
       }
       var resetPwdBtn = content.querySelector('.super-detail-reset');
@@ -8014,11 +8087,21 @@ async function showApp() {
     document.getElementById('superUserDetailClose').onclick = () => {
       if (superDetailCountdownInterval) clearInterval(superDetailCountdownInterval);
       superDetailCountdownInterval = null;
+      closeAllSuperUserMdrSubmodals();
       document.getElementById('superUserDetailModal').classList.add('hidden');
       document.getElementById('superUserDetailModal').classList.remove('flex');
       renderSuper();
     };
     document.getElementById('superUserDetailOverlay').onclick = () => { if (superDetailCountdownInterval) clearInterval(superDetailCountdownInterval); superDetailCountdownInterval = null; document.getElementById('superUserDetailClose').click(); };
+
+    var _sumMdrClose = document.getElementById('superUserMdrSumClose');
+    if (_sumMdrClose) _sumMdrClose.onclick = closeSuperMdrSumModal;
+    var _sumMdrOv = document.getElementById('superUserMdrSumOverlay');
+    if (_sumMdrOv) _sumMdrOv.onclick = closeSuperMdrSumModal;
+    var _remMdrClose = document.getElementById('superUserMdrRemClose');
+    if (_remMdrClose) _remMdrClose.onclick = closeSuperMdrRemModal;
+    var _remMdrOv = document.getElementById('superUserMdrRemOverlay');
+    if (_remMdrOv) _remMdrOv.onclick = closeSuperMdrRemModal;
 
     var superFilterState = 'todos';
 
