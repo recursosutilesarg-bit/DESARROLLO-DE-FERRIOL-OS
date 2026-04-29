@@ -1773,17 +1773,27 @@
       }
     }
     function syncMercadoPagoCheckoutUi() {
-      var u = (typeof window._ferriolMercadoPagoCheckoutUrl === 'string' ? window._ferriolMercadoPagoCheckoutUrl : '').trim();
+      var raw = typeof window._ferriolMercadoPagoCheckoutUrl === 'string' ? String(window._ferriolMercadoPagoCheckoutUrl).trim() : '';
+      var u = raw;
+      if (raw && !/^https?:\/\//i.test(raw) && /^[\w.-]+\.[a-z]{2,}(\/.*)?$/i.test(raw.replace(/^\/*/, ''))) {
+        u = 'https://' + raw.replace(/^\/+/, '');
+      }
       var ok = /^https?:\/\//i.test(u);
       var wrap = document.getElementById('planPanelMercadoPagoWrap');
       var btn = document.getElementById('planPanelBtnMercadoPago');
       var miss = document.getElementById('planPanelMercadoPagoMissingHint');
-      if (wrap) wrap.classList.toggle('hidden', !ok);
+      if (wrap) wrap.classList.remove('hidden');
       if (btn) {
         btn.disabled = !ok;
-        if (ok) btn.setAttribute('data-mp-url', u); else btn.removeAttribute('data-mp-url');
+        if (ok) {
+          btn.setAttribute('data-mp-url', u);
+          btn.title = 'Abre Mercado Pago en una nueva pestaña.';
+        } else {
+          btn.removeAttribute('data-mp-url');
+          btn.title = 'Aún sin link público de cobro: el fundador lo carga en Más → Ajustes del sistema.';
+        }
       }
-      if (miss) miss.classList.toggle('hidden', ok);
+      if (miss) miss.classList.toggle('hidden', !!ok);
     }
     async function ferriolRefreshMercadoPagoCheckoutUrl() {
       if (!supabaseClient) {
