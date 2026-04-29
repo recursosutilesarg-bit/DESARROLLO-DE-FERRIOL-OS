@@ -3962,6 +3962,169 @@
         .replace(/>/g, '&gt;');
     }
 
+    /** app_settings.ferriol_checkout_copy — textos páginas de cierre (plan + opcional modal) */
+    function ferriolDefaultCheckoutCopy() {
+      return {
+        kiosco: [
+          'Resumen antes de abonar la licencia a la empresa (Ferriol).',
+          'Caja y movimientos de tu ferretería organizados desde un solo lugar.'
+        ],
+        admin: [
+          'Referencia de cuota de distribuidor antes de datos bancarios.',
+          'Comisiones y liquidaciones según política empresa / red Ferriol.'
+        ],
+        distrib: [
+          'Ventas del kit y soporte oficial según reglas empresa.',
+          'Ferriol revisa la solicitud y te indica siguiente pasos.'
+        ],
+        products: [
+          'Software de gestión pensado para kioscos y ferreterías.',
+          'Canal oficial y actualizaciones coordinadas desde la empresa.'
+        ],
+        distrib_intro:
+          'Si querés ser distribuidor/a, la empresa revisa la solicitud y te contacta cuando corresponda.',
+        modal_kiosco: '',
+        modal_admin: ''
+      };
+    }
+    function ferriolLinesToArray(txt) {
+      return String(txt || '')
+        .split(/\r?\n/)
+        .map(function (line) {
+          return line.trim();
+        })
+        .filter(Boolean);
+    }
+    function ferriolParseCheckoutCopyValue(raw) {
+      var d = ferriolDefaultCheckoutCopy();
+      if (raw == null || raw === '') return d;
+      var j = null;
+      try {
+        j = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      } catch (_) {
+        return d;
+      }
+      if (!j || typeof j !== 'object') return d;
+      function arrOrDef(key) {
+        var a = j[key];
+        if (!Array.isArray(a)) return d[key];
+        var lines = a.map(function (x) {
+          return String(x != null ? x : '').trim();
+        }).filter(Boolean);
+        return lines.length ? lines : d[key];
+      }
+      var intro =
+        typeof j.distrib_intro === 'string' && String(j.distrib_intro).trim()
+          ? String(j.distrib_intro).trim()
+          : d.distrib_intro;
+      return {
+        kiosco: arrOrDef('kiosco'),
+        admin: arrOrDef('admin'),
+        distrib: arrOrDef('distrib'),
+        products: arrOrDef('products'),
+        distrib_intro: intro,
+        modal_kiosco: typeof j.modal_kiosco === 'string' ? String(j.modal_kiosco).trim() : d.modal_kiosco,
+        modal_admin: typeof j.modal_admin === 'string' ? String(j.modal_admin).trim() : d.modal_admin
+      };
+    }
+    function ferriolRenderCheckoutBenefitUl(ulEl, lines, variant) {
+      if (!ulEl) return;
+      var color =
+        variant === 'cyan'
+          ? 'text-cyan-400'
+          : variant === 'violet'
+          ? 'text-violet-400'
+          : 'text-emerald-400';
+      var sym = variant === 'violet' ? '★' : '✓';
+      ulEl.innerHTML = (lines || []).map(function (t) {
+        return (
+          '<li class="flex gap-2.5 items-start"><span class="' +
+          color +
+          ' font-black shrink-0 mt-0.5">' +
+          ferriolEscapeHtmlLite(sym) +
+          '</span><span class="text-white/90">' +
+          ferriolEscapeHtmlLite(String(t)) +
+          '</span></li>'
+        );
+      }).join('');
+    }
+    function ferriolFormatDistribIntroHtml(text) {
+      var t = String(text != null ? text : '');
+      return ferriolEscapeHtmlLite(t).replace(/\r?\n/g, '<br>');
+    }
+    function ferriolApplyCheckoutBenefitsToPanels(copy) {
+      copy = copy || window._ferriolCheckoutCopyParsed || ferriolDefaultCheckoutCopy();
+      var dk = document.getElementById('planCheckoutDistribLead');
+      if (dk) dk.innerHTML = ferriolFormatDistribIntroHtml(copy.distrib_intro);
+      ferriolRenderCheckoutBenefitUl(
+        document.getElementById('planCheckoutBenefitsKioscoList'),
+        copy.kiosco,
+        'emerald'
+      );
+      ferriolRenderCheckoutBenefitUl(
+        document.getElementById('planCheckoutBenefitsProductsListKiosco'),
+        copy.products,
+        'emerald'
+      );
+      ferriolRenderCheckoutBenefitUl(
+        document.getElementById('planCheckoutBenefitsAdminList'),
+        copy.admin,
+        'cyan'
+      );
+      ferriolRenderCheckoutBenefitUl(
+        document.getElementById('planCheckoutBenefitsProductsListAdmin'),
+        copy.products,
+        'cyan'
+      );
+      ferriolRenderCheckoutBenefitUl(document.getElementById('planCheckoutBenefitsDistribList'), copy.distrib, 'violet');
+    }
+    window.ferriolFetchCheckoutCopy = function (force) {
+      return new Promise(function (resolve) {
+        if (window._ferriolCheckoutCopyParsed && !force) {
+          resolve(window._ferriolCheckoutCopyParsed);
+          return;
+        }
+        if (!supabaseClient) {
+          window._ferriolCheckoutCopyParsed = ferriolDefaultCheckoutCopy();
+          resolve(window._ferriolCheckoutCopyParsed);
+          return;
+        }
+        supabaseClient
+          .from('app_settings')
+          .select('value')
+          .eq('key', 'ferriol_checkout_copy')
+          .maybeSingle()
+          .then(function (r) {
+            var raw = r.data && r.data.value;
+            window._ferriolCheckoutCopyParsed = ferriolParseCheckoutCopyValue(raw);
+            resolve(window._ferriolCheckoutCopyParsed);
+          })
+          .catch(function () {
+            window._ferriolCheckoutCopyParsed = ferriolDefaultCheckoutCopy();
+            resolve(window._ferriolCheckoutCopyParsed);
+          });
+      });
+    };
+    function ferriolBuildCheckoutCopyObjectFromSettingsForm() {
+      var g = function (id) {
+        var el = document.getElementById(id);
+        return el ? ferriolLinesToArray(el.value) : [];
+      };
+      var gs = function (id) {
+        var el = document.getElementById(id);
+        return el ? String(el.value || '').trim() : '';
+      };
+      return {
+        kiosco: g('adminCheckoutCopyKiosco'),
+        admin: g('adminCheckoutCopyAdmin'),
+        distrib: g('adminCheckoutCopyDistrib'),
+        products: g('adminCheckoutCopyProducts'),
+        distrib_intro: gs('adminCheckoutCopyDistribIntro'),
+        modal_kiosco: gs('adminCheckoutCopyModalKiosco'),
+        modal_admin: gs('adminCheckoutCopyModalAdmin')
+      };
+    }
+
     /** Quita una envoltura [ ... ] típica de plantillas (ej. [COMPLETAR]) para copiar solo el contenido útil */
     function ferriolStripOuterSquareBrackets(val) {
       var t = String(val != null ? val : '').trim();
@@ -4065,35 +4228,24 @@
       if (lead) {
         if (admin) {
           lead.innerHTML =
-            'Debajo tenés <strong class="text-white/90">beneficios concretos</strong> y la <strong class="text-cyan-200/90">cuota de referencia</strong>. Un clic y pasás a datos bancarios oficiales.';
+            'Resumen antes de pagar: <strong class="text-cyan-200/90">beneficios editables desde Ajustes (fundador)</strong> y cuota de referencia.';
         } else {
           lead.innerHTML =
-            'Leé el <strong class="text-emerald-200/90">por qué sí hoy</strong> y el precio de referencia; después abrís datos Ferriol sin salir de la app.';
+            'Licencia mensual para tu negocio: <strong class="text-emerald-200/90">beneficios configurables desde Ajustes</strong> del sistema y datos de empresa abajo.';
         }
       }
-      var hookK = document.getElementById('planCheckoutHookKiosco');
-      var hookA = document.getElementById('planCheckoutHookAdmin');
-      if (hookK && hookA) {
-        hookK.classList.toggle('hidden', admin);
-        hookA.classList.toggle('hidden', !admin);
+      var benefitsKiosco = document.getElementById('planCheckoutBenefitsBlocksKiosco');
+      var benefitsAdmin = document.getElementById('planCheckoutBenefitsBlocksAdmin');
+      if (benefitsKiosco && benefitsAdmin) {
+        benefitsKiosco.classList.toggle('hidden', admin);
+        benefitsAdmin.classList.toggle('hidden', !admin);
       }
       var eyeb = document.getElementById('planCheckoutPayEyebrow');
       if (eyeb) {
         eyeb.textContent = admin ? 'Liquidación · distribuidor' : 'Tu compra · licencia mensual';
       }
-      var lk = document.getElementById('planCheckoutPayDetailsListKiosco');
-      var la = document.getElementById('planCheckoutPayDetailsListAdmin');
-      if (lk && la) {
-        if (admin) {
-          la.classList.remove('hidden');
-          lk.classList.add('hidden');
-        } else {
-          lk.classList.remove('hidden');
-          la.classList.add('hidden');
-        }
-      }
       var prim = document.getElementById('planPanelPayBtnPrimary');
-      if (prim) prim.textContent = admin ? 'Ver datos — pagar cuota empresa' : 'Ver datos — abonar mi licencia';
+      if (prim) prim.textContent = admin ? 'Ver datos para transferir (cuota)' : 'Ver datos para transferir';
       var sub = document.getElementById('planPanelPayBtnSubtitle');
       if (sub) {
         sub.textContent = admin ? ' · cuenta Ferriol' : ' · cuenta Ferriol';
@@ -4101,14 +4253,23 @@
       var foot = document.getElementById('planPanelFooterHint');
       if (foot) {
         foot.innerHTML = admin
-          ? '<strong class="text-cyan-100/80">Cerrá el círculo:</strong> la cuota empresa no negocia con la red — ejecutala y mostrá ejemplo.'
-          : '<strong class="text-emerald-100/85">Último empuje:</strong> después del botón naranja copiás CBU / alias — no das vueltas.';
+          ? 'Pagás a la <strong class="text-cyan-100/80">cuenta empresa</strong> indicada arriba; guardá tu comprobante según WhatsApp oficial.'
+          : 'La licencia del negocio va a la <strong class="text-emerald-100/85">cuenta empresa</strong>; después enviás el comprobante donde indique Ferriol.';
       }
       var aml = document.getElementById('accountMenuPlanAbonarLabel');
       if (aml) aml.textContent = admin ? 'Abonar cuota distribuidor' : 'Abonar suscripción';
       try {
         syncPlanCheckoutPrices();
       } catch (_) {}
+      void (
+        typeof window.ferriolFetchCheckoutCopy === 'function'
+          ? window.ferriolFetchCheckoutCopy(false)
+          : Promise.resolve(window._ferriolCheckoutCopyParsed || ferriolDefaultCheckoutCopy())
+      ).then(function () {
+        try {
+          ferriolApplyCheckoutBenefitsToPanels();
+        } catch (_) {}
+      });
     }
 
     function syncPlanCheckoutPrices() {
@@ -4224,28 +4385,38 @@
       var tit = document.getElementById('kioscoSubPayModalTitle');
       var intro = document.getElementById('kioscoSubPayModalIntro');
       if (tit) {
-        tit.textContent = mode === 'admin'
-          ? 'Abonar cuota distribuidor'
-          : 'Suscripción Ferriol · negocio (kiosco)';
+        tit.textContent =
+          mode === 'admin' ? 'Abonar cuota distribuidor' : 'Suscripción Ferriol · negocio (kiosco)';
       }
       if (intro) {
-        intro.innerHTML = mode === 'admin'
-          ? 'Como <strong class="text-white/88">fundador o socio de red (distribuidor)</strong>, esta <strong class="text-cyan-200/95">cuota distribuidor</strong> va <strong class="text-cyan-200/95">solo a Ferriol (empresa)</strong>. Transferencia a los datos de abajo. El comprobante por WhatsApp a la empresa (o según indiquen en Ajustes). <strong class="text-white/75">No</strong> al patrocinador para esta cuota: las comisiones las liquida Ferriol.'
-          : 'La <strong class="text-white/85">licencia del negocio</strong> se abona <strong class="text-[#86efac]/95">solo a Ferriol (empresa)</strong>. Usá los datos de abajo y enviá el comprobante por WhatsApp a la empresa.';
+        intro.innerHTML =
+          mode === 'admin'
+            ? 'Como <strong class="text-white/88">fundador o socio de red (distribuidor)</strong>, esta <strong class="text-cyan-200/95">cuota distribuidor</strong> va <strong class="text-cyan-200/95">solo a Ferriol (empresa)</strong>. Transferencia a los datos de abajo. El comprobante por WhatsApp a la empresa (o según indiquen en Ajustes). <strong class="text-white/75">No</strong> al patrocinador para esta cuota: las comisiones las liquida Ferriol.'
+            : 'La <strong class="text-white/85">licencia del negocio</strong> se abona <strong class="text-[#86efac]/95">solo a Ferriol (empresa)</strong>. Usá los datos de abajo y enviá el comprobante por WhatsApp a la empresa.';
       }
       var saleStrip = document.getElementById('kioscoSubPaySalesStrip');
       if (saleStrip) {
-        saleStrip.classList.remove('hidden');
-        saleStrip.innerHTML =
-          mode === 'admin'
-            ? '<span class="font-semibold text-cyan-200/95">Checklist cierre · </span>Copiás CBU o alias → transferís en tu banco → mandás comprobante → <strong class="text-white">quedás alineado con Ferriol</strong> y seguís liderando sin fricción.'
-            : '<span class="font-semibold text-[#86efac]/95">Seguí vendiendo sin drama · </span>Datos abajo listos para copiar. <strong class="text-white">Una transferencia + un WhatsApp</strong> y tu licencia queda en regla — el negocio no para.';
+        var copy =
+          typeof window.ferriolFetchCheckoutCopy === 'function'
+            ? await window.ferriolFetchCheckoutCopy(false)
+            : ferriolDefaultCheckoutCopy();
+        var line = mode === 'admin' ? copy.modal_admin : copy.modal_kiosco;
+        if (line && String(line).trim()) {
+          saleStrip.classList.remove('hidden');
+          saleStrip.innerHTML =
+            '<p class="text-sm text-white/88 leading-snug">' +
+            ferriolEscapeHtmlLite(String(line).trim()).replace(/\r?\n/g, '<br>') +
+            '</p>';
+        } else {
+          saleStrip.classList.add('hidden');
+          saleStrip.innerHTML = '';
+        }
       }
       var raw = '';
       if (supabaseClient) {
         try {
           var r = await supabaseClient.from('app_settings').select('value').eq('key', 'ferriol_transfer_info').maybeSingle();
-          raw = (r.data && r.data.value) ? String(r.data.value) : '';
+          raw = r.data && r.data.value ? String(r.data.value) : '';
         } catch (_) {}
       }
       window._ferriolKioscoEmpresaTransferRaw = raw;
@@ -9231,7 +9402,7 @@ async function showApp() {
     async function renderSuper() {
       if (!supabaseClient) return;
       try {
-        const { data: settingsRows } = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4', 'admin_delete_password', 'trial_reminder_config', 'ferriol_transfer_info', 'trial_duration_days']);
+        const { data: settingsRows } = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4', 'admin_delete_password', 'trial_reminder_config', 'ferriol_transfer_info', 'trial_duration_days', 'ferriol_checkout_copy']);
         var whatsappInput = document.getElementById('adminContactWhatsapp');
         var whatsapp2Input = document.getElementById('adminContactWhatsapp2');
         var whatsapp3Input = document.getElementById('adminContactWhatsapp3');
@@ -9254,6 +9425,27 @@ async function showApp() {
             }
             if (r.key === 'trial_reminder_config') trialCfgParsed = parseTrialReminderConfigValue(r.value || '');
           });
+        }
+        var ccRow = (settingsRows || []).filter(function (rx) {
+          return rx.key === 'ferriol_checkout_copy';
+        })[0];
+        var copyForUi = ferriolParseCheckoutCopyValue(ccRow ? ccRow.value : null);
+        window._ferriolCheckoutCopyParsed = copyForUi;
+        if (isEmpresaLensSuper()) {
+          var fk = document.getElementById('adminCheckoutCopyKiosco');
+          var fa = document.getElementById('adminCheckoutCopyAdmin');
+          var fd = document.getElementById('adminCheckoutCopyDistrib');
+          var fp = document.getElementById('adminCheckoutCopyProducts');
+          var fdi = document.getElementById('adminCheckoutCopyDistribIntro');
+          var fmk = document.getElementById('adminCheckoutCopyModalKiosco');
+          var fma = document.getElementById('adminCheckoutCopyModalAdmin');
+          if (fk) fk.value = copyForUi.kiosco.join('\n');
+          if (fa) fa.value = copyForUi.admin.join('\n');
+          if (fd) fd.value = copyForUi.distrib.join('\n');
+          if (fp) fp.value = copyForUi.products.join('\n');
+          if (fdi) fdi.value = copyForUi.distrib_intro || '';
+          if (fmk) fmk.value = copyForUi.modal_kiosco || '';
+          if (fma) fma.value = copyForUi.modal_admin || '';
         }
         window._superTrialReminderEditCache = trialCfgParsed;
         var winDaysInput = document.getElementById('trialReminderWindowDays');
@@ -9457,7 +9649,7 @@ async function showApp() {
         var transferInfo = (document.getElementById('adminTransferInfo') && document.getElementById('adminTransferInfo').value != null) ? String(document.getElementById('adminTransferInfo').value || '') : '';
         var trialDurEl = document.getElementById('adminTrialDurationDays');
         var trialDurSave = Math.min(365, Math.max(1, parseInt(trialDurEl && trialDurEl.value, 10) || 15));
-        await supabaseClient.from('app_settings').upsert([
+        var rowsUpsert = [
           { key: 'admin_whatsapp', value: whatsapp },
           { key: 'admin_whatsapp_2', value: whatsapp2 },
           { key: 'admin_whatsapp_3', value: whatsapp3 },
@@ -9466,7 +9658,13 @@ async function showApp() {
           { key: 'ferriol_transfer_info', value: transferInfo },
           { key: 'trial_duration_days', value: String(trialDurSave) },
           { key: 'trial_reminder_config', value: trialReminderJson }
-        ], { onConflict: 'key' });
+        ];
+        var checkoutSaved = null;
+        if (isEmpresaLensSuper() && document.getElementById('adminCheckoutCopyKiosco')) {
+          checkoutSaved = ferriolBuildCheckoutCopyObjectFromSettingsForm();
+          rowsUpsert.push({ key: 'ferriol_checkout_copy', value: JSON.stringify(checkoutSaved) });
+        }
+        await supabaseClient.from('app_settings').upsert(rowsUpsert, { onConflict: 'key' });
         if (isEmpresaLensSuper()) {
           var pl = await supabaseClient.from('mlm_plan_config').select('value').eq('key', 'compensation_v1').maybeSingle();
           var base = (pl.data && pl.data.value) || {};
@@ -9496,6 +9694,12 @@ async function showApp() {
         adminContact.whatsapp = whatsapp;
         adminContact.whatsappList = [whatsapp, whatsapp2, whatsapp3, whatsapp4].filter(Boolean);
         window._superTrialReminderEditCache = parseTrialReminderConfigValue(trialReminderJson);
+        if (checkoutSaved) {
+          window._ferriolCheckoutCopyParsed = ferriolParseCheckoutCopyValue(JSON.stringify(checkoutSaved));
+          try {
+            ferriolApplyCheckoutBenefitsToPanels();
+          } catch (_) {}
+        }
         msgEl.textContent = 'Ajustes guardados.';
         msgEl.classList.remove('hidden');
         setTimeout(() => msgEl.classList.add('hidden'), 3000);
