@@ -386,11 +386,14 @@
     async function syncKiosqueroPartnerUpgradeUi() {
       var wrap = document.getElementById('partnerUpgradeCtaWrap');
       var btn = document.getElementById('btnKiosqueroPartnerUpgrade');
+      var outer = document.getElementById('partnerUpgradeOuterCard');
       if (!wrap || !btn) return;
       if (!currentUser || currentUser.role !== 'kiosquero') {
         wrap.classList.add('hidden');
+        if (outer) outer.classList.add('hidden');
         return;
       }
+      if (outer) outer.classList.remove('hidden');
       wrap.classList.remove('hidden');
       btn.disabled = false;
       btn.classList.remove('opacity-80', 'cursor-not-allowed');
@@ -1703,10 +1706,50 @@
       var block = document.getElementById('kioscoLicensePaymentBlock');
       var priceEl = document.getElementById('kioscoLicensePriceHint');
       var sponsorEl = document.getElementById('kioscoLicenseSponsorHint');
+      var daysEl = document.getElementById('kioscoSubscriptionDaysLeft');
       if (!currentUser) return;
       var show = currentUser.role === 'kiosquero' || isSuperKioscoPreviewMode();
       if (block) block.style.display = show ? '' : 'none';
       if (!show) return;
+      if (daysEl && show) {
+        if (!isSuperKioscoPreviewMode() && currentUser.role === 'kiosquero') {
+          daysEl.classList.remove('hidden');
+          var te = currentUser.trialEndsAt;
+          if (!te) {
+            daysEl.textContent = 'Suscripción del sistema: sin fecha de vigencia en tu perfil.';
+            daysEl.className =
+              'text-xs font-semibold text-amber-200/80 mb-1.5';
+          } else {
+            var end = new Date(te);
+            if (isNaN(end.getTime())) {
+              daysEl.textContent = 'Suscripción del sistema: fecha de vigencia no válida.';
+              daysEl.className = 'text-xs font-semibold text-amber-200/80 mb-1.5';
+            } else {
+            var now = new Date();
+            var expired = end.getTime() <= now.getTime();
+            var ms = end - now;
+            var daysLeft = expired ? 0 : Math.ceil(ms / (24 * 60 * 60 * 1000));
+            if (expired) {
+              daysEl.textContent = 'Tu suscripción está vencida · renovala para mantener la licencia activa.';
+              daysEl.className = 'text-sm font-semibold text-red-300 mb-1.5';
+            } else if (daysLeft >= 1) {
+              daysEl.textContent =
+                'Te quedan ' +
+                daysLeft +
+                (daysLeft === 1 ? ' día' : ' días') +
+                ' de suscripción.';
+              daysEl.className = 'text-sm font-semibold text-[#fde68a] mb-1.5';
+            } else {
+              daysEl.textContent = 'La licencia vence en las próximas horas.';
+              daysEl.className = 'text-sm font-semibold text-amber-200 mb-1.5';
+            }
+            }
+          }
+        } else {
+          daysEl.classList.add('hidden');
+          daysEl.textContent = '';
+        }
+      }
       var amt = FERRIOL_PLAN_AMOUNTS.kioscoMonthly;
       var amtStr = amt.toLocaleString('es-AR');
       if (priceEl) {
