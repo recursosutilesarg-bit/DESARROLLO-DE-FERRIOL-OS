@@ -1772,42 +1772,102 @@
         return { html: 'Consultá con el administrador quién es tu referidor.', ok: false, partnerTransferInfo: '' };
       }
     }
-    function syncMercadoPagoCheckoutUi() {
-      var raw = typeof window._ferriolMercadoPagoCheckoutUrl === 'string' ? String(window._ferriolMercadoPagoCheckoutUrl).trim() : '';
-      var u = raw;
-      if (raw && !/^https?:\/\//i.test(raw) && /^[\w.-]+\.[a-z]{2,}(\/.*)?$/i.test(raw.replace(/^\/*/, ''))) {
-        u = 'https://' + raw.replace(/^\/+/, '');
+    function ferriolMercadoPagoUrlsDefault() {
+      return { kit: '', kioscoMonthly: '', vendorMonthly: '' };
+    }
+    function ferriolNormalizeMercadoPagoUrl(raw) {
+      var s = typeof raw === 'string' ? raw.trim() : String(raw || '').trim();
+      if (!s) return '';
+      var u = s;
+      if (!/^https?:\/\//i.test(u) && /^[\w.-]+\.[a-z]{2,}(\/.*)?$/i.test(u.replace(/^\/*/, ''))) {
+        u = 'https://' + u.replace(/^\/+/, '');
       }
-      var ok = /^https?:\/\//i.test(u);
-      var wrap = document.getElementById('planPanelMercadoPagoWrap');
-      var btn = document.getElementById('planPanelBtnMercadoPago');
-      var miss = document.getElementById('planPanelMercadoPagoMissingHint');
-      if (wrap) wrap.classList.remove('hidden');
-      if (btn) {
-        btn.disabled = !ok;
-        if (ok) {
+      return /^https?:\/\//i.test(u) ? u : '';
+    }
+    function ferriolMergeMercadoPagoSettingsRows(rows) {
+      var out = ferriolMercadoPagoUrlsDefault();
+      var jsonRow = (rows || []).filter(function (r) {
+        return r.key === 'ferriol_mercadopago_checkout_urls';
+      })[0];
+      var legacyRow = (rows || []).filter(function (r) {
+        return r.key === 'ferriol_mercadopago_checkout_url';
+      })[0];
+      if (jsonRow && jsonRow.value != null && String(jsonRow.value).trim() !== '') {
+        try {
+          var p = typeof jsonRow.value === 'string' ? JSON.parse(jsonRow.value) : jsonRow.value;
+          if (p && typeof p === 'object') {
+            if (p.kit != null) out.kit = String(p.kit).trim();
+            if (p.kioscoMonthly != null) out.kioscoMonthly = String(p.kioscoMonthly).trim();
+            if (p.vendorMonthly != null) out.vendorMonthly = String(p.vendorMonthly).trim();
+          }
+        } catch (_) {}
+      }
+      if (legacyRow && legacyRow.value != null && String(legacyRow.value).trim() !== '') {
+        var leg = String(legacyRow.value).trim();
+        if (!out.kit) out.kit = leg;
+        if (!out.kioscoMonthly) out.kioscoMonthly = leg;
+        if (!out.vendorMonthly) out.vendorMonthly = leg;
+      }
+      return out;
+    }
+    function ferriolApplyMercadoPagoUrlsToWindow(parsedObj) {
+      var src = parsedObj && typeof parsedObj === 'object' ? parsedObj : ferriolMercadoPagoUrlsDefault();
+      window._ferriolMercadoPagoUrls = {
+        kit: ferriolNormalizeMercadoPagoUrl(src.kit || ''),
+        kioscoMonthly: ferriolNormalizeMercadoPagoUrl(src.kioscoMonthly || ''),
+        vendorMonthly: ferriolNormalizeMercadoPagoUrl(src.vendorMonthly || '')
+      };
+      var d = window._ferriolMercadoPagoUrls;
+      window._ferriolMercadoPagoCheckoutUrl = d.kioscoMonthly || d.kit || d.vendorMonthly || '';
+    }
+    function ferriolFillAdminMercadoPagoInputsFromMerged(rawMerged) {
+      var o = rawMerged && typeof rawMerged === 'object' ? rawMerged : ferriolMercadoPagoUrlsDefault();
+      var k = document.getElementById('adminMercadoPagoCheckoutUrlKit');
+      var ko = document.getElementById('adminMercadoPagoCheckoutUrlKiosco');
+      var v = document.getElementById('adminMercadoPagoCheckoutUrlVendor');
+      if (k) k.value = o.kit || '';
+      if (ko) ko.value = o.kioscoMonthly || '';
+      if (v) v.value = o.vendorMonthly || '';
+    }
+    function syncMercadoPagoCheckoutUi() {
+      var urls = window._ferriolMercadoPagoUrls && typeof window._ferriolMercadoPagoUrls === 'object'
+        ? window._ferriolMercadoPagoUrls
+        : ferriolMercadoPagoUrlsDefault();
+      var map = {
+        kit: urls.kit ? ferriolNormalizeMercadoPagoUrl(urls.kit) : '',
+        kioscoMonthly: urls.kioscoMonthly ? ferriolNormalizeMercadoPagoUrl(urls.kioscoMonthly) : '',
+        vendorMonthly: urls.vendorMonthly ? ferriolNormalizeMercadoPagoUrl(urls.vendorMonthly) : ''
+      };
+      document.querySelectorAll('.ferriol-mp-pay-btn[data-mp-product]').forEach(function (btn) {
+        var prod = btn.getAttribute('data-mp-product');
+        var u = map[prod] || '';
+        btn.disabled = !u;
+        if (u) {
           btn.setAttribute('data-mp-url', u);
           btn.title = 'Abre Mercado Pago en una nueva pestaña.';
         } else {
           btn.removeAttribute('data-mp-url');
-          btn.title = 'Aún sin link público de cobro: el fundador lo carga en Más → Ajustes del sistema.';
+          btn.title = 'Sin link: cargalo en Más → Ajustes del sistema (Mercado Pago por producto).';
         }
-      }
-      if (miss) miss.classList.toggle('hidden', !!ok);
+      });
+      var anyOk = !!(map.kit || map.kioscoMonthly || map.vendorMonthly);
+      var wrap = document.getElementById('planPanelMercadoPagoWrap');
+      var miss = document.getElementById('planPanelMercadoPagoMissingHint');
+      if (wrap) wrap.classList.remove('hidden');
+      if (miss) miss.classList.toggle('hidden', anyOk);
     }
     async function ferriolRefreshMercadoPagoCheckoutUrl() {
       if (!supabaseClient) {
-        window._ferriolMercadoPagoCheckoutUrl = '';
+        ferriolApplyMercadoPagoUrlsToWindow({ kit: '', kioscoMonthly: '', vendorMonthly: '' });
         syncMercadoPagoCheckoutUi();
         return;
       }
       try {
-        var r = await supabaseClient.from('app_settings').select('value').eq('key', 'ferriol_mercadopago_checkout_url').maybeSingle();
+        var r = await supabaseClient.from('app_settings').select('key, value').in('key', ['ferriol_mercadopago_checkout_urls', 'ferriol_mercadopago_checkout_url']);
         if (r.error) throw r.error;
-        var v = (r.data && r.data.value != null) ? String(r.data.value).trim() : '';
-        window._ferriolMercadoPagoCheckoutUrl = v;
+        ferriolApplyMercadoPagoUrlsToWindow(ferriolMergeMercadoPagoSettingsRows(r.data || []));
       } catch (_) {
-        window._ferriolMercadoPagoCheckoutUrl = '';
+        ferriolApplyMercadoPagoUrlsToWindow({ kit: '', kioscoMonthly: '', vendorMonthly: '' });
       }
       syncMercadoPagoCheckoutUi();
     }
@@ -1943,11 +2003,11 @@
       try {
         if (supabaseClient) await ferriolRefreshMercadoPagoCheckoutUrl();
         else {
-          window._ferriolMercadoPagoCheckoutUrl = '';
+          ferriolApplyMercadoPagoUrlsToWindow({ kit: '', kioscoMonthly: '', vendorMonthly: '' });
           syncMercadoPagoCheckoutUi();
         }
       } catch (_) {
-        window._ferriolMercadoPagoCheckoutUrl = '';
+        ferriolApplyMercadoPagoUrlsToWindow({ kit: '', kioscoMonthly: '', vendorMonthly: '' });
         syncMercadoPagoCheckoutUi();
       }
       var show = currentUser.role === 'kiosquero' || isAnyKioscoPreviewMode();
@@ -1973,7 +2033,7 @@
       var transferBody = 'Falta cargar en Ajustes (fundador) los datos oficiales de la cuenta de Ferriol (empresa) a la que se transfiere la suscripción mensual de todos los negocios.';
       if (!supabaseClient) {
         transferBody = 'Configurá Supabase para ver datos de pago.';
-        window._ferriolMercadoPagoCheckoutUrl = '';
+        ferriolApplyMercadoPagoUrlsToWindow({ kit: '', kioscoMonthly: '', vendorMonthly: '' });
         syncMercadoPagoCheckoutUi();
       } else {
         try {
@@ -5145,10 +5205,13 @@
         } catch (_) {}
       });
     }
-    var planPanelBtnMercadoPago = document.getElementById('planPanelBtnMercadoPago');
-    if (planPanelBtnMercadoPago) {
-      planPanelBtnMercadoPago.addEventListener('click', function () {
-        var u = planPanelBtnMercadoPago.getAttribute('data-mp-url') || (typeof window._ferriolMercadoPagoCheckoutUrl === 'string' ? window._ferriolMercadoPagoCheckoutUrl : '').trim();
+    var planCheckoutMetodosPagoEl = document.getElementById('planCheckoutMetodosPago');
+    if (planCheckoutMetodosPagoEl) {
+      planCheckoutMetodosPagoEl.addEventListener('click', function (ev) {
+        var tgt = ev.target;
+        var btn = tgt && tgt.closest ? tgt.closest('.ferriol-mp-pay-btn[data-mp-product]') : null;
+        if (!btn || btn.disabled) return;
+        var u = btn.getAttribute('data-mp-url');
         if (!u || !/^https?:\/\//i.test(u)) return;
         try {
           window.open(u, '_blank', 'noopener,noreferrer');
@@ -9597,7 +9660,7 @@ async function showApp() {
     async function renderSuper() {
       if (!supabaseClient) return;
       try {
-        const { data: settingsRows } = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4', 'admin_delete_password', 'trial_reminder_config', 'ferriol_transfer_info', 'trial_duration_days', 'ferriol_checkout_copy', 'ferriol_plan_amounts', 'ferriol_mercadopago_checkout_url']);
+        const { data: settingsRows } = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4', 'admin_delete_password', 'trial_reminder_config', 'ferriol_transfer_info', 'trial_duration_days', 'ferriol_checkout_copy', 'ferriol_plan_amounts', 'ferriol_mercadopago_checkout_urls', 'ferriol_mercadopago_checkout_url']);
         var whatsappInput = document.getElementById('adminContactWhatsapp');
         var whatsapp2Input = document.getElementById('adminContactWhatsapp2');
         var whatsapp3Input = document.getElementById('adminContactWhatsapp3');
@@ -9614,24 +9677,17 @@ async function showApp() {
             if (r.key === 'admin_whatsapp_4' && whatsapp4Input) whatsapp4Input.value = r.value || '';
             if (r.key === 'admin_delete_password' && deletePwdInput) deletePwdInput.value = r.value || '';
             if (r.key === 'ferriol_transfer_info' && transferInfoTa) transferInfoTa.value = r.value || '';
-            if (r.key === 'ferriol_mercadopago_checkout_url') {
-              var mpIn = document.getElementById('adminMercadoPagoCheckoutUrl');
-              if (mpIn) mpIn.value = r.value || '';
-              window._ferriolMercadoPagoCheckoutUrl = r.value ? String(r.value).trim() : '';
-              try { syncMercadoPagoCheckoutUi(); } catch (_) {}
-            }
             if (r.key === 'trial_duration_days' && trialDurInput) {
               var td = parseInt(r.value, 10);
               trialDurInput.value = (!isNaN(td) && td >= 1 && td <= 365) ? String(td) : '15';
             }
             if (r.key === 'trial_reminder_config') trialCfgParsed = parseTrialReminderConfigValue(r.value || '');
           });
-          var mpRowFound = settingsRows.some(function (r2) { return r2.key === 'ferriol_mercadopago_checkout_url'; });
-          if (!mpRowFound) {
-            window._ferriolMercadoPagoCheckoutUrl = '';
-            try { syncMercadoPagoCheckoutUi(); } catch (_) {}
-          }
         }
+        var mpMergedLoad = ferriolMergeMercadoPagoSettingsRows(settingsRows || []);
+        ferriolFillAdminMercadoPagoInputsFromMerged(mpMergedLoad);
+        ferriolApplyMercadoPagoUrlsToWindow(mpMergedLoad);
+        try { syncMercadoPagoCheckoutUi(); } catch (_) {}
         var paRow = (settingsRows || []).filter(function (rx) {
           return rx.key === 'ferriol_plan_amounts';
         })[0];
@@ -9892,8 +9948,21 @@ async function showApp() {
           planAmtSaved = ferriolPlanAmountsObjectFromSettingsForm();
           rowsUpsert.push({ key: 'ferriol_plan_amounts', value: JSON.stringify(planAmtSaved) });
         }
-        if (isEmpresaLensSuper() && document.getElementById('adminMercadoPagoCheckoutUrl')) {
-          rowsUpsert.push({ key: 'ferriol_mercadopago_checkout_url', value: String((document.getElementById('adminMercadoPagoCheckoutUrl').value || '')).trim() });
+        if (isEmpresaLensSuper() && document.getElementById('adminMercadoPagoCheckoutUrlKit')) {
+          var mk = document.getElementById('adminMercadoPagoCheckoutUrlKit');
+          var mko = document.getElementById('adminMercadoPagoCheckoutUrlKiosco');
+          var mv = document.getElementById('adminMercadoPagoCheckoutUrlVendor');
+          var kitV = mk ? String(mk.value || '').trim() : '';
+          var kioscoV = mko ? String(mko.value || '').trim() : '';
+          var vendV = mv ? String(mv.value || '').trim() : '';
+          rowsUpsert.push({
+            key: 'ferriol_mercadopago_checkout_urls',
+            value: JSON.stringify({ kit: kitV, kioscoMonthly: kioscoV, vendorMonthly: vendV })
+          });
+          rowsUpsert.push({
+            key: 'ferriol_mercadopago_checkout_url',
+            value: kioscoV || kitV || vendV || ''
+          });
         }
         await supabaseClient.from('app_settings').upsert(rowsUpsert, { onConflict: 'key' });
         if (isEmpresaLensSuper()) {
@@ -9937,9 +10006,15 @@ async function showApp() {
             syncPlanCheckoutPrices();
           } catch (_) {}
         }
-        var mpElSave = document.getElementById('adminMercadoPagoCheckoutUrl');
-        if (isEmpresaLensSuper() && mpElSave) {
-          window._ferriolMercadoPagoCheckoutUrl = String(mpElSave.value || '').trim();
+        var mkSv = document.getElementById('adminMercadoPagoCheckoutUrlKit');
+        var mkoSv = document.getElementById('adminMercadoPagoCheckoutUrlKiosco');
+        var mvSv = document.getElementById('adminMercadoPagoCheckoutUrlVendor');
+        if (isEmpresaLensSuper() && (mkSv || mkoSv || mvSv)) {
+          ferriolApplyMercadoPagoUrlsToWindow({
+            kit: mkSv ? String(mkSv.value || '').trim() : '',
+            kioscoMonthly: mkoSv ? String(mkoSv.value || '').trim() : '',
+            vendorMonthly: mvSv ? String(mvSv.value || '').trim() : ''
+          });
           try { syncMercadoPagoCheckoutUi(); } catch (_) {}
         }
         msgEl.textContent = 'Ajustes guardados.';

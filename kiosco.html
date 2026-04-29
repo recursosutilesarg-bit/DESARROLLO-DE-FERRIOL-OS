@@ -1025,13 +1025,22 @@
               <div class="border-t border-white/12 pt-5">
                 <p class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i data-lucide="credit-card" class="w-5 h-5 shrink-0 text-sky-200/95"></i> Tarjeta · efectivo · Mercado Pago</p>
                 <p class="text-xs text-white/55 mb-3 leading-relaxed">Pago con link público de Mercado Pago (tarjeta, efectivo en red u otros según configure la empresa).</p>
-                <div id="planPanelMercadoPagoWrap" class="w-full">
-                  <button type="button" id="planPanelBtnMercadoPago" class="w-full rounded-xl py-3 px-3 touch-target flex items-center justify-center gap-2 font-bold text-[0.6875rem] sm:text-xs text-white leading-tight text-center border-2 border-sky-400/50 bg-gradient-to-br from-[#009ee3]/90 via-[#008ad4]/95 to-[#006ebb] shadow-lg shadow-sky-900/30 ring-1 ring-white/15 hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:active:scale-100">
-                    <i data-lucide="external-link" class="w-[1.125rem] h-[1.125rem] shrink-0 opacity-95"></i>
-                    <span>PAGAR CON TARJETA / EFECTIVO / MERCADO PAGO</span>
+                <div id="planPanelMercadoPagoWrap" class="w-full space-y-2">
+                  <p class="text-[10px] text-white/50 mb-1">Un link por producto (podés repetir el mismo checkout en varios si aplica).</p>
+                  <button type="button" data-mp-product="kit" class="ferriol-mp-pay-btn w-full rounded-xl py-3 px-3 touch-target flex flex-col sm:flex-row sm:items-center sm:justify-center gap-1 sm:gap-2 font-bold text-[0.6875rem] sm:text-xs text-white leading-tight text-center border-2 border-sky-400/50 bg-gradient-to-br from-[#009ee3]/90 via-[#008ad4]/95 to-[#006ebb] shadow-lg shadow-sky-900/30 ring-1 ring-white/15 hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:active:scale-100">
+                    <span class="inline-flex items-center justify-center gap-2"><i data-lucide="external-link" class="w-[1.125rem] h-[1.125rem] shrink-0 opacity-95"></i><span>Mercado Pago · Kit distribuidor</span></span>
+                    <span class="font-normal opacity-90 text-[0.625rem] sm:text-[10px]">venta inicial</span>
+                  </button>
+                  <button type="button" data-mp-product="kioscoMonthly" class="ferriol-mp-pay-btn w-full rounded-xl py-3 px-3 touch-target flex flex-col sm:flex-row sm:items-center sm:justify-center gap-1 sm:gap-2 font-bold text-[0.6875rem] sm:text-xs text-white leading-tight text-center border-2 border-sky-400/50 bg-gradient-to-br from-[#009ee3]/90 via-[#008ad4]/95 to-[#006ebb] shadow-lg shadow-sky-900/30 ring-1 ring-white/15 hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:active:scale-100">
+                    <span class="inline-flex items-center justify-center gap-2"><i data-lucide="external-link" class="w-[1.125rem] h-[1.125rem] shrink-0 opacity-95"></i><span>Mercado Pago · Suscripción mensual negocio</span></span>
+                    <span class="font-normal opacity-90 text-[0.625rem] sm:text-[10px]">kiosco / sistema</span>
+                  </button>
+                  <button type="button" data-mp-product="vendorMonthly" class="ferriol-mp-pay-btn w-full rounded-xl py-3 px-3 touch-target flex flex-col sm:flex-row sm:items-center sm:justify-center gap-1 sm:gap-2 font-bold text-[0.6875rem] sm:text-xs text-white leading-tight text-center border-2 border-sky-400/50 bg-gradient-to-br from-[#009ee3]/90 via-[#008ad4]/95 to-[#006ebb] shadow-lg shadow-sky-900/30 ring-1 ring-white/15 hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:active:scale-100">
+                    <span class="inline-flex items-center justify-center gap-2"><i data-lucide="external-link" class="w-[1.125rem] h-[1.125rem] shrink-0 opacity-95"></i><span>Mercado Pago · Cuota mensual distribuidor</span></span>
+                    <span class="font-normal opacity-90 text-[0.625rem] sm:text-[10px]">rol socio / red</span>
                   </button>
                 </div>
-                <p id="planPanelMercadoPagoMissingHint" class="text-[11px] text-white/45 leading-snug mt-2">Si no aparece el botón azul, el fundador debe cargar el link en <strong class="text-white/65">Más → Ajustes del sistema</strong> (recuadro azul Mercado Pago).</p>
+                <p id="planPanelMercadoPagoMissingHint" class="text-[11px] text-white/45 leading-snug mt-2">Si ningún botón azul está activo, cargá los links en <strong class="text-white/65">Más → Ajustes del sistema</strong> (recuadro Mercado Pago).</p>
               </div>
             </div>
           </div>
@@ -2059,10 +2068,14 @@
                 Link Mercado Pago (tarjeta / efectivo / MP)
               </h3>
               <p class="text-xs text-white/65 mb-3 leading-relaxed"><strong class="text-white/90">Dónde estás:</strong> pestaña inferior <strong class="text-[#86efac]">Más</strong> → <strong class="text-[#86efac]">Ajustes del sistema</strong> (entrá por el menú de opciones). Si <strong class="text-amber-200/95">no ves este recuadro azul</strong>, no estás como fundador en vista <strong class="text-white/90">Empresa</strong>: tocá el modo en el encabezado y pasá a esa vista (no «negocio» ni modo socio).</p>
-              <p class="text-xs text-white/50 mb-2">Los usuarios verán debajo de «Pagar suscripción mensual» / «Pagar cuota mensual» el botón <strong class="text-white/75">tarjeta / efectivo / Mercado Pago</strong>.</p>
-              <label class="block text-xs font-medium text-white/85 mb-1" for="adminMercadoPagoCheckoutUrl">Pegá acá tu link público de cobro</label>
-              <input type="url" id="adminMercadoPagoCheckoutUrl" name="mercadopago_checkout_url" inputmode="url" autocomplete="off" placeholder="https://www.mercadopago.com.ar/..." class="w-full glass rounded-xl px-4 py-3 border border-sky-400/35 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-400/60 text-sm mb-2 font-mono">
-              <p class="text-[10px] text-white/45 mb-0">Al final de esta pantalla tocá <strong class="text-[#86efac]">Guardar ajustes</strong>. Para ocultar el botón en la app, dejá el campo vacío.</p>
+              <p class="text-xs text-white/50 mb-3">En la página <strong class="text-white/75">Plan</strong> hay un botón de Mercado Pago por producto: <strong class="text-white/75">kit</strong>, <strong class="text-white/75">suscripción mensual del negocio</strong> y <strong class="text-white/75">cuota mensual del distribuidor</strong>. Podés usar el mismo link en más de uno si comparten checkout.</p>
+              <label class="block text-xs font-medium text-white/85 mb-1" for="adminMercadoPagoCheckoutUrlKit">Kit distribuidor (venta inicial)</label>
+              <input type="url" id="adminMercadoPagoCheckoutUrlKit" name="mercadopago_checkout_url_kit" inputmode="url" autocomplete="off" placeholder="https://www.mercadopago.com.ar/..." class="w-full glass rounded-xl px-4 py-3 border border-sky-400/35 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-400/60 text-sm mb-3 font-mono">
+              <label class="block text-xs font-medium text-white/85 mb-1" for="adminMercadoPagoCheckoutUrlKiosco">Suscripción mensual · negocio (kiosco)</label>
+              <input type="url" id="adminMercadoPagoCheckoutUrlKiosco" name="mercadopago_checkout_url_kiosco" inputmode="url" autocomplete="off" placeholder="https://www.mercadopago.com.ar/..." class="w-full glass rounded-xl px-4 py-3 border border-sky-400/35 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-400/60 text-sm mb-3 font-mono">
+              <label class="block text-xs font-medium text-white/85 mb-1" for="adminMercadoPagoCheckoutUrlVendor">Cuota mensual · distribuidor (socio / red)</label>
+              <input type="url" id="adminMercadoPagoCheckoutUrlVendor" name="mercadopago_checkout_url_vendor" inputmode="url" autocomplete="off" placeholder="https://www.mercadopago.com.ar/..." class="w-full glass rounded-xl px-4 py-3 border border-sky-400/35 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-400/60 text-sm mb-2 font-mono">
+              <p class="text-[10px] text-white/45 mb-0">Al final de esta pantalla tocá <strong class="text-[#86efac]">Guardar ajustes</strong>. Un producto sin link deja su botón deshabilitado en Plan.</p>
             </div>
             <div class="border-t border-white/10 pt-4 mt-4">
               <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
@@ -3042,7 +3055,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426_mercadopago_checkout"></script>
+  <script defer src="kiosco-app.js?v=20260426_mercadopago_checkout_multi"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>
