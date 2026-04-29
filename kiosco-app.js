@@ -384,26 +384,14 @@
       return p[0] + '-' + p[1] + '-01';
     }
     async function syncKiosqueroPartnerUpgradeUi() {
-      var wrap = document.getElementById('partnerUpgradeCtaWrap');
-      var btn = document.getElementById('btnKiosqueroPartnerUpgrade');
-      var outer = document.getElementById('partnerUpgradeOuterCard');
-      if (!wrap || !btn) return;
+      var amd = document.getElementById('accountMenuDistribuidorWrap');
+      var amb = document.getElementById('accountMenuBtnDistribuidor');
+      var planBt = document.getElementById('btnPlanOpenDistribuidorRequest');
       if (!currentUser || currentUser.role !== 'kiosquero') {
-        wrap.classList.add('hidden');
-        if (outer) outer.classList.add('hidden');
-        var amDistHide = document.getElementById('accountMenuDistribuidorWrap');
-        if (amDistHide) amDistHide.classList.add('hidden');
+        if (amd) amd.classList.add('hidden');
         return;
       }
-      if (outer) outer.classList.remove('hidden');
-      wrap.classList.remove('hidden');
-      btn.disabled = false;
-      btn.classList.remove('opacity-80', 'cursor-not-allowed');
-      var lbl =
-        '<i data-lucide="badge-check" class="w-4 h-4 shrink-0"></i> Quiero ser distribuidor';
-      btn.innerHTML = lbl;
-      btn.className =
-        'w-full py-3 px-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 touch-target active:scale-[0.98] text-white border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 shadow-lg shadow-violet-600/40 ring-1 ring-white/15 hover:brightness-110';
+      var pendingUpgrade = false;
       try {
         if (supabaseClient) {
           var r = await supabaseClient
@@ -412,28 +400,36 @@
             .eq('profile_id', currentUser.id)
             .eq('status', 'pending')
             .maybeSingle();
-          if (!r.error && r.data) {
-            btn.disabled = true;
-            btn.classList.add('opacity-80', 'cursor-not-allowed');
-            btn.textContent = 'Solicitud de distribuidor pendiente';
-          }
+          pendingUpgrade = !r.error && !!r.data;
         }
       } catch (_) {}
       try {
-        var amd = document.getElementById('accountMenuDistribuidorWrap');
-        var amb = document.getElementById('accountMenuBtnDistribuidor');
         if (amd && amb) {
           amd.classList.remove('hidden');
-          amb.disabled = btn.disabled;
-          if (btn.disabled) {
+          amb.disabled = pendingUpgrade;
+          if (pendingUpgrade) {
             amb.className =
-              'w-full rounded-xl py-2.5 px-3 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 touch-target border border-violet-400/40 bg-violet-950/65 text-white/90 opacity-85 cursor-not-allowed';
-            amb.textContent = btn.textContent || 'Solicitud pendiente';
+              'w-full rounded-xl py-3 px-3 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 touch-target border border-violet-400/40 bg-violet-950/65 text-white/90 opacity-85 cursor-not-allowed';
+            amb.textContent = 'Solicitud de distribuidor pendiente';
           } else {
             amb.className =
-              'w-full rounded-xl py-2.5 px-3 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-white border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 shadow-md shadow-violet-600/30 ring-1 ring-white/10 hover:brightness-110 active:scale-[0.98]';
+              'w-full rounded-xl py-3 px-3 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-white border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 shadow-md shadow-violet-600/30 ring-1 ring-white/10 hover:brightness-110 active:scale-[0.98]';
             amb.innerHTML =
               '<i data-lucide="badge-check" class="w-4 h-4 shrink-0"></i> Quiero ser distribuidor/a del sistema';
+          }
+        }
+        if (planBt) {
+          planBt.disabled = pendingUpgrade;
+          if (pendingUpgrade) {
+            planBt.className =
+              'w-full rounded-2xl px-5 py-4 font-semibold text-sm text-white touch-target flex items-center justify-center gap-2 border border-violet-400/40 bg-violet-950/65 opacity-85 cursor-not-allowed';
+            planBt.innerHTML =
+              '<span>Solicitud de distribuidor pendiente</span>';
+          } else {
+            planBt.className =
+              'w-full rounded-2xl px-5 py-4 font-bold text-base text-white shadow-xl border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 ring-2 ring-white/10 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2 mb-2';
+            planBt.innerHTML =
+              '<i data-lucide="badge-check" class="w-6 h-6 shrink-0"></i><span>Continuar con la solicitud</span>';
           }
         }
       } catch (_) {}
@@ -4062,35 +4058,48 @@
       if (!currentUser) return;
       var admin = ferriolPlanPayModalMode() === 'admin';
       var ht = document.getElementById('planPanelHeadingText');
-      if (ht) ht.textContent = admin ? 'Plan · Abonar cuota distribuidor' : 'Plan · Abonar suscripción';
+      if (ht) {
+        ht.textContent = admin ? 'Resumen · Cuota distribuidor' : 'Resumen · Suscripción Ferriol OS';
+      }
       var lead = document.getElementById('planPanelLead');
       if (lead) {
         if (admin) {
-          lead.innerHTML = 'La <strong class="text-white/85">cuota distribuidor</strong> de Ferriol la abonás <strong class="text-white/85">solo a Ferriol (empresa)</strong>, con los datos oficiales. Aplica a fundadores y socios de red (rol distribuidor).';
+          lead.innerHTML =
+            'Este resumen es para abonar la <strong class="text-white/88">cuota de red / distribuidor</strong>: un solo pago a <strong class="text-cyan-200/95">Ferriol (empresa)</strong>, con los datos oficiales. Revisá el detalle abajo y tocá el botón naranja cuando quieras ver CBU/alias y mandar el comprobante.';
         } else {
-          lead.innerHTML = 'La cuota del sistema Ferriol la abonás <strong class="text-white/85">solo a Ferriol (empresa)</strong>, con los datos oficiales. Es el mismo proceso para negocio, socios de red y administración empresa.';
+          lead.innerHTML =
+            'Este resumen corresponde a tu <strong class="text-emerald-100/90">licencia mensual del negocio (kiosco)</strong>. El importe y la vigencia dependen de tu plan; el pago es siempre a <strong class="text-[#86efac]/95">Ferriol (empresa)</strong>. Luego abrís los datos bancarios y enviás el comprobante.';
+        }
+      }
+      var eyeb = document.getElementById('planCheckoutPayEyebrow');
+      if (eyeb) {
+        eyeb.textContent = admin ? 'Liquidación · distribuidor' : 'Tu compra · licencia mensual';
+      }
+      var lk = document.getElementById('planCheckoutPayDetailsListKiosco');
+      var la = document.getElementById('planCheckoutPayDetailsListAdmin');
+      if (lk && la) {
+        if (admin) {
+          la.classList.remove('hidden');
+          lk.classList.add('hidden');
+        } else {
+          lk.classList.remove('hidden');
+          la.classList.add('hidden');
         }
       }
       var prim = document.getElementById('planPanelPayBtnPrimary');
-      if (prim) prim.textContent = admin ? 'Abonar cuota distribuidor' : 'Abonar suscripción';
+      if (prim) prim.textContent = admin ? 'Ver datos para transferir' : 'Ver datos para transferir';
+      var sub = document.getElementById('planPanelPayBtnSubtitle');
+      if (sub) {
+        sub.textContent = admin ? ' · cuenta Ferriol' : ' · cuenta Ferriol';
+      }
       var foot = document.getElementById('planPanelFooterHint');
       if (foot) {
-        if (admin) {
-          foot.innerHTML = 'Distribuidores / fundadores / socios de red: en <strong class="text-white/55">menú foto · Mi plan</strong> tocá <strong class="text-emerald-100/90">Abonar cuota</strong> (o <strong class="text-white/55">Más opciones</strong>).';
-        } else {
-          foot.innerHTML = 'Todos los perfiles usan el mismo flujo: <strong class="text-white/55">Cuenta</strong> (avatar) → <strong class="text-emerald-100/90">Abonar suscripción</strong> o desde <strong class="text-white/65">Más</strong>. Vigencia de licencia: <strong class="text-white/55">Inicio</strong> del negocio (kioscos).';
-        }
+        foot.innerHTML = admin
+          ? 'En el siguiente paso se abren los datos cuenta <strong class="text-emerald-100/85">Ferriol</strong>. La cuota distribuidor <strong class="text-white/65">no va al patrocinador</strong>.'
+          : 'El siguiente paso muestra CBU/alias y texto para copiar. La vigencia de tu licencia también la ves en <strong class="text-white/55">Inicio</strong>.';
       }
       var aml = document.getElementById('accountMenuPlanAbonarLabel');
       if (aml) aml.textContent = admin ? 'Abonar cuota distribuidor' : 'Abonar suscripción';
-      var masl1 = document.getElementById('btnMasPlanLine1');
-      if (masl1) masl1.textContent = admin ? 'Cuenta · Plan · Abonar cuota distribuidor' : 'Cuenta · Plan · Abonar suscripción';
-      var masl2 = document.getElementById('btnMasPlanLine2');
-      if (masl2) {
-        masl2.textContent = admin
-          ? 'Un solo lugar: cuota distribuidor a Ferriol (empresa) — mismos datos oficiales'
-          : 'Un solo lugar: datos de cuenta Ferriol (empresa) para todos los perfiles';
-      }
     }
 
     function syncPlanPanelTrialSummary() {
@@ -4123,6 +4132,32 @@
         el.innerHTML = '<span class="font-semibold text-emerald-200/95">Tu vigencia en el sistema:</span> hasta <strong class="text-white/90">' + ferriolEscapeHtmlLite(fechaStr) + '</strong> · quedan <strong class="tabular-nums">' + String(daysLeft) + '</strong> día(s).';
       }
       el.classList.remove('hidden');
+    }
+
+    /** Ir a pantalla Plan / resumen antes de pagar o antes de solicitar distribuidor */
+    window._ferriolGoToPlanCheckout = function (mode, explicitReturnPanel) {
+      try {
+        window._ferriolPlanCheckoutMode =
+          String(mode || '').toLowerCase() === 'distribuidor' ? 'distribuidor' : 'pay';
+      } catch (_) {
+        window._ferriolPlanCheckoutMode = 'pay';
+      }
+      if (typeof window._ferriolGoToPlanPanel === 'function') {
+        window._ferriolGoToPlanPanel(explicitReturnPanel);
+      } else goToPanel('plan');
+    };
+
+    function syncPlanCheckoutLayout() {
+      var raw = typeof window._ferriolPlanCheckoutMode === 'string' ? window._ferriolPlanCheckoutMode : 'pay';
+      var mode = raw === 'distribuidor' ? 'distribuidor' : 'pay';
+      if (mode === 'distribuidor' && (!currentUser || currentUser.role !== 'kiosquero')) {
+        mode = 'pay';
+      }
+      window._ferriolPlanCheckoutMode = mode;
+      var payW = document.getElementById('planCheckoutPayWrap');
+      var distW = document.getElementById('planCheckoutDistribWrap');
+      if (payW) payW.classList.toggle('hidden', mode !== 'pay');
+      if (distW) distW.classList.toggle('hidden', mode !== 'distribuidor');
     }
 
     /** Navegar a pantalla Plan; al volver, restaurar panel guardado en _ferriolPlanPanelReturn. */
@@ -4464,10 +4499,15 @@
       }
       if (name === 'plan') {
         syncPlanRolePayLabels();
+        try {
+          syncPlanCheckoutLayout();
+        } catch (_) {}
         syncPlanPanelTrialSummary();
-      }
-      if (name === 'mas') {
-        syncPlanRolePayLabels();
+        try {
+          if (window._ferriolPlanCheckoutMode === 'distribuidor' && typeof syncKiosqueroPartnerUpgradeUi === 'function') {
+            syncKiosqueroPartnerUpgradeUi().catch(function () {});
+          }
+        } catch (_) {}
       }
       if (name === 'dashboard') {
         updateTrialCountdown();
@@ -4690,11 +4730,8 @@
         if (typeof closeAccountPlanSheet === 'function') closeAccountPlanSheet();
         closeAccountMenuDrawer(true);
         try {
-          if (typeof window.ferriolOpenEmpresaSubscriptionModal === 'function') {
-            var pm =
-              typeof ferriolPlanPayModalMode === 'function' ? ferriolPlanPayModalMode() : 'kiosco';
-            window.ferriolOpenEmpresaSubscriptionModal(pm);
-          }
+          if (typeof window._ferriolGoToPlanCheckout === 'function') window._ferriolGoToPlanCheckout('pay');
+          else goToPanel('plan');
         } catch (_) {}
       });
     }
@@ -4704,7 +4741,10 @@
         if (accountMenuBtnDistribuidor.disabled) return;
         if (typeof closeAccountPlanSheet === 'function') closeAccountPlanSheet();
         closeAccountMenuDrawer(true);
-        openKiosqueroPartnerUpgradeModal();
+        try {
+          if (typeof window._ferriolGoToPlanCheckout === 'function') window._ferriolGoToPlanCheckout('distribuidor');
+          else goToPanel('plan');
+        } catch (_) {}
       });
     }
     var accountMenuBtnBank = document.getElementById('accountMenuBtnBank');
@@ -9928,11 +9968,6 @@ async function showApp() {
     if (btnAffDone) btnAffDone.onclick = closePartnerAffiliateLinksModal;
     var btnAffOv = document.getElementById('partnerAffiliateLinksModalOverlay');
     if (btnAffOv) btnAffOv.onclick = closePartnerAffiliateLinksModal;
-    var btnKpu = document.getElementById('btnKiosqueroPartnerUpgrade');
-    if (btnKpu) btnKpu.onclick = function () {
-      if (btnKpu.disabled) return;
-      openKiosqueroPartnerUpgradeModal();
-    };
     var kpuClose = document.getElementById('kiosqueroPartnerUpgradeModalClose');
     if (kpuClose) kpuClose.onclick = closeKiosqueroPartnerUpgradeModal;
     var kpuOv = document.getElementById('kiosqueroPartnerUpgradeModalOverlay');
@@ -10057,21 +10092,25 @@ async function showApp() {
           goToPanel('dashboard');
         }
       });
-      var masBtn = document.getElementById('btnMasIrPlanSuscripcion');
-      if (masBtn) masBtn.addEventListener('click', function () {
-        if (typeof window._ferriolGoToPlanPanel === 'function') window._ferriolGoToPlanPanel('mas');
-        else goToPanel('plan');
-      });
       var bp = document.getElementById('btnPlanOpenEmpresaSubscription');
-      if (bp) bp.addEventListener('click', function () {
-        if (typeof window.ferriolOpenEmpresaSubscriptionModal === 'function') {
-          window.ferriolOpenEmpresaSubscriptionModal(typeof ferriolPlanPayModalMode === 'function' ? ferriolPlanPayModalMode() : 'admin');
-        }
-      });
+      if (bp) {
+        bp.addEventListener('click', function () {
+          if (typeof window.ferriolOpenEmpresaSubscriptionModal === 'function') {
+            window.ferriolOpenEmpresaSubscriptionModal(typeof ferriolPlanPayModalMode === 'function' ? ferriolPlanPayModalMode() : 'admin');
+          }
+        });
+      }
+      var pq = document.getElementById('btnPlanOpenDistribuidorRequest');
+      if (pq) {
+        pq.addEventListener('click', function () {
+          if (pq.disabled) return;
+          if (typeof openKiosqueroPartnerUpgradeModal === 'function') openKiosqueroPartnerUpgradeModal();
+        });
+      }
     })();
     var btnOpenClientSale = document.getElementById('btnOpenClientSaleRequestModal');
     if (btnOpenClientSale) btnOpenClientSale.onclick = function () { openClientSaleRequestModal(); };
-    var clientSaleClose = document.getElementById('clientSaleRequestModalClose');
+
     if (clientSaleClose) clientSaleClose.onclick = closeClientSaleRequestModal;
     var clientSaleOv = document.getElementById('clientSaleRequestModalOverlay');
     if (clientSaleOv) clientSaleOv.onclick = closeClientSaleRequestModal;
