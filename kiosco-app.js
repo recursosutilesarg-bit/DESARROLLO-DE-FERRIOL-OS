@@ -383,6 +383,58 @@
       if (p.length !== 2) return null;
       return p[0] + '-' + p[1] + '-01';
     }
+    async function syncKiosqueroPartnerUpgradeUi() {
+      var wrap = document.getElementById('partnerUpgradeCtaWrap');
+      var btn = document.getElementById('btnKiosqueroPartnerUpgrade');
+      if (!wrap || !btn) return;
+      if (!currentUser || currentUser.role !== 'kiosquero') {
+        wrap.classList.add('hidden');
+        return;
+      }
+      wrap.classList.remove('hidden');
+      btn.disabled = false;
+      btn.classList.remove('opacity-80', 'cursor-not-allowed');
+      var lbl = '';
+      lbl = '<i data-lucide="badge-check" class="w-4 h-4 shrink-0"></i> Quiero ser distribuidor';
+      btn.innerHTML = lbl;
+      try {
+        if (supabaseClient) {
+          var r = await supabaseClient
+            .from('ferriol_kiosquero_partner_upgrade_requests')
+            .select('id,status')
+            .eq('profile_id', currentUser.id)
+            .eq('status', 'pending')
+            .maybeSingle();
+          if (!r.error && r.data) {
+            btn.disabled = true;
+            btn.classList.add('opacity-80', 'cursor-not-allowed');
+            btn.textContent = 'Solicitud de distribuidor pendiente';
+          }
+        }
+      } catch (_) {}
+      try {
+        if (typeof lucide !== 'undefined' && lucide.createIcons && !btn.disabled) lucide.createIcons();
+      } catch (_) {}
+    }
+    function openKiosqueroPartnerUpgradeModal() {
+      var m = document.getElementById('kiosqueroPartnerUpgradeModal');
+      var err = document.getElementById('kiosqueroPartnerUpgradeErr');
+      var em = document.getElementById('kiosqueroPartnerUpgradeKitEmail');
+      var no = document.getElementById('kiosqueroPartnerUpgradeNote');
+      if (!m) return;
+      if (err) { err.textContent = ''; err.classList.add('hidden'); err.classList.remove('show'); }
+      if (em) em.value = '';
+      if (no) no.value = '';
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+      try {
+        if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+      } catch (_) {}
+    }
+    function closeKiosqueroPartnerUpgradeModal() {
+      var m = document.getElementById('kiosqueroPartnerUpgradeModal');
+      if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+    }
     async function ferriolResolveProfileIdByEmail(email) {
       if (!supabaseClient) return null;
       var e = String(email || '').trim().toLowerCase();
@@ -3422,8 +3474,9 @@
       if (kpr) { kpr.classList.add('hidden'); kpr.classList.remove('flex'); }
       var kpc = document.getElementById('kiosqueroProvisionCompleteModal');
       if (kpc) { kpc.classList.add('hidden'); kpc.classList.remove('flex'); }
+      var kpur = document.getElementById('kiosqueroPartnerUpgradeModal');
+      if (kpur) { kpur.classList.add('hidden'); kpur.classList.remove('flex'); }
       var pal = document.getElementById('partnerAffiliateLinksModal');
-      if (pal) { pal.classList.add('hidden'); pal.classList.remove('flex'); }
       var pti = document.getElementById('partnerTransferInfoModal');
       if (pti) { pti.classList.add('hidden'); pti.classList.remove('flex'); }
       var amd = document.getElementById('accountMenuDrawer');
@@ -6661,6 +6714,7 @@ async function showApp() {
       history.replaceState({ panel: 'dashboard', root: true }, '', location.href);
       ferriolStartNotificationPolling();
       lucide.createIcons();
+      await syncKiosqueroPartnerUpgradeUi();
     }
 }
 
@@ -8205,20 +8259,23 @@ async function showApp() {
           var r = await supabaseClient.from('ferriol_membership_day_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false }).limit(50);
           var rProv = await supabaseClient.from('ferriol_partner_provision_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false }).limit(50);
           var rKpr = await supabaseClient.from('ferriol_kiosquero_provision_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false }).limit(50);
+          var rKpur = await supabaseClient.from('ferriol_kiosquero_partner_upgrade_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false }).limit(50);
           var dayErr = r.error;
           var provErr = rProv.error;
           var kprErr = rKpr.error;
+          var kpurErr = rKpur.error;
           var rows = dayErr ? [] : (r.data || []);
           var provRows = provErr ? [] : (rProv.data || []);
           var kprRows = kprErr ? [] : (rKpr.data || []);
+          var kpurRows = kpurErr ? [] : (rKpur.data || []);
           founderBox.classList.remove('hidden');
-          if (dayErr && provErr && kprErr) {
-            founderBox.innerHTML = '<p class="text-xs text-amber-200/90 font-medium mb-1">Aprobaciones pendientes</p><p class="text-xs text-white/55">No se pudieron cargar las colas. Ejecutá los SQL: membresía, partner-provision, kiosquero-provision, mdr-partner-target. ' + String(dayErr.message || provErr.message || kprErr.message || '') + '</p>';
+          if (dayErr && provErr && kprErr && kpurErr) {
+            founderBox.innerHTML = '<p class="text-xs text-amber-200/90 font-medium mb-1">Aprobaciones pendientes</p><p class="text-xs text-white/55">No se pudieron cargar las colas. Ejecutá los SQL del proyecto (membresía, partner-provision, kiosquero-provision, <strong class="text-white/70">supabase-ferriol-kiosquero-partner-upgrade-requests.sql</strong>, mdr-partner-target). ' + String(dayErr.message || provErr.message || kprErr.message || kpurErr.message || '') + '</p>';
             lucide.createIcons();
             return;
           }
-          if (rows.length === 0 && provRows.length === 0 && kprRows.length === 0) {
-            founderBox.innerHTML = '<p class="text-xs text-amber-200/90 font-medium mb-1 flex items-center gap-2"><i data-lucide="inbox" class="w-4 h-4"></i> Aprobaciones (empresa)</p><p class="text-xs text-white/55">No hay pendientes: días de licencia, altas de socios ni altas de negocios (kioscos).</p>';
+          if (rows.length === 0 && provRows.length === 0 && kprRows.length === 0 && kpurRows.length === 0) {
+            founderBox.innerHTML = '<p class="text-xs text-amber-200/90 font-medium mb-1 flex items-center gap-2"><i data-lucide="inbox" class="w-4 h-4"></i> Aprobaciones (empresa)</p><p class="text-xs text-white/55">No hay pendientes: días de licencia, altas de socios, altas de negocios ni upgrades kiosco→socio.</p>';
             lucide.createIcons();
             return;
           }
@@ -8285,6 +8342,25 @@ async function showApp() {
                 '<div class="flex flex-wrap gap-2 mt-2">' +
                 '<button type="button" class="ferriol-kpr-approve btn-glow rounded-lg py-1.5 px-3 text-[11px] font-semibold touch-target" data-kpr-id="' + row.id + '">Aprobar alta kiosco</button>' +
                 '<button type="button" class="ferriol-kpr-reject rounded-lg py-1.5 px-3 text-[11px] font-semibold touch-target border border-red-400/50 bg-red-500/15 text-red-200" data-kpr-id="' + row.id + '">Rechazar</button>' +
+                '</div></div>';
+            });
+            html += '</div>';
+          }
+          if (kpurErr) {
+            html += '<p class="text-[10px] text-red-300 mb-2">Upgrade kiosco → socio: error. ' + String(kpurErr.message || '') + '</p>';
+          } else if (kpurRows.length > 0) {
+            html += '<p class="text-[11px] font-medium text-blue-300/95 mb-1">Kiosquero solicita pasar a distribuidor</p><div class="space-y-2 max-h-[26vh] overflow-y-auto pr-1">';
+            kpurRows.forEach(function (row) {
+              var kn = String(nameOf(row.profile_id)).replace(/</g, '&lt;');
+              var pe = pool.find(function (x) { return x && x.id === row.profile_id; });
+              var em = pe && pe.email ? String(pe.email).replace(/</g, '&lt;') : '';
+              var kitLine = row.partner_kit_sponsor_id ? '<p class="text-[10px] text-violet-200/90">Socio del kit: ' + String(nameOf(row.partner_kit_sponsor_id)).replace(/</g, '&lt;') + '</p>' : '<p class="text-[10px] text-white/45">Socio del kit: misma línea que el negocio (sponsor)</p>';
+              var noteLine = row.applicant_note ? '<p class="text-[10px] text-cyan-100/80">Nota: ' + String(row.applicant_note).replace(/</g, '&lt;') + '</p>' : '';
+              html += '<div class="rounded-lg border border-blue-500/30 bg-blue-950/20 p-2 text-xs">' +
+                '<p class="font-medium text-white/90">' + kn + '</p><p class="text-[10px] text-white/55">' + em + '</p>' + kitLine + noteLine +
+                '<div class="flex flex-wrap gap-2 mt-2">' +
+                '<button type="button" class="ferriol-kpur-approve btn-glow rounded-lg py-1.5 px-3 text-[11px] font-semibold touch-target" data-kpur-id="' + row.id + '">Aprobar upgrade</button>' +
+                '<button type="button" class="ferriol-kpur-reject rounded-lg py-1.5 px-3 text-[11px] font-semibold touch-target border border-red-400/50 bg-red-500/15 text-red-200" data-kpur-id="' + row.id + '">Rechazar</button>' +
                 '</div></div>';
             });
             html += '</div>';
@@ -8368,6 +8444,33 @@ async function showApp() {
               var note = prompt('Motivo del rechazo (opcional):');
               if (note === null) return;
               var rpc = await supabaseClient.rpc('ferriol_approve_kiosquero_provision_request', { p_request_id: id, p_approve: false, p_reject_note: note || null });
+              if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+              var out = rpc.data;
+              if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+              if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo rechazar.'); return; }
+              renderSuper();
+            };
+          });
+          founderBox.querySelectorAll('.ferriol-kpur-approve').forEach(function (btn) {
+            btn.onclick = async function () {
+              var id = btn.getAttribute('data-kpur-id');
+              if (!id || !confirm('¿Aprobar el pasaje a distribuidor? Se actualizará la misma cuenta y la licencia según app_settings.')) return;
+              var rpc = await supabaseClient.rpc('ferriol_approve_kiosquero_partner_upgrade', { p_request_id: id, p_approve: true, p_reject_note: null });
+              if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+              var out = rpc.data;
+              if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+              if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo aprobar.'); return; }
+              alert('Upgrade aplicado. El usuario debe cerrar sesión y volver a entrar para ver el panel de socio.');
+              renderSuper();
+            };
+          });
+          founderBox.querySelectorAll('.ferriol-kpur-reject').forEach(function (btn) {
+            btn.onclick = async function () {
+              var id = btn.getAttribute('data-kpur-id');
+              if (!id) return;
+              var note = prompt('Motivo del rechazo (opcional):');
+              if (note === null) return;
+              var rpc = await supabaseClient.rpc('ferriol_approve_kiosquero_partner_upgrade', { p_request_id: id, p_approve: false, p_reject_note: note || null });
               if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
               var out = rpc.data;
               if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
@@ -9274,6 +9377,59 @@ async function showApp() {
     if (btnAffDone) btnAffDone.onclick = closePartnerAffiliateLinksModal;
     var btnAffOv = document.getElementById('partnerAffiliateLinksModalOverlay');
     if (btnAffOv) btnAffOv.onclick = closePartnerAffiliateLinksModal;
+    var btnKpu = document.getElementById('btnKiosqueroPartnerUpgrade');
+    if (btnKpu) btnKpu.onclick = function () {
+      if (btnKpu.disabled) return;
+      openKiosqueroPartnerUpgradeModal();
+    };
+    var kpuClose = document.getElementById('kiosqueroPartnerUpgradeModalClose');
+    if (kpuClose) kpuClose.onclick = closeKiosqueroPartnerUpgradeModal;
+    var kpuOv = document.getElementById('kiosqueroPartnerUpgradeModalOverlay');
+    if (kpuOv) kpuOv.onclick = closeKiosqueroPartnerUpgradeModal;
+    var kpuSub = document.getElementById('kiosqueroPartnerUpgradeSubmit');
+    if (kpuSub) {
+      kpuSub.onclick = async function () {
+        var errBox = document.getElementById('kiosqueroPartnerUpgradeErr');
+        if (errBox) { errBox.textContent = ''; errBox.classList.add('hidden'); errBox.classList.remove('show'); }
+        if (!supabaseClient || !currentUser || currentUser.role !== 'kiosquero') return;
+        var kitEmail = (document.getElementById('kiosqueroPartnerUpgradeKitEmail') && document.getElementById('kiosqueroPartnerUpgradeKitEmail').value || '').trim().toLowerCase();
+        var note = (document.getElementById('kiosqueroPartnerUpgradeNote') && document.getElementById('kiosqueroPartnerUpgradeNote').value || '').trim();
+        var kitSponsorId = null;
+        if (kitEmail) {
+          if (kitEmail === String(currentUser.email || '').toLowerCase()) {
+            if (errBox) { errBox.textContent = 'No podés indicar tu propio email como socio del kit.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+            return;
+          }
+          var pr = await supabaseClient.from('profiles').select('id,role').eq('email', kitEmail).maybeSingle();
+          if (pr.error || !pr.data || !pr.data.id) {
+            if (errBox) { errBox.textContent = 'No encontramos un usuario con ese email. Revisá o dejá el campo vacío.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+            return;
+          }
+          if (pr.data.role !== 'partner' && pr.data.role !== 'super') {
+            if (errBox) { errBox.textContent = 'Ese email no corresponde a un socio distribuidor o empresa.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+            return;
+          }
+          kitSponsorId = pr.data.id;
+        }
+        var rpc = await supabaseClient.rpc('ferriol_request_kiosquero_partner_upgrade', {
+          p_partner_kit_sponsor_id: kitSponsorId,
+          p_note: note || null
+        });
+        if (rpc.error) {
+          if (errBox) { errBox.textContent = rpc.error.message || 'No se pudo enviar.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+          return;
+        }
+        var out = rpc.data;
+        if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+        if (!out || out.ok !== true) {
+          if (errBox) { errBox.textContent = (out && out.error) ? out.error : 'No se pudo enviar.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+          return;
+        }
+        closeKiosqueroPartnerUpgradeModal();
+        alert('Solicitud enviada. Cuando Ferriol la apruebe, cerrá sesión y volvé a entrar para ver el panel de socio.');
+        await syncKiosqueroPartnerUpgradeUi();
+      };
+    }
     (function bindKioscoSubscriptionPayModal() {
       var m = document.getElementById('kioscoSubscriptionPayModal');
       function closeModal() {
