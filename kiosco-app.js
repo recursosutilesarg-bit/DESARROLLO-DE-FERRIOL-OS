@@ -4100,6 +4100,47 @@
       }
       var aml = document.getElementById('accountMenuPlanAbonarLabel');
       if (aml) aml.textContent = admin ? 'Abonar cuota distribuidor' : 'Abonar suscripción';
+      try {
+        syncPlanCheckoutPrices();
+      } catch (_) {}
+    }
+
+    function syncPlanCheckoutPrices() {
+      var label = document.getElementById('planCheckoutPriceLabel');
+      var big = document.getElementById('planCheckoutPriceBig');
+      var ex = document.getElementById('planCheckoutPriceExplain');
+      var box = document.getElementById('planCheckoutPriceBox');
+      var dh = document.getElementById('planCheckoutDistribPriceHint');
+      if (!currentUser) {
+        if (big) big.textContent = '—';
+        if (ex) ex.textContent = '';
+        return;
+      }
+      var admin = ferriolPlanPayModalMode() === 'admin';
+      var n = admin ? FERRIOL_PLAN_AMOUNTS.vendorMonthly : FERRIOL_PLAN_AMOUNTS.kioscoMonthly;
+      var nf = '$ ' + Number(n).toLocaleString('es-AR') + ' ARS';
+      if (big) big.textContent = nf;
+      if (label) {
+        label.textContent = admin ? 'Cuota mensual · referencia' : 'Licencia mensual · referencia';
+      }
+      if (ex) {
+        ex.textContent = admin
+          ? 'Este es el monto que usa la app como referencia para la cuota de distribuidor. Si Ferriol te comunicó otro valor, ese es el que vale.'
+          : 'Este es el precio mensual que usa la app para la licencia del negocio. Si la empresa te pasó otro importe oficial, ese es el válido.';
+      }
+      if (box) {
+        box.className = admin
+          ? 'rounded-2xl border border-cyan-500/35 bg-gradient-to-b from-cyan-950/40 to-black/35 p-4 sm:p-5 mb-4 text-center shadow-md shadow-cyan-950/30'
+          : 'rounded-2xl border border-emerald-500/35 bg-gradient-to-b from-emerald-950/30 to-black/30 p-4 sm:p-5 mb-4 text-center shadow-md shadow-emerald-950/20';
+      }
+      if (dh) {
+        var kit = FERRIOL_PLAN_AMOUNTS.kit;
+        var kitStr = '$ ' + Number(kit).toLocaleString('es-AR') + ' ARS';
+        dh.innerHTML =
+          'Referencia venta inicial (kit distribuidor) en la app: <strong class="text-violet-50">' +
+          kitStr +
+          '</strong> · puede cambiar si Ferriol avisa otro valor.';
+      }
     }
 
     function syncPlanPanelTrialSummary() {
