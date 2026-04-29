@@ -1275,6 +1275,142 @@
       }
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
+    async function loadFounderEmpresaPaymentProofPanel() {
+      var clBox = document.getElementById('superEmpresaPaymentProofList');
+      if (!clBox) return;
+      if (!supabaseClient || !isEmpresaLensSuper()) {
+        clBox.innerHTML = '';
+        return;
+      }
+      clBox.innerHTML = '<p class="text-white/45 text-xs py-2">Cargando…</p>';
+      try {
+        var r = await supabaseClient.from('ferriol_empresa_payment_proof_requests').select('*').order('created_at', { ascending: false }).limit(40);
+        if (r.error) throw r.error;
+        var rows = r.data || [];
+        var pool = window._ferriolAllProfilesCache || [];
+        if (!pool.length) {
+          var prP = await supabaseClient.from('profiles').select('id, email, kiosco_name').limit(800);
+          if (!prP.error && prP.data) {
+            window._ferriolAllProfilesCache = prP.data;
+            pool = prP.data;
+          }
+        }
+        var pending = rows.filter(function (x) { return x.status === 'pending'; });
+        var other = rows.filter(function (x) { return x.status !== 'pending'; });
+        function pubUrl(path) {
+          return ferriolCsrComprobantePublicUrl(path);
+        }
+        var htmlPend = pending.map(function (row) {
+          var img = pubUrl(row.comprobante_path);
+          var pName = superSolicitudNameOf(pool, row.user_id);
+          var spName = row.sponsor_resolved_id ? superSolicitudNameOf(pool, row.sponsor_resolved_id) : '—';
+          var codeLbl = (row.sponsor_code_raw && String(row.sponsor_code_raw).trim())
+            ? escHtmlCsr(row.sponsor_code_raw)
+            : '<span class="text-white/35">(perfil / vacío)</span>';
+          return (
+            '<div class="rounded-xl border border-white/15 bg-black/30 p-3 space-y-2">' +
+            '<div class="flex flex-wrap gap-2 justify-between text-xs text-white/55"><span>' + String(row.created_at).slice(0, 19).replace('T', ' ') + '</span><span>Pagador: ' + escHtmlCsr(pName) + '</span></div>' +
+            '<p class="text-xs text-white/55">Tipo: ' + escHtmlCsr(ferriolIngresosPaymentTypeLabel(row.payment_type)) + (row.period_month ? ' · Mes: ' + escHtmlCsr(String(row.period_month).slice(0, 7)) : '') + '</p>' +
+            '<p class="text-xs text-white/60">Código cargado: ' + codeLbl + ' · <strong class="text-white/75">Patrocinador resuelto:</strong> ' + escHtmlCsr(spName) + '</p>' +
+            '<div class="flex flex-wrap items-center gap-2"><span class="text-xs text-white/50">Monto ARS</span>' +
+            '<input type="number" id="ep-proof-amt-' + row.id + '" class="glass rounded-lg px-2 py-1 border border-white/20 text-white text-sm w-36" value="' + String(Number(row.amount_ars) || 0) + '"></div>' +
+            (img
+              ? '<a href="' + escHtmlCsr(img) + '" target="_blank" rel="noopener" class="block touch-target"><img src="' + escHtmlCsr(img) + '" alt="Comprobante" class="max-h-48 w-auto max-w-full rounded-lg border border-white/20 object-contain bg-black/20"></a>'
+              : '<p class="text-amber-200 text-xs">Sin URL pública al comprobante.</p>') +
+            '<div class="flex flex-wrap gap-2 pt-1">' +
+            '<button type="button" data-ep-proof-approve="' + row.id + '" class="btn-glow rounded-xl py-2 px-3 text-xs font-semibold">Aprobar y verificar cobro</button>' +
+            '<button type="button" data-ep-proof-reject="' + row.id + '" class="rounded-xl py-2 px-3 text-xs font-semibold border border-red-400/50 text-red-200">Rechazar</button></div></div>'
+          );
+        }).join('');
+        var htmlHist = other.length
+          ? '<h4 class="text-xs font-medium text-white/40 mt-4 mb-2">Historial reciente</h4><div class="text-xs text-white/50 space-y-1.5 max-h-40 overflow-y-auto pr-1">' + other.slice(0, 12).map(function (row) {
+            return (
+              '<p class="border-b border-white/5 pb-1">' + String(row.created_at).slice(0, 10) + ' · ' + escHtmlCsr(ferriolIngresosPaymentTypeLabel(row.payment_type)) + ' · <span class="text-white/70">' + escHtmlCsr(row.status) + '</span>' +
+              (row.ferriol_payment_id ? ' · pago' : '') + '</p>'
+            );
+          }).join('') + '</div>'
+          : '';
+        if (!rows.length) {
+          clBox.innerHTML = '<p class="text-white/50 text-sm py-4">Nadie cargó un comprobante desde <strong class="text-white/75">Cuenta → Pagar … → Cargar y enviar comprobante</strong>.</p>';
+        } else {
+          clBox.innerHTML = (htmlPend || '<p class="text-amber-200/90 text-sm py-2">Nada pendiente.</p>') + htmlHist;
+        }
+      } catch (e) {
+        clBox.innerHTML = '<p class="text-red-300 text-sm">Error al cargar. ¿Ejecutaste <code class="text-white/80">supabase-ferriol-empresa-payment-proof-requests.sql</code>? ' + escHtmlCsr(String(e.message || e)) + '</p>';
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    window._ferriolExecEmpresaProofApprove = async function (id, approves, rejectNote, amountOverride) {
+      if (!supabaseClient || !isEmpresaLensSuper() || !id) return;
+      if (
+        !window.confirm(
+          approves
+            ? '¿Verificar cobro Ferriol y aplicar liquidación/compensaciones como en Cobros manuales?'
+            : '¿Rechazar esta solicitud?'
+        )
+      )
+        return;
+      var msgEl = document.getElementById('superEmpresaPaymentProofMsg');
+      if (msgEl) {
+        msgEl.classList.add('hidden');
+        msgEl.textContent = '';
+      }
+      try {
+        var rpc = await supabaseClient.rpc('ferriol_approve_empresa_payment_proof_request', {
+          p_request_id: id,
+          p_approve: approves,
+          p_reject_note: approves ? null : (rejectNote != null && rejectNote !== '' ? rejectNote : null),
+          p_amount_override: approves && amountOverride != null && !isNaN(amountOverride) ? amountOverride : null
+        });
+        if (rpc.error) throw rpc.error;
+        var out = rpc.data;
+        if (typeof out === 'string') {
+          try {
+            out = JSON.parse(out);
+          } catch (_) {}
+        }
+        if (!out || out.ok !== true) {
+          alert((out && out.error) ? out.error : 'No se pudo completar la operación.');
+          return;
+        }
+        if (msgEl) {
+          msgEl.textContent = approves ? 'Aprobado. Cobro verificado.' : 'Solicitud rechazada.';
+          msgEl.classList.remove('hidden');
+        }
+        await loadFounderEmpresaPaymentProofPanel();
+        await loadFounderClientSaleRequestsPanel();
+        if (state.superSection === 'sistema' || state.superSection === 'cobros') await renderSuperCobrosSection();
+      } catch (e) {
+        alert('Error: ' + (e && e.message ? e.message : e));
+      }
+    };
+    (function setupFounderEmpresaProofDelegation() {
+      var box = document.getElementById('superEmpresaPaymentProofBox');
+      if (!box) return;
+      box.addEventListener('click', function (e) {
+        var a = e.target && e.target.closest && e.target.closest('[data-ep-proof-approve]');
+        if (a) {
+          e.preventDefault();
+          var id = a.getAttribute('data-ep-proof-approve');
+          var inp = id ? document.getElementById('ep-proof-amt-' + id) : null;
+          var raw = inp ? String(inp.value || '').replace(/\./g, '').replace(',', '.') : '';
+          var amt = parseFloat(raw, 10);
+          if (isNaN(amt) || amt <= 0) {
+            alert('Ingresá un monto ARS válido en el recuadro.');
+            return;
+          }
+          void window._ferriolExecEmpresaProofApprove(id, true, null, amt);
+          return;
+        }
+        var rj = e.target && e.target.closest && e.target.closest('[data-ep-proof-reject]');
+        if (rj) {
+          e.preventDefault();
+          var id2 = rj.getAttribute('data-ep-proof-reject');
+          var n = typeof window.prompt === 'function' ? window.prompt('Motivo de rechazo (opcional):', '') : '';
+          void window._ferriolExecEmpresaProofApprove(id2, false, n || null, null);
+        }
+      });
+    })();
     window._ferriolExecCsrApprove = async function (id, approves, rejectNote, amountOverride) {
       if (!supabaseClient || !isEmpresaLensSuper() || !id) return;
       if (!window.confirm(approves ? '¿Aprobar esta venta, verificar pago y acreditar comisiones (libro + Ingresos del socio)?' : '¿Rechazar esta solicitud?')) return;
@@ -1694,6 +1830,10 @@
       if (!supabaseClient || !currentUser) {
         if (clBox) clBox.innerHTML = '';
         if (clWrap) clWrap.classList.add('hidden');
+        var epBx0 = document.getElementById('superEmpresaPaymentProofBox');
+        var epIn0 = document.getElementById('superEmpresaPaymentProofList');
+        if (epIn0) epIn0.innerHTML = '';
+        if (epBx0) epBx0.classList.add('hidden');
         return;
       }
       if (isPartnerLens() && !isEmpresaLensSuper()) {
@@ -1705,6 +1845,15 @@
       } else {
         if (clBox) clBox.innerHTML = '';
         if (clWrap) clWrap.classList.add('hidden');
+      }
+      var epBox = document.getElementById('superEmpresaPaymentProofBox');
+      var epInner = document.getElementById('superEmpresaPaymentProofList');
+      if (isEmpresaLensSuper()) {
+        if (epBox) epBox.classList.remove('hidden');
+        await loadFounderEmpresaPaymentProofPanel();
+      } else {
+        if (epInner) epInner.innerHTML = '';
+        if (epBox) epBox.classList.add('hidden');
       }
       if (!isEmpresaLensSuper()) {
         return;
@@ -4511,11 +4660,6 @@
       html += rowCopiable('CBU / CVU', 'cbu', p.cbu);
       html += rowCopiable('Alias', 'alias', p.alias);
 
-      html += '<div class="rounded-xl border border-cyan-500/25 bg-black/35 p-3 mb-1">' +
-        '<p class="text-[10px] uppercase tracking-wide text-cyan-200/80 font-semibold mb-1">Todos los datos (referencia)</p>' +
-        '<pre class="text-xs whitespace-pre-wrap text-white/75 font-mono leading-relaxed max-h-44 overflow-y-auto">' + ferriolEscapeHtmlLite(txt || '—') + '</pre>' +
-        '<button type="button" id="kioscoSubPayCopyFull" class="mt-3 w-full rounded-xl py-2.5 px-4 text-sm font-semibold border border-white/20 bg-white/10 hover:bg-white/15 touch-target active:scale-[0.99]">Copiar datos completos</button></div>';
-
       container.innerHTML = html;
 
       container.onclick = function (ev) {
@@ -4529,12 +4673,6 @@
         copyTextToClipboard(plain, msg);
       };
 
-      var fullBtn = document.getElementById('kioscoSubPayCopyFull');
-      if (fullBtn) {
-        fullBtn.onclick = function () {
-          copyTextToClipboard(txt, 'Datos copiados. Pegá en tu banca o donde te lo pidan.');
-        };
-      }
       try {
         if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
       } catch (_) {}
@@ -4730,6 +4868,9 @@
 
     window.ferriolOpenEmpresaSubscriptionModal = async function (mode) {
       mode = mode || 'kiosco';
+      try {
+        window._ferriolSubPayModalMode = mode;
+      } catch (_) {}
       if (mode === 'kit') window._ferriolSubPayModalMpProduct = 'kit';
       else window._ferriolSubPayModalMpProduct = mode === 'admin' ? 'vendorMonthly' : 'kioscoMonthly';
       try {
@@ -10824,6 +10965,198 @@ async function showApp() {
       if (cl) cl.addEventListener('click', closeModal);
       var dn = document.getElementById('kioscoSubscriptionPayModalDone');
       if (dn) dn.addEventListener('click', closeModal);
+    })();
+    (function bindKioscoEmpresaPaymentProofModalEl() {
+      function syncEmpresaProofFormFromPayModal() {
+        var mode = window._ferriolSubPayModalMode || 'kiosco';
+        var titSp = document.getElementById('kioscoEmpresaPaymentProofTitleSpan');
+        var intro = document.getElementById('kioscoEmpresaPaymentProofIntro');
+        var vw = document.getElementById('kioscoEmpresaPaymentProofVendorMonthWrap');
+        var vmi = document.getElementById('kioscoEmpresaPaymentProofVendorMonth');
+        var amt = document.getElementById('kioscoEmpresaPaymentProofAmount');
+        var sp = document.getElementById('kioscoEmpresaPaymentProofSponsor');
+        if (sp) sp.value = '';
+        if (mode === 'kit') {
+          if (titSp) titSp.textContent = 'Kit + licencia · comprobante';
+          if (intro)
+            intro.textContent =
+              'Indicá el monto transferido a la cuenta Ferriol y adjuntá la imagen del comprobante.';
+          if (vw) vw.classList.add('hidden');
+          if (amt) amt.value = String(FERRIOL_PLAN_AMOUNTS.kit);
+        } else if (mode === 'admin') {
+          if (titSp) titSp.textContent = 'Cuota distribuidor · comprobante';
+          if (intro)
+            intro.textContent =
+              'Elegí el mes de la cuota y el monto transferido. Adjuntá la imagen del comprobante.';
+          if (vw) vw.classList.remove('hidden');
+          if (vmi && !vmi.value) {
+            var d = new Date();
+            vmi.value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+          }
+          if (amt) amt.value = String(FERRIOL_PLAN_AMOUNTS.vendorMonthly);
+        } else {
+          if (titSp) titSp.textContent = 'Suscripción negocio · comprobante';
+          if (intro)
+            intro.textContent =
+              'Indicá el monto de la suscripción mensual y cargá el comprobante. Opcional: código de patrocinador si aplica tu red.';
+          if (vw) vw.classList.add('hidden');
+          if (amt) amt.value = String(FERRIOL_PLAN_AMOUNTS.kioscoMonthly);
+        }
+      }
+      function openProofModal() {
+        var err = document.getElementById('kioscoEmpresaPaymentProofErr');
+        var fi = document.getElementById('kioscoEmpresaPaymentProofFile');
+        if (err) {
+          err.textContent = '';
+          err.classList.add('hidden');
+        }
+        if (fi) fi.value = '';
+        syncEmpresaProofFormFromPayModal();
+        var pm = document.getElementById('kioscoEmpresaPaymentProofModal');
+        if (pm) {
+          pm.classList.remove('hidden');
+          pm.classList.add('flex');
+        }
+        try {
+          if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
+        } catch (_) {}
+      }
+      function closeProofModal() {
+        var pm = document.getElementById('kioscoEmpresaPaymentProofModal');
+        if (pm) {
+          pm.classList.add('hidden');
+          pm.classList.remove('flex');
+        }
+      }
+      var btnOp = document.getElementById('btnOpenKioscoEmpresaPaymentProofModal');
+      if (btnOp) btnOp.addEventListener('click', openProofModal);
+      var ov = document.getElementById('kioscoEmpresaPaymentProofModalOverlay');
+      if (ov) ov.addEventListener('click', closeProofModal);
+      var cl = document.getElementById('kioscoEmpresaPaymentProofModalClose');
+      if (cl) cl.addEventListener('click', closeProofModal);
+      var sb = document.getElementById('kioscoEmpresaPaymentProofSubmit');
+      if (sb) {
+        sb.addEventListener('click', async function () {
+          var err = document.getElementById('kioscoEmpresaPaymentProofErr');
+          if (err) {
+            err.textContent = '';
+            err.classList.add('hidden');
+          }
+          if (!supabaseClient || !currentUser) {
+            if (err) {
+              err.textContent = 'Sesión no disponible.';
+              err.classList.remove('hidden');
+            }
+            return;
+          }
+          var mode = window._ferriolSubPayModalMode || 'kiosco';
+          var paymentType = mode === 'kit' ? 'kit_inicial' : mode === 'admin' ? 'vendor_mantenimiento' : 'kiosco_licencia';
+          var rawAmt = (document.getElementById('kioscoEmpresaPaymentProofAmount') && document.getElementById('kioscoEmpresaPaymentProofAmount').value) || '';
+          var amt = parseFloat(String(rawAmt).replace(/\./g, '').replace(',', '.'), 10);
+          var fileIn = document.getElementById('kioscoEmpresaPaymentProofFile');
+          var file = fileIn && fileIn.files && fileIn.files[0];
+          var sponsorIn = (document.getElementById('kioscoEmpresaPaymentProofSponsor') && document.getElementById('kioscoEmpresaPaymentProofSponsor').value) || '';
+          var sponsorCode = String(sponsorIn).trim();
+          if (isNaN(amt) || amt <= 0) {
+            if (err) {
+              err.textContent = 'Indicá un monto válido en ARS.';
+              err.classList.remove('hidden');
+            }
+            return;
+          }
+          if (!file) {
+            if (err) {
+              err.textContent = 'Adjuntá la imagen del comprobante.';
+              err.classList.remove('hidden');
+            }
+            return;
+          }
+          if (file.size > 5 * 1024 * 1024) {
+            if (err) {
+              err.textContent = 'La imagen supera 5 MB.';
+              err.classList.remove('hidden');
+            }
+            return;
+          }
+          var periodMonth = null;
+          if (paymentType === 'vendor_mantenimiento') {
+            var mval =
+              (document.getElementById('kioscoEmpresaPaymentProofVendorMonth') &&
+                document.getElementById('kioscoEmpresaPaymentProofVendorMonth').value) ||
+              '';
+            periodMonth = ferriolMonthInputToPeriodDate(mval);
+            if (!periodMonth) {
+              if (err) {
+                err.textContent = 'Elegí el mes de la cuota.';
+                err.classList.remove('hidden');
+              }
+              return;
+            }
+          }
+          var sponsorResolved = null;
+          if (sponsorCode) {
+            sponsorResolved = await resolveReferralCodeToSponsorId(sponsorCode);
+            if (!sponsorResolved) {
+              if (err) {
+                err.textContent = 'El código de patrocinador no es válido.';
+                err.classList.remove('hidden');
+              }
+              return;
+            }
+          } else if (currentUser.sponsorId) {
+            sponsorResolved = currentUser.sponsorId;
+          }
+          if (paymentType !== 'vendor_mantenimiento' && !sponsorResolved) {
+            if (err) {
+              err.textContent =
+                'Para este tipo de pago hace falta un patrocinador: cargá el código del socio o pedí en administración que figure tu referidor en el perfil.';
+              err.classList.remove('hidden');
+            }
+            return;
+          }
+          var reqId =
+            typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + '-epp';
+          var ext =
+            file.name && file.name.lastIndexOf('.') > 0 ? file.name.slice(file.name.lastIndexOf('.')).toLowerCase() : '.jpg';
+          if (ext.length > 6) ext = '.jpg';
+          var path = currentUser.id + '/' + reqId + '/comprobante' + ext;
+          var up = await supabaseClient.storage
+            .from('comprobantes-ferriol')
+            .upload(path, file, { contentType: file.type || 'image/jpeg', upsert: false });
+          if (up.error) {
+            if (err) {
+              err.textContent =
+                'No se pudo subir el archivo. ¿Bucket comprobantes-ferriol? ' + (up.error.message || '');
+              err.classList.remove('hidden');
+            }
+            return;
+          }
+          var insertRow = {
+            id: reqId,
+            user_id: currentUser.id,
+            payment_type: paymentType,
+            amount_ars: amt,
+            comprobante_path: path,
+            sponsor_code_raw: sponsorCode || null,
+            sponsor_resolved_id: sponsorResolved || null,
+            period_month: periodMonth
+          };
+          var ins = await supabaseClient.from('ferriol_empresa_payment_proof_requests').insert(insertRow);
+          if (ins.error) {
+            try {
+              await supabaseClient.storage.from('comprobantes-ferriol').remove([path]);
+            } catch (_) {}
+            if (err) {
+              err.textContent = ins.error.message + ' · Revisá la tabla ferriol_empresa_payment_proof_requests.';
+              err.classList.remove('hidden');
+            }
+            return;
+          }
+          closeProofModal();
+          if (fileIn) fileIn.value = '';
+          alert('Enviado. La empresa lo revisa en Solicitudes y aplica el cobro al aprobar.');
+        });
+      }
     })();
     (function bindPlanPanel() {
       var back = document.getElementById('planPanelBackBtn');

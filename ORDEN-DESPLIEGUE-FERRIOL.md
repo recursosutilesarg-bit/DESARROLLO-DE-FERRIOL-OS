@@ -9,6 +9,7 @@ Referencia única: **qué ejecutar en Supabase** y **qué subir al hosting**. Si
 | # | Archivo | Rol |
 |---|---------|-----|
 | 1 | `supabase-referral-network.sql` | Base red: `sponsor_id`, `referral_code`, función `resolve_referral_code`. |
+| 1b | `supabase-profiles-allow-role-partner.sql` | **Obligatorio** si el CHECK de `profiles.role` no incluye `partner` (error al registrar distribuidor). |
 | 2 | `supabase-mlm-foundation.sql` | Tablas/plan MLM si usás compensaciones en libro. |
 | 3 | `supabase-ferriol-kiosco-definitive-trial.sql` | Asegura `trial_duration_days` en `app_settings`. |
 | 4 | `supabase-ferriol-payments.sql` | Cobros `ferriol_payments`, verificación, textos banco; claves `app_settings` (transferencias, horas kit socio, días licencia distribuidor, etc.). |

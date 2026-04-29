@@ -50,3 +50,6 @@ GRANT EXECUTE ON FUNCTION public.resolve_referral_code(text) TO authenticated;
 -- Los administradores globales mantienen role = 'super' (acceso total a la app).
 
 -- 7) Fundación MLM (tablas de ledger, plan, columnas extra en profiles): ejecutá supabase-mlm-foundation.sql cuando quieras dejar lista la base sin activar aún la app.
+
+-- 8) Si al registrar un distribuidor por enlace ves error "profiles_role_check":
+--    ejecutá también supabase-profiles-allow-role-partner.sql (habilita role = 'partner').

@@ -189,7 +189,43 @@
         </button>
         <p id="kioscoSubPayModalMpMissingHint" class="text-[11px] text-white/45 leading-snug mt-2 hidden">Sin link para este producto: el fundador lo carga en <strong class="text-white/65">Más → Ajustes del sistema</strong>.</p>
       </div>
-      <button type="button" id="kioscoSubscriptionPayModalDone" class="mt-4 w-full py-3 rounded-xl border border-white/15 bg-white/[0.08] hover:bg-white/[0.14] font-semibold touch-target active:scale-[0.99] text-white/90">Listo</button>
+      <button type="button" id="btnOpenKioscoEmpresaPaymentProofModal" class="mt-5 w-full py-3.5 rounded-xl font-semibold touch-target active:scale-[0.99] flex items-center justify-center gap-2 border-2 border-[#86efac]/55 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-100 shadow-lg shadow-emerald-900/25">
+        <i data-lucide="upload" class="w-5 h-5 shrink-0"></i>
+        Cargar y enviar comprobante
+      </button>
+      <button type="button" id="kioscoSubscriptionPayModalDone" class="mt-3 w-full py-3 rounded-xl border border-white/15 bg-white/[0.08] hover:bg-white/[0.14] font-semibold touch-target active:scale-[0.99] text-white/90">Listo</button>
+    </div>
+  </div>
+
+  <!-- Modal: enviar comprobante de pago a cuenta Ferriol (mismo usuario que paga) -->
+  <div id="kioscoEmpresaPaymentProofModal" class="fixed inset-0 z-[74] hidden flex items-center justify-center p-4" aria-modal="true" role="dialog">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" id="kioscoEmpresaPaymentProofModalOverlay"></div>
+    <div class="relative glass-strong rounded-2xl p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto scale-in border border-emerald-500/35 shadow-xl shadow-emerald-950/40">
+      <div class="flex items-center justify-between mb-3">
+        <h3 id="kioscoEmpresaPaymentProofTitle" class="font-bold text-lg flex items-center gap-2 text-emerald-100">
+          <i data-lucide="receipt" class="w-5 h-5 text-emerald-300"></i>
+          <span id="kioscoEmpresaPaymentProofTitleSpan">Enviar comprobante</span>
+        </h3>
+        <button type="button" id="kioscoEmpresaPaymentProofModalClose" class="btn-neomorphic rounded-xl p-2 touch-target" title="Cerrar"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <p id="kioscoEmpresaPaymentProofIntro" class="text-sm text-white/60 mb-3 leading-relaxed">Subí una imagen del comprobante. La empresa revisa la solicitud antes de aplicar el pago en el sistema.</p>
+      <div id="kioscoEmpresaPaymentProofErr" class="text-xs text-red-300 mb-3 hidden"></div>
+      <div id="kioscoEmpresaPaymentProofVendorMonthWrap" class="hidden mb-3">
+        <label class="block text-xs text-white/55 mb-1" for="kioscoEmpresaPaymentProofVendorMonth">Mes abonado (cuota distribuidor)</label>
+        <input type="month" id="kioscoEmpresaPaymentProofVendorMonth" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base">
+      </div>
+      <label class="block text-xs text-white/55 mb-1" for="kioscoEmpresaPaymentProofAmount">Monto transferido en ARS</label>
+      <input type="number" id="kioscoEmpresaPaymentProofAmount" min="1" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-3 tabular-nums" placeholder="9900">
+      <label class="block text-xs text-white/55 mb-1" for="kioscoEmpresaPaymentProofSponsor">Código de patrocinador (opcional)</label>
+      <input type="text" id="kioscoEmpresaPaymentProofSponsor" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-1 font-mono" placeholder="Solo si aplica tu red" maxlength="48" autocomplete="off">
+      <p class="text-[10px] text-white/42 mb-3 leading-snug">Si te refiere un socio, podés cargar su <strong class="text-white/60">código público</strong>. Si está vacío, usamos el referidor ya guardado en tu cuenta cuando corresponde (kit / suscripción).</p>
+      <label class="block text-xs text-white/55 mb-1" for="kioscoEmpresaPaymentProofFile">Imagen del comprobante</label>
+      <input type="file" id="kioscoEmpresaPaymentProofFile" accept="image/jpeg,image/png,image/webp,image/gif" class="w-full text-sm text-white/80 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-white/10 file:text-white">
+      <p class="text-[10px] text-white/40 mt-1 mb-3">Hasta 5 MB. JPG, PNG, WebP o GIF.</p>
+      <button type="button" id="kioscoEmpresaPaymentProofSubmit" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target flex items-center justify-center gap-2">
+        <i data-lucide="send" class="w-4 h-4"></i>
+        Enviar a la empresa
+      </button>
     </div>
   </div>
 
@@ -2264,6 +2300,12 @@
             <div id="superClientSaleRequestsList" class="space-y-3 text-sm min-h-[2rem]"></div>
             <p id="superClientSaleRequestsMsg" class="text-xs mt-2 text-emerald-200/80 hidden"></p>
           </div>
+          <div id="superEmpresaPaymentProofBox" class="hidden mb-5 rounded-2xl border border-teal-500/40 bg-teal-500/[0.07] p-3 sm:p-4 super-only super-main-only scroll-mt-8">
+            <h3 class="text-sm font-semibold text-teal-200 mb-2 flex items-center gap-2"><i data-lucide="banknote" class="w-4 h-4"></i> Comprobantes · pagos propios (cuenta empresa)</h3>
+            <p class="text-[11px] text-white/50 mb-3">Las personas envían desde <strong class="text-white/70">Pagar suscripción / cuota / kit → Cargar y enviar comprobante</strong>. Revisá monto y patrocinador; al aprobá se registra y verifica el cobro.</p>
+            <div id="superEmpresaPaymentProofList" class="space-y-3 text-sm min-h-[2rem]"></div>
+            <p id="superEmpresaPaymentProofMsg" class="text-xs mt-2 text-teal-200/80 hidden"></p>
+          </div>
           <div id="superDayRequestsFounderBox" class="hidden mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-3 text-sm super-only super-main-only"></div>
         </div>
         <!-- Pagos pendientes: retiros aprobados → transferencia + comprobante (solo fundador) -->
@@ -3098,7 +3140,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426_pay_copy_admin_inputs"></script>
+  <script defer src="kiosco-app.js?v=20260429_empresa_payment_proof"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>
