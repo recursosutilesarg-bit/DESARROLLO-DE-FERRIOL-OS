@@ -389,48 +389,6 @@
           </div>
         </div>
 
-        <!-- Suscripción mensual Ferriol + upgrade a distribuidor (antes accesible desde Caja) -->
-        <div id="ferriolDashboardLicenseSection" class="kiosquero-only space-y-4">
-          <div class="glass rounded-2xl p-4 sm:p-5 border border-amber-400/28 ring-1 ring-amber-500/15 shadow-lg shadow-amber-950/20">
-            <h2 class="font-bold text-base sm:text-lg flex items-center gap-2 text-amber-100 mb-2">
-              <i data-lucide="cpu" class="w-5 h-5 shrink-0 text-amber-300"></i>
-              Suscripción mensual Ferriol OS
-            </h2>
-            <p class="text-sm text-white/65 leading-relaxed">Los <strong class="text-white/85">pagos a Ferriol (empresa)</strong> y las <strong class="text-[#86efac]/90">solicitudes de distribuidor</strong> van en <strong class="text-white/80">tu foto → Cuenta → Mi plan</strong>. Los <strong class="text-white/85">pagos a proveedores de mercadería</strong> siguen en <strong class="text-amber-200/90">Caja → Proveedores</strong>.</p>
-          </div>
-          <div id="kioscoLicensePaymentBlock" class="kiosquero-only rounded-2xl border border-[#22c55e]/25 bg-gradient-to-br from-[#0a2e18]/95 to-[#052a14]/90 p-4 sm:p-5 shadow-lg shadow-black/20">
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-              <div class="min-w-0 flex-1">
-                <div id="kioscoSubscriptionDaysStrip" class="kiosco-sub-days-strip hidden mb-3 rounded-xl p-3 sm:p-3.5 border border-white/12 bg-black/25 shadow-md shadow-black/30 relative overflow-hidden">
-                  <div class="relative flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-                    <div id="kioscoSubscriptionDaysNumberWrap" class="flex items-end gap-1.5 shrink-0">
-                      <span id="kioscoSubscriptionDaysNumber" class="text-3xl sm:text-4xl font-bold tabular-nums leading-none text-white/90">—</span>
-                      <span id="kioscoSubscriptionDaysSuffix" class="hidden text-[10px] font-semibold uppercase tracking-wider text-white/55 pb-1 leading-none whitespace-nowrap">días</span>
-                    </div>
-                    <div class="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
-                      <p id="kioscoSubscriptionDaysEyebrow" class="text-[9px] font-medium uppercase tracking-wide text-white/45 mb-0.5">Vigencia</p>
-                      <p id="kioscoSubscriptionDaysLine" class="text-sm sm:text-[0.9375rem] font-medium text-white/82 leading-snug"></p>
-                    </div>
-                  </div>
-                </div>
-                <h3 class="font-semibold mb-2 flex items-center gap-2 text-base text-[#86efac]">
-                  <i data-lucide="sparkles" class="w-5 h-5 shrink-0"></i>
-                  Suscripción mensual Ferriol OS
-                </h3>
-                <p id="kioscoLicensePriceHint" class="text-xs text-white/55"></p>
-                <p class="text-[10px] text-white/45 mt-2 leading-snug">Datos de pago y comprobante: <strong class="text-white/70">foto → Cuenta → Mi plan</strong> → <strong class="text-[#86efac]/85">Abonar</strong>. Mercadería: <strong class="text-amber-200/90">Caja → Proveedores</strong>.</p>
-              </div>
-            </div>
-            <div class="mt-4 rounded-xl border border-emerald-500/25 bg-black/30 p-3 sm:p-4">
-              <p class="text-[10px] font-semibold uppercase tracking-wide text-emerald-200/85 mb-2 flex items-center gap-2">
-                <i data-lucide="users" class="w-4 h-4 shrink-0 text-[#86efac]"></i>
-                Administrador · referidor
-              </p>
-              <div id="kioscoLicenseSponsorHint" class="text-sm text-white/80 leading-snug"></div>
-              <div id="kioscoLicenseReferidorWhatsApp" class="hidden mt-3 pt-3 border-t border-white/10"></div>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
 
@@ -1139,7 +1097,7 @@
             <label class="block text-sm text-white/70 mb-2">Nombre del negocio</label>
             <input type="text" id="configKioscoName" placeholder="Ej: Mi Negocio" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
           </div>
-          <p class="text-xs text-white/50 -mt-2 mb-1"><strong class="text-white/75">Cuota mensual Ferriol:</strong> desde <strong class="text-white/78">tu foto → Cuenta → Mi plan</strong> (<strong class="text-[#86efac]/90">Abonar</strong>). La vigencia aparece también en <strong class="text-white/60">Inicio · Suscripción mensual Ferriol</strong>.</p>
+          <p class="text-xs text-white/50 -mt-2 mb-1"><strong class="text-white/75">Cuota mensual Ferriol:</strong> desde <strong class="text-white/78">tu foto → Cuenta → Mi plan</strong> (<strong class="text-[#86efac]/90">Abonar</strong>). Recordatorios de vigencia también figuran en la <strong class="text-white/60">campana</strong> cuando corresponda.</p>
           <div>
             <label class="block text-sm text-white/70 mb-2">Mensaje de cobro por WhatsApp (usá <code class="text-[#86efac]">{cliente}</code> y <code class="text-[#86efac]">{monto}</code>)</label>
             <textarea id="configWhatsappMsg" rows="4" placeholder="Hola {cliente}, tenés un saldo de ${monto}..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] resize-y"></textarea>
