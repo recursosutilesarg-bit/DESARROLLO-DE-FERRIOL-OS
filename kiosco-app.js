@@ -4689,8 +4689,13 @@
       accountMenuBtnAbonar.addEventListener('click', function () {
         if (typeof closeAccountPlanSheet === 'function') closeAccountPlanSheet();
         closeAccountMenuDrawer(true);
-        if (typeof window._ferriolGoToPlanPanel === 'function') window._ferriolGoToPlanPanel();
-        else goToPanel('plan');
+        try {
+          if (typeof window.ferriolOpenEmpresaSubscriptionModal === 'function') {
+            var pm =
+              typeof ferriolPlanPayModalMode === 'function' ? ferriolPlanPayModalMode() : 'kiosco';
+            window.ferriolOpenEmpresaSubscriptionModal(pm);
+          }
+        } catch (_) {}
       });
     }
     var accountMenuBtnDistribuidor = document.getElementById('accountMenuBtnDistribuidor');
