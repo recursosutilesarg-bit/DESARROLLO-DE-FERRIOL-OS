@@ -989,7 +989,7 @@
             <span class="font-semibold text-base">Historial</span>
             <span class="text-xs text-white/60">Ventas registradas</span>
           </button>
-          <button data-nav="config" class="glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
+          <button type="button" data-nav="config" class="kiosco-mas-config-entry glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
             <div class="w-14 h-14 rounded-2xl bg-[#22c55e]/30 flex items-center justify-center">
               <i data-lucide="settings" class="w-7 h-7 text-[#86efac]"></i>
             </div>
@@ -3005,6 +3005,10 @@
           <i data-lucide="landmark" class="w-[1.125rem] h-[1.125rem] text-gray-500 shrink-0 stroke-[1.75]"></i>
           <span>Mis datos bancarios</span>
         </button>
+        <button type="button" id="accountMenuBtnConfig" class="w-full text-left rounded-xl py-2.5 px-3 mb-1 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors hidden">
+          <i data-lucide="settings" class="w-[1.125rem] h-[1.125rem] text-gray-500 shrink-0 stroke-[1.75]"></i>
+          <span>Configuración</span>
+        </button>
         <button type="button" id="accountMenuBtnOpenPlanSheet" class="w-full text-left rounded-xl py-2.5 px-3 mb-2 touch-target flex items-center gap-3 border-2 border-orange-300/90 bg-gradient-to-br from-orange-50/95 via-amber-50 to-orange-100/90 shadow-md shadow-orange-200/40 ring-1 ring-orange-200/60 hover:brightness-[1.02] active:scale-[0.99] transition-[transform,filter]" aria-haspopup="dialog" aria-controls="accountPlanSheetModal" aria-expanded="false">
           <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-500/20 ring-1 ring-orange-400/35" aria-hidden="true">
             <i data-lucide="layers" class="w-[1.15rem] h-[1.15rem] text-orange-700 shrink-0 stroke-[2]"></i>
@@ -3137,7 +3141,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260429_partner_mi_plan_btn"></script>
+  <script defer src="kiosco-app.js?v=20260429_config_menu_perfil_kiosco"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>

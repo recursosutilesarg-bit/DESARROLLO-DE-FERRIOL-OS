@@ -4205,6 +4205,18 @@
       var show = !!(currentUser && isNetworkAdminRole(currentUser.role) && !isAnyKioscoPreviewMode());
       bankBtn.classList.toggle('hidden', !show);
     }
+    /** Kiosquero (y vista negocio simulada): Configuración en menú del avatar; se oculta el tile en Más. */
+    function syncAccountMenuKiosqueroConfigPlacement() {
+      var cfgBtn = document.getElementById('accountMenuBtnConfig');
+      var masTile = document.querySelector('.kiosco-mas-config-entry');
+      var showInProfile =
+        !!(
+          currentUser &&
+          (currentUser.role === 'kiosquero' || isAnyKioscoPreviewMode())
+        );
+      if (cfgBtn) cfgBtn.classList.toggle('hidden', !showInProfile);
+      if (masTile) masTile.classList.toggle('hidden', showInProfile);
+    }
 
     /** Panel “Mi plan” (action sheet · opciones sobre el menú cuenta) */
     function closeAccountPlanSheet() {
@@ -5171,6 +5183,7 @@
       }
       syncHeaderProfileAvatar();
       syncAccountMenuDrawerShell();
+      syncAccountMenuKiosqueroConfigPlacement();
       try {
         if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
       } catch (_) {}
@@ -5458,6 +5471,13 @@
       accountMenuBtnPersonal.addEventListener('click', function () {
         closeAccountMenuDrawer(true);
         openAccountProfileModal('personal');
+      });
+    }
+    var accountMenuBtnConfig = document.getElementById('accountMenuBtnConfig');
+    if (accountMenuBtnConfig) {
+      accountMenuBtnConfig.addEventListener('click', function () {
+        closeAccountMenuDrawer(true);
+        goToPanel('config');
       });
     }
     var accountMenuBtnOpenPlanSheet = document.getElementById('accountMenuBtnOpenPlanSheet');
