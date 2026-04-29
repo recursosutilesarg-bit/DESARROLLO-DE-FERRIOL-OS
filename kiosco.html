@@ -989,58 +989,48 @@
         </button>
         <!-- Resumen: abono empresa (suscripción o cuota distribuidor) -->
         <div id="planCheckoutPayWrap">
-          <p id="planCheckoutPayEyebrow" class="text-[10px] font-semibold uppercase tracking-widest text-amber-200/75 mb-2">Cierre · compra</p>
-          <h2 class="font-bold text-xl mb-3 flex items-center gap-2 text-white">
-            <i data-lucide="shopping-cart" class="w-6 h-6 text-amber-200/95 shrink-0"></i>
-            <span id="planPanelHeadingText">Tu compra en Ferriol OS</span>
-          </h2>
-          <div id="planCheckoutPurchaseIntro" class="mb-4 rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-sm leading-relaxed text-white/80"></div>
-          <div id="planCheckoutReferenciasBox" class="mb-4 rounded-xl border border-amber-500/25 bg-amber-950/15 px-4 py-3">
-            <p class="text-[10px] font-semibold uppercase tracking-wide text-amber-200/80 mb-2">Referencias de precios (ARS · empresa)</p>
-            <ul id="planCheckoutReferenciasList" class="space-y-1.5 text-sm text-white/85 [&>li]:flex [&>li]:flex-wrap [&>li]:gap-x-2 [&>li]:items-baseline [&>li]:justify-between [&>li]:gap-y-1">
-            </ul>
-            <p id="planCheckoutEstePagoNota" class="text-[11px] text-amber-100/95 mt-2 font-medium leading-snug"></p>
-            <p class="text-[10px] text-white/45 mt-2 leading-snug">Kit = venta inicial distribuidor. Suscripción = mensual uso del sistema en el negocio. Cuota = mensual rol socio/red.</p>
+          <p id="planCheckoutPayEyebrow" class="text-[10px] font-semibold uppercase tracking-wider text-amber-200/95 mb-2">—</p>
+          <p id="planCheckoutPaySalesHeadline" class="font-black text-xl sm:text-2xl text-white mb-4 leading-snug">—</p>
+          <p id="planCheckoutPayLead" class="text-sm text-white/76 mb-6 leading-relaxed hidden"></p>
+          <div id="planCheckoutPriceBox" class="rounded-2xl border border-white/25 bg-gradient-to-b from-black/45 to-black/55 py-6 px-4 mb-6 text-center ring-1 ring-white/12 shadow-xl shadow-black/30">
+            <p id="planCheckoutPriceLabel" class="text-[10px] font-semibold uppercase tracking-wide text-white/55 mb-2">Precio referencia empresa</p>
+            <p id="planCheckoutPriceBig" class="text-[2.35rem] sm:text-5xl font-black tabular-nums text-amber-50 tracking-tight leading-none drop-shadow-lg">—</p>
+            <p id="planCheckoutPriceExplain" class="text-[11px] text-white/52 mt-3 leading-snug px-2">—</p>
           </div>
-          <div id="planCheckoutPriceBox" class="rounded-2xl border border-white/20 bg-gradient-to-b from-white/[0.06] to-black/30 p-4 sm:p-5 mb-4 text-center">
-            <p id="planCheckoutPriceLabel" class="text-[10px] font-semibold uppercase tracking-wide text-white/50 mb-2">Importe de este pago · referencia</p>
-            <p id="planCheckoutPriceBig" class="text-[1.6rem] sm:text-3xl font-black tabular-nums text-amber-100 tracking-tight">—</p>
-            <p id="planCheckoutPriceExplain" class="text-[11px] text-white/55 mt-2 leading-snug px-1"></p>
+          <div id="planCheckoutBenefitsBlocksKiosco" class="mb-5">
+            <p id="planCheckoutPayKioscoBenefMainLabel" class="text-[10px] font-semibold uppercase tracking-wide text-emerald-200/85 mb-2">Beneficios incluidos con tu suscripción</p>
+            <ul id="planCheckoutBenefitsKioscoList" class="space-y-2 text-sm text-emerald-50/95 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-emerald-500/35 bg-emerald-950/25 p-4 min-h-[2.5rem]"></ul>
+            <p id="planCheckoutPayKioscoProductsLabel" class="text-[10px] font-semibold uppercase tracking-wide text-white/52 mt-4 mb-2">Propuesta Ferriol</p>
+            <ul id="planCheckoutBenefitsProductsListKiosco" class="space-y-2 text-sm text-white/82 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-white/15 bg-black/25 p-4 min-h-[2.5rem]"></ul>
           </div>
-          <div id="planCheckoutBenefitsBlocksKiosco" class="mb-4">
-            <p class="text-[10px] font-semibold uppercase tracking-wide text-emerald-200/85 mb-2">Beneficios · incluidos con tu suscripción mensual</p>
-            <ul id="planCheckoutBenefitsKioscoList" class="space-y-2 text-sm text-emerald-50/95 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-emerald-500/25 bg-emerald-950/20 p-4 min-h-[2.5rem]"></ul>
-            <p class="text-[10px] font-semibold uppercase tracking-wide text-white/50 mt-4 mb-2">Suscripción mensual · propuesta Ferriol</p>
-            <ul id="planCheckoutBenefitsProductsListKiosco" class="space-y-2 text-sm text-white/80 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-white/15 bg-black/25 p-4 min-h-[2.5rem]"></ul>
+          <div id="planCheckoutBenefitsBlocksAdmin" class="hidden mb-5">
+            <p id="planCheckoutPayAdminBenefMainLabel" class="text-[10px] font-semibold uppercase tracking-wide text-cyan-200/85 mb-2">Beneficios de esta cuota</p>
+            <ul id="planCheckoutBenefitsAdminList" class="space-y-2 text-sm text-cyan-50/95 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-cyan-500/35 bg-cyan-950/25 p-4 min-h-[2.5rem]"></ul>
+            <p id="planCheckoutPayAdminProductsLabel" class="text-[10px] font-semibold uppercase tracking-wide text-white/52 mt-4 mb-2">Propuesta Ferriol</p>
+            <ul id="planCheckoutBenefitsProductsListAdmin" class="space-y-2 text-sm text-white/82 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-white/15 bg-black/25 p-4 min-h-[2.5rem]"></ul>
           </div>
-          <div id="planCheckoutBenefitsBlocksAdmin" class="hidden mb-4">
-            <p class="text-[10px] font-semibold uppercase tracking-wide text-cyan-200/85 mb-2">Beneficios · cuota distribuidor</p>
-            <ul id="planCheckoutBenefitsAdminList" class="space-y-2 text-sm text-cyan-50/95 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-cyan-500/25 bg-cyan-950/20 p-4 min-h-[2.5rem]"></ul>
-            <p class="text-[10px] font-semibold uppercase tracking-wide text-white/50 mt-4 mb-2">Propuesta de valor Ferriol</p>
-            <ul id="planCheckoutBenefitsProductsListAdmin" class="space-y-2 text-sm text-white/80 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-white/15 bg-black/25 p-4 min-h-[2.5rem]"></ul>
-          </div>
-          <div id="planTrialSummary" class="hidden mb-4 rounded-xl border border-amber-500/35 bg-black/35 px-4 py-3 text-sm text-white/82 leading-snug"></div>
+          <div id="planTrialSummary" class="hidden mb-5 rounded-xl border border-amber-500/35 bg-black/35 px-4 py-3 text-sm text-white/82 leading-snug"></div>
           <div id="planCheckoutMetodosPago" class="rounded-2xl border border-white/18 bg-black/28 p-4 sm:p-5 mb-3 ring-1 ring-white/10">
             <p class="text-[10px] font-semibold uppercase tracking-widest text-white/55 mb-4">Métodos de pago</p>
             <div class="space-y-5">
               <div>
-                <p class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 shrink-0 text-emerald-200/95"></i> Transferencia</p>
-                <p class="text-xs text-white/55 mb-3 leading-relaxed">Te mostramos los datos de la <strong class="text-white/75">cuenta empresa Ferriol</strong> para que transfieras y envíes el comprobante.</p>
-          <button type="button" id="btnPlanOpenEmpresaSubscription" class="w-full rounded-2xl px-5 py-4 font-bold text-base text-white shadow-xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-700 ring-2 ring-amber-200/45 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2">
+                <p class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 shrink-0 text-amber-200/95"></i> Transferencia</p>
+                <p id="planCheckoutPayTransferHint" class="text-xs text-white/55 mb-3 leading-relaxed"></p>
+                <button type="button" id="btnPlanOpenEmpresaSubscription" class="w-full rounded-2xl px-5 py-4 font-bold text-base text-white shadow-xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-700 ring-2 ring-amber-200/45 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2">
                   <i data-lucide="building-2" class="w-6 h-6 shrink-0"></i>
                   <span><span id="planPanelPayBtnPrimary">Ver datos para transferir</span><span id="planPanelPayBtnSubtitle" class="text-white/90 font-semibold hidden sm:inline"> · cuenta Ferriol</span></span>
                 </button>
               </div>
               <div class="border-t border-white/12 pt-5">
-                <p class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i data-lucide="credit-card" class="w-5 h-5 shrink-0 text-sky-200/95"></i> Tarjeta · efectivo · Mercado Pago</p>
-                <p class="text-xs text-white/55 mb-3 leading-relaxed">Pago con link de Mercado Pago para <strong class="text-white/80">este mismo producto</strong> (suscripción del negocio o cuota de socio, según tu cuenta).</p>
+                <p class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i data-lucide="credit-card" class="w-5 h-5 shrink-0 text-sky-200/95"></i> Mercado Pago</p>
+                <p id="planCheckoutPayMpHint" class="text-xs text-white/55 mb-3 leading-relaxed"></p>
                 <div id="planPanelMercadoPagoWrap" class="w-full">
                   <button type="button" id="planCheckoutMpRoleBtn" data-mp-product="kioscoMonthly" class="ferriol-mp-pay-btn w-full rounded-xl py-3 px-3 touch-target inline-flex items-center justify-center gap-2 font-bold text-[0.6875rem] sm:text-xs text-white leading-tight text-center border-2 border-sky-400/50 bg-gradient-to-br from-[#009ee3]/90 via-[#008ad4]/95 to-[#006ebb] shadow-lg shadow-sky-900/30 ring-1 ring-white/15 hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:active:scale-100">
                     <i data-lucide="external-link" class="w-[1.125rem] h-[1.125rem] shrink-0 opacity-95"></i>
                     <span id="planCheckoutMpRoleBtnLabel">Mercado Pago · Suscripción mensual negocio</span>
                   </button>
                 </div>
-                <p id="planPanelMercadoPagoMissingHint" class="text-[11px] text-white/45 leading-snug mt-2">Si el botón no está activo, pedí al fundador el link correspondiente en <strong class="text-white/65">Más → Ajustes del sistema</strong>.</p>
+                <p id="planPanelMercadoPagoMissingHint" class="text-[11px] text-white/45 leading-snug mt-2">Sin link cargado por la empresa para este producto · <strong class="text-white/65">Más → Ajustes del sistema</strong>.</p>
               </div>
             </div>
           </div>
@@ -1085,11 +1075,6 @@
               </div>
             </div>
           </div>
-          <button type="button" id="btnPlanOpenDistribuidorRequest" class="w-full rounded-2xl px-5 py-4 font-bold text-base text-white shadow-xl border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 ring-2 ring-white/10 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2 mb-2">
-            <i data-lucide="badge-check" class="w-6 h-6 shrink-0"></i>
-            <span>Obtener rol distribuidor — sigo la solicitud</span>
-          </button>
-          <p id="planCheckoutDistribFooter" class="text-[10px] text-white/40 leading-relaxed text-center px-1">Si ya enviaste la solicitud, queda hasta que Ferriol la revise.</p>
         </div>
       </div>
     </section>
@@ -2176,6 +2161,30 @@
               <input type="text" id="adminCheckoutDistribSalesHeadline" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-3" placeholder="Hacete distribuidor del sistema y ganá hasta el 50% mensual" maxlength="220">
               <label class="block text-xs text-white/70 mb-1">Título sección beneficios · pantalla distribuidor</label>
               <input type="text" id="adminCheckoutDistribBeneficiosTitle" placeholder="Beneficios" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-3" maxlength="80">
+              <hr class="border-white/15 my-4">
+              <p class="text-xs text-emerald-200/90 font-semibold mb-2 uppercase tracking-wide">Plan · cerrar suscripción mensual (negocio)</p>
+              <label class="block text-xs text-white/70 mb-1">Encabezado</label>
+              <input type="text" id="adminCheckoutPayKioscoEyebrow" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-2 font-mono" maxlength="140">
+              <label class="block text-xs text-white/70 mb-1">Titular</label>
+              <input type="text" id="adminCheckoutPayKioscoHeadline" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-2">
+              <label class="block text-xs text-white/70 mb-1">Texto opcional entre titular y precio</label>
+              <textarea id="adminCheckoutPayKioscoLead" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2"></textarea>
+              <label class="block text-xs text-white/70 mb-1">Título primer bloque de beneficios</label>
+              <input type="text" id="adminCheckoutPayKioscoBenefitsTitle" placeholder="Beneficios incluidos con tu suscripción" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-2" maxlength="120">
+              <label class="block text-xs text-white/70 mb-1">Título segundo bloque (propuesta valor)</label>
+              <input type="text" id="adminCheckoutPayKioscoProductsTitle" placeholder="Propuesta Ferriol" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-3" maxlength="120">
+              <hr class="border-white/15 my-4">
+              <p class="text-xs text-cyan-200/90 font-semibold mb-2 uppercase tracking-wide">Plan · cerrar cuota mensual (distribuidor)</p>
+              <label class="block text-xs text-white/70 mb-1">Encabezado</label>
+              <input type="text" id="adminCheckoutPayAdminEyebrow" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-2 font-mono" maxlength="140">
+              <label class="block text-xs text-white/70 mb-1">Titular</label>
+              <input type="text" id="adminCheckoutPayAdminHeadline" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-2">
+              <label class="block text-xs text-white/70 mb-1">Texto opcional</label>
+              <textarea id="adminCheckoutPayAdminLead" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2"></textarea>
+              <label class="block text-xs text-white/70 mb-1">Título primer bloque de beneficios</label>
+              <input type="text" id="adminCheckoutPayAdminBenefitsTitle" placeholder="Beneficios de esta cuota" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-2" maxlength="120">
+              <label class="block text-xs text-white/70 mb-1">Título segundo bloque</label>
+              <input type="text" id="adminCheckoutPayAdminProductsTitle" placeholder="Propuesta Ferriol" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-3" maxlength="120">
               <label class="block text-xs text-white/70 mb-1">Beneficios · pantalla pagar como kiosco (negocio)</label>
               <textarea id="adminCheckoutCopyKiosco" rows="5" placeholder="Ej. Tu caja y stock ordenados todos los días&#10;Soporte oficial Ferriol" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm resize-y mb-3 font-mono"></textarea>
               <label class="block text-xs text-white/70 mb-1">Beneficios · pantalla cuota distribuidor (fundador / socio)</label>
@@ -3089,7 +3098,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426_distrib_distribuidor_cierre"></script>
+  <script defer src="kiosco-app.js?v=20260426_pay_copy_admin_inputs"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>

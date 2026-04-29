@@ -426,7 +426,6 @@
     async function syncKiosqueroPartnerUpgradeUi() {
       var amd = document.getElementById('accountMenuDistribuidorWrap');
       var amb = document.getElementById('accountMenuBtnDistribuidor');
-      var planBt = document.getElementById('btnPlanOpenDistribuidorRequest');
       if (!currentUser || currentUser.role !== 'kiosquero') {
         if (amd) amd.classList.add('hidden');
         return;
@@ -456,20 +455,6 @@
               'w-full rounded-xl py-3 px-3 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-white border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 shadow-md shadow-violet-600/30 ring-1 ring-white/10 hover:brightness-110 active:scale-[0.98]';
             amb.innerHTML =
               '<i data-lucide="badge-check" class="w-4 h-4 shrink-0"></i> Quiero ser distribuidor/a del sistema';
-          }
-        }
-        if (planBt) {
-          planBt.disabled = pendingUpgrade;
-          if (pendingUpgrade) {
-            planBt.className =
-              'w-full rounded-2xl px-5 py-4 font-semibold text-sm text-white touch-target flex items-center justify-center gap-2 border border-violet-400/40 bg-violet-950/65 opacity-85 cursor-not-allowed';
-            planBt.innerHTML =
-              '<span>Solicitud de distribuidor pendiente</span>';
-          } else {
-            planBt.className =
-              'w-full rounded-2xl px-5 py-4 font-bold text-base text-white shadow-xl border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 ring-2 ring-white/10 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2 mb-2';
-            planBt.innerHTML =
-              '<i data-lucide="badge-check" class="w-6 h-6 shrink-0"></i><span>Obtener rol distribuidor — sigo la solicitud</span>';
           }
         }
       } catch (_) {}
@@ -4203,7 +4188,18 @@
         distrib_intro: '',
         modal_kiosco: '',
         modal_admin: '',
-        modal_distrib_kit: ''
+        modal_distrib_kit: '',
+        pay_kiosco_eyebrow: 'SUSCRIPCIÓN MENSUAL · NEGOCIO',
+        pay_kiosco_headline: 'Tu abono mensual a Ferriol para usar Ferriol OS en tu comercio',
+        pay_kiosco_lead: '',
+        pay_admin_eyebrow: 'CUOTA MENSUAL · DISTRIBUIDOR',
+        pay_admin_headline:
+          'Mantené activo ante la empresa Ferriol tu rol de socio/red (cuota mensual)',
+        pay_admin_lead: '',
+        pay_kiosco_benefits_title: 'Beneficios incluidos con tu suscripción',
+        pay_kiosco_products_title: 'Propuesta Ferriol',
+        pay_admin_benefits_title: 'Beneficios de esta cuota',
+        pay_admin_products_title: 'Propuesta Ferriol'
       };
     }
     function ferriolLinesToArray(txt) {
@@ -4257,7 +4253,41 @@
         modal_kiosco: typeof j.modal_kiosco === 'string' ? String(j.modal_kiosco).trim() : d.modal_kiosco,
         modal_admin: typeof j.modal_admin === 'string' ? String(j.modal_admin).trim() : d.modal_admin,
         modal_distrib_kit:
-          typeof j.modal_distrib_kit === 'string' ? String(j.modal_distrib_kit).trim() : d.modal_distrib_kit
+          typeof j.modal_distrib_kit === 'string' ? String(j.modal_distrib_kit).trim() : d.modal_distrib_kit,
+        pay_kiosco_eyebrow:
+          typeof j.pay_kiosco_eyebrow === 'string' && String(j.pay_kiosco_eyebrow).trim()
+            ? String(j.pay_kiosco_eyebrow).trim()
+            : d.pay_kiosco_eyebrow,
+        pay_kiosco_headline:
+          typeof j.pay_kiosco_headline === 'string' && String(j.pay_kiosco_headline).trim()
+            ? String(j.pay_kiosco_headline).trim()
+            : d.pay_kiosco_headline,
+        pay_kiosco_lead: typeof j.pay_kiosco_lead === 'string' ? String(j.pay_kiosco_lead).trim() : d.pay_kiosco_lead,
+        pay_admin_eyebrow:
+          typeof j.pay_admin_eyebrow === 'string' && String(j.pay_admin_eyebrow).trim()
+            ? String(j.pay_admin_eyebrow).trim()
+            : d.pay_admin_eyebrow,
+        pay_admin_headline:
+          typeof j.pay_admin_headline === 'string' && String(j.pay_admin_headline).trim()
+            ? String(j.pay_admin_headline).trim()
+            : d.pay_admin_headline,
+        pay_admin_lead: typeof j.pay_admin_lead === 'string' ? String(j.pay_admin_lead).trim() : d.pay_admin_lead,
+        pay_kiosco_benefits_title:
+          typeof j.pay_kiosco_benefits_title === 'string' && String(j.pay_kiosco_benefits_title).trim()
+            ? String(j.pay_kiosco_benefits_title).trim()
+            : d.pay_kiosco_benefits_title,
+        pay_kiosco_products_title:
+          typeof j.pay_kiosco_products_title === 'string' && String(j.pay_kiosco_products_title).trim()
+            ? String(j.pay_kiosco_products_title).trim()
+            : d.pay_kiosco_products_title,
+        pay_admin_benefits_title:
+          typeof j.pay_admin_benefits_title === 'string' && String(j.pay_admin_benefits_title).trim()
+            ? String(j.pay_admin_benefits_title).trim()
+            : d.pay_admin_benefits_title,
+        pay_admin_products_title:
+          typeof j.pay_admin_products_title === 'string' && String(j.pay_admin_products_title).trim()
+            ? String(j.pay_admin_products_title).trim()
+            : d.pay_admin_products_title
       };
     }
     function ferriolRenderCheckoutBenefitUl(ulEl, lines, variant) {
@@ -4321,6 +4351,48 @@
         'cyan'
       );
       ferriolRenderCheckoutBenefitUl(document.getElementById('planCheckoutBenefitsDistribList'), copy.distrib, 'violet');
+      try {
+        syncPlanCheckoutPayTextsFromCopy(copy);
+      } catch (_) {}
+    }
+    function syncPlanCheckoutPayTextsFromCopy(copy) {
+      copy = copy || window._ferriolCheckoutCopyParsed || ferriolDefaultCheckoutCopy();
+      var ck = typeof window._ferriolPlanCheckoutMode === 'string' ? window._ferriolPlanCheckoutMode : 'pay';
+      if (ck !== 'pay' || !currentUser) return;
+      var admin = ferriolPlanPayModalMode() === 'admin';
+      var eb = document.getElementById('planCheckoutPayEyebrow');
+      var hl = document.getElementById('planCheckoutPaySalesHeadline');
+      var ld = document.getElementById('planCheckoutPayLead');
+      if (eb)
+        eb.textContent = admin ? copy.pay_admin_eyebrow || '' : copy.pay_kiosco_eyebrow || '';
+      if (hl)
+        hl.textContent = admin ? copy.pay_admin_headline || '' : copy.pay_kiosco_headline || '';
+      if (ld) {
+        var leadRaw = admin ? copy.pay_admin_lead : copy.pay_kiosco_lead;
+        var leadTxt = String(leadRaw != null ? leadRaw : '').trim();
+        ld.innerHTML = leadTxt ? ferriolFormatDistribIntroHtml(leadRaw) : '';
+        ld.classList.toggle('hidden', !leadTxt);
+      }
+      var lbKmain = document.getElementById('planCheckoutPayKioscoBenefMainLabel');
+      var lbKprod = document.getElementById('planCheckoutPayKioscoProductsLabel');
+      var lbAmain = document.getElementById('planCheckoutPayAdminBenefMainLabel');
+      var lbAprod = document.getElementById('planCheckoutPayAdminProductsLabel');
+      if (lbKmain) lbKmain.textContent = copy.pay_kiosco_benefits_title || 'Beneficios';
+      if (lbKprod) lbKprod.textContent = copy.pay_kiosco_products_title || 'Propuesta Ferriol';
+      if (lbAmain) lbAmain.textContent = copy.pay_admin_benefits_title || 'Beneficios';
+      if (lbAprod) lbAprod.textContent = copy.pay_admin_products_title || 'Propuesta Ferriol';
+      var tr = document.getElementById('planCheckoutPayTransferHint');
+      var mp = document.getElementById('planCheckoutPayMpHint');
+      if (tr) {
+        tr.textContent = admin
+          ? 'Te mostramos la cuenta empresa Ferriol para abonar la cuota mensual de distribuidor y enviar el comprobante.'
+          : 'Te mostramos la cuenta empresa Ferriol para abonar la suscripción mensual de tu negocio y enviar el comprobante.';
+      }
+      if (mp) {
+        mp.innerHTML = admin
+          ? 'Link de Mercado Pago <strong class="text-white/80">solo</strong> para la <strong class="text-white/85">cuota mensual distribuidor</strong>.'
+          : 'Link de Mercado Pago <strong class="text-white/80">solo</strong> para la <strong class="text-emerald-100/90">suscripción mensual del negocio</strong>.';
+      }
     }
     window.ferriolFetchCheckoutCopy = function (force) {
       return new Promise(function (resolve) {
@@ -4369,7 +4441,17 @@
         distrib_intro: gs('adminCheckoutCopyDistribIntro'),
         modal_kiosco: gs('adminCheckoutCopyModalKiosco'),
         modal_admin: gs('adminCheckoutCopyModalAdmin'),
-        modal_distrib_kit: gs('adminCheckoutModalDistribKit')
+        modal_distrib_kit: gs('adminCheckoutModalDistribKit'),
+        pay_kiosco_eyebrow: gs('adminCheckoutPayKioscoEyebrow'),
+        pay_kiosco_headline: gs('adminCheckoutPayKioscoHeadline'),
+        pay_kiosco_lead: gs('adminCheckoutPayKioscoLead'),
+        pay_admin_eyebrow: gs('adminCheckoutPayAdminEyebrow'),
+        pay_admin_headline: gs('adminCheckoutPayAdminHeadline'),
+        pay_admin_lead: gs('adminCheckoutPayAdminLead'),
+        pay_kiosco_benefits_title: gs('adminCheckoutPayKioscoBenefitsTitle'),
+        pay_kiosco_products_title: gs('adminCheckoutPayKioscoProductsTitle'),
+        pay_admin_benefits_title: gs('adminCheckoutPayAdminBenefitsTitle'),
+        pay_admin_products_title: gs('adminCheckoutPayAdminProductsTitle')
       };
     }
 
@@ -4466,66 +4548,24 @@
 
     function syncPlanCheckoutReferenciasMontos() {
       var ul = document.getElementById('planCheckoutReferenciasList');
-      var note = document.getElementById('planCheckoutEstePagoNota');
       var box = document.getElementById('planCheckoutReferenciasBox');
       if (!ul || !box) return;
-      var ck = typeof window._ferriolPlanCheckoutMode === 'string' ? window._ferriolPlanCheckoutMode : 'pay';
-      if (ck !== 'pay') {
-        box.classList.add('hidden');
-        return;
-      }
-      box.classList.remove('hidden');
-      var kit = Number(FERRIOL_PLAN_AMOUNTS.kit) || 0;
-      var km = Number(FERRIOL_PLAN_AMOUNTS.kioscoMonthly) || 0;
-      var vm = Number(FERRIOL_PLAN_AMOUNTS.vendorMonthly) || 0;
-      function fmt(x) {
-        return '$ ' + Number(x).toLocaleString('es-AR') + ' ARS';
-      }
-      ul.innerHTML =
-        '<li><span><strong class="text-violet-200/95">Kit distribuidor</strong> <span class="text-white/45 text-[11px] font-normal">(venta inicial)</span></span><span class="tabular-nums font-semibold text-white">' + fmt(kit) + '</span></li>' +
-        '<li><span><strong class="text-emerald-200/95">Suscripción mensual al sistema</strong> <span class="text-white/45 text-[11px] font-normal">(negocio)</span></span><span class="tabular-nums font-semibold text-white">' + fmt(km) + '</span></li>' +
-        '<li><span><strong class="text-cyan-200/95">Cuota distribuidor</strong> <span class="text-white/45 text-[11px] font-normal">(mensual socio/red)</span></span><span class="tabular-nums font-semibold text-white">' + fmt(vm) + '</span></li>';
-      if (note) {
-        var admin = ferriolPlanPayModalMode() === 'admin';
-        note.textContent =
-          admin
-            ? 'Este cierre está orientado al pago de la cuota mensual distribuidor. El gran importe de abajo es la referencia para esa cuota (no el kit en esta pantalla).'
-            : 'Este cierre está orientado al pago de la suscripción mensual del negocio. Los otros rubros aparecen sólo como referencia de empresa.';
-      }
     }
 
     function syncPlanCheckoutPurchaseIntro() {
-      var el = document.getElementById('planCheckoutPurchaseIntro');
       var metodos = document.getElementById('planCheckoutMetodosPago');
-      if (!el || !currentUser) return;
       var ck = typeof window._ferriolPlanCheckoutMode === 'string' ? window._ferriolPlanCheckoutMode : 'pay';
-      if (ck !== 'pay') {
-        el.classList.add('hidden');
-        el.innerHTML = '';
-        return;
-      }
-      el.classList.remove('hidden');
-      var admin = ferriolPlanPayModalMode() === 'admin';
-      if (admin) {
-        el.innerHTML =
-          '<p class="text-[11px] font-semibold uppercase tracking-wide text-cyan-200/85 mb-1">Qué está comprando / abonando el cliente</p>' +
-          '<p class="text-sm text-white/88 leading-relaxed"><strong class="text-cyan-100">Cuota mensual de distribuidor</strong> — acceso y operación del rol socio/red en Ferriol OS, abonada a <strong class="text-white/95">Ferriol (empresa)</strong>. En la tabla de referencias también ves <strong class="text-white/80">kit distribuidor</strong> y <strong class="text-white/80">suscripción mensual negocio</strong> para comparar montos.</p>';
-      } else {
-        el.innerHTML =
-          '<p class="text-[11px] font-semibold uppercase tracking-wide text-emerald-200/85 mb-1">Qué está comprando / abonando el cliente</p>' +
-          '<p class="text-sm text-white/88 leading-relaxed"><strong class="text-emerald-100">Suscripción mensual al sistema Ferriol OS</strong> — uso del software en el comercio, abonada a <strong class="text-white/95">Ferriol (empresa)</strong>. Las referencias de <strong class="text-white/80">kit distribuidor</strong> y <strong class="text-white/80">cuota socio</strong> figuran abajo para transparencia.</p>';
-      }
-      if (metodos) metodos.classList.remove('hidden');
+      if (metodos) metodos.classList.toggle('hidden', ck !== 'pay');
+      if (ck !== 'pay' || !currentUser) return;
+      try {
+        syncPlanCheckoutPayTextsFromCopy();
+      } catch (_) {}
     }
 
     /** Textos Plan / cuenta según rol: kiosco = suscripción mensual; fundador/socio/partner sin preview = cuota distribuidor */
     function syncPlanRolePayLabels() {
       if (!currentUser) return;
       var admin = ferriolPlanPayModalMode() === 'admin';
-      var ht = document.getElementById('planPanelHeadingText');
-      if (ht) {
-        ht.textContent = admin ? 'Cierre · cuota mensual distribuidor' : 'Cierre · suscripción mensual al sistema';
-      }
       var lead = document.getElementById('planPanelLead');
       if (lead) {
         lead.innerHTML = '';
@@ -4537,12 +4577,8 @@
         benefitsKiosco.classList.toggle('hidden', admin);
         benefitsAdmin.classList.toggle('hidden', !admin);
       }
-      var eyeb = document.getElementById('planCheckoutPayEyebrow');
-      if (eyeb) {
-        eyeb.textContent = 'Pago seguro · Ferriol OS';
-      }
       var prim = document.getElementById('planPanelPayBtnPrimary');
-      if (prim) prim.textContent = admin ? 'Abrir datos para transferir (cuota)' : 'Abrir datos para transferir (suscripción)';
+      if (prim) prim.textContent = admin ? 'Ver datos para transferir (cuota)' : 'Ver datos para transferir (suscripción)';
       var sub = document.getElementById('planPanelPayBtnSubtitle');
       if (sub) {
         sub.textContent = admin ? ' · cuenta Ferriol' : ' · cuenta Ferriol';
@@ -4550,8 +4586,8 @@
       var foot = document.getElementById('planPanelFooterHint');
       if (foot) {
         foot.innerHTML = admin
-          ? 'Elegí <strong class="text-cyan-100/80">transferencia</strong> o <strong class="text-cyan-100/80">Mercado Pago</strong> arriba. Los importes son referencia de empresa salvo otro aviso fehaciente.'
-          : 'Elegí <strong class="text-emerald-100/85">transferencia</strong> o <strong class="text-emerald-100/85">Mercado Pago</strong>. El monto grande es la suscripción mensual de referencia.';
+          ? 'Aboná la <strong class="text-cyan-100/80">cuota mensual distribuidor</strong> (referencia abajo). Los montos son de empresa salvo aviso diferente.'
+          : 'Aboná la <strong class="text-emerald-100/85">suscripción mensual del negocio</strong> (referencia abajo). Si Ferriol te pasó otro valor, ese es el válido.';
       }
       var aml = document.getElementById('accountMenuPlanAbonarLabel');
       if (aml) aml.textContent = admin ? 'Pagar cuota mensual' : 'Pagar suscripción mensual';
@@ -4593,7 +4629,9 @@
       var nf = '$ ' + Number(n).toLocaleString('es-AR') + ' ARS';
       if (big) big.textContent = nf;
       if (label) {
-        label.textContent = admin ? 'Cuota mensual · referencia' : 'Suscripción mensual · referencia';
+        label.textContent = admin
+          ? 'Precio referencia · cuota distribuidor'
+          : 'Precio referencia · suscripción del negocio';
       }
       if (ex) {
         ex.textContent = admin
@@ -4602,8 +4640,13 @@
       }
       if (box) {
         box.className = admin
-          ? 'rounded-2xl border border-cyan-500/35 bg-gradient-to-b from-cyan-950/40 to-black/35 p-4 sm:p-5 mb-4 text-center shadow-md shadow-cyan-950/30'
-          : 'rounded-2xl border border-emerald-500/35 bg-gradient-to-b from-emerald-950/30 to-black/30 p-4 sm:p-5 mb-4 text-center shadow-md shadow-emerald-950/20';
+          ? 'rounded-2xl border border-cyan-500/45 bg-gradient-to-b from-cyan-950/50 to-black/45 py-6 px-4 mb-6 text-center ring-1 ring-cyan-400/25 shadow-xl shadow-black/30'
+          : 'rounded-2xl border border-emerald-500/45 bg-gradient-to-b from-emerald-950/40 to-black/45 py-6 px-4 mb-6 text-center ring-1 ring-emerald-400/25 shadow-xl shadow-black/30';
+      }
+      if (big) {
+        big.className = admin
+          ? 'text-[2.35rem] sm:text-5xl font-black tabular-nums text-cyan-50 tracking-tight leading-none drop-shadow-lg'
+          : 'text-[2.35rem] sm:text-5xl font-black tabular-nums text-emerald-50 tracking-tight leading-none drop-shadow-lg';
       }
       var dpb = document.getElementById('planCheckoutDistribPriceBig');
       if (dpb) {
@@ -9826,6 +9869,26 @@ async function showApp() {
           if (fhl) fhl.value = copyForUi.distrib_sales_headline || '';
           if (fben) fben.value = copyForUi.distrib_beneficios_title || '';
           if (fkit) fkit.value = copyForUi.modal_distrib_kit || '';
+          var pke = document.getElementById('adminCheckoutPayKioscoEyebrow');
+          var pkh = document.getElementById('adminCheckoutPayKioscoHeadline');
+          var pkld = document.getElementById('adminCheckoutPayKioscoLead');
+          var pkb = document.getElementById('adminCheckoutPayKioscoBenefitsTitle');
+          var pkp = document.getElementById('adminCheckoutPayKioscoProductsTitle');
+          var pae = document.getElementById('adminCheckoutPayAdminEyebrow');
+          var pah = document.getElementById('adminCheckoutPayAdminHeadline');
+          var pal = document.getElementById('adminCheckoutPayAdminLead');
+          var pab = document.getElementById('adminCheckoutPayAdminBenefitsTitle');
+          var pap = document.getElementById('adminCheckoutPayAdminProductsTitle');
+          if (pke) pke.value = copyForUi.pay_kiosco_eyebrow || '';
+          if (pkh) pkh.value = copyForUi.pay_kiosco_headline || '';
+          if (pkld) pkld.value = copyForUi.pay_kiosco_lead || '';
+          if (pkb) pkb.value = copyForUi.pay_kiosco_benefits_title || '';
+          if (pkp) pkp.value = copyForUi.pay_kiosco_products_title || '';
+          if (pae) pae.value = copyForUi.pay_admin_eyebrow || '';
+          if (pah) pah.value = copyForUi.pay_admin_headline || '';
+          if (pal) pal.value = copyForUi.pay_admin_lead || '';
+          if (pab) pab.value = copyForUi.pay_admin_benefits_title || '';
+          if (pap) pap.value = copyForUi.pay_admin_products_title || '';
         }
         if (isEmpresaLensSuper()) {
           var elk = document.getElementById('adminPlanAmountKit');
@@ -10783,13 +10846,6 @@ async function showApp() {
           if (typeof window.ferriolOpenEmpresaSubscriptionModal === 'function') {
             window.ferriolOpenEmpresaSubscriptionModal(typeof ferriolPlanPayModalMode === 'function' ? ferriolPlanPayModalMode() : 'admin');
           }
-        });
-      }
-      var pq = document.getElementById('btnPlanOpenDistribuidorRequest');
-      if (pq) {
-        pq.addEventListener('click', function () {
-          if (pq.disabled) return;
-          if (typeof openKiosqueroPartnerUpgradeModal === 'function') openKiosqueroPartnerUpgradeModal();
         });
       }
       var bdt = document.getElementById('btnPlanDistribOpenTransferModal');
