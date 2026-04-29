@@ -1720,7 +1720,7 @@
       function applyKioscoSubscriptionDaysStrip(te) {
         if (!strip) return;
         var baseClasses =
-          'kiosco-sub-days-strip mb-4 rounded-2xl p-4 sm:p-5 border-2 shadow-2xl shadow-black/50 relative overflow-hidden';
+          'kiosco-sub-days-strip mb-3 rounded-xl p-3 sm:p-3.5 border shadow-md shadow-black/30 relative overflow-hidden';
         strip.classList.remove('animate-kiosco-days-pulse', 'animate-pulse');
         if (
           !stripNum ||
@@ -1732,17 +1732,17 @@
           strip.classList.remove('hidden');
           stripNum.textContent = '—';
           if (stripSuf) stripSuf.classList.add('hidden');
-          stripEye.textContent = 'Licencia sistema';
+          stripEye.textContent = 'Vigencia';
           stripLine.textContent =
             'Sin fecha de vigencia en tu perfil. Coordiná con el administrador.';
           stripEye.className =
-            'text-[10px] font-bold uppercase tracking-[0.2em] text-amber-200/95 mb-1';
-          stripLine.className = 'text-sm sm:text-base font-semibold text-amber-100/95 leading-snug';
+            'text-[9px] font-medium uppercase tracking-wide text-white/45 mb-0.5';
+          stripLine.className = 'text-sm sm:text-[0.9375rem] font-medium text-white/70 leading-snug';
           strip.className =
             baseClasses +
-            ' bg-gradient-to-br from-amber-950/85 via-neutral-950/90 to-neutral-950/95 border-amber-500/55 ring-2 ring-amber-400/35';
+            ' border-white/12 bg-black/25';
           stripNum.className =
-            'text-4xl sm:text-5xl font-black tabular-nums leading-none text-amber-200/90 drop-shadow-none';
+            'text-3xl sm:text-4xl font-bold tabular-nums leading-none text-white/40';
           return;
         }
         var end = new Date(te);
@@ -1751,16 +1751,16 @@
           strip.classList.remove('hidden');
           stripNum.textContent = '—';
           if (stripSuf) stripSuf.classList.add('hidden');
-          stripEye.textContent = 'Error de fecha';
+          stripEye.textContent = 'Vigencia';
           stripLine.textContent = 'La vigencia cargada no es válida. Consultá soporte.';
           stripEye.className =
-            'text-[10px] font-bold uppercase tracking-[0.2em] text-amber-200/85 mb-1';
-          stripLine.className = 'text-sm sm:text-base font-semibold text-amber-100/90 leading-snug';
+            'text-[9px] font-medium uppercase tracking-wide text-white/45 mb-0.5';
+          stripLine.className = 'text-sm sm:text-[0.9375rem] font-medium text-white/70 leading-snug';
           strip.className =
             baseClasses +
-            ' bg-gradient-to-br from-amber-950/80 via-neutral-950/90 to-neutral-950 border-amber-500/50 ring-2 ring-amber-400/30';
+            ' border-amber-500/25 bg-amber-950/15';
           stripNum.className =
-            'text-4xl sm:text-5xl font-black tabular-nums leading-none text-amber-200/95';
+            'text-3xl sm:text-4xl font-bold tabular-nums leading-none text-amber-200/70';
           return;
         }
         var expired = end.getTime() <= now.getTime();
@@ -1773,15 +1773,15 @@
           stripNum.textContent = '!';
           stripEye.textContent = 'Vencido';
           stripEye.className =
-            'text-[10px] font-bold uppercase tracking-[0.2em] text-red-300 mb-1';
+            'text-[9px] font-medium uppercase tracking-wide text-red-400/85 mb-0.5';
           stripLine.textContent =
             'Suscripción vencida. Renovala para mantener Ferriol OS activo en tu negocio.';
-          stripLine.className = 'text-base sm:text-lg font-semibold text-red-100 leading-snug drop-shadow-md';
+          stripLine.className = 'text-sm sm:text-[0.9375rem] font-medium text-red-100/85 leading-snug';
           strip.className =
             baseClasses +
-            ' bg-gradient-to-br from-red-950/95 via-neutral-950/95 to-neutral-950 border-red-400/65 ring-2 ring-red-500/40 animate-kiosco-days-pulse';
+            ' border-red-400/35 bg-red-950/20';
           stripNum.className =
-            'text-6xl sm:text-7xl font-black tabular-nums leading-none text-red-200 drop-shadow-[0_0_22px_rgba(248,113,113,0.45)]';
+            'text-3xl sm:text-4xl font-bold tabular-nums leading-none text-red-300/90';
         } else if (daysLeft >= 1) {
           if (stripSuf) {
             stripSuf.classList.remove('hidden');
@@ -1789,10 +1789,10 @@
           }
           stripNum.textContent = String(daysLeft);
           stripEye.textContent =
-            daysLeft === 1 ? 'Último día' : urgentSoon ? 'Atención' : 'Licencia activa';
+            daysLeft === 1 ? 'Último día' : urgentSoon ? 'Pronto vence' : 'Vigencia';
           stripEye.className =
-            'text-[10px] font-bold uppercase tracking-[0.2em] mb-1 ' +
-            (urgentSoon ? 'text-amber-200' : 'text-emerald-200/90');
+            'text-[9px] font-medium uppercase tracking-wide mb-0.5 ' +
+            (urgentSoon ? 'text-amber-200/80' : 'text-emerald-200/65');
           stripLine.textContent =
             daysLeft === 1 ?
               'Te queda 1 día de licencia antes del vencimiento.' :
@@ -1800,32 +1800,34 @@
                 daysLeft +
                 ' días de suscripción antes del vencimiento.';
           stripLine.className =
-            'text-base sm:text-lg font-semibold leading-snug ' +
-            (urgentSoon ? 'text-amber-100' : 'text-white');
+            'text-sm sm:text-[0.9375rem] font-medium leading-snug ' +
+            (urgentSoon ? 'text-amber-100/85' : 'text-white/78');
           strip.className =
             baseClasses +
             ' ' +
             (urgentSoon ?
-              'bg-gradient-to-br from-amber-600/55 via-orange-950/90 to-neutral-950 border-amber-300/65 ring-2 ring-amber-400/55 animate-kiosco-days-pulse' :
-              'bg-gradient-to-br from-emerald-600/35 via-neutral-950/95 to-neutral-950 border-emerald-400/50 ring-2 ring-emerald-400/30');
+              'border-amber-400/35 bg-amber-950/18' :
+              'border-emerald-400/22 bg-emerald-950/12');
           stripNum.className =
-            'text-5xl sm:text-[3.35rem] font-black tabular-nums leading-none text-[#fef08a] drop-shadow-[0_0_18px_rgba(250,204,21,0.35)]';
-          if (!urgentSoon) strip.classList.remove('animate-kiosco-days-pulse');
+            'text-3xl sm:text-4xl font-bold tabular-nums leading-none ' +
+            (urgentSoon ? 'text-amber-100/95' : 'text-emerald-100/90');
+          strip.classList.remove('animate-kiosco-days-pulse');
         } else {
           if (stripSuf) stripSuf.classList.add('hidden');
-          stripNum.textContent = '⚡';
-          stripEye.textContent = 'Urgente';
+          stripNum.textContent = '·';
+          stripEye.textContent = 'Últimas horas';
           stripEye.className =
-            'text-[10px] font-bold uppercase tracking-[0.2em] text-amber-100 mb-1';
+            'text-[9px] font-medium uppercase tracking-wide text-orange-200/75 mb-0.5';
           stripLine.textContent =
-            'La licencia vence en las próximas horas. Aboná la suscripción ya.';
+            'La licencia vence pronto. Aboná la suscripción si aún no lo hiciste.';
           stripLine.className =
-            'text-base sm:text-lg font-semibold text-amber-50 leading-snug';
+            'text-sm sm:text-[0.9375rem] font-medium text-orange-50/85 leading-snug';
           strip.className =
             baseClasses +
-            ' bg-gradient-to-br from-orange-600/65 via-neutral-950/95 to-neutral-950 border-orange-400/65 ring-2 ring-orange-400/50 animate-kiosco-days-pulse';
+            ' border-orange-400/35 bg-orange-950/18';
           stripNum.className =
-            'text-5xl font-black tabular-nums leading-none drop-shadow-[0_0_20px_rgba(251,191,36,0.5)]';
+            'text-3xl sm:text-4xl font-bold tabular-nums leading-none text-orange-200/95';
+          strip.classList.remove('animate-kiosco-days-pulse');
         }
       }
       if (!currentUser) return;

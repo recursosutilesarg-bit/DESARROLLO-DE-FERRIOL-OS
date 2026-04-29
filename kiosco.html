@@ -464,13 +464,6 @@
             <span class="font-semibold text-sm">Libreta de fiado</span>
             <span class="text-xs text-white/50 text-center leading-tight">Clientes con deuda</span>
           </button>
-          <button onclick="window._switchCajaTab('sistema')" class="caja-hub-btn glass rounded-2xl p-5 border border-amber-500/35 flex flex-col items-center gap-2 w-full transition-all hover:border-amber-400/55 active:scale-[0.98] touch-target ring-1 ring-amber-400/22">
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/25 to-rose-950/35 flex items-center justify-center border border-amber-300/35">
-              <i data-lucide="sparkles" class="w-6 h-6 text-amber-200"></i>
-            </div>
-            <span class="font-semibold text-sm text-center leading-tight px-1">Abono sistema / suscripción</span>
-            <span class="text-xs text-white/50 text-center leading-tight">Licencia Ferriol y distribuidor</span>
-          </button>
           <button onclick="window._switchCajaTab('proveedores')" class="caja-hub-btn glass rounded-2xl p-5 border border-amber-500/35 flex flex-col items-center gap-2 w-full transition-all hover:border-amber-400/55 active:scale-[0.98] touch-target ring-1 ring-amber-500/20">
             <div class="w-12 h-12 rounded-2xl bg-amber-500/15 flex items-center justify-center border border-amber-400/25">
               <i data-lucide="truck" class="w-6 h-6 text-amber-200"></i>
@@ -484,6 +477,18 @@
             </div>
             <span class="font-semibold text-sm">Gastos fijos</span>
             <span class="text-xs text-white/50 text-center leading-tight">Luz, alquiler…</span>
+          </button>
+          <button onclick="window._switchCajaTab('sistema')" type="button" class="caja-hub-btn col-span-2 w-full rounded-2xl px-4 py-5 sm:px-6 sm:py-6 border border-violet-400/40 flex flex-row items-center justify-between gap-3 sm:gap-5 text-left transition-all hover:border-violet-300/60 active:scale-[0.99] touch-target ring-1 ring-violet-500/30 bg-gradient-to-r from-violet-950/80 via-purple-950/65 to-indigo-950/55 shadow-xl shadow-black/35 hover:shadow-violet-900/25">
+            <div class="flex items-center gap-4 min-w-0 flex-1">
+              <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl shrink-0 bg-gradient-to-br from-violet-600/45 to-purple-900/55 flex items-center justify-center border border-violet-400/35">
+                <i data-lucide="sparkles" class="w-7 h-7 sm:w-8 sm:h-8 text-violet-100"></i>
+              </div>
+              <div class="min-w-0">
+                <span class="font-semibold text-base sm:text-lg text-violet-50 block leading-snug">Abono sistema / suscripción</span>
+                <span class="text-xs sm:text-sm text-violet-200/75 mt-1 block leading-snug">Licencia Ferriol y distribuidor</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-6 h-6 text-violet-300/65 shrink-0"></i>
           </button>
         </div>
       </div>
@@ -613,17 +618,15 @@
           <div id="kioscoLicensePaymentBlock" class="kiosquero-only rounded-2xl border border-[#22c55e]/25 bg-gradient-to-br from-[#0a2e18]/95 to-[#052a14]/90 p-4 sm:p-5 shadow-lg shadow-black/20">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
               <div class="min-w-0 flex-1">
-                <div id="kioscoSubscriptionDaysStrip" class="kiosco-sub-days-strip hidden mb-4 rounded-2xl p-4 sm:p-5 border-2 shadow-2xl shadow-black/50 relative overflow-hidden ring-2 ring-emerald-400/20">
-                  <div class="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-amber-400/15 blur-2xl"></div>
-                  <div class="pointer-events-none absolute -left-8 bottom-0 h-32 w-32 rounded-full bg-emerald-500/10 blur-2xl"></div>
-                  <div class="relative flex flex-col sm:flex-row sm:items-center gap-4">
+                <div id="kioscoSubscriptionDaysStrip" class="kiosco-sub-days-strip hidden mb-3 rounded-xl p-3 sm:p-3.5 border border-white/12 bg-black/25 shadow-md shadow-black/30 relative overflow-hidden">
+                  <div class="relative flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                     <div id="kioscoSubscriptionDaysNumberWrap" class="flex items-end gap-1.5 shrink-0">
-                      <span id="kioscoSubscriptionDaysNumber" class="text-5xl sm:text-[3.35rem] font-black tabular-nums leading-none text-[#fef08a] drop-shadow-[0_0_18px_rgba(250,204,21,0.35)]">—</span>
-                      <span id="kioscoSubscriptionDaysSuffix" class="hidden text-[11px] font-extrabold uppercase tracking-[0.2em] text-white/85 pb-1.5 leading-none whitespace-nowrap">días</span>
+                      <span id="kioscoSubscriptionDaysNumber" class="text-3xl sm:text-4xl font-bold tabular-nums leading-none text-white/90">—</span>
+                      <span id="kioscoSubscriptionDaysSuffix" class="hidden text-[10px] font-semibold uppercase tracking-wider text-white/55 pb-1 leading-none whitespace-nowrap">días</span>
                     </div>
-                    <div class="flex-1 min-w-0 flex flex-col justify-center gap-0.5 pt-1">
-                      <p id="kioscoSubscriptionDaysEyebrow" class="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-200/90 mb-1">Suscripción sistema</p>
-                      <p id="kioscoSubscriptionDaysLine" class="text-base sm:text-lg font-semibold text-white leading-snug"></p>
+                    <div class="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
+                      <p id="kioscoSubscriptionDaysEyebrow" class="text-[9px] font-medium uppercase tracking-wide text-white/45 mb-0.5">Vigencia</p>
+                      <p id="kioscoSubscriptionDaysLine" class="text-sm sm:text-[0.9375rem] font-medium text-white/82 leading-snug"></p>
                     </div>
                   </div>
                 </div>
@@ -2926,7 +2929,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426_caja_tarjeta_sistema"></script>
+  <script defer src="kiosco-app.js?v=20260426_hub_morado_dias_suave"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>
