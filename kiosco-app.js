@@ -394,9 +394,11 @@
       wrap.classList.remove('hidden');
       btn.disabled = false;
       btn.classList.remove('opacity-80', 'cursor-not-allowed');
-      var lbl = '';
-      lbl = '<i data-lucide="badge-check" class="w-4 h-4 shrink-0"></i> Quiero ser distribuidor';
+      var lbl =
+        '<i data-lucide="badge-check" class="w-4 h-4 shrink-0"></i> Quiero ser distribuidor';
       btn.innerHTML = lbl;
+      btn.className =
+        'w-full py-3 px-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 touch-target active:scale-[0.98] text-white border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 shadow-lg shadow-violet-600/40 ring-1 ring-white/15 hover:brightness-110';
       try {
         if (supabaseClient) {
           var r = await supabaseClient
@@ -419,11 +421,11 @@
     function openKiosqueroPartnerUpgradeModal() {
       var m = document.getElementById('kiosqueroPartnerUpgradeModal');
       var err = document.getElementById('kiosqueroPartnerUpgradeErr');
-      var em = document.getElementById('kiosqueroPartnerUpgradeKitEmail');
+      var refIn = document.getElementById('kiosqueroPartnerUpgradeKitRefCode');
       var no = document.getElementById('kiosqueroPartnerUpgradeNote');
       if (!m) return;
       if (err) { err.textContent = ''; err.classList.add('hidden'); err.classList.remove('show'); }
-      if (em) em.value = '';
+      if (refIn) refIn.value = '';
       if (no) no.value = '';
       m.classList.remove('hidden');
       m.classList.add('flex');
@@ -9404,24 +9406,42 @@ async function showApp() {
         var errBox = document.getElementById('kiosqueroPartnerUpgradeErr');
         if (errBox) { errBox.textContent = ''; errBox.classList.add('hidden'); errBox.classList.remove('show'); }
         if (!supabaseClient || !currentUser || currentUser.role !== 'kiosquero') return;
-        var kitEmail = (document.getElementById('kiosqueroPartnerUpgradeKitEmail') && document.getElementById('kiosqueroPartnerUpgradeKitEmail').value || '').trim().toLowerCase();
+        var kitCodeRaw =
+          document.getElementById('kiosqueroPartnerUpgradeKitRefCode') &&
+          document.getElementById('kiosqueroPartnerUpgradeKitRefCode').value
+            ? document.getElementById('kiosqueroPartnerUpgradeKitRefCode').value
+            : '';
+        var kitCode = normalizeReferralCode(kitCodeRaw);
         var note = (document.getElementById('kiosqueroPartnerUpgradeNote') && document.getElementById('kiosqueroPartnerUpgradeNote').value || '').trim();
         var kitSponsorId = null;
-        if (kitEmail) {
-          if (kitEmail === String(currentUser.email || '').toLowerCase()) {
-            if (errBox) { errBox.textContent = 'No podés indicar tu propio email como socio del kit.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+        if (kitCode) {
+          kitSponsorId = await resolveReferralCodeToSponsorId(kitCode);
+          if (!kitSponsorId) {
+            if (errBox) {
+              errBox.textContent =
+                'El código de afiliación no es válido o no existe. Revisalo o dejalo vacío para usar el referidor de tu negocio.';
+              errBox.classList.remove('hidden');
+              errBox.classList.add('show');
+            }
             return;
           }
-          var pr = await supabaseClient.from('profiles').select('id,role').eq('email', kitEmail).maybeSingle();
-          if (pr.error || !pr.data || !pr.data.id) {
-            if (errBox) { errBox.textContent = 'No encontramos un usuario con ese email. Revisá o dejá el campo vacío.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+          if (kitSponsorId === currentUser.id) {
+            if (errBox) {
+              errBox.textContent = 'No podés usar tu propio código de afiliación.';
+              errBox.classList.remove('hidden');
+              errBox.classList.add('show');
+            }
             return;
           }
-          if (pr.data.role !== 'partner' && pr.data.role !== 'super') {
-            if (errBox) { errBox.textContent = 'Ese email no corresponde a un socio distribuidor o empresa.'; errBox.classList.remove('hidden'); errBox.classList.add('show'); }
+          var pr = await supabaseClient.from('profiles').select('id,role').eq('id', kitSponsorId).maybeSingle();
+          if (!pr.error && pr.data && pr.data.role !== 'partner' && pr.data.role !== 'super') {
+            if (errBox) {
+              errBox.textContent = 'Ese código pertenece a un perfil que no es socio distribuidor ni empresa.';
+              errBox.classList.remove('hidden');
+              errBox.classList.add('show');
+            }
             return;
           }
-          kitSponsorId = pr.data.id;
         }
         var rpc = await supabaseClient.rpc('ferriol_request_kiosquero_partner_upgrade', {
           p_partner_kit_sponsor_id: kitSponsorId,

@@ -599,7 +599,7 @@
                   Abonar suscripción
                 </button>
                 <div id="partnerUpgradeCtaWrap" class="hidden flex flex-col gap-1 min-w-0 sm:flex-1">
-                  <button type="button" id="btnKiosqueroPartnerUpgrade" class="w-full py-3 px-3 rounded-2xl border border-violet-400/45 bg-violet-600/22 hover:bg-violet-600/32 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-violet-100 active:scale-[0.98] shadow-md shadow-violet-900/30">
+                  <button type="button" id="btnKiosqueroPartnerUpgrade" class="w-full py-3 px-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 touch-target active:scale-[0.98] text-white border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 shadow-lg shadow-violet-600/40 ring-1 ring-white/15 hover:brightness-110">
                     <i data-lucide="badge-check" class="w-4 h-4 shrink-0"></i>
                     Quiero ser distribuidor
                   </button>
@@ -2225,12 +2225,12 @@
         </div>
         <p class="text-xs text-white/60 mb-3 leading-relaxed">Enviás la solicitud a <strong class="text-white/80">Ferriol</strong>. Cuando la aprueben, tu misma cuenta pasa a panel de socio (mismo email). La licencia de distribuidor se acredita según <code class="text-violet-200/80">partner_distribution_license_days</code> en Ajustes.</p>
         <div id="kiosqueroPartnerUpgradeErr" class="login-err hidden mb-3"></div>
-        <label class="block text-xs text-white/55 mb-1">Email del socio que te vendió el kit (opcional)</label>
-        <input type="email" id="kiosqueroPartnerUpgradeKitEmail" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-2" placeholder="Si es distinto al referidor de tu negocio" autocomplete="off">
-        <p class="text-[10px] text-white/40 mb-3">Si lo dejás vacío, se usa la línea de tu negocio (<code class="text-white/50">sponsor_id</code>) como patrocinio de socio.</p>
+        <label class="block text-xs text-violet-200/95 mb-1">Código de afiliación del socio que te vendió el kit (opcional)</label>
+        <input type="text" id="kiosqueroPartnerUpgradeKitRefCode" maxlength="32" class="w-full glass rounded-xl px-4 py-3 border border-violet-400/35 text-white text-base uppercase tracking-wide mb-2 font-mono" placeholder="Ej. ABC12XYZ" autocomplete="off">
+        <p class="text-[10px] text-white/45 mb-3">Vacío = se usa tu referidor de <strong class="text-white/70">negocio</strong>. Si cargás código, debe ser el del <strong class="text-violet-200/90">distribuidor</strong> que vendió el kit (misma lógica que en el alta por enlace).</p>
         <label class="block text-xs text-white/55 mb-1">Nota para la empresa (opcional)</label>
         <textarea id="kiosqueroPartnerUpgradeNote" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-sm min-h-[4rem] mb-4" placeholder="Ej. ya pagué el kit, contacto del socio…"></textarea>
-        <button type="button" id="kiosqueroPartnerUpgradeSubmit" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target">Enviar solicitud</button>
+        <button type="button" id="kiosqueroPartnerUpgradeSubmit" class="w-full rounded-xl py-3 font-semibold touch-target text-white border border-violet-300/50 bg-gradient-to-br from-violet-600 to-purple-700 shadow-md shadow-violet-900/40 hover:brightness-110 active:scale-[0.99]">Enviar solicitud</button>
       </div>
     </div>
 
