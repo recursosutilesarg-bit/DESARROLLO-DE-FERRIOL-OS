@@ -351,8 +351,48 @@
     })();
     try { if (typeof window !== 'undefined') window.FerriolMlm = FerriolMlm; } catch (_) {}
 
-    /** Montos orientativos (alineados a mlm_plan_config compensation_v1 y PLAN-COMPENSACIONES-FERRIOL.md) */
+    /** Montos orientativos (alineados a mlm_plan_config compensation_v1 y PLAN-COMPENSACIONES-FERRIOL.md). Se pueden sobreescribir desde app_settings.ferriol_plan_amounts */
     var FERRIOL_PLAN_AMOUNTS = { kit: 60000, kioscoMonthly: 9900, vendorMonthly: 20000 };
+
+    function ferriolMergePlanAmountsFromParsed(j) {
+      if (!j || typeof j !== 'object') return;
+      function pick(x, fb) {
+        var n =
+          typeof x === 'number' && !isNaN(x)
+            ? x
+            : parseFloat(String(x != null ? x : '').replace(/\s/g, '').replace(',', '.'), 10);
+        if (!isFinite(n) || n < 0) return fb;
+        return Math.round(n);
+      }
+      var fb = { kit: 60000, kioscoMonthly: 9900, vendorMonthly: 20000 };
+      if (j.kit != null) FERRIOL_PLAN_AMOUNTS.kit = pick(j.kit, fb.kit);
+      if (j.kioscoMonthly != null) FERRIOL_PLAN_AMOUNTS.kioscoMonthly = pick(j.kioscoMonthly, fb.kioscoMonthly);
+      if (j.vendorMonthly != null) FERRIOL_PLAN_AMOUNTS.vendorMonthly = pick(j.vendorMonthly, fb.vendorMonthly);
+    }
+    async function ferriolLoadPlanAmountsFromSupabase() {
+      if (!supabaseClient) return;
+      try {
+        var r = await supabaseClient.from('app_settings').select('value').eq('key', 'ferriol_plan_amounts').maybeSingle();
+        var raw = r.data && r.data.value;
+        if (raw == null || raw === '') return;
+        var j = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        ferriolMergePlanAmountsFromParsed(j);
+      } catch (_) {}
+    }
+    function ferriolPlanAmountsObjectFromSettingsForm() {
+      function read(id, fb) {
+        var el = document.getElementById(id);
+        var n = el ? parseFloat(String(el.value || '').replace(/\s/g, '').replace(',', '.'), 10) : NaN;
+        if (!isFinite(n) || n < 0) return fb;
+        return Math.round(n);
+      }
+      var fb = { kit: 60000, kioscoMonthly: 9900, vendorMonthly: 20000 };
+      return {
+        kit: read('adminPlanAmountKit', fb.kit),
+        kioscoMonthly: read('adminPlanAmountKioscoMonthly', fb.kioscoMonthly),
+        vendorMonthly: read('adminPlanAmountVendorMonthly', fb.vendorMonthly)
+      };
+    }
 
     async function getTrialDurationDays() {
       if (!supabaseClient) return 15;
@@ -7365,6 +7405,7 @@ async function showApp() {
       state.partnerUiMode = 'red';
     }
     applyAppShell();
+    await ferriolLoadPlanAmountsFromSupabase();
     if (isSuper && state.superUiMode === 'negocio') {
       if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
       window._trialCountdownInterval = setInterval(ferriolTickCountdowns, 1000);
@@ -9402,7 +9443,7 @@ async function showApp() {
     async function renderSuper() {
       if (!supabaseClient) return;
       try {
-        const { data: settingsRows } = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4', 'admin_delete_password', 'trial_reminder_config', 'ferriol_transfer_info', 'trial_duration_days', 'ferriol_checkout_copy']);
+        const { data: settingsRows } = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4', 'admin_delete_password', 'trial_reminder_config', 'ferriol_transfer_info', 'trial_duration_days', 'ferriol_checkout_copy', 'ferriol_plan_amounts']);
         var whatsappInput = document.getElementById('adminContactWhatsapp');
         var whatsapp2Input = document.getElementById('adminContactWhatsapp2');
         var whatsapp3Input = document.getElementById('adminContactWhatsapp3');
@@ -9426,6 +9467,15 @@ async function showApp() {
             if (r.key === 'trial_reminder_config') trialCfgParsed = parseTrialReminderConfigValue(r.value || '');
           });
         }
+        var paRow = (settingsRows || []).filter(function (rx) {
+          return rx.key === 'ferriol_plan_amounts';
+        })[0];
+        if (paRow && paRow.value != null && paRow.value !== '') {
+          try {
+            var pav = typeof paRow.value === 'string' ? JSON.parse(paRow.value) : paRow.value;
+            ferriolMergePlanAmountsFromParsed(pav);
+          } catch (_) {}
+        }
         var ccRow = (settingsRows || []).filter(function (rx) {
           return rx.key === 'ferriol_checkout_copy';
         })[0];
@@ -9446,6 +9496,14 @@ async function showApp() {
           if (fdi) fdi.value = copyForUi.distrib_intro || '';
           if (fmk) fmk.value = copyForUi.modal_kiosco || '';
           if (fma) fma.value = copyForUi.modal_admin || '';
+        }
+        if (isEmpresaLensSuper()) {
+          var elk = document.getElementById('adminPlanAmountKit');
+          var elko = document.getElementById('adminPlanAmountKioscoMonthly');
+          var elv = document.getElementById('adminPlanAmountVendorMonthly');
+          if (elk) elk.value = String(FERRIOL_PLAN_AMOUNTS.kit);
+          if (elko) elko.value = String(FERRIOL_PLAN_AMOUNTS.kioscoMonthly);
+          if (elv) elv.value = String(FERRIOL_PLAN_AMOUNTS.vendorMonthly);
         }
         window._superTrialReminderEditCache = trialCfgParsed;
         var winDaysInput = document.getElementById('trialReminderWindowDays');
@@ -9664,6 +9722,11 @@ async function showApp() {
           checkoutSaved = ferriolBuildCheckoutCopyObjectFromSettingsForm();
           rowsUpsert.push({ key: 'ferriol_checkout_copy', value: JSON.stringify(checkoutSaved) });
         }
+        var planAmtSaved = null;
+        if (isEmpresaLensSuper() && document.getElementById('adminPlanAmountKit')) {
+          planAmtSaved = ferriolPlanAmountsObjectFromSettingsForm();
+          rowsUpsert.push({ key: 'ferriol_plan_amounts', value: JSON.stringify(planAmtSaved) });
+        }
         await supabaseClient.from('app_settings').upsert(rowsUpsert, { onConflict: 'key' });
         if (isEmpresaLensSuper()) {
           var pl = await supabaseClient.from('mlm_plan_config').select('value').eq('key', 'compensation_v1').maybeSingle();
@@ -9698,6 +9761,12 @@ async function showApp() {
           window._ferriolCheckoutCopyParsed = ferriolParseCheckoutCopyValue(JSON.stringify(checkoutSaved));
           try {
             ferriolApplyCheckoutBenefitsToPanels();
+          } catch (_) {}
+        }
+        if (planAmtSaved) {
+          ferriolMergePlanAmountsFromParsed(planAmtSaved);
+          try {
+            syncPlanCheckoutPrices();
           } catch (_) {}
         }
         msgEl.textContent = 'Ajustes guardados.';

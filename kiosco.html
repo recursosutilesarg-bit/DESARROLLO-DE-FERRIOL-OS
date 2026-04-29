@@ -2107,6 +2107,28 @@
             </div>
             <div class="border-t border-white/10 pt-4 mt-4 super-only super-main-only">
               <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
+                <i data-lucide="coins" class="w-4 h-4 text-emerald-300"></i>
+                Precios de referencia (ARS · sin centavos)
+              </h3>
+              <p class="text-xs text-white/50 mb-3">Montos orientativos que usa la app en <strong class="text-white/70">Cuenta → Mi plan</strong>, texto del kit inicial y formularios de cobros según política empresa. Son <strong class="text-white/70">enteros en pesos</strong>; al guardar, kioscos y socios ven el cambio tras recargar o al abrir Mi plan.</p>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-2">
+                <div>
+                  <label class="block text-xs text-white/70 mb-1">Kit distribuidor (venta inicial)</label>
+                  <input type="number" id="adminPlanAmountKit" min="0" step="1" value="60000" placeholder="60000" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-base tabular-nums">
+                </div>
+                <div>
+                  <label class="block text-xs text-white/70 mb-1">Licencia mensual kiosco</label>
+                  <input type="number" id="adminPlanAmountKioscoMonthly" min="0" step="1" value="9900" placeholder="9900" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-base tabular-nums">
+                </div>
+                <div>
+                  <label class="block text-xs text-white/70 mb-1">Cuota mensual distribuidor</label>
+                  <input type="number" id="adminPlanAmountVendorMonthly" min="0" step="1" value="20000" placeholder="20000" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-base tabular-nums">
+                </div>
+              </div>
+              <p class="text-[10px] text-white/40 mb-0">Se guarda con <strong class="text-white/55">Guardar ajustes</strong> · <code class="text-white/55">app_settings.ferriol_plan_amounts</code> (JSON: kit, kioscoMonthly, vendorMonthly).</p>
+            </div>
+            <div class="border-t border-white/10 pt-4 mt-4 super-only super-main-only">
+              <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
                 <i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i>
                 Textos de cierre (pago · licencia · distribuidor)
               </h3>
