@@ -980,19 +980,26 @@
         </button>
         <!-- Resumen: abono empresa (suscripción o cuota distribuidor) -->
         <div id="planCheckoutPayWrap">
-          <p id="planCheckoutPayEyebrow" class="text-[10px] font-semibold uppercase tracking-widest text-amber-200/75 mb-2">Resumen de pago</p>
+          <p id="planCheckoutPayEyebrow" class="text-[10px] font-semibold uppercase tracking-widest text-amber-200/75 mb-2">Cierre · compra</p>
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2 text-white">
-            <i data-lucide="receipt-text" class="w-6 h-6 text-amber-200/95 shrink-0"></i>
-            <span id="planPanelHeadingText">Resumen · Suscripción mensual Ferriol OS</span>
+            <i data-lucide="shopping-cart" class="w-6 h-6 text-amber-200/95 shrink-0"></i>
+            <span id="planPanelHeadingText">Tu compra en Ferriol OS</span>
           </h2>
-          <p id="planPanelLead" class="text-sm text-white/70 mb-4 leading-relaxed"></p>
+          <div id="planCheckoutPurchaseIntro" class="mb-4 rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-sm leading-relaxed text-white/80"></div>
+          <div id="planCheckoutReferenciasBox" class="mb-4 rounded-xl border border-amber-500/25 bg-amber-950/15 px-4 py-3">
+            <p class="text-[10px] font-semibold uppercase tracking-wide text-amber-200/80 mb-2">Referencias de precios (ARS · empresa)</p>
+            <ul id="planCheckoutReferenciasList" class="space-y-1.5 text-sm text-white/85 [&>li]:flex [&>li]:flex-wrap [&>li]:gap-x-2 [&>li]:items-baseline [&>li]:justify-between [&>li]:gap-y-1">
+            </ul>
+            <p id="planCheckoutEstePagoNota" class="text-[11px] text-amber-100/95 mt-2 font-medium leading-snug"></p>
+            <p class="text-[10px] text-white/45 mt-2 leading-snug">Kit = venta inicial distribuidor. Suscripción = mensual uso del sistema en el negocio. Cuota = mensual rol socio/red.</p>
+          </div>
           <div id="planCheckoutPriceBox" class="rounded-2xl border border-white/20 bg-gradient-to-b from-white/[0.06] to-black/30 p-4 sm:p-5 mb-4 text-center">
-            <p id="planCheckoutPriceLabel" class="text-[10px] font-semibold uppercase tracking-wide text-white/50 mb-2">Precio mensual · referencia</p>
+            <p id="planCheckoutPriceLabel" class="text-[10px] font-semibold uppercase tracking-wide text-white/50 mb-2">Importe de este pago · referencia</p>
             <p id="planCheckoutPriceBig" class="text-[1.6rem] sm:text-3xl font-black tabular-nums text-amber-100 tracking-tight">—</p>
             <p id="planCheckoutPriceExplain" class="text-[11px] text-white/55 mt-2 leading-snug px-1"></p>
           </div>
           <div id="planCheckoutBenefitsBlocksKiosco" class="mb-4">
-            <p class="text-[10px] font-semibold uppercase tracking-wide text-emerald-200/85 mb-2">Beneficios · negocio (kiosco)</p>
+            <p class="text-[10px] font-semibold uppercase tracking-wide text-emerald-200/85 mb-2">Beneficios · incluidos con tu suscripción mensual</p>
             <ul id="planCheckoutBenefitsKioscoList" class="space-y-2 text-sm text-emerald-50/95 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-emerald-500/25 bg-emerald-950/20 p-4 min-h-[2.5rem]"></ul>
             <p class="text-[10px] font-semibold uppercase tracking-wide text-white/50 mt-4 mb-2">Suscripción mensual · propuesta Ferriol</p>
             <ul id="planCheckoutBenefitsProductsListKiosco" class="space-y-2 text-sm text-white/80 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-white/15 bg-black/25 p-4 min-h-[2.5rem]"></ul>
@@ -1004,10 +1011,31 @@
             <ul id="planCheckoutBenefitsProductsListAdmin" class="space-y-2 text-sm text-white/80 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-white/15 bg-black/25 p-4 min-h-[2.5rem]"></ul>
           </div>
           <div id="planTrialSummary" class="hidden mb-4 rounded-xl border border-amber-500/35 bg-black/35 px-4 py-3 text-sm text-white/82 leading-snug"></div>
-          <button type="button" id="btnPlanOpenEmpresaSubscription" class="w-full rounded-2xl px-5 py-4 font-bold text-base text-white shadow-xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-700 ring-2 ring-amber-200/45 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2 mb-3">
-            <i data-lucide="building-2" class="w-6 h-6 shrink-0"></i>
-            <span><span id="planPanelPayBtnPrimary">Ver datos para transferir</span><span id="planPanelPayBtnSubtitle" class="text-white/90 font-semibold hidden sm:inline"> · cuenta Ferriol</span></span>
-          </button>
+          <div id="planCheckoutMetodosPago" class="rounded-2xl border border-white/18 bg-black/28 p-4 sm:p-5 mb-3 ring-1 ring-white/10">
+            <p class="text-[10px] font-semibold uppercase tracking-widest text-white/55 mb-4">Métodos de pago</p>
+            <div class="space-y-5">
+              <div>
+                <p class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 shrink-0 text-emerald-200/95"></i> Transferencia</p>
+                <p class="text-xs text-white/55 mb-3 leading-relaxed">Te mostramos los datos de la <strong class="text-white/75">cuenta empresa Ferriol</strong> para que transfieras y envíes el comprobante.</p>
+          <button type="button" id="btnPlanOpenEmpresaSubscription" class="w-full rounded-2xl px-5 py-4 font-bold text-base text-white shadow-xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-700 ring-2 ring-amber-200/45 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2">
+                  <i data-lucide="building-2" class="w-6 h-6 shrink-0"></i>
+                  <span><span id="planPanelPayBtnPrimary">Ver datos para transferir</span><span id="planPanelPayBtnSubtitle" class="text-white/90 font-semibold hidden sm:inline"> · cuenta Ferriol</span></span>
+                </button>
+              </div>
+              <div class="border-t border-white/12 pt-5">
+                <p class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i data-lucide="credit-card" class="w-5 h-5 shrink-0 text-sky-200/95"></i> Tarjeta · efectivo · Mercado Pago</p>
+                <p class="text-xs text-white/55 mb-3 leading-relaxed">Pago con link público de Mercado Pago (tarjeta, efectivo en red u otros según configure la empresa).</p>
+                <div id="planPanelMercadoPagoWrap" class="hidden w-full">
+                  <button type="button" id="planPanelBtnMercadoPago" class="w-full rounded-xl py-3 px-3 touch-target flex items-center justify-center gap-2 font-bold text-[0.6875rem] sm:text-xs text-white leading-tight text-center border-2 border-sky-400/50 bg-gradient-to-br from-[#009ee3]/90 via-[#008ad4]/95 to-[#006ebb] shadow-lg shadow-sky-900/30 ring-1 ring-white/15 hover:brightness-110 active:scale-[0.98]">
+                    <i data-lucide="external-link" class="w-[1.125rem] h-[1.125rem] shrink-0 opacity-95"></i>
+                    <span>PAGAR CON TARJETA / EFECTIVO / MERCADO PAGO</span>
+                  </button>
+                </div>
+                <p id="planPanelMercadoPagoMissingHint" class="text-[11px] text-white/45 leading-snug mt-2">Si no aparece el botón azul, el fundador debe cargar el link en <strong class="text-white/65">Más → Ajustes del sistema</strong> (recuadro azul Mercado Pago).</p>
+              </div>
+            </div>
+          </div>
+          <p id="planPanelLead" class="text-sm text-white/55 mb-3 leading-relaxed hidden"></p>
           <p id="planPanelFooterHint" class="text-[10px] text-white/45 leading-relaxed"></p>
         </div>
         <!-- Resumen: solicitud rol distribuidor -->
@@ -2924,12 +2952,6 @@
           <i data-lucide="building-2" class="w-5 h-5 shrink-0 opacity-95"></i>
           <span id="accountMenuPlanAbonarLabel" class="leading-snug text-center">Pagar suscripción mensual</span>
         </button>
-        <div id="accountPlanMercadoPagoWrap" class="hidden w-full">
-          <button type="button" id="accountPlanBtnMercadoPago" class="w-full rounded-xl py-3 px-3 touch-target flex items-center justify-center gap-2 font-bold text-[0.6875rem] sm:text-xs text-white leading-tight text-center border-2 border-sky-400/50 bg-gradient-to-br from-[#009ee3]/90 via-[#008ad4]/95 to-[#006ebb] shadow-lg shadow-sky-900/30 ring-1 ring-white/15 hover:brightness-110 active:scale-[0.98]">
-            <i data-lucide="external-link" class="w-[1.125rem] h-[1.125rem] shrink-0 opacity-95"></i>
-            <span>PAGAR CON TARJETA / EFECTIVO / MERCADO PAGO</span>
-          </button>
-        </div>
         <div id="accountMenuDistribuidorWrap" class="hidden">
           <button type="button" id="accountMenuBtnDistribuidor" class="w-full rounded-xl py-3 px-3 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-white border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 shadow-md shadow-violet-600/30 ring-1 ring-white/10 hover:brightness-110 active:scale-[0.98]">
             <i data-lucide="badge-check" class="w-4 h-4 shrink-0"></i>
