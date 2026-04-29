@@ -1838,6 +1838,38 @@
         kioscoMonthly: urls.kioscoMonthly ? ferriolNormalizeMercadoPagoUrl(urls.kioscoMonthly) : '',
         vendorMonthly: urls.vendorMonthly ? ferriolNormalizeMercadoPagoUrl(urls.vendorMonthly) : ''
       };
+      var ck = typeof window._ferriolPlanCheckoutMode === 'string' ? window._ferriolPlanCheckoutMode : 'pay';
+      var isPayPanel = ck === 'pay';
+      var adminRole =
+        typeof ferriolPlanPayModalMode === 'function' ? ferriolPlanPayModalMode() === 'admin' : false;
+      var planProd = isPayPanel ? (adminRole ? 'vendorMonthly' : 'kioscoMonthly') : null;
+      var roleBtn = document.getElementById('planCheckoutMpRoleBtn');
+      var roleLbl = document.getElementById('planCheckoutMpRoleBtnLabel');
+      if (roleBtn && planProd) {
+        roleBtn.setAttribute('data-mp-product', planProd);
+        if (roleLbl) {
+          roleLbl.textContent =
+            planProd === 'vendorMonthly'
+              ? 'Mercado Pago · Cuota mensual distribuidor'
+              : 'Mercado Pago · Suscripción mensual negocio';
+        }
+      }
+      var subMp =
+        typeof window._ferriolSubPayModalMpProduct === 'string'
+          ? window._ferriolSubPayModalMpProduct
+          : 'kioscoMonthly';
+      if (subMp !== 'kioscoMonthly' && subMp !== 'vendorMonthly') subMp = 'kioscoMonthly';
+      var modalMp = document.getElementById('kioscoSubPayModalMpBtn');
+      var modalLbl = document.getElementById('kioscoSubPayModalMpLabel');
+      if (modalMp) {
+        modalMp.setAttribute('data-mp-product', subMp);
+        if (modalLbl) {
+          modalLbl.textContent =
+            subMp === 'vendorMonthly'
+              ? 'Mercado Pago · Cuota mensual distribuidor'
+              : 'Mercado Pago · Suscripción mensual negocio';
+        }
+      }
       document.querySelectorAll('.ferriol-mp-pay-btn[data-mp-product]').forEach(function (btn) {
         var prod = btn.getAttribute('data-mp-product');
         var u = map[prod] || '';
@@ -1850,11 +1882,17 @@
           btn.title = 'Sin link: cargalo en Más → Ajustes del sistema (Mercado Pago por producto).';
         }
       });
-      var anyOk = !!(map.kit || map.kioscoMonthly || map.vendorMonthly);
       var wrap = document.getElementById('planPanelMercadoPagoWrap');
-      var miss = document.getElementById('planPanelMercadoPagoMissingHint');
       if (wrap) wrap.classList.remove('hidden');
-      if (miss) miss.classList.toggle('hidden', anyOk);
+      var planMiss = document.getElementById('planPanelMercadoPagoMissingHint');
+      if (planMiss) {
+        if (!isPayPanel) planMiss.classList.add('hidden');
+        else planMiss.classList.toggle('hidden', !!(planProd && map[planProd]));
+      }
+      var distMiss = document.getElementById('planCheckoutDistribMercadoMissingHint');
+      if (distMiss) distMiss.classList.toggle('hidden', !!map.kit);
+      var modalMiss = document.getElementById('kioscoSubPayModalMpMissingHint');
+      if (modalMiss) modalMiss.classList.toggle('hidden', !!(map[subMp]));
     }
     async function ferriolRefreshMercadoPagoCheckoutUrl() {
       if (!supabaseClient) {
@@ -4486,6 +4524,9 @@
       try {
         syncPlanCheckoutPrices();
       } catch (_) {}
+      try {
+        syncMercadoPagoCheckoutUi();
+      } catch (_) {}
       void (
         typeof window.ferriolFetchCheckoutCopy === 'function'
           ? window.ferriolFetchCheckoutCopy(false)
@@ -4610,6 +4651,10 @@
 
     window.ferriolOpenEmpresaSubscriptionModal = async function (mode) {
       mode = mode || 'kiosco';
+      window._ferriolSubPayModalMpProduct = mode === 'admin' ? 'vendorMonthly' : 'kioscoMonthly';
+      try {
+        syncMercadoPagoCheckoutUi();
+      } catch (_) {}
       var tit = document.getElementById('kioscoSubPayModalTitle');
       var intro = document.getElementById('kioscoSubPayModalIntro');
       if (tit) {
@@ -4651,6 +4696,9 @@
       if (typeof window._populateKioscoSubscriptionPayModal === 'function') {
         window._populateKioscoSubscriptionPayModal(raw);
       }
+      try {
+        syncMercadoPagoCheckoutUi();
+      } catch (_) {}
       var m = document.getElementById('kioscoSubscriptionPayModal');
       if (m) {
         m.classList.remove('hidden');
@@ -5205,9 +5253,9 @@
         } catch (_) {}
       });
     }
-    var planCheckoutMetodosPagoEl = document.getElementById('planCheckoutMetodosPago');
-    if (planCheckoutMetodosPagoEl) {
-      planCheckoutMetodosPagoEl.addEventListener('click', function (ev) {
+    document.addEventListener(
+      'click',
+      function (ev) {
         var tgt = ev.target;
         var btn = tgt && tgt.closest ? tgt.closest('.ferriol-mp-pay-btn[data-mp-product]') : null;
         if (!btn || btn.disabled) return;
@@ -5216,8 +5264,9 @@
         try {
           window.open(u, '_blank', 'noopener,noreferrer');
         } catch (_) {}
-      });
-    }
+      },
+      false
+    );
     var accountMenuBtnDistribuidor = document.getElementById('accountMenuBtnDistribuidor');
     if (accountMenuBtnDistribuidor) {
       accountMenuBtnDistribuidor.addEventListener('click', function () {
