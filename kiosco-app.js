@@ -429,7 +429,7 @@
             planBt.className =
               'w-full rounded-2xl px-5 py-4 font-bold text-base text-white shadow-xl border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 ring-2 ring-white/10 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2 mb-2';
             planBt.innerHTML =
-              '<i data-lucide="badge-check" class="w-6 h-6 shrink-0"></i><span>Continuar con la solicitud</span>';
+              '<i data-lucide="badge-check" class="w-6 h-6 shrink-0"></i><span>Obtener rol distribuidor — sigo la solicitud</span>';
           }
         }
       } catch (_) {}
@@ -4065,11 +4065,17 @@
       if (lead) {
         if (admin) {
           lead.innerHTML =
-            'Este resumen es para abonar la <strong class="text-white/88">cuota de red / distribuidor</strong>: un solo pago a <strong class="text-cyan-200/95">Ferriol (empresa)</strong>, con los datos oficiales. Revisá el detalle abajo y tocá el botón naranja cuando quieras ver CBU/alias y mandar el comprobante.';
+            'Debajo tenés <strong class="text-white/90">beneficios concretos</strong> y la <strong class="text-cyan-200/90">cuota de referencia</strong>. Un clic y pasás a datos bancarios oficiales.';
         } else {
           lead.innerHTML =
-            'Este resumen corresponde a tu <strong class="text-emerald-100/90">licencia mensual del negocio (kiosco)</strong>. El importe y la vigencia dependen de tu plan; el pago es siempre a <strong class="text-[#86efac]/95">Ferriol (empresa)</strong>. Luego abrís los datos bancarios y enviás el comprobante.';
+            'Leé el <strong class="text-emerald-200/90">por qué sí hoy</strong> y el precio de referencia; después abrís datos Ferriol sin salir de la app.';
         }
+      }
+      var hookK = document.getElementById('planCheckoutHookKiosco');
+      var hookA = document.getElementById('planCheckoutHookAdmin');
+      if (hookK && hookA) {
+        hookK.classList.toggle('hidden', admin);
+        hookA.classList.toggle('hidden', !admin);
       }
       var eyeb = document.getElementById('planCheckoutPayEyebrow');
       if (eyeb) {
@@ -4087,7 +4093,7 @@
         }
       }
       var prim = document.getElementById('planPanelPayBtnPrimary');
-      if (prim) prim.textContent = admin ? 'Ver datos para transferir' : 'Ver datos para transferir';
+      if (prim) prim.textContent = admin ? 'Ver datos — pagar cuota empresa' : 'Ver datos — abonar mi licencia';
       var sub = document.getElementById('planPanelPayBtnSubtitle');
       if (sub) {
         sub.textContent = admin ? ' · cuenta Ferriol' : ' · cuenta Ferriol';
@@ -4095,8 +4101,8 @@
       var foot = document.getElementById('planPanelFooterHint');
       if (foot) {
         foot.innerHTML = admin
-          ? 'En el siguiente paso se abren los datos cuenta <strong class="text-emerald-100/85">Ferriol</strong>. La cuota distribuidor <strong class="text-white/65">no va al patrocinador</strong>.'
-          : 'El siguiente paso muestra CBU/alias y texto para copiar. La vigencia de tu licencia también la ves en <strong class="text-white/55">Inicio</strong>.';
+          ? '<strong class="text-cyan-100/80">Cerrá el círculo:</strong> la cuota empresa no negocia con la red — ejecutala y mostrá ejemplo.'
+          : '<strong class="text-emerald-100/85">Último empuje:</strong> después del botón naranja copiás CBU / alias — no das vueltas.';
       }
       var aml = document.getElementById('accountMenuPlanAbonarLabel');
       if (aml) aml.textContent = admin ? 'Abonar cuota distribuidor' : 'Abonar suscripción';
@@ -4226,6 +4232,14 @@
         intro.innerHTML = mode === 'admin'
           ? 'Como <strong class="text-white/88">fundador o socio de red (distribuidor)</strong>, esta <strong class="text-cyan-200/95">cuota distribuidor</strong> va <strong class="text-cyan-200/95">solo a Ferriol (empresa)</strong>. Transferencia a los datos de abajo. El comprobante por WhatsApp a la empresa (o según indiquen en Ajustes). <strong class="text-white/75">No</strong> al patrocinador para esta cuota: las comisiones las liquida Ferriol.'
           : 'La <strong class="text-white/85">licencia del negocio</strong> se abona <strong class="text-[#86efac]/95">solo a Ferriol (empresa)</strong>. Usá los datos de abajo y enviá el comprobante por WhatsApp a la empresa.';
+      }
+      var saleStrip = document.getElementById('kioscoSubPaySalesStrip');
+      if (saleStrip) {
+        saleStrip.classList.remove('hidden');
+        saleStrip.innerHTML =
+          mode === 'admin'
+            ? '<span class="font-semibold text-cyan-200/95">Checklist cierre · </span>Copiás CBU o alias → transferís en tu banco → mandás comprobante → <strong class="text-white">quedás alineado con Ferriol</strong> y seguís liderando sin fricción.'
+            : '<span class="font-semibold text-[#86efac]/95">Seguí vendiendo sin drama · </span>Datos abajo listos para copiar. <strong class="text-white">Una transferencia + un WhatsApp</strong> y tu licencia queda en regla — el negocio no para.';
       }
       var raw = '';
       if (supabaseClient) {

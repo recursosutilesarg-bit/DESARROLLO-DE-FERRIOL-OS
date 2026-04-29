@@ -175,6 +175,7 @@
         <div class="min-w-0 pr-2 flex-1">
           <h3 id="kioscoSubPayModalTitle" class="font-bold text-lg leading-snug text-amber-100 drop-shadow-md">Suscripción Ferriol · cuenta empresa</h3>
           <p id="kioscoSubPayModalIntro" class="text-xs text-white/55 mt-2 leading-relaxed">Transferís <strong class="text-white/80">solo a Ferriol (empresa)</strong>. Debajo están los datos. Enviá el comprobante por WhatsApp a los números que la empresa tiene configurados.</p>
+          <div id="kioscoSubPaySalesStrip" class="hidden mt-3 rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-950/50 to-black/40 px-3 py-2.5 text-[11px] text-amber-50/95 leading-snug ring-1 ring-amber-400/20"></div>
         </div>
         <button type="button" id="kioscoSubscriptionPayModalClose" class="btn-neomorphic rounded-xl p-2 touch-target shrink-0" title="Cerrar"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
@@ -1021,7 +1022,7 @@
         </button>
         <!-- Resumen: abono empresa (suscripción o cuota distribuidor) -->
         <div id="planCheckoutPayWrap">
-          <p id="planCheckoutPayEyebrow" class="text-[10px] font-semibold uppercase tracking-widest text-amber-200/75 mb-2">Tu compra / liquidación</p>
+          <p id="planCheckoutPayEyebrow" class="text-[10px] font-semibold uppercase tracking-widest text-amber-200/75 mb-2">Cierre de venta</p>
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2 text-white">
             <i data-lucide="receipt-text" class="w-6 h-6 text-amber-200/95 shrink-0"></i>
             <span id="planPanelHeadingText">Resumen · Abonar suscripción</span>
@@ -1031,6 +1032,26 @@
             <p id="planCheckoutPriceLabel" class="text-[10px] font-semibold uppercase tracking-wide text-white/50 mb-2">Precio mensual · referencia</p>
             <p id="planCheckoutPriceBig" class="text-[1.6rem] sm:text-3xl font-black tabular-nums text-amber-100 tracking-tight">—</p>
             <p id="planCheckoutPriceExplain" class="text-[11px] text-white/55 mt-2 leading-snug px-1"></p>
+          </div>
+          <div id="planCheckoutHookKiosco" class="rounded-2xl border border-emerald-500/35 bg-emerald-950/[0.35] px-4 py-4 mb-4 ring-1 ring-emerald-500/15 shadow-inner">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-emerald-300/95 mb-1.5">Cerrá venta · mantené el sistema vivo</p>
+            <p class="text-base font-bold text-white leading-snug mb-3">Si la licencia no está al día, tu negocio queda expuesto. Acá ves el punto exacto antes de pasar los datos Ferriol.</p>
+            <ul class="space-y-2 text-sm text-emerald-50/92 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start">
+              <li><span class="text-emerald-400 font-black shrink-0 mt-0.5">✓</span><span><strong>Ventas claras todos los días</strong> sin quedarte afuera de caja, stock y cobros Ferriol.</span></li>
+              <li><span class="text-emerald-400 font-black shrink-0 mt-0.5">✓</span><span><strong>Un solo lugar para pagar al sistema</strong> — transferencia oficial a empresa, como corresponde.</span></li>
+              <li><span class="text-emerald-400 font-black shrink-0 mt-0.5">✓</span><span><strong>Tranquilidad legal y operativa</strong>: vos seguís; el cliente también nota orden.</span></li>
+              <li><span class="text-emerald-400 font-black shrink-0 mt-0.5">✓</span><span><strong>Llamado a la acción claro:</strong> el siguiente botón te muestra todos los datos copiables para que no escapes.</span></li>
+            </ul>
+          </div>
+          <div id="planCheckoutHookAdmin" class="hidden rounded-2xl border border-cyan-500/35 bg-cyan-950/[0.3] px-4 py-4 mb-4 ring-1 ring-cyan-500/15 shadow-inner">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-cyan-300/90 mb-1.5">Cuota de red · no la dejes pasar</p>
+            <p class="text-base font-bold text-white leading-snug mb-3">La cuota distribuidor es tu contrato vivo con Ferriol: cerrala y seguí habilitado para líderar y cobrar en la red.</p>
+            <ul class="space-y-2 text-sm text-cyan-50/92 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start">
+              <li><span class="text-cyan-400 font-black shrink-0 mt-0.5">✓</span><span><strong>Rol y red activos</strong> sin apagones por falta de pago empresa.</span></li>
+              <li><span class="text-cyan-400 font-black shrink-0 mt-0.5">✓</span><span><strong>Regla única Ferriol</strong>: vas directo al banco empresa — no improvisás con el sponsor.</span></li>
+              <li><span class="text-cyan-400 font-black shrink-0 mt-0.5">✓</span><span><strong>Beneficio intangible enorme:</strong> continuidad con tu equipo sin fricciones de “no me figura vigente”.</span></li>
+              <li><span class="text-cyan-400 font-black shrink-0 mt-0.5">✓</span><span>Listo para <strong>marcar líderazgo real</strong> mostrando que cumplís igual que pedís cumplimiento.</span></li>
+            </ul>
           </div>
           <div id="planCheckoutPayDetailsBox" class="rounded-2xl border border-white/18 bg-black/35 p-4 sm:p-5 mb-4 space-y-3">
             <p class="text-[11px] font-semibold uppercase tracking-wide text-white/45 mb-2">Detalle</p>
@@ -1056,12 +1077,21 @@
         </div>
         <!-- Resumen: solicitud rol distribuidor -->
         <div id="planCheckoutDistribWrap" class="hidden">
-          <p class="text-[10px] font-semibold uppercase tracking-widest text-violet-200/75 mb-2">Pasá a distribuidor</p>
+          <p class="text-[10px] font-semibold uppercase tracking-widest text-violet-200/75 mb-2">Oportunidad</p>
           <h2 id="planCheckoutDistribHeading" class="font-bold text-xl mb-3 flex items-center gap-2 text-white">
             <i data-lucide="badge-check" class="w-6 h-6 text-violet-200 shrink-0"></i>
             <span>Distribuidor/a del sistema</span>
           </h2>
-          <p id="planCheckoutDistribLead" class="text-sm text-white/70 mb-4 leading-relaxed">Solicitud a Ferriol. Si la aprueban, esta misma cuenta pasa al panel de socio (mismo email).</p>
+          <p id="planCheckoutDistribLead" class="text-sm font-medium text-white/85 mb-3 leading-relaxed"><strong class="text-violet-200">El paso que te mueve en la tabla de ingresos</strong>: pedir distribuidor hoy significa iniciar revisión empresa y llegar antes al estado que te permite vender Ferriol con credibilidad.</p>
+          <div id="planCheckoutDistribBenefitsBox" class="rounded-2xl border border-violet-500/45 bg-violet-950/45 px-4 py-4 mb-4 ring-1 ring-violet-400/20">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-violet-200/95 mb-2">Beneficios cuando Ferriol te habilita</p>
+            <ul class="space-y-2 text-sm text-violet-50/93 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start">
+              <li><span class="text-violet-400 font-black shrink-0 mt-0.5">★</span><span><strong>Panel socio</strong> con la misma cuenta (no armás mails nuevos).</span></li>
+              <li><span class="text-violet-400 font-black shrink-0 mt-0.5">★</span><span><strong>Comisiones y red</strong> según modelo Ferriol: vendés sistemas como negocio, no sólo uso.</span></li>
+              <li><span class="text-violet-400 font-black shrink-0 mt-0.5">★</span><span><strong>Marca vos</strong> frente al negocio: “soy oficial Ferriol”.</span></li>
+              <li><span class="text-violet-400 font-black shrink-0 mt-0.5">★</span><span><strong>Seguimos en el proceso</strong> con revisión Ferriol — mejor pedir ya que esperar después.</span></li>
+            </ul>
+          </div>
           <div id="planCheckoutDistribDetailsBox" class="rounded-2xl border border-violet-500/40 bg-violet-950/35 p-4 sm:p-5 mb-4">
             <p class="text-[11px] font-semibold uppercase tracking-wide text-violet-200/75 mb-2">Incluye / condiciones</p>
             <p id="planCheckoutDistribPriceHint" class="text-sm font-semibold text-violet-100/95 mb-3 rounded-xl border border-violet-400/30 bg-black/25 py-3 px-3 text-center leading-snug"></p>
@@ -1074,7 +1104,7 @@
           </div>
           <button type="button" id="btnPlanOpenDistribuidorRequest" class="w-full rounded-2xl px-5 py-4 font-bold text-base text-white shadow-xl border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 ring-2 ring-white/10 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2 mb-2">
             <i data-lucide="badge-check" class="w-6 h-6 shrink-0"></i>
-            <span>Continuar con la solicitud</span>
+            <span>Obtener rol distribuidor — sigo la solicitud</span>
           </button>
           <p id="planCheckoutDistribFooter" class="text-[10px] text-white/40 leading-relaxed text-center px-1">Si ya enviaste la solicitud, queda hasta que Ferriol la revise.</p>
         </div>
@@ -2904,7 +2934,7 @@
           </span>
           <div class="min-w-0">
             <h3 id="accountPlanSheetTitle" class="font-bold text-base text-orange-950 leading-tight">Mi plan</h3>
-            <p id="accountPlanSheetSubtitle" class="text-[11px] text-orange-800/85 mt-0.5 leading-snug">Elegí qué querés hacer</p>
+            <p id="accountPlanSheetSubtitle" class="text-[11px] text-orange-800/85 mt-0.5 leading-snug">Elegí: seguir vendiendo tranquilo · o escalá a distribuidor</p>
           </div>
         </div>
         <button type="button" id="accountPlanSheetModalClose" class="p-2 rounded-xl text-orange-800/75 hover:bg-orange-100/90 touch-target shrink-0" title="Cerrar">
