@@ -2314,6 +2314,18 @@
       partnerUiMode: 'red'  // red (panel socio) | negocio (misma UI que kiosquero) — solo si role === 'partner'
     };
 
+    /** true si la empresa aprobó upgrade kiosquero→partner (tabla ferriol_kiosquero_partner_upgrade_requests). Solo esos socios pueden usar la vista negocio en la misma cuenta. */
+    async function ferriolFetchPartnerKiosqueroUpgradeEligible(uid) {
+      if (!supabaseClient || !uid) return false;
+      try {
+        var q = await supabaseClient.from('ferriol_kiosquero_partner_upgrade_requests').select('id').eq('profile_id', uid).eq('status', 'approved').limit(1);
+        if (q.error || !q.data || q.data.length === 0) return false;
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
     function ferriolNormalizeSuperUiMode(raw) {
       if (raw === 'negocio') return 'negocio';
       if (raw === 'socio') return 'socio';
@@ -2325,9 +2337,9 @@
     function ferriolNormalizePartnerUiMode(raw) {
       return raw === 'negocio' ? 'negocio' : 'red';
     }
-    /** Socio distribuidor viendo la app como negocio (caja, productos, escáner…), misma sesión/perfil que el upgrade desde kiosquero. */
+    /** Vista “como kiosco” solo si el socio completó upgrade aprobado (no alta solo por kit / otro camino). */
     function isPartnerKioscoPreviewMode() {
-      return !!(currentUser && currentUser.role === 'partner' && state.partnerUiMode === 'negocio');
+      return !!(currentUser && currentUser.role === 'partner' && currentUser.partnerFromKiosqueroUpgrade && state.partnerUiMode === 'negocio');
     }
     function isAnyKioscoPreviewMode() {
       return isSuperKioscoPreviewMode() || isPartnerKioscoPreviewMode();
@@ -2471,6 +2483,7 @@
 
     async function ferriolSetPartnerLens(lens) {
       if (!currentUser || currentUser.role !== 'partner') return;
+      if (lens === 'negocio' && !currentUser.partnerFromKiosqueroUpgrade) return;
       if (lens !== 'red' && lens !== 'negocio') return;
       if (lens === 'negocio') {
         await window._partnerIrModoNegocio();
@@ -4173,9 +4186,15 @@
           ht.textContent = 'FERRIOL OS';
           if (subEl) {
             subEl.textContent = 'Tu red · Ferriol';
-            subEl.classList.add('header-sub--toggle');
-            subEl.title = 'Tocá para abrir la vista de tu negocio (caja, productos, ventas)';
-            subEl.setAttribute('aria-label', 'Abrir vista negocio');
+            if (currentUser.partnerFromKiosqueroUpgrade) {
+              subEl.classList.add('header-sub--toggle');
+              subEl.title = 'Tocá para abrir la vista de tu negocio (caja, productos, ventas)';
+              subEl.setAttribute('aria-label', 'Abrir vista negocio');
+            } else {
+              subEl.classList.remove('header-sub--toggle');
+              subEl.removeAttribute('title');
+              subEl.removeAttribute('aria-label');
+            }
           }
         } else {
           ht.textContent = currentUser.kioscoName || 'Ferriol OS';
@@ -6836,6 +6855,10 @@ async function showApp() {
       } catch (_) {
         state.partnerUiMode = 'red';
       }
+      if (!currentUser.partnerFromKiosqueroUpgrade) {
+        state.partnerUiMode = 'red';
+        try { sessionStorage.removeItem('ferriol_partner_ui'); } catch (_) {}
+      }
     } else if (currentUser) {
       state.partnerUiMode = 'red';
     }
@@ -7040,7 +7063,11 @@ async function showApp() {
           return;
         }
         var userCreatedAt = (authData && authData.user && authData.user.created_at) ? authData.user.created_at : null;
-        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '', phone: profile.phone != null ? String(profile.phone) : '', avatarUrl: profile.avatar_url != null ? String(profile.avatar_url).trim() : '' };
+        var partnerFromKUp = false;
+        if (profile.role === 'partner') {
+          partnerFromKUp = await ferriolFetchPartnerKiosqueroUpgradeEligible(uid);
+        }
+        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '', phone: profile.phone != null ? String(profile.phone) : '', avatarUrl: profile.avatar_url != null ? String(profile.avatar_url).trim() : '', partnerFromKiosqueroUpgrade: partnerFromKUp };
         await showApp();
       } catch (err) {
         console.error('Error en login:', err);
@@ -7382,7 +7409,7 @@ async function showApp() {
       await ferriolSetSuperLens('empresa');
     };
     window._partnerIrModoNegocio = async function () {
-      if (!currentUser || currentUser.role !== 'partner') return;
+      if (!currentUser || currentUser.role !== 'partner' || !currentUser.partnerFromKiosqueroUpgrade) return;
       state.partnerUiMode = 'negocio';
       try { sessionStorage.setItem('ferriol_partner_ui', 'negocio'); } catch (_) {}
       applyAppShell();
@@ -7407,6 +7434,7 @@ async function showApp() {
       headerSubBtn.addEventListener('click', function () {
         if (!currentUser) return;
         if (currentUser.role === 'partner') {
+          if (!currentUser.partnerFromKiosqueroUpgrade) return;
           if (isPartnerKioscoPreviewMode()) {
             ferriolSetPartnerLens('red');
           } else {
@@ -10030,7 +10058,11 @@ async function showApp() {
           return;
         }
         var userCreatedAt = (session && session.user && session.user.created_at) ? session.user.created_at : null;
-        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '', phone: profile.phone != null ? String(profile.phone) : '', avatarUrl: profile.avatar_url != null ? String(profile.avatar_url).trim() : '' };
+        var partnerFromKUpInit = false;
+        if (profile.role === 'partner') {
+          partnerFromKUpInit = await ferriolFetchPartnerKiosqueroUpgradeEligible(uid);
+        }
+        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '', phone: profile.phone != null ? String(profile.phone) : '', avatarUrl: profile.avatar_url != null ? String(profile.avatar_url).trim() : '', partnerFromKiosqueroUpgrade: partnerFromKUpInit };
         await showApp();
       } catch (e) {
         console.error('Error en init:', e);
