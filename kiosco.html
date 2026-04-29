@@ -1031,8 +1031,8 @@
               <i data-lucide="credit-card" class="w-6 h-6 text-violet-100"></i>
             </span>
             <span class="min-w-0 flex flex-col items-start gap-0.5">
-              <span class="font-semibold text-base text-white leading-snug">Cuenta · Plan · Abonar suscripción</span>
-              <span class="text-xs text-violet-200/75 leading-snug">Un solo lugar: datos de cuenta Ferriol (empresa) para todos los perfiles</span>
+              <span id="btnMasPlanLine1" class="font-semibold text-base text-white leading-snug">Cuenta · Plan · Abonar suscripción</span>
+              <span id="btnMasPlanLine2" class="text-xs text-violet-200/75 leading-snug">Un solo lugar: datos de cuenta Ferriol (empresa) para todos los perfiles</span>
             </span>
           </span>
           <i data-lucide="chevron-right" class="w-6 h-6 text-violet-300/70 shrink-0"></i>
@@ -1073,17 +1073,17 @@
         <p class="text-[10px] font-semibold uppercase tracking-widest text-violet-200/65 mb-1">Cuenta</p>
         <h2 class="font-bold text-xl mb-2 flex items-center gap-2 text-white">
           <i data-lucide="clipboard-list" class="w-6 h-6 text-[#86efac] shrink-0"></i>
-          Plan · Abonar suscripción
+          <span id="planPanelHeadingText">Plan · Abonar suscripción</span>
         </h2>
-        <p class="text-sm text-white/65 mb-4 leading-relaxed">
+        <p id="planPanelLead" class="text-sm text-white/65 mb-4 leading-relaxed">
           La cuota del sistema Ferriol la abonás <strong class="text-white/85">solo a Ferriol (empresa)</strong>, con los datos oficiales. Es el mismo proceso para negocio, socios de red y administración empresa.
         </p>
         <div id="planTrialSummary" class="hidden mb-4 rounded-xl border border-white/15 bg-black/25 px-4 py-3 text-sm text-white/78 leading-snug"></div>
         <button type="button" id="btnPlanOpenEmpresaSubscription" class="w-full rounded-2xl px-5 py-4 font-bold text-base text-white shadow-xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-700 ring-2 ring-amber-200/45 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2 mb-4">
           <i data-lucide="building-2" class="w-6 h-6 shrink-0"></i>
-          Abonar suscripción <span class="text-white/90 font-semibold hidden sm:inline">· ver datos Ferriol</span>
+          <span><span id="planPanelPayBtnPrimary">Abonar suscripción</span><span class="text-white/90 font-semibold hidden sm:inline"> · ver datos Ferriol</span></span>
         </button>
-        <p class="text-[10px] text-white/45 leading-relaxed mb-5">
+        <p id="planPanelFooterHint" class="text-[10px] text-white/45 leading-relaxed mb-5">
           Socios / fundadores: también tocá tu foto arriba <strong class="text-white/55">→ Cuenta</strong> y este mismo ítem.<br/>
           Negocio (kiosco): opcional desde <strong class="text-white/65">Caja → Abono sistema / suscripción</strong>.
         </p>
@@ -1279,12 +1279,12 @@
           <div id="ferriolAdminEmpresaPayCard" class="rounded-2xl border border-cyan-500/28 bg-gradient-to-br from-cyan-950/50 to-slate-950/70 p-4 sm:p-4 mb-5 ring-1 ring-cyan-400/18">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div class="min-w-0">
-                <p class="text-[10px] font-semibold uppercase tracking-wide text-cyan-100/85 mb-1">Suscripción empresa</p>
-                <p class="text-xs text-white/70 leading-snug"><strong class="text-white/90">Único lugar preferido:</strong> <strong class="text-cyan-200/95">Cuenta (avatar)</strong> → <strong class="text-white/85">Plan · Abonar suscripción</strong>. Misma cuenta Ferriol para fundadores y socios.</p>
+                <p id="ferriolAdminEmpresaPayKicker" class="text-[10px] font-semibold uppercase tracking-wide text-cyan-100/85 mb-1">Cuota distribuidor</p>
+                <p class="text-xs text-white/70 leading-snug"><strong class="text-white/90">Único lugar preferido:</strong> <strong class="text-cyan-200/95">Cuenta (avatar)</strong> → <strong id="ferriolIngresosPlanCue" class="text-white/85">Plan · Abonar cuota distribuidor</strong>. Misma cuenta Ferriol para fundadores y socios.</p>
               </div>
               <button type="button" id="btnOpenEmpresaSubscriptionAdmin" class="shrink-0 rounded-2xl px-4 py-3 font-semibold text-sm text-white whitespace-nowrap shadow-lg bg-gradient-to-br from-cyan-600 to-slate-900 border border-cyan-300/35 hover:brightness-110 active:scale-[0.98] touch-target inline-flex items-center justify-center gap-2">
                 <i data-lucide="credit-card" class="w-4 h-4 shrink-0"></i>
-                Abonar (datos Ferriol)
+                <span id="btnOpenEmpresaSubscriptionAdminLabel">Abonar cuota distribuidor</span>
               </button>
             </div>
           </div>
@@ -2897,7 +2897,7 @@
           <i data-lucide="credit-card" class="w-[1.125rem] h-[1.125rem] text-emerald-600 shrink-0 stroke-[1.75]"></i>
           <span class="flex flex-col items-start leading-snug gap-0.5">
             <span class="text-[11px] font-semibold uppercase tracking-wide text-emerald-800/85">Plan</span>
-            <span>Cuenta · Abonar suscripción</span>
+            <span id="accountMenuPlanSubline">Cuenta · Abonar suscripción</span>
           </span>
         </button>
         <button type="button" id="accountMenuBtnBank" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors hidden">
@@ -2992,7 +2992,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260430_plan_panel_bindings"></script>
+  <script defer src="kiosco-app.js?v=20260430_cuota_distribuidor_nombrada"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>

@@ -3870,6 +3870,7 @@
       if (!root || !panel) return;
       syncAccountMenuDrawerUserBlock();
       syncAccountMenuDrawerShell();
+      syncPlanRolePayLabels();
       positionAccountMenuDrawerPanel();
       var hdrBtn = document.getElementById('headerProfileBtn');
       if (hdrBtn) hdrBtn.classList.add('ring-2', 'ring-gray-900/85');
@@ -3995,6 +3996,48 @@
       return 'admin';
     }
 
+    /** Textos Plan / cuenta según rol: kiosco = suscripción licencia; fundador/socio/partner sin preview = cuota distribuidor */
+    function syncPlanRolePayLabels() {
+      if (!currentUser) return;
+      var admin = ferriolPlanPayModalMode() === 'admin';
+      var ht = document.getElementById('planPanelHeadingText');
+      if (ht) ht.textContent = admin ? 'Plan · Abonar cuota distribuidor' : 'Plan · Abonar suscripción';
+      var lead = document.getElementById('planPanelLead');
+      if (lead) {
+        if (admin) {
+          lead.innerHTML = 'La <strong class="text-white/85">cuota distribuidor</strong> de Ferriol la abonás <strong class="text-white/85">solo a Ferriol (empresa)</strong>, con los datos oficiales. Aplica a fundadores y socios de red (rol distribuidor).';
+        } else {
+          lead.innerHTML = 'La cuota del sistema Ferriol la abonás <strong class="text-white/85">solo a Ferriol (empresa)</strong>, con los datos oficiales. Es el mismo proceso para negocio, socios de red y administración empresa.';
+        }
+      }
+      var prim = document.getElementById('planPanelPayBtnPrimary');
+      if (prim) prim.textContent = admin ? 'Abonar cuota distribuidor' : 'Abonar suscripción';
+      var foot = document.getElementById('planPanelFooterHint');
+      if (foot) {
+        if (admin) {
+          foot.innerHTML = 'Fundadores / socios: también desde <strong class="text-white/55">Cuenta (avatar)</strong> tocá este ítem.<br/>Negocio (kiosco): desde <strong class="text-white/65">Caja → Abono sistema / suscripción</strong>.';
+        } else {
+          foot.innerHTML = 'Socios / fundadores: también tocá tu foto arriba <strong class="text-white/55">→ Cuenta</strong> y este mismo ítem.<br/>Negocio (kiosco): opcional desde <strong class="text-white/65">Caja → Abono sistema / suscripción</strong>.';
+        }
+      }
+      var aml = document.getElementById('accountMenuPlanSubline');
+      if (aml) aml.textContent = admin ? 'Cuenta · Abonar cuota distribuidor' : 'Cuenta · Abonar suscripción';
+      var masl1 = document.getElementById('btnMasPlanLine1');
+      if (masl1) masl1.textContent = admin ? 'Cuenta · Plan · Abonar cuota distribuidor' : 'Cuenta · Plan · Abonar suscripción';
+      var masl2 = document.getElementById('btnMasPlanLine2');
+      if (masl2) {
+        masl2.textContent = admin
+          ? 'Un solo lugar: cuota distribuidor a Ferriol (empresa) — mismos datos oficiales'
+          : 'Un solo lugar: datos de cuenta Ferriol (empresa) para todos los perfiles';
+      }
+      var payKick = document.getElementById('ferriolAdminEmpresaPayKicker');
+      if (payKick) payKick.textContent = admin ? 'Cuota distribuidor' : 'Licencia / suscripción negocio';
+      var cue = document.getElementById('ferriolIngresosPlanCue');
+      if (cue) cue.textContent = admin ? 'Plan · Abonar cuota distribuidor' : 'Plan · Abonar suscripción';
+      var admLbl = document.getElementById('btnOpenEmpresaSubscriptionAdminLabel');
+      if (admLbl) admLbl.textContent = admin ? 'Abonar cuota distribuidor' : 'Abonar suscripción';
+    }
+
     function syncPlanPanelTrialSummary() {
       var el = document.getElementById('planTrialSummary');
       if (!el || !currentUser) return;
@@ -4045,12 +4088,12 @@
       var intro = document.getElementById('kioscoSubPayModalIntro');
       if (tit) {
         tit.textContent = mode === 'admin'
-          ? 'Suscripción · cuenta empresa Ferriol'
+          ? 'Abonar cuota distribuidor'
           : 'Suscripción Ferriol · negocio (kiosco)';
       }
       if (intro) {
         intro.innerHTML = mode === 'admin'
-          ? 'Como <strong class="text-white/88">fundador o socio de red</strong>, la cuota del sistema va <strong class="text-cyan-200/95">solo a Ferriol (empresa)</strong>. Transferencia a los datos de abajo. El comprobante por WhatsApp a la empresa (o según indiquen en Ajustes). <strong class="text-white/75">No</strong> al patrocinador para esta cuota: las comisiones las liquida Ferriol.'
+          ? 'Como <strong class="text-white/88">fundador o socio de red (distribuidor)</strong>, esta <strong class="text-cyan-200/95">cuota distribuidor</strong> va <strong class="text-cyan-200/95">solo a Ferriol (empresa)</strong>. Transferencia a los datos de abajo. El comprobante por WhatsApp a la empresa (o según indiquen en Ajustes). <strong class="text-white/75">No</strong> al patrocinador para esta cuota: las comisiones las liquida Ferriol.'
           : 'La <strong class="text-white/85">licencia del negocio</strong> se abona <strong class="text-[#86efac]/95">solo a Ferriol (empresa)</strong>. Usá los datos de abajo y enviá el comprobante por WhatsApp a la empresa.';
       }
       var raw = '';
@@ -4313,6 +4356,7 @@
         }
       }
       syncPartnerBilleteraShell();
+      try { syncPlanRolePayLabels(); } catch (_) {}
     }
 
     function showPanel(name, cajaTabOverride) {
@@ -4364,7 +4408,11 @@
         if (navSuperBottom) navSuperBottom.classList.add('hidden');
       }
       if (name === 'plan') {
+        syncPlanRolePayLabels();
         syncPlanPanelTrialSummary();
+      }
+      if (name === 'mas') {
+        syncPlanRolePayLabels();
       }
       if (name === 'dashboard') {
         updateTrialCountdown();
@@ -6959,7 +7007,6 @@ async function showApp() {
       state.partnerUiMode = 'red';
     }
     applyAppShell();
-
     if (isSuper && state.superUiMode === 'negocio') {
       if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
       window._trialCountdownInterval = setInterval(ferriolTickCountdowns, 1000);
