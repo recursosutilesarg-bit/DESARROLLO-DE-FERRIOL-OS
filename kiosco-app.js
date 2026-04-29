@@ -763,26 +763,40 @@
                    'equipo';
       if (title) title.textContent = 'Hola, ' + nombre + ', te damos la bienvenida.';
       if (sub) sub.textContent = currentUser.role === 'partner'
-        ? 'Acá podés ver tus comisiones, ventas y kioscos activos.'
+        ? 'Acá podés ver tus comisiones, ventas y un resumen de comercios (kioscos) y distribuidores en tu red.'
         : 'Panel de ingresos y operaciones de Ferriol OS.';
       var isPartner = currentUser.role === 'partner';
       if (statsBox) statsBox.classList.toggle('hidden', !isPartner);
       banner.classList.remove('hidden');
       if (!isPartner || !supabaseClient) return;
-      var countEl = document.getElementById('bienvenidaKioscosCount');
-      var mesEl = document.getElementById('bienvenidaMesCount');
-      if (countEl) countEl.textContent = '…';
-      if (mesEl) mesEl.textContent = '…';
-      supabaseClient.from('profiles').select('id', { count: 'exact', head: true })
-        .eq('sponsor_id', currentUser.id).eq('role', 'kiosquero').eq('active', true)
-        .then(function(r) { if (countEl) countEl.textContent = r.count != null ? r.count : '—'; })
-        .catch(function() { if (countEl) countEl.textContent = '—'; });
-      var now = new Date();
-      var start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-      supabaseClient.from('mlm_ledger').select('id', { count: 'exact', head: true })
-        .eq('partner_id', currentUser.id).gte('created_at', start)
-        .then(function(r) { if (mesEl) mesEl.textContent = r.count != null ? r.count : '—'; })
-        .catch(function() { if (mesEl) mesEl.textContent = '—'; });
+      var comerciosEl = document.getElementById('bienvenidaComerciosCount');
+      var distribEl = document.getElementById('bienvenidaDistribuidoresCount');
+      if (comerciosEl) comerciosEl.textContent = '…';
+      if (distribEl) distribEl.textContent = '…';
+      supabaseClient
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .eq('sponsor_id', currentUser.id)
+        .eq('role', 'kiosquero')
+        .eq('active', true)
+        .then(function (r) {
+          if (comerciosEl) comerciosEl.textContent = r.count != null ? r.count : '—';
+        })
+        .catch(function () {
+          if (comerciosEl) comerciosEl.textContent = '—';
+        });
+      supabaseClient
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .eq('sponsor_id', currentUser.id)
+        .eq('role', 'partner')
+        .eq('active', true)
+        .then(function (r) {
+          if (distribEl) distribEl.textContent = r.count != null ? r.count : '—';
+        })
+        .catch(function () {
+          if (distribEl) distribEl.textContent = '—';
+        });
     }
 
     async function loadSuperIngresosSection() {
