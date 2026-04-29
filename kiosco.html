@@ -301,13 +301,6 @@
         </div>
         <!-- Ventas del día: fuera del bloque de resumen / cobro rápido -->
         <div class="kiosquero-only mb-5 space-y-2">
-          <div id="partnerUpgradeCtaWrap" class="hidden rounded-xl border border-violet-500/35 bg-violet-950/25 p-3 space-y-2">
-            <p class="text-[11px] text-white/60 leading-snug">Sumá tu <strong class="text-violet-200/95">cuenta como distribuidor</strong> (misma sesión después de que Ferriol apruebe). Indicás quién te vendió el kit si fue distinto del referidor de tu negocio.</p>
-            <button type="button" id="btnKiosqueroPartnerUpgrade" class="w-full py-2.5 px-3 rounded-xl border border-violet-400/50 bg-violet-600/25 hover:bg-violet-600/35 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-violet-100 active:scale-[0.99]">
-              <i data-lucide="badge-check" class="w-4 h-4 shrink-0"></i>
-              Quiero ser distribuidor
-            </button>
-          </div>
           <button type="button" id="btnVentasDelDia" onclick="window._openVentasDelDia && window._openVentasDelDia()" class="w-full py-2.5 px-3 rounded-xl border border-[#22c55e]/35 bg-[#22c55e]/10 hover:bg-[#22c55e]/18 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-[#86efac] active:scale-[0.99]">
             <i data-lucide="clipboard-list" class="w-4 h-4 shrink-0"></i>
             Ventas del día
@@ -600,11 +593,18 @@
                 <p id="kioscoLicensePriceHint" class="text-xs text-white/55"></p>
                 <p class="text-[10px] text-white/45 mt-2 leading-snug">Acá abonás la <strong class="text-white/60">licencia mensual</strong> del sistema; más abajo registrás los <strong class="text-white/60">pagos a tus proveedores</strong> de mercadería.</p>
               </div>
-              <div class="shrink-0 sm:pt-1 w-full sm:w-auto">
-                <button type="button" id="btnOpenKioscoSubscriptionModal" class="w-full sm:w-auto rounded-2xl px-5 py-3.5 font-bold text-sm sm:text-base text-white shadow-lg shadow-amber-600/40 bg-gradient-to-br from-amber-400 via-orange-500 to-rose-600 ring-2 ring-amber-200/50 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2">
+              <div class="shrink-0 w-full sm:max-w-md sm:pt-1 flex flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-2 sm:justify-end">
+                <button type="button" id="btnOpenKioscoSubscriptionModal" class="w-full sm:flex-1 min-w-0 rounded-2xl px-4 py-3.5 font-bold text-sm sm:text-base text-white shadow-lg shadow-amber-600/40 bg-gradient-to-br from-amber-400 via-orange-500 to-rose-600 ring-2 ring-amber-200/50 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2">
                   <i data-lucide="wallet" class="w-5 h-5 shrink-0"></i>
                   Abonar suscripción
                 </button>
+                <div id="partnerUpgradeCtaWrap" class="hidden flex flex-col gap-1 min-w-0 sm:flex-1">
+                  <button type="button" id="btnKiosqueroPartnerUpgrade" class="w-full py-3 px-3 rounded-2xl border border-violet-400/45 bg-violet-600/22 hover:bg-violet-600/32 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-violet-100 active:scale-[0.98] shadow-md shadow-violet-900/30">
+                    <i data-lucide="badge-check" class="w-4 h-4 shrink-0"></i>
+                    Quiero ser distribuidor
+                  </button>
+                  <p class="text-[9px] text-white/45 text-center sm:text-right leading-tight px-0.5">Misma cuenta; Ferriol aprueba el upgrade.</p>
+                </div>
               </div>
             </div>
             <div class="mt-4 rounded-xl border border-emerald-500/25 bg-black/30 p-3 sm:p-4">
@@ -2880,7 +2880,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426_partner_upgrade_kiosk_signup_hint"></script>
+  <script defer src="kiosco-app.js?v=20260426_partner_upgrade_beside_subscription"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>
