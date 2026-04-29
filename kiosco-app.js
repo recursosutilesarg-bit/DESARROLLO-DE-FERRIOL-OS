@@ -3597,7 +3597,7 @@
     function updateTrialCountdown() {
       const banner = document.getElementById('trialCountdownBanner');
       if (!banner || !currentUser || currentUser.role !== 'kiosquero') return;
-      /** Los días restantes se muestran en Caja → Proveedores (tarjeta Abonar suscripción), no repetimos en el inicio. */
+      /** Los días restantes se muestran en Caja → Proveedores (tarjeta «Pagar suscripción mensual»), no repetimos en el inicio. */
       banner.classList.add('hidden');
       banner.classList.remove('trial-countdown-banner--urgent');
       var stClr = document.getElementById('trialCountdownSubtext');
@@ -4244,7 +4244,7 @@
       return p;
     }
 
-    /** Rellena el modal «Abonar suscripción» desde el texto cargado desde app_settings */
+    /** Rellena el modal de pago (suscripción / cuota) desde app_settings */
     window._populateKioscoSubscriptionPayModal = function (raw) {
       window._ferriolKioscoEmpresaTransferRaw = raw != null ? String(raw) : '';
       var container = document.getElementById('kioscoSubPayBankFields');
@@ -4351,7 +4351,7 @@
           : 'La suscripción mensual del negocio va a la <strong class="text-emerald-100/85">cuenta empresa</strong>; después enviás el comprobante donde indique Ferriol.';
       }
       var aml = document.getElementById('accountMenuPlanAbonarLabel');
-      if (aml) aml.textContent = admin ? 'Abonar cuota distribuidor' : 'Abonar suscripción';
+      if (aml) aml.textContent = admin ? 'Pagar cuota mensual' : 'Pagar suscripción mensual';
       try {
         syncPlanCheckoutPrices();
       } catch (_) {}
@@ -4480,7 +4480,7 @@
       var intro = document.getElementById('kioscoSubPayModalIntro');
       if (tit) {
         tit.textContent =
-          mode === 'admin' ? 'Abonar cuota distribuidor' : 'Suscripción mensual Ferriol · negocio';
+          mode === 'admin' ? 'Pagar cuota mensual' : 'Pagar suscripción mensual';
       }
       if (intro) {
         intro.innerHTML =

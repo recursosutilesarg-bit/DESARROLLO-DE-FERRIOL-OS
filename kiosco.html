@@ -593,7 +593,7 @@
               <i data-lucide="plus-circle" class="w-4 h-4 text-[#86efac]"></i>
               Registrar pago a proveedor
             </h3>
-            <p class="text-[10px] text-white/45 mb-4 leading-snug">Solo <strong class="text-white/55">mercadería</strong> y proveedores. La <strong class="text-amber-200/80">suscripción mensual Ferriol</strong> se abona desde <strong class="text-white/60">Cuenta (foto)</strong> → <strong class="text-white/60">Abonar cuota</strong>, no desde acá.</p>
+            <p class="text-[10px] text-white/45 mb-4 leading-snug">Solo <strong class="text-white/55">mercadería</strong> y proveedores. La <strong class="text-amber-200/80">suscripción mensual Ferriol</strong> se abona desde <strong class="text-white/60">Cuenta (foto)</strong> → <strong class="text-white/60">Mi plan</strong> (<strong class="text-white/60">Pagar suscripción mensual</strong>), no desde acá.</p>
             <div class="space-y-3">
               <div>
                 <label class="block text-xs text-white/60 mb-1">Proveedor</label>
@@ -983,7 +983,7 @@
           <p id="planCheckoutPayEyebrow" class="text-[10px] font-semibold uppercase tracking-widest text-amber-200/75 mb-2">Resumen de pago</p>
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2 text-white">
             <i data-lucide="receipt-text" class="w-6 h-6 text-amber-200/95 shrink-0"></i>
-            <span id="planPanelHeadingText">Resumen · Abonar suscripción</span>
+            <span id="planPanelHeadingText">Resumen · Suscripción mensual Ferriol OS</span>
           </h2>
           <p id="planPanelLead" class="text-sm text-white/70 mb-4 leading-relaxed"></p>
           <div id="planCheckoutPriceBox" class="rounded-2xl border border-white/20 bg-gradient-to-b from-white/[0.06] to-black/30 p-4 sm:p-5 mb-4 text-center">
@@ -1097,7 +1097,7 @@
             <label class="block text-sm text-white/70 mb-2">Nombre del negocio</label>
             <input type="text" id="configKioscoName" placeholder="Ej: Mi Negocio" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
           </div>
-          <p class="text-xs text-white/50 -mt-2 mb-1"><strong class="text-white/75">Cuota mensual Ferriol:</strong> desde <strong class="text-white/78">tu foto → Cuenta → Mi plan</strong> (<strong class="text-[#86efac]/90">Abonar</strong>). Recordatorios de vigencia también figuran en la <strong class="text-white/60">campana</strong> cuando corresponda.</p>
+          <p class="text-xs text-white/50 -mt-2 mb-1"><strong class="text-white/75">Cuota mensual Ferriol:</strong> desde <strong class="text-white/78">tu foto → Cuenta → Mi plan</strong> (<strong class="text-[#86efac]/90">Pagar suscripción mensual</strong> / <strong class="text-[#86efac]/90">Pagar cuota mensual</strong>). Recordatorios de vigencia también figuran en la <strong class="text-white/60">campana</strong> cuando corresponda.</p>
           <div>
             <label class="block text-sm text-white/70 mb-2">Mensaje de cobro por WhatsApp (usá <code class="text-[#86efac]">{cliente}</code> y <code class="text-[#86efac]">{monto}</code>)</label>
             <textarea id="configWhatsappMsg" rows="4" placeholder="Hola {cliente}, tenés un saldo de ${monto}..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] resize-y"></textarea>
@@ -1213,7 +1213,7 @@
                     <i data-lucide="refresh-cw" class="w-5 h-5"></i> Renovar / Coordinar</button>
                 </div>
               </div>
-              <p class="text-[10px] text-white/45 leading-snug"><strong class="text-white/60">Cuota distribuidor / suscripción Ferriol:</strong> mismo flujo desde <strong class="text-amber-100/85">foto → Cuenta → Mi plan</strong> (<strong class="text-amber-100/85">Abonar</strong>).</p>
+              <p class="text-[10px] text-white/45 leading-snug"><strong class="text-white/60">Cuota distribuidor / suscripción Ferriol:</strong> mismo flujo desde <strong class="text-amber-100/85">foto → Cuenta → Mi plan</strong> (<strong class="text-amber-100/85">Pagar suscripción o cuota mensual</strong>).</p>
             </div>
           </div>
 
@@ -2028,7 +2028,7 @@
                 <i data-lucide="shopping-bag" class="w-4 h-4 text-sky-300"></i>
                 Medios de pago (checkout Mercado Pago)
               </h3>
-              <p class="text-xs text-white/50 mb-2">Link público de cobro (Mercado Pago: tarjeta, efectivo en red, etc.). Los usuarios verán un botón debajo de <strong class="text-white/70">Abonar suscripción / Abonar cuota</strong> en <strong class="text-white/70">Cuenta → Mi plan</strong> que abre esta URL en una nueva pestaña.</p>
+              <p class="text-xs text-white/50 mb-2">Link público de cobro (Mercado Pago: tarjeta, efectivo en red, etc.). Los usuarios verán un botón debajo de <strong class="text-white/70">Pagar suscripción mensual</strong> / <strong class="text-white/70">Pagar cuota mensual</strong> en <strong class="text-white/70">Cuenta → Mi plan</strong> que abre esta URL en una nueva pestaña.</p>
               <label class="block text-xs text-white/70 mb-1" for="adminMercadoPagoCheckoutUrl">URL del checkout</label>
               <input type="url" id="adminMercadoPagoCheckoutUrl" inputmode="url" autocomplete="off" placeholder="https://www.mercadopago.com.ar/…" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm mb-2 font-mono">
               <p class="text-[10px] text-white/40 mb-0">Se guarda con <strong class="text-white/55">Guardar ajustes</strong> · <code class="text-white/55">app_settings.ferriol_mercadopago_checkout_url</code>. Dejalo vacío para ocultar el botón.</p>
@@ -2885,7 +2885,7 @@
           </span>
           <span class="flex-1 min-w-0">
             <span class="block font-bold text-sm tracking-wide text-orange-950 uppercase">Mi plan</span>
-            <span class="block text-[10px] text-orange-800/75 mt-0.5 leading-snug">Abonar, cuota distribuidor o solicitar rol</span>
+            <span class="block text-[10px] text-orange-800/75 mt-0.5 leading-snug">Pagar suscripción / cuota o solicitar rol</span>
           </span>
           <i data-lucide="chevron-right" class="w-5 h-5 text-orange-700/90 shrink-0"></i>
         </button>
@@ -2919,7 +2919,7 @@
       <div class="flex flex-col gap-2 px-3 sm:px-4 py-4 min-h-0 overflow-y-auto overscroll-contain">
         <button type="button" id="accountMenuBtnAbonar" class="w-full rounded-xl py-3.5 px-4 touch-target flex items-center justify-center gap-2.5 font-bold text-sm sm:text-base text-white shadow-lg bg-gradient-to-br from-amber-400 via-orange-500 to-rose-700 ring-2 ring-amber-200/45 hover:brightness-110 active:scale-[0.98]">
           <i data-lucide="building-2" class="w-5 h-5 shrink-0 opacity-95"></i>
-          <span id="accountMenuPlanAbonarLabel" class="leading-snug text-center">Abonar suscripción</span>
+          <span id="accountMenuPlanAbonarLabel" class="leading-snug text-center">Pagar suscripción mensual</span>
         </button>
         <div id="accountPlanMercadoPagoWrap" class="hidden w-full">
           <button type="button" id="accountPlanBtnMercadoPago" class="w-full rounded-xl py-3 px-3 touch-target flex items-center justify-center gap-2 font-bold text-[0.6875rem] sm:text-xs text-white leading-tight text-center border-2 border-sky-400/50 bg-gradient-to-br from-[#009ee3]/90 via-[#008ad4]/95 to-[#006ebb] shadow-lg shadow-sky-900/30 ring-1 ring-white/15 hover:brightness-110 active:scale-[0.98]">
