@@ -1999,6 +1999,7 @@
             <i data-lucide="settings" class="w-5 h-5 text-[#86efac]"></i>
             Ajustes del sistema
           </h2>
+          <p class="text-xs text-sky-200/95 mb-3 leading-relaxed rounded-lg border border-sky-500/35 bg-sky-950/40 px-3 py-2.5 super-only super-main-only"><strong class="text-white/95">Link Mercado Pago:</strong> bajá en esta pantalla hasta el <strong class="text-white/95">recuadro azul</strong> y pegá el link público (<code class="text-sky-100/95">https://...</code>). Si no ves ese bloque, no estás como fundador en vista <strong class="text-white/95">Empresa</strong>.</p>
           <div class="space-y-4">
             <div>
               <p class="text-xs text-white/50 mb-2">Números de WhatsApp que verán los <strong class="text-white/65">administradores de red</strong> (socios) si su cuenta se desactiva o deben renovar o pagar. Los <strong class="text-white/65">negocios (kioscos)</strong> ven el teléfono que cargó su referidor en el perfil.</p>
@@ -2023,15 +2024,17 @@
               <p class="text-xs text-white/50 mb-2">Los kiosqueros ven estos datos solo como <strong class="text-white/70">instrucciones de pago de la empresa (Ferriol)</strong> donde corresponde abonar la suscripción mensual según política oficial. Los datos bancarios personales que el socio cargue en su cuenta <strong class="text-white/70">no se muestran</strong> al negocio referido.</p>
               <textarea id="adminTransferInfo" rows="5" placeholder="Titular, CBU, alias, instrucciones..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm resize-y mb-2"></textarea>
             </div>
-            <div class="border-t border-white/10 pt-4 mt-4 super-only super-main-only">
-              <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
-                <i data-lucide="shopping-bag" class="w-4 h-4 text-sky-300"></i>
-                Medios de pago (checkout Mercado Pago)
+            <div id="ferriolMercadoPagoCheckoutSettings" class="rounded-xl border border-sky-400/45 bg-sky-950/25 ring-1 ring-sky-400/20 p-3 sm:p-4 mt-4 scroll-mt-28 super-only super-main-only">
+              <p class="text-[10px] font-semibold uppercase tracking-wider text-sky-200/90 mb-2">Solo fundador (vista empresa)</p>
+              <h3 class="font-bold mb-2 flex flex-wrap items-center gap-2 text-base sm:text-lg text-white leading-snug">
+                <i data-lucide="link-2" class="w-5 h-5 text-sky-300 shrink-0"></i>
+                Link Mercado Pago (tarjeta / efectivo / MP)
               </h3>
-              <p class="text-xs text-white/50 mb-2">Link público de cobro (Mercado Pago: tarjeta, efectivo en red, etc.). Los usuarios verán un botón debajo de <strong class="text-white/70">Pagar suscripción mensual</strong> / <strong class="text-white/70">Pagar cuota mensual</strong> en <strong class="text-white/70">Cuenta → Mi plan</strong> que abre esta URL en una nueva pestaña.</p>
-              <label class="block text-xs text-white/70 mb-1" for="adminMercadoPagoCheckoutUrl">URL del checkout</label>
-              <input type="url" id="adminMercadoPagoCheckoutUrl" inputmode="url" autocomplete="off" placeholder="https://www.mercadopago.com.ar/…" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm mb-2 font-mono">
-              <p class="text-[10px] text-white/40 mb-0">Se guarda con <strong class="text-white/55">Guardar ajustes</strong> · <code class="text-white/55">app_settings.ferriol_mercadopago_checkout_url</code>. Dejalo vacío para ocultar el botón.</p>
+              <p class="text-xs text-white/65 mb-3 leading-relaxed"><strong class="text-white/90">Dónde estás:</strong> pestaña inferior <strong class="text-[#86efac]">Más</strong> → <strong class="text-[#86efac]">Ajustes del sistema</strong> (entrá por el menú de opciones). Si <strong class="text-amber-200/95">no ves este recuadro azul</strong>, no estás como fundador en vista <strong class="text-white/90">Empresa</strong>: tocá el modo en el encabezado y pasá a esa vista (no «negocio» ni modo socio).</p>
+              <p class="text-xs text-white/50 mb-2">Los usuarios verán debajo de «Pagar suscripción mensual» / «Pagar cuota mensual» el botón <strong class="text-white/75">tarjeta / efectivo / Mercado Pago</strong>.</p>
+              <label class="block text-xs font-medium text-white/85 mb-1" for="adminMercadoPagoCheckoutUrl">Pegá acá tu link público de cobro</label>
+              <input type="url" id="adminMercadoPagoCheckoutUrl" name="mercadopago_checkout_url" inputmode="url" autocomplete="off" placeholder="https://www.mercadopago.com.ar/..." class="w-full glass rounded-xl px-4 py-3 border border-sky-400/35 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-400/60 text-sm mb-2 font-mono">
+              <p class="text-[10px] text-white/45 mb-0">Al final de esta pantalla tocá <strong class="text-[#86efac]">Guardar ajustes</strong>. Para ocultar el botón en la app, dejá el campo vacío.</p>
             </div>
             <div class="border-t border-white/10 pt-4 mt-4">
               <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
@@ -2194,7 +2197,7 @@
             <i data-lucide="settings" class="w-5 h-5 text-[#86efac]"></i>
             Ajustes
           </h2>
-          <p class="text-xs text-white/50 mb-4">Desde esta pantalla vas a <strong class="text-white/65">Ajustes del sistema</strong>, aviso global y exportación. Para <strong class="text-white/65">cargar una venta con comprobante</strong>, usá el botón <strong class="text-white/65">Cargar venta</strong> en <strong class="text-white/65">Ingresos</strong> junto al filtro de período. Los <strong class="text-white/65">enlaces para referir negocios o socios</strong> están en <strong class="text-white/65">Afiliados</strong>. Los <strong class="text-white/65">datos bancarios</strong> (tuyos) los cargás en el menú de tu perfil.</p>
+          <p class="text-xs text-white/50 mb-4">Tocá <strong class="text-white/65">Ajustes del sistema</strong> desde acá para WhatsApp empresa, período de prueba, precios y el <strong class="text-sky-200/90">link Mercado Pago</strong> en el recuadro azul. También: aviso global y exportación. Para <strong class="text-white/65">cargar una venta con comprobante</strong>, usá el botón <strong class="text-white/65">Cargar venta</strong> en <strong class="text-white/65">Ingresos</strong> junto al filtro de período. Los <strong class="text-white/65">enlaces para referir negocios o socios</strong> están en <strong class="text-white/65">Afiliados</strong>. Los <strong class="text-white/65">datos bancarios</strong> (tuyos) los cargás en el menú de tu perfil.</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 super-only super-main-only">
             <button type="button" id="btnSuperMasGoSolicitudesVentas" class="glass rounded-2xl p-5 border border-emerald-500/45 bg-emerald-500/[0.12] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-emerald-400/65 active:scale-[0.98] touch-target sm:col-span-2">
               <div class="w-12 h-12 rounded-xl bg-emerald-500/25 flex items-center justify-center shrink-0">
@@ -2210,7 +2213,7 @@
                 <i data-lucide="settings" class="w-6 h-6 text-[#86efac]"></i>
               </div>
               <span class="font-semibold text-base text-white">Ajustes del sistema</span>
-              <span class="text-xs text-white/55">WhatsApp, transferencias, prueba, avisos de renovación, respaldo masivo.</span>
+              <span class="text-xs text-white/55">WhatsApp empresa, datos de transferencia, período de prueba, precios y <strong class="text-sky-200/95">link Mercado Pago</strong> (recuadro azul dentro de esa pantalla). Respaldo masivo.</span>
             </button>
             <button type="button" id="btnSuperMasScrollAviso" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
               <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">

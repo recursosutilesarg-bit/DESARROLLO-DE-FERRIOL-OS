@@ -1928,6 +1928,16 @@
         }
       }
       if (!currentUser) return;
+      try {
+        if (supabaseClient) await ferriolRefreshMercadoPagoCheckoutUrl();
+        else {
+          window._ferriolMercadoPagoCheckoutUrl = '';
+          syncAccountPlanMercadoPagoButton();
+        }
+      } catch (_) {
+        window._ferriolMercadoPagoCheckoutUrl = '';
+        syncAccountPlanMercadoPagoButton();
+      }
       var show = currentUser.role === 'kiosquero' || isAnyKioscoPreviewMode();
       if (block) block.style.display = show ? '' : 'none';
       if (!show) return;
@@ -1955,18 +1965,12 @@
         syncAccountPlanMercadoPagoButton();
       } else {
         try {
-          var rSettings = await supabaseClient.from('app_settings').select('key, value').in('key', ['ferriol_transfer_info', 'ferriol_mercadopago_checkout_url']);
+          var rSettings = await supabaseClient.from('app_settings').select('key, value').in('key', ['ferriol_transfer_info']);
           var srows = rSettings.data || [];
           var tiRow = srows.filter(function (x) { return x.key === 'ferriol_transfer_info'; })[0];
-          var mpRow = srows.filter(function (x) { return x.key === 'ferriol_mercadopago_checkout_url'; })[0];
           transferBody = (tiRow && tiRow.value) ? String(tiRow.value) : transferBody;
-          var mpV = (mpRow && mpRow.value != null) ? String(mpRow.value).trim() : '';
-          window._ferriolMercadoPagoCheckoutUrl = mpV;
-          syncAccountPlanMercadoPagoButton();
         } catch (_) {
           transferBody = 'No se pudieron cargar los datos de transferencia.';
-          window._ferriolMercadoPagoCheckoutUrl = '';
-          syncAccountPlanMercadoPagoButton();
         }
       }
       if (typeof window._populateKioscoSubscriptionPayModal === 'function') window._populateKioscoSubscriptionPayModal(transferBody);
@@ -4747,6 +4751,10 @@
       }
       if (currentUser && (currentUser.role === 'kiosquero' || isAnyKioscoPreviewMode())) {
         loadKioscoLicensePaymentInfo();
+      } else if (currentUser && supabaseClient) {
+        try {
+          ferriolRefreshMercadoPagoCheckoutUrl().catch(function () {});
+        } catch (_) {}
       }
       syncHeaderProfileAvatar();
       syncAccountMenuDrawerShell();
