@@ -1706,49 +1706,143 @@
       var block = document.getElementById('kioscoLicensePaymentBlock');
       var priceEl = document.getElementById('kioscoLicensePriceHint');
       var sponsorEl = document.getElementById('kioscoLicenseSponsorHint');
-      var daysEl = document.getElementById('kioscoSubscriptionDaysLeft');
+      var strip =
+        document.getElementById('kioscoSubscriptionDaysStrip') ||
+        document.querySelector('#kioscoSubscriptionDaysStrip');
+      var stripNum =
+        document.getElementById('kioscoSubscriptionDaysNumber');
+      var stripSuf =
+        document.getElementById('kioscoSubscriptionDaysSuffix');
+      var stripEye =
+        document.getElementById('kioscoSubscriptionDaysEyebrow');
+      var stripLine =
+        document.getElementById('kioscoSubscriptionDaysLine');
+      function applyKioscoSubscriptionDaysStrip(te) {
+        if (!strip) return;
+        var baseClasses =
+          'kiosco-sub-days-strip mb-4 rounded-2xl p-4 sm:p-5 border-2 shadow-2xl shadow-black/50 relative overflow-hidden';
+        strip.classList.remove('animate-kiosco-days-pulse', 'animate-pulse');
+        if (
+          !stripNum ||
+          !stripLine ||
+          !stripEye
+        )
+          return;
+        if (!te) {
+          strip.classList.remove('hidden');
+          stripNum.textContent = '—';
+          if (stripSuf) stripSuf.classList.add('hidden');
+          stripEye.textContent = 'Licencia sistema';
+          stripLine.textContent =
+            'Sin fecha de vigencia en tu perfil. Coordiná con el administrador.';
+          stripEye.className =
+            'text-[10px] font-bold uppercase tracking-[0.2em] text-amber-200/95 mb-1';
+          stripLine.className = 'text-sm sm:text-base font-semibold text-amber-100/95 leading-snug';
+          strip.className =
+            baseClasses +
+            ' bg-gradient-to-br from-amber-950/85 via-neutral-950/90 to-neutral-950/95 border-amber-500/55 ring-2 ring-amber-400/35';
+          stripNum.className =
+            'text-4xl sm:text-5xl font-black tabular-nums leading-none text-amber-200/90 drop-shadow-none';
+          return;
+        }
+        var end = new Date(te);
+        var now = new Date();
+        if (isNaN(end.getTime())) {
+          strip.classList.remove('hidden');
+          stripNum.textContent = '—';
+          if (stripSuf) stripSuf.classList.add('hidden');
+          stripEye.textContent = 'Error de fecha';
+          stripLine.textContent = 'La vigencia cargada no es válida. Consultá soporte.';
+          stripEye.className =
+            'text-[10px] font-bold uppercase tracking-[0.2em] text-amber-200/85 mb-1';
+          stripLine.className = 'text-sm sm:text-base font-semibold text-amber-100/90 leading-snug';
+          strip.className =
+            baseClasses +
+            ' bg-gradient-to-br from-amber-950/80 via-neutral-950/90 to-neutral-950 border-amber-500/50 ring-2 ring-amber-400/30';
+          stripNum.className =
+            'text-4xl sm:text-5xl font-black tabular-nums leading-none text-amber-200/95';
+          return;
+        }
+        var expired = end.getTime() <= now.getTime();
+        var ms = end - now;
+        var daysLeft = expired ? 0 : Math.ceil(ms / (24 * 60 * 60 * 1000));
+        var urgentSoon = !expired && daysLeft >= 1 && daysLeft <= 7;
+        strip.classList.remove('hidden');
+        if (expired) {
+          if (stripSuf) stripSuf.classList.add('hidden');
+          stripNum.textContent = '!';
+          stripEye.textContent = 'Vencido';
+          stripEye.className =
+            'text-[10px] font-bold uppercase tracking-[0.2em] text-red-300 mb-1';
+          stripLine.textContent =
+            'Suscripción vencida. Renovala para mantener Ferriol OS activo en tu negocio.';
+          stripLine.className = 'text-base sm:text-lg font-semibold text-red-100 leading-snug drop-shadow-md';
+          strip.className =
+            baseClasses +
+            ' bg-gradient-to-br from-red-950/95 via-neutral-950/95 to-neutral-950 border-red-400/65 ring-2 ring-red-500/40 animate-kiosco-days-pulse';
+          stripNum.className =
+            'text-6xl sm:text-7xl font-black tabular-nums leading-none text-red-200 drop-shadow-[0_0_22px_rgba(248,113,113,0.45)]';
+        } else if (daysLeft >= 1) {
+          if (stripSuf) {
+            stripSuf.classList.remove('hidden');
+            stripSuf.textContent = 'días';
+          }
+          stripNum.textContent = String(daysLeft);
+          stripEye.textContent =
+            daysLeft === 1 ? 'Último día' : urgentSoon ? 'Atención' : 'Licencia activa';
+          stripEye.className =
+            'text-[10px] font-bold uppercase tracking-[0.2em] mb-1 ' +
+            (urgentSoon ? 'text-amber-200' : 'text-emerald-200/90');
+          stripLine.textContent =
+            daysLeft === 1 ?
+              'Te queda 1 día de licencia antes del vencimiento.' :
+              'Te quedan ' +
+                daysLeft +
+                ' días de suscripción antes del vencimiento.';
+          stripLine.className =
+            'text-base sm:text-lg font-semibold leading-snug ' +
+            (urgentSoon ? 'text-amber-100' : 'text-white');
+          strip.className =
+            baseClasses +
+            ' ' +
+            (urgentSoon ?
+              'bg-gradient-to-br from-amber-600/55 via-orange-950/90 to-neutral-950 border-amber-300/65 ring-2 ring-amber-400/55 animate-kiosco-days-pulse' :
+              'bg-gradient-to-br from-emerald-600/35 via-neutral-950/95 to-neutral-950 border-emerald-400/50 ring-2 ring-emerald-400/30');
+          stripNum.className =
+            'text-5xl sm:text-[3.35rem] font-black tabular-nums leading-none text-[#fef08a] drop-shadow-[0_0_18px_rgba(250,204,21,0.35)]';
+          if (!urgentSoon) strip.classList.remove('animate-kiosco-days-pulse');
+        } else {
+          if (stripSuf) stripSuf.classList.add('hidden');
+          stripNum.textContent = '⚡';
+          stripEye.textContent = 'Urgente';
+          stripEye.className =
+            'text-[10px] font-bold uppercase tracking-[0.2em] text-amber-100 mb-1';
+          stripLine.textContent =
+            'La licencia vence en las próximas horas. Aboná la suscripción ya.';
+          stripLine.className =
+            'text-base sm:text-lg font-semibold text-amber-50 leading-snug';
+          strip.className =
+            baseClasses +
+            ' bg-gradient-to-br from-orange-600/65 via-neutral-950/95 to-neutral-950 border-orange-400/65 ring-2 ring-orange-400/50 animate-kiosco-days-pulse';
+          stripNum.className =
+            'text-5xl font-black tabular-nums leading-none drop-shadow-[0_0_20px_rgba(251,191,36,0.5)]';
+        }
+      }
       if (!currentUser) return;
       var show = currentUser.role === 'kiosquero' || isSuperKioscoPreviewMode();
       if (block) block.style.display = show ? '' : 'none';
       if (!show) return;
-      if (daysEl && show) {
-        if (!isSuperKioscoPreviewMode() && currentUser.role === 'kiosquero') {
-          daysEl.classList.remove('hidden');
-          var te = currentUser.trialEndsAt;
-          if (!te) {
-            daysEl.textContent = 'Suscripción del sistema: sin fecha de vigencia en tu perfil.';
-            daysEl.className =
-              'text-xs font-semibold text-amber-200/80 mb-1.5';
-          } else {
-            var end = new Date(te);
-            if (isNaN(end.getTime())) {
-              daysEl.textContent = 'Suscripción del sistema: fecha de vigencia no válida.';
-              daysEl.className = 'text-xs font-semibold text-amber-200/80 mb-1.5';
-            } else {
-            var now = new Date();
-            var expired = end.getTime() <= now.getTime();
-            var ms = end - now;
-            var daysLeft = expired ? 0 : Math.ceil(ms / (24 * 60 * 60 * 1000));
-            if (expired) {
-              daysEl.textContent = 'Tu suscripción está vencida · renovala para mantener la licencia activa.';
-              daysEl.className = 'text-sm font-semibold text-red-300 mb-1.5';
-            } else if (daysLeft >= 1) {
-              daysEl.textContent =
-                'Te quedan ' +
-                daysLeft +
-                (daysLeft === 1 ? ' día' : ' días') +
-                ' de suscripción.';
-              daysEl.className = 'text-sm font-semibold text-[#fde68a] mb-1.5';
-            } else {
-              daysEl.textContent = 'La licencia vence en las próximas horas.';
-              daysEl.className = 'text-sm font-semibold text-amber-200 mb-1.5';
-            }
-            }
-          }
-        } else {
-          daysEl.classList.add('hidden');
-          daysEl.textContent = '';
-        }
+      if (
+        strip &&
+        show &&
+        !isSuperKioscoPreviewMode() &&
+        currentUser.role === 'kiosquero'
+      )
+        applyKioscoSubscriptionDaysStrip(currentUser.trialEndsAt || null);
+      else if (strip) {
+        strip.classList.add('hidden');
+        if (stripLine) stripLine.textContent = '';
+        if (stripNum) stripNum.textContent = '—';
       }
       var amt = FERRIOL_PLAN_AMOUNTS.kioscoMonthly;
       var amtStr = amt.toLocaleString('es-AR');
@@ -3345,15 +3439,17 @@
     }
     function updateTrialCountdown() {
       const banner = document.getElementById('trialCountdownBanner');
-      const textEl = document.getElementById('trialCountdownText');
-      const daysEl = document.getElementById('trialCountdownDays');
       if (!banner || !currentUser || currentUser.role !== 'kiosquero') return;
+      /** Los días restantes se muestran en Caja → Proveedores (tarjeta Abonar suscripción), no repetimos en el inicio. */
+      banner.classList.add('hidden');
+      banner.classList.remove('trial-countdown-banner--urgent');
+      var stClr = document.getElementById('trialCountdownSubtext');
+      if (stClr) {
+        stClr.textContent = '';
+        stClr.classList.add('hidden');
+      }
       const endsAt = currentUser.trialEndsAt;
       if (!endsAt) {
-        banner.classList.add('hidden');
-        banner.classList.remove('trial-countdown-banner--urgent');
-        var st = document.getElementById('trialCountdownSubtext');
-        if (st) { st.textContent = ''; st.classList.add('hidden'); }
         var subEl = document.getElementById('headerSub');
         if (subEl && currentUser.role === 'kiosquero') subEl.textContent = 'Sistema Premium';
         return;
@@ -3362,10 +3458,6 @@
       const now = new Date();
       const msLeft = end - now;
       if (msLeft <= 0) {
-        banner.classList.add('hidden');
-        banner.classList.remove('trial-countdown-banner--urgent');
-        var st0 = document.getElementById('trialCountdownSubtext');
-        if (st0) { st0.textContent = ''; st0.classList.add('hidden'); }
         if (supabaseClient && currentUser && currentUser.id && !currentUser._trialBlockTriggered) {
           currentUser._trialBlockTriggered = true;
           supabaseClient.from('profiles').update({ active: false }).eq('id', currentUser.id).then(function () {
@@ -3376,28 +3468,8 @@
         }
         return;
       }
-      const daysLeft = Math.ceil(msLeft / (24 * 60 * 60 * 1000));
-      const win = getTrialReminderWindowDays();
-      const inReminderWindow = daysLeft >= 1 && daysLeft <= win;
-      banner.classList.remove('hidden');
-      banner.classList.toggle('trial-countdown-banner--urgent', inReminderWindow);
-      daysEl.textContent = daysLeft;
-      textEl.textContent = daysLeft === 1 ? 'Último día de prueba' : (daysLeft + ' días de prueba restantes');
-      var subTxt = document.getElementById('trialCountdownSubtext');
-      if (subTxt) {
-        if (inReminderWindow) {
-          var cfg = window._trialReminderConfig || { messages: {} };
-          var custom = (cfg.messages && (cfg.messages[String(daysLeft)] != null ? cfg.messages[String(daysLeft)] : cfg.messages[daysLeft])) || '';
-          var line = applyTrialReminderTokens(custom, daysLeft, currentUser.kioscoName);
-          subTxt.textContent = line;
-          subTxt.classList.remove('hidden');
-        } else {
-          subTxt.textContent = '';
-          subTxt.classList.add('hidden');
-        }
-      }
-      var subEl = document.getElementById('headerSub');
-      if (subEl) subEl.textContent = 'Sistema de prueba';
+      var subHd = document.getElementById('headerSub');
+      if (subHd) subHd.textContent = 'Sistema de prueba';
     }
     /** Vigencia administrador empresa (fundador, role super): mismo criterio que kioscos (trial_ends_at). Al vencer: active=false y cierre de sesión. El banner solo se muestra en vista empresa. */
     function updateTrialCountdownSuperFundador() {
@@ -5506,7 +5578,7 @@
 
     window._switchCajaTab = function (tab) {
       var hub = document.getElementById('caja-hub');
-      var subs = ['cierre', 'proveedores', 'gastos'];
+      var subs = ['cierre', 'proveedores', 'gastos', 'sistema'];
       if (tab === 'hub') {
         if (hub) hub.classList.remove('hidden');
         subs.forEach(function (s) { var el = document.getElementById('caja-sub-' + s); if (el) el.classList.add('hidden'); });
@@ -5522,6 +5594,10 @@
       }
       if (tab === 'proveedores') { _resetFormInline('proveedor'); renderGastos('proveedor'); }
       if (tab === 'gastos') { _resetFormInline('gasto_fijo'); renderGastos('gasto_fijo'); }
+      if (tab === 'sistema') {
+        if (typeof loadKioscoLicensePaymentInfo === 'function') loadKioscoLicensePaymentInfo().catch(function () {});
+        if (typeof syncKiosqueroPartnerUpgradeUi === 'function') syncKiosqueroPartnerUpgradeUi().catch(function () {});
+      }
       lucide.createIcons();
     };
 
@@ -6469,7 +6545,7 @@
       libretalSubs.forEach(function (id) { var el = document.getElementById(id); if (el) el.classList.add('hidden'); });
       if (tab === 'libreta') {
         var hub = document.getElementById('caja-hub');
-        var subs = ['cierre','proveedores','gastos'];
+        var subs = ['cierre', 'proveedores', 'gastos', 'sistema'];
         if (hub) hub.classList.add('hidden');
         subs.forEach(function (s) { var el = document.getElementById('caja-sub-' + s); if (el) el.classList.add('hidden'); });
         var el = document.getElementById('caja-sub-libreta');
@@ -6481,7 +6557,7 @@
       }
       if (tab === 'libreta-cliente') {
         var hub = document.getElementById('caja-hub');
-        var subs = ['cierre','proveedores','gastos'];
+        var subs = ['cierre', 'proveedores', 'gastos', 'sistema'];
         if (hub) hub.classList.add('hidden');
         subs.forEach(function (s) { var el = document.getElementById('caja-sub-' + s); if (el) el.classList.add('hidden'); });
         document.getElementById('caja-sub-libreta').classList.add('hidden');
@@ -6492,9 +6568,6 @@
         return;
       }
       _switchCajaTabOrig(tab);
-      if (tab === 'proveedores') {
-        if (typeof loadKioscoLicensePaymentInfo === 'function') loadKioscoLicensePaymentInfo().catch(function () {});
-      }
       maybePushCajaHistory();
     };
     // ============================================================

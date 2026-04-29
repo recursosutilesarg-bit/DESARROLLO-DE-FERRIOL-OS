@@ -2007,9 +2007,35 @@ select.ferriol-native-select option:active {
 .trial-countdown-banner--urgent .trial-renovar-btn {
   animation: trial-renovar-glow 2s ease-in-out infinite;
 }
+
+/* Franja de días — Caja → Proveedores (suscripción); pulso en alerta / vencida */
+.animate-kiosco-days-pulse {
+  animation: kiosco-sub-days-banner-pulse 2.15s ease-in-out infinite;
+}
+@keyframes kiosco-sub-days-banner-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 25px 50px -12px rgba(0, 0, 0, 0.65),
+      0 0 0 2px rgba(251, 191, 36, 0.18);
+    filter: saturate(1.02);
+  }
+  50% {
+    box-shadow:
+      0 22px 44px -10px rgba(245, 158, 11, 0.35),
+      0 0 0 2px rgba(251, 191, 36, 0.35);
+    filter: saturate(1.08);
+  }
+}
+
 @keyframes trial-banner-pulse {
-  0%, 100% { box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.25), 0 12px 40px rgba(245, 158, 11, 0.15); }
-  50% { box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.35), 0 16px 48px rgba(245, 158, 11, 0.28); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.25), 0 12px 40px rgba(245, 158, 11, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.35), 0 16px 48px rgba(245, 158, 11, 0.28);
+  }
 }
 @keyframes trial-icon-nudge {
   0%, 100% { transform: translateY(0); }

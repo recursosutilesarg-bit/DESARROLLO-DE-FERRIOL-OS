@@ -35,7 +35,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-  <link rel="stylesheet" href="kiosco.css?v=20260430scannerpc-ptr">
+  <link rel="stylesheet" href="kiosco.css?v=20260426_kiosco_days_strip_pulse">
 </head>
 <body class="relative">
   <!-- Banner instalar como app (PWA) — visible al abrir el link -->
@@ -443,7 +443,7 @@
         </div>
       </div>
 
-      <!-- HUB: 4 botones grandes (2×2) -->
+      <!-- HUB: tarjetas (grid 2 columnas) -->
       <div id="caja-hub" class="p-4">
         <h2 class="font-bold text-xl mb-5 flex items-center gap-2 pt-1">
           <i data-lucide="wallet" class="w-5 h-5 text-[#86efac]"></i>
@@ -464,13 +464,19 @@
             <span class="font-semibold text-sm">Libreta de fiado</span>
             <span class="text-xs text-white/50 text-center leading-tight">Clientes con deuda</span>
           </button>
+          <button onclick="window._switchCajaTab('sistema')" class="caja-hub-btn glass rounded-2xl p-5 border border-amber-500/35 flex flex-col items-center gap-2 w-full transition-all hover:border-amber-400/55 active:scale-[0.98] touch-target ring-1 ring-amber-400/22">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500/25 to-rose-950/35 flex items-center justify-center border border-amber-300/35">
+              <i data-lucide="sparkles" class="w-6 h-6 text-amber-200"></i>
+            </div>
+            <span class="font-semibold text-sm text-center leading-tight px-1">Abono sistema / suscripción</span>
+            <span class="text-xs text-white/50 text-center leading-tight">Licencia Ferriol y distribuidor</span>
+          </button>
           <button onclick="window._switchCajaTab('proveedores')" class="caja-hub-btn glass rounded-2xl p-5 border border-amber-500/35 flex flex-col items-center gap-2 w-full transition-all hover:border-amber-400/55 active:scale-[0.98] touch-target ring-1 ring-amber-500/20">
             <div class="w-12 h-12 rounded-2xl bg-amber-500/15 flex items-center justify-center border border-amber-400/25">
               <i data-lucide="truck" class="w-6 h-6 text-amber-200"></i>
             </div>
             <span class="font-semibold text-sm">Proveedores</span>
-            <span class="text-xs text-white/50 text-center leading-tight">Pagos a proveedores</span>
-            <span class="text-[10px] text-amber-200/95 text-center leading-tight font-semibold px-2 py-0.5 rounded-lg bg-amber-500/15 border border-amber-400/25">Suscripción Ferriol · abonar acá</span>
+            <span class="text-xs text-white/50 text-center leading-tight">Pagos de mercadería</span>
           </button>
           <button onclick="window._switchCajaTab('gastos')" class="caja-hub-btn glass rounded-2xl p-5 border border-white/10 flex flex-col items-center gap-3 w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
             <div class="w-12 h-12 rounded-2xl bg-[#22c55e]/20 flex items-center justify-center">
@@ -575,7 +581,79 @@
         </div>
       </div>
 
-      <!-- Sub-vista: Proveedores (registro de pagos, upgrade distribuidor, suscripción sistema) -->
+      <!-- Sub-vista: Abono sistema / Suscripción Ferriol (licencia + distribuidor) -->
+      <div id="caja-sub-sistema" class="hidden">
+        <div class="caja-subview-header">
+          <button onclick="window._switchCajaTab('hub')" class="caja-back-btn touch-target">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i> Caja
+          </button>
+        </div>
+        <div class="p-4 space-y-4">
+          <div class="glass rounded-2xl p-5 border border-amber-400/28 ring-1 ring-amber-500/15 shadow-lg shadow-amber-950/20">
+            <h2 class="font-bold text-lg flex items-center gap-2 text-amber-100 mb-2">
+              <i data-lucide="cpu" class="w-5 h-5 shrink-0 text-amber-300"></i>
+              Abono de sistema / Suscripción
+            </h2>
+            <p class="text-sm text-white/65 leading-relaxed">Acá abonás la <strong class="text-white/85">licencia mensual</strong> de Ferriol OS y, si corresponde, pedís pasar a <strong class="text-white/85">distribuidor</strong>. Los pagos a <strong class="text-white/85">proveedores de mercadería</strong> se cargan en la tarjeta <strong class="text-amber-200/90">Proveedores</strong>.</p>
+          </div>
+          <div id="partnerUpgradeOuterCard" class="kiosquero-only hidden rounded-2xl border border-violet-500/35 bg-gradient-to-br from-violet-950/55 to-purple-950/40 p-4 sm:p-5 shadow-lg shadow-violet-950/30 ring-1 ring-violet-400/20">
+            <h3 class="font-semibold mb-1 flex items-center gap-2 text-base text-violet-100">
+              <i data-lucide="badge-check" class="w-5 h-5 shrink-0"></i>
+              Distribuidor Ferriol
+            </h3>
+            <p class="text-[10px] text-violet-200/70 mb-3 leading-snug">Podés pedir pasar a socio con la misma cuenta; Ferriol revisa la solicitud.</p>
+            <div id="partnerUpgradeCtaWrap" class="hidden flex flex-col gap-1">
+              <button type="button" id="btnKiosqueroPartnerUpgrade" class="w-full py-3 px-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 touch-target active:scale-[0.98] text-white border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 shadow-lg shadow-violet-600/40 ring-1 ring-white/15 hover:brightness-110">
+                <i data-lucide="badge-check" class="w-4 h-4 shrink-0"></i>
+                Quiero ser distribuidor
+              </button>
+              <p class="text-[9px] text-white/45 text-center leading-tight px-0.5">Si ya enviaste la solicitud, queda hasta que Ferriol la apruebe.</p>
+            </div>
+          </div>
+          <div id="kioscoLicensePaymentBlock" class="kiosquero-only rounded-2xl border border-[#22c55e]/25 bg-gradient-to-br from-[#0a2e18]/95 to-[#052a14]/90 p-4 sm:p-5 shadow-lg shadow-black/20">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+              <div class="min-w-0 flex-1">
+                <div id="kioscoSubscriptionDaysStrip" class="kiosco-sub-days-strip hidden mb-4 rounded-2xl p-4 sm:p-5 border-2 shadow-2xl shadow-black/50 relative overflow-hidden ring-2 ring-emerald-400/20">
+                  <div class="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-amber-400/15 blur-2xl"></div>
+                  <div class="pointer-events-none absolute -left-8 bottom-0 h-32 w-32 rounded-full bg-emerald-500/10 blur-2xl"></div>
+                  <div class="relative flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div id="kioscoSubscriptionDaysNumberWrap" class="flex items-end gap-1.5 shrink-0">
+                      <span id="kioscoSubscriptionDaysNumber" class="text-5xl sm:text-[3.35rem] font-black tabular-nums leading-none text-[#fef08a] drop-shadow-[0_0_18px_rgba(250,204,21,0.35)]">—</span>
+                      <span id="kioscoSubscriptionDaysSuffix" class="hidden text-[11px] font-extrabold uppercase tracking-[0.2em] text-white/85 pb-1.5 leading-none whitespace-nowrap">días</span>
+                    </div>
+                    <div class="flex-1 min-w-0 flex flex-col justify-center gap-0.5 pt-1">
+                      <p id="kioscoSubscriptionDaysEyebrow" class="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-200/90 mb-1">Suscripción sistema</p>
+                      <p id="kioscoSubscriptionDaysLine" class="text-base sm:text-lg font-semibold text-white leading-snug"></p>
+                    </div>
+                  </div>
+                </div>
+                <h3 class="font-semibold mb-2 flex items-center gap-2 text-base text-[#86efac]">
+                  <i data-lucide="sparkles" class="w-5 h-5 shrink-0"></i>
+                  Suscripción mensual Ferriol OS
+                </h3>
+                <p id="kioscoLicensePriceHint" class="text-xs text-white/55"></p>
+                <p class="text-[10px] text-white/45 mt-2 leading-snug">Usá <strong class="text-white/60">Abonar suscripción</strong> para ver datos de pago y enviar comprobante. Los <strong class="text-white/60">pagos a proveedores de mercadería</strong> van en <strong class="text-amber-200/90">Caja → Proveedores</strong>.</p>
+              </div>
+              <div class="shrink-0 w-full sm:max-w-xs sm:pt-1">
+                <button type="button" id="btnOpenKioscoSubscriptionModal" class="w-full rounded-2xl px-4 py-3.5 font-bold text-sm sm:text-base text-white shadow-lg shadow-amber-600/40 bg-gradient-to-br from-amber-400 via-orange-500 to-rose-600 ring-2 ring-amber-200/50 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2">
+                  <i data-lucide="wallet" class="w-5 h-5 shrink-0"></i>
+                  Abonar suscripción
+                </button>
+              </div>
+            </div>
+            <div class="mt-4 rounded-xl border border-emerald-500/25 bg-black/30 p-3 sm:p-4">
+              <p class="text-[10px] font-semibold uppercase tracking-wide text-emerald-200/85 mb-2 flex items-center gap-2">
+                <i data-lucide="users" class="w-4 h-4 shrink-0 text-[#86efac]"></i>
+                Administrador · referidor
+              </p>
+              <div id="kioscoLicenseSponsorHint" class="text-sm text-white/80 leading-snug"></div>
+              <div id="kioscoLicenseReferidorWhatsApp" class="hidden mt-3 pt-3 border-t border-white/10"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-vista: Proveedores (solo pagos a proveedores de mercadería) -->
       <div id="caja-sub-proveedores" class="hidden">
         <div class="caja-subview-header">
           <button onclick="window._switchCajaTab('hub')" class="caja-back-btn touch-target">
@@ -583,12 +661,13 @@
           </button>
         </div>
         <div class="p-4 space-y-4">
-          <!-- 1 · Planilla de registro proveedores -->
+          <!-- Planilla registro proveedores -->
           <div class="glass rounded-2xl p-5">
-            <h3 class="font-bold text-base mb-4 flex items-center gap-2">
+            <h3 class="font-bold text-base mb-2 flex items-center gap-2">
               <i data-lucide="plus-circle" class="w-4 h-4 text-[#86efac]"></i>
               Registrar pago a proveedor
             </h3>
+            <p class="text-[10px] text-white/45 mb-4 leading-snug">Solo <strong class="text-white/55">mercadería</strong> y proveedores. La <strong class="text-amber-200/80">licencia Ferriol</strong> va en <strong class="text-white/60">Abono sistema / suscripción</strong> en el hub de Caja.</p>
             <div class="space-y-3">
               <div>
                 <label class="block text-xs text-white/60 mb-1">Proveedor</label>
@@ -613,49 +692,6 @@
             <button onclick="window._guardarGastoInline('proveedor')" class="w-full btn-glow rounded-xl py-3 font-semibold mt-4 touch-target flex items-center justify-center gap-2">
               <i data-lucide="save" class="w-4 h-4"></i> Guardar pago
             </button>
-          </div>
-          <!-- 2 · Quiero ser distribuidor -->
-          <div id="partnerUpgradeOuterCard" class="kiosquero-only hidden rounded-2xl border border-violet-500/35 bg-gradient-to-br from-violet-950/55 to-purple-950/40 p-4 sm:p-5 shadow-lg shadow-violet-950/30 ring-1 ring-violet-400/20">
-            <h3 class="font-semibold mb-1 flex items-center gap-2 text-base text-violet-100">
-              <i data-lucide="badge-check" class="w-5 h-5 shrink-0"></i>
-              Distribuidor Ferriol
-            </h3>
-            <p class="text-[10px] text-violet-200/70 mb-3 leading-snug">Podés pedir pasar a socio con la misma cuenta; Ferriol revisa la solicitud.</p>
-            <div id="partnerUpgradeCtaWrap" class="hidden flex flex-col gap-1">
-              <button type="button" id="btnKiosqueroPartnerUpgrade" class="w-full py-3 px-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 touch-target active:scale-[0.98] text-white border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 shadow-lg shadow-violet-600/40 ring-1 ring-white/15 hover:brightness-110">
-                <i data-lucide="badge-check" class="w-4 h-4 shrink-0"></i>
-                Quiero ser distribuidor
-              </button>
-              <p class="text-[9px] text-white/45 text-center leading-tight px-0.5">Si ya enviaste la solicitud, queda hasta que Ferriol la apruebe.</p>
-            </div>
-          </div>
-          <!-- 3 · Suscripción Ferriol OS -->
-          <div id="kioscoLicensePaymentBlock" class="kiosquero-only rounded-2xl border border-[#22c55e]/25 bg-gradient-to-br from-[#0a2e18]/95 to-[#052a14]/90 p-4 sm:p-5 shadow-lg shadow-black/20">
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-              <div class="min-w-0 flex-1">
-                <h3 class="font-semibold mb-2 flex items-center gap-2 text-base text-[#86efac]">
-                  <i data-lucide="sparkles" class="w-5 h-5 shrink-0"></i>
-                  Suscripción mensual Ferriol OS
-                </h3>
-                <p id="kioscoSubscriptionDaysLeft" class="text-sm font-semibold text-[#fde68a] mb-1.5 hidden"></p>
-                <p id="kioscoLicensePriceHint" class="text-xs text-white/55"></p>
-                <p class="text-[10px] text-white/45 mt-2 leading-snug">Acá abonás la <strong class="text-white/60">licencia mensual</strong> del sistema. Arriba registrás los <strong class="text-white/60">pagos a tus proveedores</strong> de mercadería.</p>
-              </div>
-              <div class="shrink-0 w-full sm:max-w-xs sm:pt-1">
-                <button type="button" id="btnOpenKioscoSubscriptionModal" class="w-full rounded-2xl px-4 py-3.5 font-bold text-sm sm:text-base text-white shadow-lg shadow-amber-600/40 bg-gradient-to-br from-amber-400 via-orange-500 to-rose-600 ring-2 ring-amber-200/50 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2">
-                  <i data-lucide="wallet" class="w-5 h-5 shrink-0"></i>
-                  Abonar suscripción
-                </button>
-              </div>
-            </div>
-            <div class="mt-4 rounded-xl border border-emerald-500/25 bg-black/30 p-3 sm:p-4">
-              <p class="text-[10px] font-semibold uppercase tracking-wide text-emerald-200/85 mb-2 flex items-center gap-2">
-                <i data-lucide="users" class="w-4 h-4 shrink-0 text-[#86efac]"></i>
-                Administrador · referidor
-              </p>
-              <div id="kioscoLicenseSponsorHint" class="text-sm text-white/80 leading-snug"></div>
-              <div id="kioscoLicenseReferidorWhatsApp" class="hidden mt-3 pt-3 border-t border-white/10"></div>
-            </div>
           </div>
           <!-- Historial -->
           <div class="glass rounded-2xl p-5">
@@ -2890,7 +2926,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426_proveedores_orde_suscripcion_dias"></script>
+  <script defer src="kiosco-app.js?v=20260426_caja_tarjeta_sistema"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>
