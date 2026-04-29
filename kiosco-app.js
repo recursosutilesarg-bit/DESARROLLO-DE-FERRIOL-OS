@@ -3989,6 +3989,56 @@
       } catch (_) {}
     };
 
+    function ferriolPlanPayModalMode() {
+      if (!currentUser) return 'admin';
+      if (currentUser.role === 'kiosquero' || isAnyKioscoPreviewMode()) return 'kiosco';
+      return 'admin';
+    }
+
+    function syncPlanPanelTrialSummary() {
+      var el = document.getElementById('planTrialSummary');
+      if (!el || !currentUser) return;
+      var te = currentUser.trialEndsAt || null;
+      if (!te) {
+        el.classList.add('hidden');
+        el.textContent = '';
+        return;
+      }
+      var end = new Date(te);
+      if (isNaN(end.getTime())) {
+        el.classList.add('hidden');
+        return;
+      }
+      var now = new Date();
+      var ms = end.getTime() - now.getTime();
+      var expired = ms <= 0;
+      var daysLeft = expired ? 0 : Math.ceil(ms / (24 * 60 * 60 * 1000));
+      var fechaStr = '';
+      try {
+        fechaStr = end.toLocaleString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
+      } catch (_) {
+        fechaStr = String(te).slice(0, 10);
+      }
+      if (expired) {
+        el.innerHTML = '<span class="font-semibold text-red-300/95">Suscripción / vigencia:</span> vencida (<time>' + ferriolEscapeHtmlLite(fechaStr) + '</time>). Regularizá con el pago a Ferriol.';
+      } else {
+        el.innerHTML = '<span class="font-semibold text-emerald-200/95">Tu vigencia en el sistema:</span> hasta <strong class="text-white/90">' + ferriolEscapeHtmlLite(fechaStr) + '</strong> · quedan <strong class="tabular-nums">' + String(daysLeft) + '</strong> día(s).';
+      }
+      el.classList.remove('hidden');
+    }
+
+    /** Navegar a pantalla Plan; al volver, restaurar panel guardado en _ferriolPlanPanelReturn. */
+    window._ferriolGoToPlanPanel = function (explicitReturnPanel) {
+      try {
+        window._ferriolPlanPanelReturn = explicitReturnPanel != null && explicitReturnPanel !== ''
+          ? explicitReturnPanel
+          : (state && state.currentPanel ? state.currentPanel : 'dashboard');
+      } catch (_) {
+        window._ferriolPlanPanelReturn = 'dashboard';
+      }
+      goToPanel('plan');
+    };
+
     window.ferriolOpenEmpresaSubscriptionModal = async function (mode) {
       mode = mode || 'kiosco';
       var tit = document.getElementById('kioscoSubPayModalTitle');
@@ -4282,7 +4332,7 @@
       if (name !== 'scanner') window._scanForProductCode = false;
       state.currentPanel = name;
       document.body.setAttribute('data-panel', name);
-      const navKey = (name === 'config' || name === 'historial' || name === 'clientes') ? 'mas' : name;
+      const navKey = (name === 'config' || name === 'historial' || name === 'clientes' || name === 'plan') ? 'mas' : name;
       var kNav = document.getElementById('navKiosquero');
       if (kNav) {
         kNav.querySelectorAll('[data-nav]').forEach(function (n) { n.classList.remove('active'); });
@@ -4312,6 +4362,9 @@
         if (superListCountdownInterval) { clearInterval(superListCountdownInterval); superListCountdownInterval = null; }
         var navSuperBottom = document.getElementById('navSuperBottom');
         if (navSuperBottom) navSuperBottom.classList.add('hidden');
+      }
+      if (name === 'plan') {
+        syncPlanPanelTrialSummary();
       }
       if (name === 'dashboard') {
         updateTrialCountdown();
@@ -4500,6 +4553,14 @@
       accountMenuBtnPersonal.addEventListener('click', function () {
         closeAccountMenuDrawer(true);
         openAccountProfileModal('personal');
+      });
+    }
+    var accountMenuBtnPlan = document.getElementById('accountMenuBtnPlan');
+    if (accountMenuBtnPlan) {
+      accountMenuBtnPlan.addEventListener('click', function () {
+        closeAccountMenuDrawer(true);
+        if (typeof window._ferriolGoToPlanPanel === 'function') window._ferriolGoToPlanPanel();
+        else goToPanel('plan');
       });
     }
     var accountMenuBtnBank = document.getElementById('accountMenuBtnBank');
@@ -9811,7 +9872,7 @@ async function showApp() {
       }
       function openModal() {
         if (typeof window.ferriolOpenEmpresaSubscriptionModal === 'function') {
-          window.ferriolOpenEmpresaSubscriptionModal('kiosco');
+          window.ferriolOpenEmpresaSubscriptionModal(typeof ferriolPlanPayModalMode === 'function' ? ferriolPlanPayModalMode() : 'kiosco');
           return;
         }
         if (typeof window._populateKioscoSubscriptionPayModal === 'function') {
@@ -9832,7 +9893,7 @@ async function showApp() {
       var opAdm = document.getElementById('btnOpenEmpresaSubscriptionAdmin');
       if (opAdm) opAdm.addEventListener('click', function () {
         if (typeof window.ferriolOpenEmpresaSubscriptionModal === 'function') {
-          window.ferriolOpenEmpresaSubscriptionModal('admin');
+          window.ferriolOpenEmpresaSubscriptionModal(typeof ferriolPlanPayModalMode === 'function' ? ferriolPlanPayModalMode() : 'admin');
         }
       });
       var ov = document.getElementById('kioscoSubscriptionPayModalOverlay');
@@ -9841,6 +9902,33 @@ async function showApp() {
       if (cl) cl.addEventListener('click', closeModal);
       var dn = document.getElementById('kioscoSubscriptionPayModalDone');
       if (dn) dn.addEventListener('click', closeModal);
+    })();
+    (function bindPlanPanel() {
+      var back = document.getElementById('planPanelBackBtn');
+      if (back) back.addEventListener('click', function () {
+        var ret = window._ferriolPlanPanelReturn;
+        window._ferriolPlanPanelReturn = null;
+        if (typeof ret === 'string' && ret.length > 0 && ret !== 'plan') {
+          goToPanel(ret);
+          return;
+        }
+        if (currentUser && isNetworkAdminRole(currentUser && currentUser.role) && !isAnyKioscoPreviewMode()) {
+          goToPanel('super');
+        } else {
+          goToPanel('dashboard');
+        }
+      });
+      var masBtn = document.getElementById('btnMasIrPlanSuscripcion');
+      if (masBtn) masBtn.addEventListener('click', function () {
+        if (typeof window._ferriolGoToPlanPanel === 'function') window._ferriolGoToPlanPanel('mas');
+        else goToPanel('plan');
+      });
+      var bp = document.getElementById('btnPlanOpenEmpresaSubscription');
+      if (bp) bp.addEventListener('click', function () {
+        if (typeof window.ferriolOpenEmpresaSubscriptionModal === 'function') {
+          window.ferriolOpenEmpresaSubscriptionModal(typeof ferriolPlanPayModalMode === 'function' ? ferriolPlanPayModalMode() : 'admin');
+        }
+      });
     })();
     var btnOpenClientSale = document.getElementById('btnOpenClientSaleRequestModal');
     if (btnOpenClientSale) btnOpenClientSale.onclick = function () { openClientSaleRequestModal(); };
