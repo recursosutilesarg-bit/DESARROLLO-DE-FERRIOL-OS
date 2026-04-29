@@ -389,12 +389,12 @@
           </div>
         </div>
 
-        <!-- Licencia Ferriol + upgrade a distribuidor (antes accesible desde Caja) -->
+        <!-- Suscripción mensual Ferriol + upgrade a distribuidor (antes accesible desde Caja) -->
         <div id="ferriolDashboardLicenseSection" class="kiosquero-only space-y-4">
           <div class="glass rounded-2xl p-4 sm:p-5 border border-amber-400/28 ring-1 ring-amber-500/15 shadow-lg shadow-amber-950/20">
             <h2 class="font-bold text-base sm:text-lg flex items-center gap-2 text-amber-100 mb-2">
               <i data-lucide="cpu" class="w-5 h-5 shrink-0 text-amber-300"></i>
-              Licencia Ferriol OS
+              Suscripción mensual Ferriol OS
             </h2>
             <p class="text-sm text-white/65 leading-relaxed">Los <strong class="text-white/85">pagos a Ferriol (empresa)</strong> y las <strong class="text-[#86efac]/90">solicitudes de distribuidor</strong> van en <strong class="text-white/80">tu foto → Cuenta → Mi plan</strong>. Los <strong class="text-white/85">pagos a proveedores de mercadería</strong> siguen en <strong class="text-amber-200/90">Caja → Proveedores</strong>.</p>
           </div>
@@ -635,7 +635,7 @@
               <i data-lucide="plus-circle" class="w-4 h-4 text-[#86efac]"></i>
               Registrar pago a proveedor
             </h3>
-            <p class="text-[10px] text-white/45 mb-4 leading-snug">Solo <strong class="text-white/55">mercadería</strong> y proveedores. La <strong class="text-amber-200/80">cuota Ferriol / licencia</strong> se abona desde <strong class="text-white/60">Cuenta (foto)</strong> → <strong class="text-white/60">Abonar cuota</strong>, no desde acá.</p>
+            <p class="text-[10px] text-white/45 mb-4 leading-snug">Solo <strong class="text-white/55">mercadería</strong> y proveedores. La <strong class="text-amber-200/80">suscripción mensual Ferriol</strong> se abona desde <strong class="text-white/60">Cuenta (foto)</strong> → <strong class="text-white/60">Abonar cuota</strong>, no desde acá.</p>
             <div class="space-y-3">
               <div>
                 <label class="block text-xs text-white/60 mb-1">Proveedor</label>
@@ -1036,7 +1036,7 @@
           <div id="planCheckoutBenefitsBlocksKiosco" class="mb-4">
             <p class="text-[10px] font-semibold uppercase tracking-wide text-emerald-200/85 mb-2">Beneficios · negocio (kiosco)</p>
             <ul id="planCheckoutBenefitsKioscoList" class="space-y-2 text-sm text-emerald-50/95 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-emerald-500/25 bg-emerald-950/20 p-4 min-h-[2.5rem]"></ul>
-            <p class="text-[10px] font-semibold uppercase tracking-wide text-white/50 mt-4 mb-2">Licencia Ferriol / productos</p>
+            <p class="text-[10px] font-semibold uppercase tracking-wide text-white/50 mt-4 mb-2">Suscripción mensual · propuesta Ferriol</p>
             <ul id="planCheckoutBenefitsProductsListKiosco" class="space-y-2 text-sm text-white/80 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-white/15 bg-black/25 p-4 min-h-[2.5rem]"></ul>
           </div>
           <div id="planCheckoutBenefitsBlocksAdmin" class="hidden mb-4">
@@ -1139,7 +1139,7 @@
             <label class="block text-sm text-white/70 mb-2">Nombre del negocio</label>
             <input type="text" id="configKioscoName" placeholder="Ej: Mi Negocio" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
           </div>
-          <p class="text-xs text-white/50 -mt-2 mb-1"><strong class="text-white/75">Cuota mensual Ferriol:</strong> desde <strong class="text-white/78">tu foto → Cuenta → Mi plan</strong> (<strong class="text-[#86efac]/90">Abonar</strong>). La vigencia aparece también en <strong class="text-white/60">Inicio · Licencia Ferriol</strong>.</p>
+          <p class="text-xs text-white/50 -mt-2 mb-1"><strong class="text-white/75">Cuota mensual Ferriol:</strong> desde <strong class="text-white/78">tu foto → Cuenta → Mi plan</strong> (<strong class="text-[#86efac]/90">Abonar</strong>). La vigencia aparece también en <strong class="text-white/60">Inicio · Suscripción mensual Ferriol</strong>.</p>
           <div>
             <label class="block text-sm text-white/70 mb-2">Mensaje de cobro por WhatsApp (usá <code class="text-[#86efac]">{cliente}</code> y <code class="text-[#86efac]">{monto}</code>)</label>
             <textarea id="configWhatsappMsg" rows="4" placeholder="Hola {cliente}, tenés un saldo de ${monto}..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] resize-y"></textarea>
@@ -1222,7 +1222,7 @@
             <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-[#22c55e]/50 bg-[#22c55e]/30" data-filter="todos">Todos</button>
             <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-white/20 glass" data-filter="activos">Activos</button>
             <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-white/20 glass" data-filter="inactivos">Inactivos</button>
-            <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-red-500/40 glass" data-filter="vencida" title="Fecha de fin de membresía / licencia ya pasada (trial_ends_at)">Vencida</button>
+            <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-red-500/40 glass" data-filter="vencida" title="Fecha de fin de vigencia / membresía ya pasada (trial_ends_at)">Vencida</button>
             <button type="button" class="super-filter-btn super-only super-main-only px-3 py-1.5 rounded-lg text-sm font-medium border border-amber-500/40 glass" data-filter="sin_referidor" title="Cuentas sin referidor asignado">Sin referidor</button>
           </div>
           <div class="flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 mb-3" role="tablist" aria-label="Tipo de afiliado">
@@ -1255,7 +1255,7 @@
                     <i data-lucide="refresh-cw" class="w-5 h-5"></i> Renovar / Coordinar</button>
                 </div>
               </div>
-              <p class="text-[10px] text-white/45 leading-snug"><strong class="text-white/60">Cuota distribuidor / licencia Ferriol:</strong> mismo flujo desde <strong class="text-amber-100/85">foto → Cuenta → Mi plan</strong> (<strong class="text-amber-100/85">Abonar</strong>).</p>
+              <p class="text-[10px] text-white/45 leading-snug"><strong class="text-white/60">Cuota distribuidor / suscripción Ferriol:</strong> mismo flujo desde <strong class="text-amber-100/85">foto → Cuenta → Mi plan</strong> (<strong class="text-amber-100/85">Abonar</strong>).</p>
             </div>
           </div>
 
@@ -1591,7 +1591,7 @@
                       <span class="flujo-channel"><i data-lucide="check-circle" class="w-3 h-3"></i> Aprobación</span>
                     </div>
                     <div class="flujo-title" contenteditable="true" data-default="Aprobación y asignación de comisión + días" spellcheck="false">Aprobación y asignación de comisión + días</div>
-                    <div class="flujo-desc" contenteditable="true" data-default="Ferriol aprueba la solicitud: asigna automáticamente la comisión al administrador (80% intro mes 1 / 50% normal desde mes 2) y suma los días de licencia a la cuenta del kiosquero." spellcheck="false">Ferriol aprueba la solicitud: asigna automáticamente la comisión al administrador (80% intro mes 1 / 50% normal desde mes 2) y suma los días de licencia a la cuenta del kiosquero.</div>
+                    <div class="flujo-desc" contenteditable="true" data-default="Ferriol aprueba la solicitud: asigna automáticamente la comisión al administrador (80% intro mes 1 / 50% normal desde mes 2) y suma los días de vigencia a la cuenta del kiosquero." spellcheck="false">Ferriol aprueba la solicitud: asigna automáticamente la comisión al administrador (80% intro mes 1 / 50% normal desde mes 2) y suma los días de vigencia a la cuenta del kiosquero.</div>
                     <span class="flujo-edit-hint">Tocá para editar</span>
                   </div>
                 </div>
@@ -1620,7 +1620,7 @@
                         <i data-lucide="store" class="w-4 h-4 text-[#86efac] shrink-0 mt-0.5"></i>
                         <div>
                           <strong class="text-[#86efac] text-xs block">Kiosquero</strong>
-                          <span class="text-white/60 text-[11px]">Días de licencia sumados · acceso completo al sistema</span>
+                          <span class="text-white/60 text-[11px]">Días de vigencia sumados · acceso completo al sistema</span>
                         </div>
                       </div>
                       <div class="flujo-result-item flujo-result-item--amber">
@@ -1694,7 +1694,7 @@
                 <div class="mlm-node-body">
                   <span class="mlm-node-role">Administrador de Red</span>
                   <span class="mlm-node-name">Socio / Distribuidor digital <code class="mlm-code">role: partner</code></span>
-                  <span class="mlm-node-desc">Vende licencias · gestiona sus referidos · recibe comisiones en Ingresos</span>
+                  <span class="mlm-node-desc">Vende kits y suscripciones mensuales · gestiona sus referidos · recibe comisiones en Ingresos</span>
                 </div>
                 <div class="mlm-badge mlm-badge--amber">Supabase: <code>partner</code></div>
               </div>
@@ -1714,7 +1714,7 @@
                 <div class="mlm-node-body">
                   <span class="mlm-node-role">Negocio (Kiosco)</span>
                   <span class="mlm-node-name">Kiosquero <code class="mlm-code">role: kiosquero</code></span>
-                  <span class="mlm-node-desc">Usa el sistema en el local · paga licencia mensual · gestiona productos, caja y deudores</span>
+                  <span class="mlm-node-desc">Usa el sistema en el local · paga suscripción mensual · gestiona productos, caja y deudores</span>
                 </div>
                 <div class="mlm-badge mlm-badge--green">Supabase: <code>kiosquero</code></div>
               </div>
@@ -1748,10 +1748,10 @@
               <p class="mlm-flow-note">El admin recibe el cobro del cliente y transfiere el 20% a Ferriol (o el split configurado). Ferriol verifica y acredita la comisión en el libro MLM.</p>
             </div>
 
-            <!-- Licencia kiosco -->
+            <!-- Suscripción mensual kiosco -->
             <div class="mlm-flow-block mlm-flow-block--green mb-3">
               <div class="mlm-flow-header">
-                <span class="mlm-flow-tag mlm-flow-tag--green"><i data-lucide="calendar-check" class="w-3 h-3 inline mr-0.5"></i>Licencia kiosco (mensual)</span>
+                <span class="mlm-flow-tag mlm-flow-tag--green"><i data-lucide="calendar-check" class="w-3 h-3 inline mr-0.5"></i>Suscripción mensual negocio (kiosco)</span>
                 <span class="mlm-flow-amount">$ 9.900 / mes</span>
               </div>
               <div class="mlm-flow-split">
@@ -1861,7 +1861,7 @@
                   </div>
                   <div class="mlm-step">
                     <span class="mlm-step-dot mlm-step-dot--green"></span>
-                    <div><strong class="text-white/80">Licencia activa</strong><br><span class="text-white/50">Kiosco paga al admin · admin transfiere 20% · Ferriol aprueba y suma días</span></div>
+                    <div><strong class="text-white/80">Suscripción activa</strong><br><span class="text-white/50">Kiosco paga al admin · admin transfiere 20% · Ferriol aprueba y suma días</span></div>
                   </div>
                   <div class="mlm-step">
                     <span class="mlm-step-dot mlm-step-dot--red"></span>
@@ -1881,7 +1881,7 @@
                   </div>
                   <div class="mlm-step">
                     <span class="mlm-step-dot mlm-step-dot--amber"></span>
-                    <div><strong class="text-white/80">Período intro <span class="text-amber-200/80 text-[10px]">mes 1</span></strong><br><span class="text-white/50">Comisión 80% sobre kits y licencias vendidas</span></div>
+                    <div><strong class="text-white/80">Período intro <span class="text-amber-200/80 text-[10px]">mes 1</span></strong><br><span class="text-white/50">Comisión 80% sobre kits y suscripciones mensuales vendidas</span></div>
                   </div>
                   <div class="mlm-step">
                     <span class="mlm-step-dot mlm-step-dot--cyan"></span>
@@ -1920,7 +1920,7 @@
                     <td class="tabular-nums text-amber-200">20–50% · $ 12–30k</td>
                   </tr>
                   <tr>
-                    <td><span class="mlm-pill mlm-pill--green">Licencia kiosco/mes</span></td>
+                    <td><span class="mlm-pill mlm-pill--green">Suscripción mensual kiosco</span></td>
                     <td class="tabular-nums font-semibold text-white/90">$ 9.900</td>
                     <td class="tabular-nums text-[#86efac] font-bold">80% · $ 7.920</td>
                     <td class="tabular-nums text-cyan-200">50% · $ 4.950</td>
@@ -1998,12 +1998,12 @@
                 <label class="block text-xs text-white/60">Tipo</label>
                 <select id="ferriolNewPayType" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm ferriol-native-select">
                   <option value="kit_inicial">Kit vendedor ($ 60.000)</option>
-                  <option value="kiosco_licencia">Licencia kiosco — mes ($ 9.900)</option>
+                  <option value="kiosco_licencia">Suscripción mensual kiosco — $ 9.900</option>
                   <option value="vendor_mantenimiento">Cuota mantenimiento vendedor ($ 20.000)</option>
                 </select>
                 <label class="block text-xs text-white/60">Email de quien paga (perfil existente)</label>
                 <input type="email" id="ferriolNewPayPayerEmail" placeholder="socio@ejemplo.com" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
-                <label class="block text-xs text-white/60">Vendedor ejecutor (email) — obligatorio para kit y licencia kiosco</label>
+                <label class="block text-xs text-white/60">Vendedor ejecutor (email) — obligatorio para kit y suscripción mensual negocio</label>
                 <input type="email" id="ferriolNewPaySellerEmail" placeholder="vendedor@ejemplo.com" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
                 <label class="block text-xs text-white/60">Monto ARS</label>
                 <input type="number" id="ferriolNewPayAmount" min="1" step="1" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
@@ -2060,9 +2060,9 @@
             <div class="border-t border-white/10 pt-4 mt-4">
               <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
                 <i data-lucide="landmark" class="w-4 h-4 text-[#86efac]"></i>
-                Datos de transferencia (licencia kioscos / socios)
+                Datos de transferencia (suscripción mensual kioscos / socios)
               </h3>
-              <p class="text-xs text-white/50 mb-2">Los kiosqueros ven estos datos solo como <strong class="text-white/70">instrucciones de pago de la empresa (Ferriol)</strong> donde corresponde abonar la licencia según política oficial. Los datos bancarios personales que el socio cargue en su cuenta <strong class="text-white/70">no se muestran</strong> al negocio referido.</p>
+              <p class="text-xs text-white/50 mb-2">Los kiosqueros ven estos datos solo como <strong class="text-white/70">instrucciones de pago de la empresa (Ferriol)</strong> donde corresponde abonar la suscripción mensual según política oficial. Los datos bancarios personales que el socio cargue en su cuenta <strong class="text-white/70">no se muestran</strong> al negocio referido.</p>
               <textarea id="adminTransferInfo" rows="5" placeholder="Titular, CBU, alias, instrucciones..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm resize-y mb-2"></textarea>
             </div>
             <div class="border-t border-white/10 pt-4 mt-4">
@@ -2077,7 +2077,7 @@
             <div class="border-t border-white/10 pt-4 mt-4 super-only super-main-only">
               <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
                 <i data-lucide="percent" class="w-4 h-4 text-[#86efac]"></i>
-                Comisiones a administradores (kit y licencia kiosco)
+                Comisiones a administradores (kit y suscripción mensual kiosco)
               </h3>
               <p class="text-xs text-white/50 mb-3">Desde el alta del socio (<code class="text-white/60">network_joined_at</code> o fecha de cuenta) podés definir un <strong class="text-white/70">período inicial</strong> con un % mayor para el vendedor; después aplica la comisión normal. Los porcentajes son sobre el <strong class="text-white/70">monto bruto</strong> que verificás en Cobros.</p>
               <label class="block text-xs text-white/70 mb-1">Meses de período inicial (0 = solo comisión normal)</label>
@@ -2117,7 +2117,7 @@
                   <input type="number" id="adminPlanAmountKit" min="0" step="1" value="60000" placeholder="60000" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-base tabular-nums">
                 </div>
                 <div>
-                  <label class="block text-xs text-white/70 mb-1">Licencia mensual kiosco</label>
+                  <label class="block text-xs text-white/70 mb-1">Suscripción mensual · negocio (kiosco)</label>
                   <input type="number" id="adminPlanAmountKioscoMonthly" min="0" step="1" value="9900" placeholder="9900" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-base tabular-nums">
                 </div>
                 <div>
@@ -2130,7 +2130,7 @@
             <div class="border-t border-white/10 pt-4 mt-4 super-only super-main-only">
               <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
                 <i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i>
-                Textos de cierre (pago · licencia · distribuidor)
+                Textos de cierre (pago · suscripción mensual · distribuidor)
               </h3>
               <p class="text-xs text-white/50 mb-3">Los kioscos y socios ven estas listas en <strong class="text-white/70">Cuenta → Mi plan → resumen antes de pagar</strong>. <strong>Una línea = un beneficio</strong>. Vacío = texto por defecto de la app.</p>
               <label class="block text-xs text-white/70 mb-1">Beneficios · pantalla pagar como kiosco (negocio)</label>
@@ -2139,8 +2139,8 @@
               <textarea id="adminCheckoutCopyAdmin" rows="5" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm resize-y mb-3 font-mono"></textarea>
               <label class="block text-xs text-white/70 mb-1">Beneficios · «Quiero ser distribuidor» (resumen)</label>
               <textarea id="adminCheckoutCopyDistrib" rows="5" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm resize-y mb-3 font-mono"></textarea>
-              <label class="block text-xs text-white/70 mb-1">Licencia Ferriol / productos (se muestra en kiosco y en cuota distribuidor)</label>
-              <textarea id="adminCheckoutCopyProducts" rows="4" placeholder="Ej. Sistema pensado para kioscos de barrio&#10;Licencia mensual clara&#10;Acompañamiento por WhatsApp empresa" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm resize-y mb-3 font-mono"></textarea>
+              <label class="block text-xs text-white/70 mb-1">Suscripción mensual · propuesta Ferriol / valor (se muestra en kiosco y cuota distribuidor)</label>
+              <textarea id="adminCheckoutCopyProducts" rows="4" placeholder="Ej. Sistema pensado para kioscos de barrio&#10;Suscripción mensual clara&#10;Acompañamiento por WhatsApp empresa" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm resize-y mb-3 font-mono"></textarea>
               <label class="block text-xs text-white/70 mb-1">Párrafo corto distribuidor (antes de las viñetas)</label>
               <textarea id="adminCheckoutCopyDistribIntro" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-3"></textarea>
               <label class="block text-xs text-white/70 mb-1">Frase extra · modal datos bancarios (kiosco)</label>
@@ -2416,7 +2416,7 @@
         <input type="email" id="clientSaleClientEmail" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-3" placeholder="cliente@ejemplo.com" autocomplete="email">
         <label class="block text-xs text-white/55 mb-1" for="clientSalePaymentType">Tipo de venta / producto</label>
         <select id="clientSalePaymentType" class="ferriol-native-select w-full rounded-xl px-4 py-3 border border-white/20 text-base mb-3">
-          <option value="kiosco_licencia">Licencia kiosco (mensual)</option>
+          <option value="kiosco_licencia">Suscripción mensual (negocio)</option>
           <option value="kit_inicial">Kit vendedor (inicial)</option>
           <option value="vendor_mantenimiento">Cuota de mantenimiento vendedor</option>
         </select>
@@ -3033,7 +3033,7 @@
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 text-amber-200"></i> Datos bancarios del socio</h3>
         <button type="button" id="partnerTransferInfoModalClose" class="btn-neomorphic rounded-xl p-2 touch-target" title="Cerrar"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-      <p class="text-sm text-white/60 mb-3">En la cuenta del <strong class="text-white/85">kiosco referido</strong> <strong class="text-amber-200/95">no</strong> aparecen tus datos personales ni bancarios. El referido solo ve cómo pagar la licencia a <strong class="text-cyan-200/85">Ferriol (empresa)</strong> según la configuración oficial. Este campo es para <strong class="text-white/80">tu registro y acuerdos con la empresa o la red</strong> (transferencias autorizadas, retiros). No incluyas contraseñas.</p>
+      <p class="text-sm text-white/60 mb-3">En la cuenta del <strong class="text-white/85">kiosco referido</strong> <strong class="text-amber-200/95">no</strong> aparecen tus datos personales ni bancarios. El referido solo ve cómo abonar la suscripción mensual a <strong class="text-cyan-200/85">Ferriol (empresa)</strong> según la configuración oficial. Este campo es para <strong class="text-white/80">tu registro y acuerdos con la empresa o la red</strong> (transferencias autorizadas, retiros). No incluyas contraseñas.</p>
       <div id="partnerTransferInfoMsg" class="text-xs text-amber-200 mb-2 hidden"></div>
       <label class="block text-xs text-white/55 mb-1" for="partnerTransferInfoTextarea">Texto para tu archivo / operaciones autorizadas</label>
       <textarea id="partnerTransferInfoTextarea" rows="8" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-sm resize-y min-h-[140px] mb-4" placeholder="Alias…&#10;CBU…"></textarea>

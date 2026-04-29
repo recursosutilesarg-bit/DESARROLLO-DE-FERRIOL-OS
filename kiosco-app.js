@@ -527,7 +527,7 @@
     }
     function ferriolIngresosPaymentTypeLabel(t) {
       if (t === 'kit_inicial') return 'Kit vendedor';
-      if (t === 'kiosco_licencia') return 'Licencia kiosco';
+      if (t === 'kiosco_licencia') return 'Suscripción mensual · negocio';
       if (t === 'vendor_mantenimiento') return 'Cuota vendedor';
       return t ? String(t) : '—';
     }
@@ -1851,7 +1851,7 @@
             (urgentSoon ? 'text-amber-200/80' : 'text-emerald-200/65');
           stripLine.textContent =
             daysLeft === 1 ?
-              'Te queda 1 día de licencia antes del vencimiento.' :
+              'Te queda 1 día de suscripción antes del vencimiento.' :
               'Te quedan ' +
                 daysLeft +
                 ' días de suscripción antes del vencimiento.';
@@ -1875,7 +1875,7 @@
           stripEye.className =
             'text-[9px] font-medium uppercase tracking-wide text-orange-200/75 mb-0.5';
           stripLine.textContent =
-            'La licencia vence pronto. Aboná la suscripción si aún no lo hiciste.';
+            'La suscripción vence pronto. Abonala si aún no lo hiciste.';
           stripLine.className =
             'text-sm sm:text-[0.9375rem] font-medium text-orange-50/85 leading-snug';
           strip.className =
@@ -1907,7 +1907,7 @@
       if (priceEl) {
         priceEl.innerHTML = 'Referencia mensual <strong class="text-[#86efac]">$ ' + amtStr + ' ARS</strong>';
       }
-      var transferBody = 'Falta cargar en Ajustes (fundador) los datos oficiales de la cuenta de Ferriol (empresa) a la que se transfiere la licencia de todos los negocios.';
+      var transferBody = 'Falta cargar en Ajustes (fundador) los datos oficiales de la cuenta de Ferriol (empresa) a la que se transfiere la suscripción mensual de todos los negocios.';
       if (!supabaseClient) {
         transferBody = 'Configurá Supabase para ver datos de pago.';
       } else {
@@ -4006,7 +4006,7 @@
     function ferriolDefaultCheckoutCopy() {
       return {
         kiosco: [
-          'Resumen antes de abonar la licencia a la empresa (Ferriol).',
+          'Resumen antes de abonar la suscripción mensual a la empresa (Ferriol).',
           'Caja y movimientos de tu ferretería organizados desde un solo lugar.'
         ],
         admin: [
@@ -4256,13 +4256,13 @@
       return 'admin';
     }
 
-    /** Textos Plan / cuenta según rol: kiosco = suscripción licencia; fundador/socio/partner sin preview = cuota distribuidor */
+    /** Textos Plan / cuenta según rol: kiosco = suscripción mensual; fundador/socio/partner sin preview = cuota distribuidor */
     function syncPlanRolePayLabels() {
       if (!currentUser) return;
       var admin = ferriolPlanPayModalMode() === 'admin';
       var ht = document.getElementById('planPanelHeadingText');
       if (ht) {
-        ht.textContent = admin ? 'Resumen · Cuota distribuidor' : 'Resumen · Suscripción Ferriol OS';
+        ht.textContent = admin ? 'Resumen · Cuota distribuidor' : 'Resumen · Suscripción mensual Ferriol OS';
       }
       var lead = document.getElementById('planPanelLead');
       if (lead) {
@@ -4271,7 +4271,7 @@
             'Resumen antes de pagar: <strong class="text-cyan-200/90">beneficios editables desde Ajustes (fundador)</strong> y cuota de referencia.';
         } else {
           lead.innerHTML =
-            'Licencia mensual para tu negocio: <strong class="text-emerald-200/90">beneficios configurables desde Ajustes</strong> del sistema y datos de empresa abajo.';
+            'Suscripción mensual para tu negocio: <strong class="text-emerald-200/90">beneficios configurables desde Ajustes</strong> del sistema y datos de empresa abajo.';
         }
       }
       var benefitsKiosco = document.getElementById('planCheckoutBenefitsBlocksKiosco');
@@ -4282,7 +4282,7 @@
       }
       var eyeb = document.getElementById('planCheckoutPayEyebrow');
       if (eyeb) {
-        eyeb.textContent = admin ? 'Liquidación · distribuidor' : 'Tu compra · licencia mensual';
+        eyeb.textContent = admin ? 'Liquidación · distribuidor' : 'Tu compra · suscripción mensual';
       }
       var prim = document.getElementById('planPanelPayBtnPrimary');
       if (prim) prim.textContent = admin ? 'Ver datos para transferir (cuota)' : 'Ver datos para transferir';
@@ -4294,7 +4294,7 @@
       if (foot) {
         foot.innerHTML = admin
           ? 'Pagás a la <strong class="text-cyan-100/80">cuenta empresa</strong> indicada arriba; guardá tu comprobante según WhatsApp oficial.'
-          : 'La licencia del negocio va a la <strong class="text-emerald-100/85">cuenta empresa</strong>; después enviás el comprobante donde indique Ferriol.';
+          : 'La suscripción mensual del negocio va a la <strong class="text-emerald-100/85">cuenta empresa</strong>; después enviás el comprobante donde indique Ferriol.';
       }
       var aml = document.getElementById('accountMenuPlanAbonarLabel');
       if (aml) aml.textContent = admin ? 'Abonar cuota distribuidor' : 'Abonar suscripción';
@@ -4328,12 +4328,12 @@
       var nf = '$ ' + Number(n).toLocaleString('es-AR') + ' ARS';
       if (big) big.textContent = nf;
       if (label) {
-        label.textContent = admin ? 'Cuota mensual · referencia' : 'Licencia mensual · referencia';
+        label.textContent = admin ? 'Cuota mensual · referencia' : 'Suscripción mensual · referencia';
       }
       if (ex) {
         ex.textContent = admin
           ? 'Este es el monto que usa la app como referencia para la cuota de distribuidor. Si Ferriol te comunicó otro valor, ese es el que vale.'
-          : 'Este es el precio mensual que usa la app para la licencia del negocio. Si la empresa te pasó otro importe oficial, ese es el válido.';
+          : 'Este es el valor mensual de referencia para la suscripción del negocio. Si la empresa te pasó otro importe oficial, ese es el válido.';
       }
       if (box) {
         box.className = admin
@@ -4426,13 +4426,13 @@
       var intro = document.getElementById('kioscoSubPayModalIntro');
       if (tit) {
         tit.textContent =
-          mode === 'admin' ? 'Abonar cuota distribuidor' : 'Suscripción Ferriol · negocio (kiosco)';
+          mode === 'admin' ? 'Abonar cuota distribuidor' : 'Suscripción mensual Ferriol · negocio';
       }
       if (intro) {
         intro.innerHTML =
           mode === 'admin'
             ? 'Como <strong class="text-white/88">fundador o socio de red (distribuidor)</strong>, esta <strong class="text-cyan-200/95">cuota distribuidor</strong> va <strong class="text-cyan-200/95">solo a Ferriol (empresa)</strong>. Transferencia a los datos de abajo. El comprobante por WhatsApp a la empresa (o según indiquen en Ajustes). <strong class="text-white/75">No</strong> al patrocinador para esta cuota: las comisiones las liquida Ferriol.'
-            : 'La <strong class="text-white/85">licencia del negocio</strong> se abona <strong class="text-[#86efac]/95">solo a Ferriol (empresa)</strong>. Usá los datos de abajo y enviá el comprobante por WhatsApp a la empresa.';
+            : 'La <strong class="text-white/85">suscripción mensual del negocio</strong> se abona <strong class="text-[#86efac]/95">solo a Ferriol (empresa)</strong>. Usá los datos de abajo y enviá el comprobante por WhatsApp a la empresa.';
       }
       var saleStrip = document.getElementById('kioscoSubPaySalesStrip');
       if (saleStrip) {
@@ -7722,7 +7722,7 @@ async function showApp() {
         '<p><strong>6. LIMITACIÓN DE RESPONSABILIDAD.</strong> En la máxima medida permitida por la ley aplicable, Ferriol OS y sus titulares no serán responsables por daños indirectos, incidentales, especiales, consecuentes o punitivos (incluyendo pérdida de beneficios, datos, clientes o buena voluntad). La responsabilidad total no excederá el monto abonado por el usuario en los últimos 12 meses por el Servicio, o cero si el Servicio fue gratuito.</p>' +
         '<p><strong>7. EXENCIÓN DE GARANTÍAS.</strong> El Servicio se presta “tal cual” y “según disponibilidad”. No ofrecemos garantías de ningún tipo, expresas o implícitas (incluyendo comerciabilidad o idoneidad para un fin determinado).</p>' +
         '<p><strong>8. SUSCRIPCIÓN Y CANCELACIÓN.</strong> La suscripción o período de prueba pueden estar sujetos a condiciones adicionales. Ferriol OS puede modificar, suspender o discontinuar el Servicio o estas condiciones, notificando cuando sea razonable. El usuario puede cerrar su cuenta en cualquier momento.</p>' +
-        '<p><strong>9. CUENTAS DE NEGOCIO (KIOSQUEROS) Y REFERIDOR O DISTRIBUIDOR EN MORA.</strong> Si tu cuenta es de <strong>negocio</strong> que usa el sistema en el local (kiosquero u similar), <strong>no perdés tu cuenta ni tus datos de gestión</strong> solo porque tu referidor o distribuidor deje de pagar su membresía u obligaciones frente a Ferriol OS. La empresa tomará conocimiento del incumplimiento y podrá: <strong>hacerse cargo</strong> de la relación comercial contigo, <strong>reasignarte</strong> otro distribuidor o administrador de red, y aplicar la política operativa vigente. En tu sesión de la aplicación podrán <strong>actualizarse</strong> los datos de referencia y las <strong>instrucciones de pago</strong> correspondientes al <strong>nuevo referidor o administrador</strong> asignado, para que sigas abonando la licencia con claridad. Esto no impide medidas por otras causas (fraude, impago tuyo propio, pedido judicial, etc.).</p>' +
+        '<p><strong>9. CUENTAS DE NEGOCIO (KIOSQUEROS) Y REFERIDOR O DISTRIBUIDOR EN MORA.</strong> Si tu cuenta es de <strong>negocio</strong> que usa el sistema en el local (kiosquero u similar), <strong>no perdés tu cuenta ni tus datos de gestión</strong> solo porque tu referidor o distribuidor deje de pagar su membresía u obligaciones frente a Ferriol OS. La empresa tomará conocimiento del incumplimiento y podrá: <strong>hacerse cargo</strong> de la relación comercial contigo, <strong>reasignarte</strong> otro distribuidor o administrador de red, y aplicar la política operativa vigente. En tu sesión de la aplicación podrán <strong>actualizarse</strong> los datos de referencia y las <strong>instrucciones de pago</strong> correspondientes al <strong>nuevo referidor o administrador</strong> asignado, para que sigas abonando la suscripción mensual con claridad. Esto no impide medidas por otras causas (fraude, impago tuyo propio, pedido judicial, etc.).</p>' +
         '<p><strong>10. JURISDICCIÓN.</strong> Estos términos se rigen por las leyes de la República Argentina. Cualquier controversia será sometida a los tribunales competentes en la República Argentina.</p>' +
         '<p><strong>11. CONTACTO.</strong> Para consultas sobre estos términos: contactar a Ferriol OS por los canales oficiales indicados en la aplicación.</p>';
       var termsParteIIDistribuidor = '<p class="text-white/55 text-xs font-semibold uppercase tracking-wide mt-5 mb-2 pt-4 border-t border-white/15">Parte II — Distribuidores / red comercial (membresía y comisiones)</p>' +
@@ -8534,8 +8534,8 @@ async function showApp() {
       var amtDef = isPartner ? FERRIOL_PLAN_AMOUNTS.vendorMonthly : FERRIOL_PLAN_AMOUNTS.kioscoMonthly;
       var shell = isPartner ? 'rounded-xl border border-violet-500/35 bg-violet-500/08 p-4 space-y-3' : 'rounded-xl border border-emerald-500/35 bg-emerald-500/08 p-4 space-y-3';
       var intro = isPartner
-        ? '<p class="text-xs text-white/65 leading-relaxed">Cuando el socio ya te pagó la cuota, indicá monto y 20% a Ferriol. La empresa aprueba y recién ahí se actualiza la licencia.</p>'
-        : '<p class="text-xs text-white/65 leading-relaxed">Ej. licencia <strong class="text-white/80">$ ' + FERRIOL_PLAN_AMOUNTS.kioscoMonthly.toLocaleString('es-AR') + '</strong>. Completás el 20% a la empresa en la solicitud; Ferriol aprueba y recién ahí cambia el contador del negocio.</p>';
+        ? '<p class="text-xs text-white/65 leading-relaxed">Cuando el socio ya te pagó la cuota, indicá monto y 20% a Ferriol. La empresa aprueba y recién ahí se actualiza la vigencia de la membresía.</p>'
+        : '<p class="text-xs text-white/65 leading-relaxed">Ej. suscripción mensual <strong class="text-white/80">$ ' + FERRIOL_PLAN_AMOUNTS.kioscoMonthly.toLocaleString('es-AR') + '</strong>. Completás el 20% a la empresa en la solicitud; Ferriol aprueba y recién ahí cambia el contador del negocio.</p>';
       return (
         intro +
         '<div class="' +
@@ -8731,7 +8731,7 @@ async function showApp() {
       if (isFounderEmpresa && user.role === 'kiosquero' && user.sponsor_id && sponsorIsPartner) {
         defSaleHtml = `
         <div class="border-t border-white/10 pt-4 space-y-2">
-          <p class="text-sm font-medium text-cyan-200/95 flex items-center gap-2"><i data-lucide="percent" class="w-4 h-4"></i> Venta licencia kiosco (alta definitiva)</p>
+          <p class="text-sm font-medium text-cyan-200/95 flex items-center gap-2"><i data-lucide="percent" class="w-4 h-4"></i> Venta suscripción mensual negocio (alta definitiva)</p>
           <p class="text-xs text-white/55">Cuando el negocio ya pasó la prueba y cerraste la venta con el socio vendedor, registrá una vez la operación: <strong class="text-white/75">20% empresa</strong> y <strong class="text-white/75">80% vendedor</strong> sobre el valor mensual del plan (ver <code class="text-cyan-200/80">mlm_plan_config</code>). El socio verá el 20% como saldo a pagar a la empresa y el 80% como comisión pendiente.</p>
           <button type="button" class="super-detail-definitive-sale w-full py-2.5 rounded-xl text-sm bg-cyan-500/20 text-cyan-100 border border-cyan-400/45 touch-target font-medium">Registrar venta (20% / 80%)</button>
         </div>`;
@@ -8792,7 +8792,7 @@ async function showApp() {
             </button>`;
       var founderActionsHtml = `
         <div class="border-t border-white/10 pt-4 space-y-3 super-detail-actions-founder">
-          <p class="text-xs text-white/55 leading-relaxed">Los <strong class="text-[#86efac]/90">días de licencia</strong> (kiosco o socio) no se cargan a mano acá: solo desde la <strong class="text-white/75">cola de aprobaciones</strong> en Negocios, después de verificar el cobro y el pago a Ferriol.</p>
+          <p class="text-xs text-white/55 leading-relaxed">Los <strong class="text-[#86efac]/90">días de vigencia</strong> (kiosco o socio) no se cargan a mano acá: solo desde la <strong class="text-white/75">cola de aprobaciones</strong> en Negocios, después de verificar el cobro y el pago a Ferriol.</p>
           <div class="flex items-center gap-2 flex-wrap">
             <span class="text-sm text-white/70">Activar/Desactivar:</span>
             <button type="button" class="super-detail-toggle toggle-switch ${user.active ? 'active' : ''}" title="${user.active ? 'Desactivar' : 'Activar'}"></button>
@@ -8809,7 +8809,7 @@ async function showApp() {
         </div>`;
       var socioKiosqueroActionsHtml = `
         <div class="border-t border-white/10 pt-5 space-y-4 super-detail-actions-socio-kiosquero">
-          <p class="text-xs text-white/55 leading-relaxed">Los administradores de red no modifican los días a mano: cada acción abre su propia pantalla. La empresa aprueba antes de aplicar cambios al contador (licencia ejemplo <strong class="text-white/70">$ ${FERRIOL_PLAN_AMOUNTS.kioscoMonthly.toLocaleString('es-AR')}</strong>).</p>
+          <p class="text-xs text-white/55 leading-relaxed">Los administradores de red no modifican los días a mano: cada acción abre su propia pantalla. La empresa aprueba antes de aplicar cambios al contador (suscripción mensual ejemplo <strong class="text-white/70">$ ${FERRIOL_PLAN_AMOUNTS.kioscoMonthly.toLocaleString('es-AR')}</strong>).</p>
           <div class="flex flex-col gap-4">
             <button type="button" class="super-detail-open-mdr-sum w-full py-3.5 rounded-xl text-sm bg-emerald-500/20 text-emerald-100 border border-emerald-500/45 touch-target font-medium shadow-sm shadow-black/15">Solicitar suma de días</button>
             <button type="button" class="super-detail-open-mdr-rem w-full py-3.5 rounded-xl text-sm bg-red-600/22 text-red-100 border border-red-500/45 touch-target font-medium shadow-sm shadow-black/15">Solicitar quita de días</button>
@@ -8866,7 +8866,7 @@ async function showApp() {
       if (defSaleBtn) {
         defSaleBtn.onclick = async function () {
           if (!supabaseClient) return;
-          if (!confirm('Se registrará en el libro la venta de licencia kiosco para este negocio (20% empresa, 80% del socio vendedor referidor). Solo se puede una vez por kiosco. ¿Continuar?')) return;
+          if (!confirm('Se registrará en el libro la venta de suscripción mensual de este negocio (20% empresa, 80% del socio vendedor referidor). Solo se puede una vez por kiosco. ¿Continuar?')) return;
           var rpc = await supabaseClient.rpc('ferriol_register_kiosco_definitive_sale', { p_kiosco_user_id: u.id });
           if (rpc.error) { alert('Error: ' + (rpc.error.message || '')); return; }
           var out = rpc.data;
@@ -9133,7 +9133,7 @@ async function showApp() {
             return;
           }
           if (rows.length === 0 && provRows.length === 0 && kprRows.length === 0 && kpurRows.length === 0) {
-            founderBox.innerHTML = '<p class="text-xs text-amber-200/90 font-medium mb-1 flex items-center gap-2"><i data-lucide="inbox" class="w-4 h-4"></i> Aprobaciones (empresa)</p><p class="text-xs text-white/55">No hay pendientes: días de licencia, altas de socios, altas de negocios ni upgrades kiosco→socio.</p>';
+            founderBox.innerHTML = '<p class="text-xs text-amber-200/90 font-medium mb-1 flex items-center gap-2"><i data-lucide="inbox" class="w-4 h-4"></i> Aprobaciones (empresa)</p><p class="text-xs text-white/55">No hay pendientes: días de vigencia, altas de socios, altas de negocios ni upgrades kiosco→socio.</p>';
             lucide.createIcons();
             return;
           }
@@ -9227,13 +9227,13 @@ async function showApp() {
           founderBox.querySelectorAll('.ferriol-mdr-approve').forEach(function (btn) {
             btn.onclick = async function () {
               var id = btn.getAttribute('data-id');
-              if (!id || !confirm('¿Aprobar y aplicar los días de licencia en la cuenta (kiosco o socio)?')) return;
+              if (!id || !confirm('¿Aprobar y aplicar los días de vigencia en la cuenta (kiosco o socio)?')) return;
               var rpc = await supabaseClient.rpc('ferriol_approve_membership_day_request', { p_request_id: id, p_approve: true, p_reject_note: null });
               if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
               var out = rpc.data;
               if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
               if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo aprobar.'); return; }
-              alert('Listo: los días ya figuran en la licencia.');
+              alert('Listo: los días ya figuran en la vigencia de la cuenta.');
               renderSuper();
             };
           });
@@ -10088,7 +10088,7 @@ async function showApp() {
           return;
         }
         var n = out.inserted_rows != null ? out.inserted_rows : '—';
-        alert('Listo. Filas nuevas: ' + n + '. Revisá Sistema → Cobros (admin). Los kiosqueros ven la licencia en Caja.');
+        alert('Listo. Filas nuevas: ' + n + '. Revisá Sistema → Cobros (admin). Los kiosqueros ven la suscripción en Caja.');
         if (state.superSection === 'sistema' || state.superSection === 'cobros') renderSuperCobrosSection();
         await loadKioscoLicensePaymentInfo();
         lucide.createIcons();
