@@ -7998,21 +7998,43 @@ async function showApp() {
       if (isFounderEmpresa) {
         var poolFull = window._ferriolAllProfilesCache || [];
         var opts = ['<option value="">— Sin referidor / sin asignar —</option>'];
-        var candidates = poolFull.filter(function (p) { return p.id !== user.id; }).slice().sort(function (a, b) {
+        var candidates = poolFull.filter(function (p) {
+          if (!p || p.id === user.id) return false;
+          return p.role === 'super' || p.role === 'partner';
+        }).slice().sort(function (a, b) {
           var ra = (a.role === 'super') ? 0 : (a.role === 'partner') ? 1 : 2;
           var rb = (b.role === 'super') ? 0 : (b.role === 'partner') ? 1 : 2;
           if (ra !== rb) return ra - rb;
           return (a.kiosco_name || a.email || '').localeCompare(b.kiosco_name || b.email || '');
         });
+        var hasCurrentSponsorInList =
+          !!(user.sponsor_id && candidates.some(function (p) { return p.id === user.sponsor_id; }));
+        var leg = null;
+        if (user.sponsor_id && !hasCurrentSponsorInList) {
+          leg = poolFull.find(function (p) { return p && p.id === user.sponsor_id; });
+          if (leg) {
+            var labLeg =
+              '[actual: ' + (leg.role || '?') + '] ' +
+              (leg.kiosco_name || leg.email || '').slice(0, 36) +
+              (leg.email ? ' · ' + leg.email : '');
+            opts.push(
+              '<option value="' +
+                leg.id +
+                '" selected title="Solo super o partner pueden patrocinar. Reasigná a un distribuidor o fundador.">' +
+                labLeg.replace(/</g, '&lt;') +
+                '</option>'
+            );
+          }
+        }
         candidates.forEach(function (p) {
           var lab = '[' + (p.role || 'kiosquero') + '] ' + (p.kiosco_name || p.email || '').slice(0, 36) + (p.email ? (' · ' + p.email) : '');
-          var sel = (user.sponsor_id && p.id === user.sponsor_id) ? ' selected' : '';
+          var sel = user.sponsor_id && p.id === user.sponsor_id ? ' selected' : '';
           opts.push('<option value="' + p.id + '"' + sel + '>' + lab.replace(/</g, '&lt;') + '</option>');
         });
         assignHtml = `
         <div class="border-t border-white/10 pt-4 space-y-2">
           <p class="text-sm font-medium text-[#86efac] flex items-center gap-2"><i data-lucide="git-branch" class="w-4 h-4"></i> Asignar referidor / admin de la red</p>
-          <p class="text-xs text-white/50">Elegí bajo qué cuenta queda este integrante (define equipo MLM y visibilidad para líderes). Los administradores <span class="text-violet-200">super</span> aparecen primero.</p>
+          <p class="text-xs text-white/50">Solo cuentas <span class="text-violet-200">super</span> (fundadores) y <span class="text-violet-200">partner</span> (distribuidores) pueden patrocinar suscriptores. Aparecen primero los <span class="text-violet-200">super</span>.</p>
           <select id="superDetailSponsorSelect" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm bg-black/20">${opts.join('')}</select>
           <button type="button" class="super-detail-save-sponsor w-full py-2.5 rounded-xl text-sm bg-[#22c55e]/25 text-[#86efac] border border-[#22c55e]/50 touch-target font-medium">Guardar referidor</button>
         </div>`;
@@ -8037,12 +8059,16 @@ async function showApp() {
         var directKios = poolNet.filter(function (p) { return p && p.sponsor_id === user.id && p.role === 'kiosquero'; });
         var directSoc = poolNet.filter(function (p) { return p && p.sponsor_id === user.id && p.role === 'partner'; });
         var optsBulk = ['<option value="">— Elegí el nuevo referidor / admin —</option>'];
-        poolNet.filter(function (p) { return p && p.id !== user.id; }).slice().sort(function (a, b) {
+        var bulkCandidates = poolNet.filter(function (p) {
+          if (!p || p.id === user.id) return false;
+          return p.role === 'super' || p.role === 'partner';
+        }).slice().sort(function (a, b) {
           var ra = (a.role === 'super') ? 0 : (a.role === 'partner') ? 1 : 2;
           var rb = (b.role === 'super') ? 0 : (b.role === 'partner') ? 1 : 2;
           if (ra !== rb) return ra - rb;
           return (a.kiosco_name || a.email || '').localeCompare(b.kiosco_name || b.email || '');
-        }).forEach(function (p) {
+        });
+        bulkCandidates.forEach(function (p) {
           var lab = '[' + (p.role || 'kiosquero') + '] ' + (p.kiosco_name || p.email || '').slice(0, 36) + (p.email ? (' · ' + p.email) : '');
           optsBulk.push('<option value="' + p.id + '">' + lab.replace(/</g, '&lt;') + '</option>');
         });
