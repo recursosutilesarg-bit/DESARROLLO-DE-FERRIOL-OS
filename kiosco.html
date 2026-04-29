@@ -174,24 +174,15 @@
       <div class="flex items-start justify-between gap-2 mb-3">
         <div class="min-w-0 pr-2 flex-1">
           <h3 id="kioscoSubPayModalTitle" class="font-bold text-lg leading-snug text-amber-100 drop-shadow-md">Suscripción Ferriol · cuenta empresa</h3>
-          <p id="kioscoSubPayModalIntro" class="text-xs text-white/55 mt-2 leading-relaxed">Transferís <strong class="text-white/80">solo a Ferriol (empresa)</strong>. Debajo están los datos. Enviá el comprobante por WhatsApp a los números que la empresa tiene configurados.</p>
+          <p id="kioscoSubPayModalIntro" class="text-xs text-white/55 mt-2 leading-relaxed hidden"></p>
           <div id="kioscoSubPaySalesStrip" class="hidden mt-3 rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-950/50 to-black/40 px-3 py-2.5 text-[11px] text-amber-50/95 leading-snug ring-1 ring-amber-400/20"></div>
         </div>
         <button type="button" id="kioscoSubscriptionPayModalClose" class="btn-neomorphic rounded-xl p-2 touch-target shrink-0" title="Cerrar"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <div id="kioscoSubPayBankFields"></div>
-      <div id="kioscoSubPayMercadoWrap" class="mt-4 pt-4 border-t border-white/12">
-        <p class="text-[10px] font-semibold uppercase tracking-wide text-sky-200/85 mb-2">Mercado Pago (mismo producto que esta pantalla)</p>
-        <p class="text-xs text-white/50 mb-3 leading-relaxed">Podés usar el mismo link que configuró Ferriol para este tipo de cobro si preferís pagar con tarjeta o efectivo en red.</p>
-        <button type="button" id="kioscoSubPayModalMpBtn" data-mp-product="kioscoMonthly" class="ferriol-mp-pay-btn w-full rounded-xl py-3 px-3 touch-target inline-flex items-center justify-center gap-2 font-bold text-xs text-white leading-tight text-center border-2 border-sky-400/50 bg-gradient-to-br from-[#009ee3]/90 via-[#008ad4]/95 to-[#006ebb] shadow-lg shadow-sky-900/30 ring-1 ring-white/15 hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:active:scale-100">
-          <i data-lucide="external-link" class="w-[1.125rem] h-[1.125rem] shrink-0 opacity-95"></i>
-          <span id="kioscoSubPayModalMpLabel">Mercado Pago · Suscripción mensual negocio</span>
-        </button>
-        <p id="kioscoSubPayModalMpMissingHint" class="text-[11px] text-white/45 leading-snug mt-2 hidden">Sin link para este producto: el fundador lo carga en <strong class="text-white/65">Más → Ajustes del sistema</strong>.</p>
-      </div>
       <button type="button" id="btnOpenKioscoEmpresaPaymentProofModal" class="mt-5 w-full py-3.5 rounded-xl font-semibold touch-target active:scale-[0.99] flex items-center justify-center gap-2 border-2 border-[#86efac]/55 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-100 shadow-lg shadow-emerald-900/25">
-        <i data-lucide="upload" class="w-5 h-5 shrink-0"></i>
-        Cargar y enviar comprobante
+        <i data-lucide="circle-check" class="w-5 h-5 shrink-0"></i>
+        YA PAGUE
       </button>
       <button type="button" id="kioscoSubscriptionPayModalDone" class="mt-3 w-full py-3 rounded-xl border border-white/15 bg-white/[0.08] hover:bg-white/[0.14] font-semibold touch-target active:scale-[0.99] text-white/90">Listo</button>
     </div>
@@ -3140,7 +3131,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260429_empresa_payment_proof"></script>
+  <script defer src="kiosco-app.js?v=20260429_modal_sub_sin_mp_ya_pague"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>

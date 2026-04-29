@@ -4885,6 +4885,7 @@
       if (mode === 'kit') {
         if (tit) tit.textContent = 'Kit + licencia de distribuidor · cuenta Ferriol';
         if (intro) {
+          intro.classList.remove('hidden');
           var kt = (copy.modal_distrib_kit || '').trim();
           intro.innerHTML = kt
             ? ferriolEscapeHtmlLite(kt).replace(/\r?\n/g, '<br>')
@@ -4896,10 +4897,8 @@
             mode === 'admin' ? 'Pagar cuota mensual' : 'Pagar suscripción mensual';
         }
         if (intro) {
-          intro.innerHTML =
-            mode === 'admin'
-              ? 'Como <strong class="text-white/88">fundador o socio de red (distribuidor)</strong>, esta <strong class="text-cyan-200/95">cuota distribuidor</strong> va <strong class="text-cyan-200/95">solo a Ferriol (empresa)</strong>. Transferencia a los datos de abajo. El comprobante por WhatsApp a la empresa (o según indiquen en Ajustes). <strong class="text-white/75">No</strong> al patrocinador para esta cuota: las comisiones las liquida Ferriol.'
-              : 'La <strong class="text-white/85">suscripción mensual del negocio</strong> se abona <strong class="text-[#86efac]/95">solo a Ferriol (empresa)</strong>. Usá los datos de abajo y enviá el comprobante por WhatsApp a la empresa.';
+          intro.innerHTML = '';
+          intro.classList.add('hidden');
         }
       }
       var saleStrip = document.getElementById('kioscoSubPaySalesStrip');
