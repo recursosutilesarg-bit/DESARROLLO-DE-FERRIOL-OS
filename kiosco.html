@@ -1158,7 +1158,7 @@
     <!-- Panel Admin: secciones al pie (Afiliados, Ingresos, …, Ajustes) -->
     <section id="panel-super" class="panel hidden">
       <div class="relative isolate min-h-[70vh] pb-24">
-        <!-- Sección Afiliados (usuarios kiosco / distribuidores) -->
+        <!-- Sección Afiliados (comercios kiosco / distribuidores) -->
         <div id="super-section-afiliados" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up absolute inset-x-0 top-0 z-0 overflow-y-auto" style="max-height: 85vh; padding-bottom: 6rem;">
           <div class="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
             <h2 class="font-bold text-xl flex min-w-0 items-center gap-2 shrink-0">
@@ -1174,7 +1174,7 @@
           </div>
           <p id="superDirectoryStats" class="hidden text-xs text-white/45 mb-2 super-only super-main-only"></p>
           <p class="text-xs text-white/50 mb-2 super-only super-main-only">Directorio global: filtro <strong class="text-white/65">Sin referidor</strong> y asignación desde el detalle de cada fila.</p>
-          <p class="text-xs text-white/50 mb-3">Pestañas <strong class="text-white/70">Usuarios</strong> / <strong class="text-white/70">Distribuidores</strong>: tocá una fila para detalle y membresía. Quitar cuentas: contraseña en la tarjeta <strong class="text-white/65">Ajustes del sistema</strong> (pestaña <strong class="text-white/65">Ajustes</strong>).</p>
+          <p class="text-xs text-white/50 mb-3">Pestañas <strong class="text-white/70">Comercios</strong> / <strong class="text-white/70">Distribuidores</strong>: tocá una fila para detalle y membresía. Quitar cuentas: contraseña en la tarjeta <strong class="text-white/65">Ajustes del sistema</strong> (pestaña <strong class="text-white/65">Ajustes</strong>).</p>
           <input type="text" id="superSearchEmail" placeholder="Buscar por email o nombre..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm mb-3" autocomplete="off">
           <div class="flex flex-wrap gap-2 mb-2">
             <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-[#22c55e]/50 bg-[#22c55e]/30" data-filter="todos">Todos</button>
@@ -1184,7 +1184,7 @@
             <button type="button" class="super-filter-btn super-only super-main-only px-3 py-1.5 rounded-lg text-sm font-medium border border-amber-500/40 glass" data-filter="sin_referidor" title="Cuentas sin referidor asignado">Sin referidor</button>
           </div>
           <div class="flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 mb-3" role="tablist" aria-label="Tipo de afiliado">
-            <button type="button" id="superAfiliadosTabUsuarios" role="tab" aria-selected="true" class="super-afiliados-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-[#22c55e]/50 bg-[#22c55e]/20 text-white transition-all">Usuarios</button>
+            <button type="button" id="superAfiliadosTabUsuarios" role="tab" aria-selected="true" class="super-afiliados-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-[#22c55e]/50 bg-[#22c55e]/20 text-white transition-all">Comercios</button>
             <button type="button" id="superAfiliadosTabDistribuidores" role="tab" aria-selected="false" class="super-afiliados-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-transparent text-white/55 hover:text-white/80 transition-all">Distribuidores</button>
           </div>
           <div id="superUsersList" class="max-h-[50vh] overflow-y-auto pr-1 rounded-xl border border-white/10 bg-black/15">
@@ -1229,7 +1229,7 @@
               <div id="ingresosBienvenidaStats" class="flex gap-3 shrink-0 flex-wrap">
                 <div class="ingresos-welcome-stat">
                   <span id="bienvenidaComerciosCount" class="ingresos-welcome-stat-val">—</span>
-                  <span class="ingresos-welcome-stat-lbl">comercios</span>
+                  <span class="ingresos-welcome-stat-lbl">comercios activos</span>
                 </div>
                 <div class="ingresos-welcome-stat">
                   <span id="bienvenidaDistribuidoresCount" class="ingresos-welcome-stat-val">—</span>
@@ -2022,6 +2022,16 @@
               </h3>
               <p class="text-xs text-white/50 mb-2">Los kiosqueros ven estos datos solo como <strong class="text-white/70">instrucciones de pago de la empresa (Ferriol)</strong> donde corresponde abonar la suscripción mensual según política oficial. Los datos bancarios personales que el socio cargue en su cuenta <strong class="text-white/70">no se muestran</strong> al negocio referido.</p>
               <textarea id="adminTransferInfo" rows="5" placeholder="Titular, CBU, alias, instrucciones..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm resize-y mb-2"></textarea>
+            </div>
+            <div class="border-t border-white/10 pt-4 mt-4 super-only super-main-only">
+              <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
+                <i data-lucide="shopping-bag" class="w-4 h-4 text-sky-300"></i>
+                Medios de pago (checkout Mercado Pago)
+              </h3>
+              <p class="text-xs text-white/50 mb-2">Link público de cobro (Mercado Pago: tarjeta, efectivo en red, etc.). Los usuarios verán un botón debajo de <strong class="text-white/70">Abonar suscripción / Abonar cuota</strong> en <strong class="text-white/70">Cuenta → Mi plan</strong> que abre esta URL en una nueva pestaña.</p>
+              <label class="block text-xs text-white/70 mb-1" for="adminMercadoPagoCheckoutUrl">URL del checkout</label>
+              <input type="url" id="adminMercadoPagoCheckoutUrl" inputmode="url" autocomplete="off" placeholder="https://www.mercadopago.com.ar/…" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm mb-2 font-mono">
+              <p class="text-[10px] text-white/40 mb-0">Se guarda con <strong class="text-white/55">Guardar ajustes</strong> · <code class="text-white/55">app_settings.ferriol_mercadopago_checkout_url</code>. Dejalo vacío para ocultar el botón.</p>
             </div>
             <div class="border-t border-white/10 pt-4 mt-4">
               <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
@@ -2911,6 +2921,15 @@
           <i data-lucide="building-2" class="w-5 h-5 shrink-0 opacity-95"></i>
           <span id="accountMenuPlanAbonarLabel" class="leading-snug text-center">Abonar suscripción</span>
         </button>
+        <div id="accountPlanMercadoPagoWrap" class="hidden w-full">
+          <button type="button" id="accountPlanBtnMercadoPago" class="w-full rounded-xl py-3 px-4 touch-target flex flex-col items-center justify-center gap-0.5 font-semibold text-sm text-white border-2 border-sky-400/50 bg-gradient-to-br from-[#009ee3]/90 via-[#008ad4]/95 to-[#006ebb] shadow-lg shadow-sky-900/30 ring-1 ring-white/15 hover:brightness-110 active:scale-[0.98]">
+            <span class="inline-flex items-center justify-center gap-2">
+              <i data-lucide="external-link" class="w-[1.125rem] h-[1.125rem] shrink-0 opacity-95"></i>
+              Pagar con Mercado Pago
+            </span>
+            <span class="text-[10px] font-normal text-white/85 opacity-95">Tarjeta, efectivo u otros según tu link</span>
+          </button>
+        </div>
         <div id="accountMenuDistribuidorWrap" class="hidden">
           <button type="button" id="accountMenuBtnDistribuidor" class="w-full rounded-xl py-3 px-3 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-white border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 shadow-md shadow-violet-600/30 ring-1 ring-white/10 hover:brightness-110 active:scale-[0.98]">
             <i data-lucide="badge-check" class="w-4 h-4 shrink-0"></i>
@@ -3001,7 +3020,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426_menu_mi_plan"></script>
+  <script defer src="kiosco-app.js?v=20260426_mercadopago_checkout"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>
