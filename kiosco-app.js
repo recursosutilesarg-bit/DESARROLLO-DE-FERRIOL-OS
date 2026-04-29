@@ -1858,7 +1858,12 @@
         typeof window._ferriolSubPayModalMpProduct === 'string'
           ? window._ferriolSubPayModalMpProduct
           : 'kioscoMonthly';
-      if (subMp !== 'kioscoMonthly' && subMp !== 'vendorMonthly') subMp = 'kioscoMonthly';
+      if (
+        subMp !== 'kioscoMonthly' &&
+        subMp !== 'vendorMonthly' &&
+        subMp !== 'kit'
+      )
+        subMp = 'kioscoMonthly';
       var modalMp = document.getElementById('kioscoSubPayModalMpBtn');
       var modalLbl = document.getElementById('kioscoSubPayModalMpLabel');
       if (modalMp) {
@@ -1867,7 +1872,9 @@
           modalLbl.textContent =
             subMp === 'vendorMonthly'
               ? 'Mercado Pago · Cuota mensual distribuidor'
-              : 'Mercado Pago · Suscripción mensual negocio';
+              : subMp === 'kit'
+                ? 'Mercado Pago · Kit distribuidor'
+                : 'Mercado Pago · Suscripción mensual negocio';
         }
       }
       document.querySelectorAll('.ferriol-mp-pay-btn[data-mp-product]').forEach(function (btn) {
@@ -1892,7 +1899,8 @@
       var distMiss = document.getElementById('planCheckoutDistribMercadoMissingHint');
       if (distMiss) distMiss.classList.toggle('hidden', !!map.kit);
       var modalMiss = document.getElementById('kioscoSubPayModalMpMissingHint');
-      if (modalMiss) modalMiss.classList.toggle('hidden', !!(map[subMp]));
+      if (modalMiss)
+        modalMiss.classList.toggle('hidden', !!(map[subMp]));
     }
     async function ferriolRefreshMercadoPagoCheckoutUrl() {
       if (!supabaseClient) {
@@ -4189,10 +4197,13 @@
           'Software de gestión pensado para kioscos y ferreterías.',
           'Canal oficial y actualizaciones coordinadas desde la empresa.'
         ],
-        distrib_intro:
-          'Si querés ser distribuidor/a, la empresa revisa la solicitud y te contacta cuando corresponda.',
+        distrib_eyebrow: 'KIT + LICENCIA DE DISTRIBUIDOR',
+        distrib_sales_headline: 'Hacete distribuidor del sistema y ganá hasta el 50% mensual',
+        distrib_beneficios_title: 'Beneficios',
+        distrib_intro: '',
         modal_kiosco: '',
-        modal_admin: ''
+        modal_admin: '',
+        modal_distrib_kit: ''
       };
     }
     function ferriolLinesToArray(txt) {
@@ -4230,9 +4241,23 @@
         admin: arrOrDef('admin'),
         distrib: arrOrDef('distrib'),
         products: arrOrDef('products'),
+        distrib_eyebrow:
+          typeof j.distrib_eyebrow === 'string' && String(j.distrib_eyebrow).trim()
+            ? String(j.distrib_eyebrow).trim()
+            : d.distrib_eyebrow,
+        distrib_sales_headline:
+          typeof j.distrib_sales_headline === 'string' && String(j.distrib_sales_headline).trim()
+            ? String(j.distrib_sales_headline).trim()
+            : d.distrib_sales_headline,
+        distrib_beneficios_title:
+          typeof j.distrib_beneficios_title === 'string' && String(j.distrib_beneficios_title).trim()
+            ? String(j.distrib_beneficios_title).trim()
+            : d.distrib_beneficios_title,
         distrib_intro: intro,
         modal_kiosco: typeof j.modal_kiosco === 'string' ? String(j.modal_kiosco).trim() : d.modal_kiosco,
-        modal_admin: typeof j.modal_admin === 'string' ? String(j.modal_admin).trim() : d.modal_admin
+        modal_admin: typeof j.modal_admin === 'string' ? String(j.modal_admin).trim() : d.modal_admin,
+        modal_distrib_kit:
+          typeof j.modal_distrib_kit === 'string' ? String(j.modal_distrib_kit).trim() : d.modal_distrib_kit
       };
     }
     function ferriolRenderCheckoutBenefitUl(ulEl, lines, variant) {
@@ -4262,8 +4287,19 @@
     }
     function ferriolApplyCheckoutBenefitsToPanels(copy) {
       copy = copy || window._ferriolCheckoutCopyParsed || ferriolDefaultCheckoutCopy();
+      var deb = document.getElementById('planCheckoutDistribEyebrow');
+      if (deb) deb.textContent = copy.distrib_eyebrow || ferriolDefaultCheckoutCopy().distrib_eyebrow;
+      var dsl = document.getElementById('planCheckoutDistribSalesHeadline');
+      if (dsl)
+        dsl.textContent = copy.distrib_sales_headline || ferriolDefaultCheckoutCopy().distrib_sales_headline;
       var dk = document.getElementById('planCheckoutDistribLead');
-      if (dk) dk.innerHTML = ferriolFormatDistribIntroHtml(copy.distrib_intro);
+      if (dk) {
+        var introTxt = String(copy.distrib_intro != null ? copy.distrib_intro : '').trim();
+        dk.innerHTML = introTxt ? ferriolFormatDistribIntroHtml(copy.distrib_intro) : '';
+        dk.classList.toggle('hidden', !introTxt);
+      }
+      var dbt = document.getElementById('planCheckoutDistribBenefitsEyebrow');
+      if (dbt) dbt.textContent = copy.distrib_beneficios_title || 'Beneficios';
       ferriolRenderCheckoutBenefitUl(
         document.getElementById('planCheckoutBenefitsKioscoList'),
         copy.kiosco,
@@ -4327,9 +4363,13 @@
         admin: g('adminCheckoutCopyAdmin'),
         distrib: g('adminCheckoutCopyDistrib'),
         products: g('adminCheckoutCopyProducts'),
+        distrib_eyebrow: gs('adminCheckoutDistribEyebrow'),
+        distrib_sales_headline: gs('adminCheckoutDistribSalesHeadline'),
+        distrib_beneficios_title: gs('adminCheckoutDistribBeneficiosTitle'),
         distrib_intro: gs('adminCheckoutCopyDistribIntro'),
         modal_kiosco: gs('adminCheckoutCopyModalKiosco'),
-        modal_admin: gs('adminCheckoutCopyModalAdmin')
+        modal_admin: gs('adminCheckoutCopyModalAdmin'),
+        modal_distrib_kit: gs('adminCheckoutModalDistribKit')
       };
     }
 
@@ -4543,7 +4583,6 @@
       var big = document.getElementById('planCheckoutPriceBig');
       var ex = document.getElementById('planCheckoutPriceExplain');
       var box = document.getElementById('planCheckoutPriceBox');
-      var dh = document.getElementById('planCheckoutDistribPriceHint');
       if (!currentUser) {
         if (big) big.textContent = '—';
         if (ex) ex.textContent = '';
@@ -4566,13 +4605,10 @@
           ? 'rounded-2xl border border-cyan-500/35 bg-gradient-to-b from-cyan-950/40 to-black/35 p-4 sm:p-5 mb-4 text-center shadow-md shadow-cyan-950/30'
           : 'rounded-2xl border border-emerald-500/35 bg-gradient-to-b from-emerald-950/30 to-black/30 p-4 sm:p-5 mb-4 text-center shadow-md shadow-emerald-950/20';
       }
-      if (dh) {
-        var kit = FERRIOL_PLAN_AMOUNTS.kit;
-        var kitStr = '$ ' + Number(kit).toLocaleString('es-AR') + ' ARS';
-        dh.innerHTML =
-          'Referencia venta inicial (kit distribuidor) en la app: <strong class="text-violet-50">' +
-          kitStr +
-          '</strong> · puede cambiar si Ferriol avisa otro valor.';
+      var dpb = document.getElementById('planCheckoutDistribPriceBig');
+      if (dpb) {
+        var kitAmt = Number(FERRIOL_PLAN_AMOUNTS.kit) || 0;
+        dpb.textContent = '$ ' + kitAmt.toLocaleString('es-AR');
       }
       try {
         syncPlanCheckoutReferenciasMontos();
@@ -4651,38 +4687,54 @@
 
     window.ferriolOpenEmpresaSubscriptionModal = async function (mode) {
       mode = mode || 'kiosco';
-      window._ferriolSubPayModalMpProduct = mode === 'admin' ? 'vendorMonthly' : 'kioscoMonthly';
+      if (mode === 'kit') window._ferriolSubPayModalMpProduct = 'kit';
+      else window._ferriolSubPayModalMpProduct = mode === 'admin' ? 'vendorMonthly' : 'kioscoMonthly';
       try {
         syncMercadoPagoCheckoutUi();
       } catch (_) {}
+      var copy =
+        typeof window.ferriolFetchCheckoutCopy === 'function'
+          ? await window.ferriolFetchCheckoutCopy(false)
+          : ferriolDefaultCheckoutCopy();
       var tit = document.getElementById('kioscoSubPayModalTitle');
       var intro = document.getElementById('kioscoSubPayModalIntro');
-      if (tit) {
-        tit.textContent =
-          mode === 'admin' ? 'Pagar cuota mensual' : 'Pagar suscripción mensual';
-      }
-      if (intro) {
-        intro.innerHTML =
-          mode === 'admin'
-            ? 'Como <strong class="text-white/88">fundador o socio de red (distribuidor)</strong>, esta <strong class="text-cyan-200/95">cuota distribuidor</strong> va <strong class="text-cyan-200/95">solo a Ferriol (empresa)</strong>. Transferencia a los datos de abajo. El comprobante por WhatsApp a la empresa (o según indiquen en Ajustes). <strong class="text-white/75">No</strong> al patrocinador para esta cuota: las comisiones las liquida Ferriol.'
-            : 'La <strong class="text-white/85">suscripción mensual del negocio</strong> se abona <strong class="text-[#86efac]/95">solo a Ferriol (empresa)</strong>. Usá los datos de abajo y enviá el comprobante por WhatsApp a la empresa.';
+      if (mode === 'kit') {
+        if (tit) tit.textContent = 'Kit + licencia de distribuidor · cuenta Ferriol';
+        if (intro) {
+          var kt = (copy.modal_distrib_kit || '').trim();
+          intro.innerHTML = kt
+            ? ferriolEscapeHtmlLite(kt).replace(/\r?\n/g, '<br>')
+            : 'Abonás el <strong class="text-white/88">kit inicial y la licencia de distribuidor</strong> únicamente a la <strong class="text-[#86efac]/95">cuenta empresa Ferriol</strong>. Usá los datos de abajo y enviá el comprobante cuando la empresa lo indique.';
+        }
+      } else {
+        if (tit) {
+          tit.textContent =
+            mode === 'admin' ? 'Pagar cuota mensual' : 'Pagar suscripción mensual';
+        }
+        if (intro) {
+          intro.innerHTML =
+            mode === 'admin'
+              ? 'Como <strong class="text-white/88">fundador o socio de red (distribuidor)</strong>, esta <strong class="text-cyan-200/95">cuota distribuidor</strong> va <strong class="text-cyan-200/95">solo a Ferriol (empresa)</strong>. Transferencia a los datos de abajo. El comprobante por WhatsApp a la empresa (o según indiquen en Ajustes). <strong class="text-white/75">No</strong> al patrocinador para esta cuota: las comisiones las liquida Ferriol.'
+              : 'La <strong class="text-white/85">suscripción mensual del negocio</strong> se abona <strong class="text-[#86efac]/95">solo a Ferriol (empresa)</strong>. Usá los datos de abajo y enviá el comprobante por WhatsApp a la empresa.';
+        }
       }
       var saleStrip = document.getElementById('kioscoSubPaySalesStrip');
       if (saleStrip) {
-        var copy =
-          typeof window.ferriolFetchCheckoutCopy === 'function'
-            ? await window.ferriolFetchCheckoutCopy(false)
-            : ferriolDefaultCheckoutCopy();
-        var line = mode === 'admin' ? copy.modal_admin : copy.modal_kiosco;
-        if (line && String(line).trim()) {
-          saleStrip.classList.remove('hidden');
-          saleStrip.innerHTML =
-            '<p class="text-sm text-white/88 leading-snug">' +
-            ferriolEscapeHtmlLite(String(line).trim()).replace(/\r?\n/g, '<br>') +
-            '</p>';
-        } else {
+        if (mode === 'kit') {
           saleStrip.classList.add('hidden');
           saleStrip.innerHTML = '';
+        } else {
+          var line = mode === 'admin' ? copy.modal_admin : copy.modal_kiosco;
+          if (line && String(line).trim()) {
+            saleStrip.classList.remove('hidden');
+            saleStrip.innerHTML =
+              '<p class="text-sm text-white/88 leading-snug">' +
+              ferriolEscapeHtmlLite(String(line).trim()).replace(/\r?\n/g, '<br>') +
+              '</p>';
+          } else {
+            saleStrip.classList.add('hidden');
+            saleStrip.innerHTML = '';
+          }
         }
       }
       var raw = '';
@@ -9759,6 +9811,10 @@ async function showApp() {
           var fdi = document.getElementById('adminCheckoutCopyDistribIntro');
           var fmk = document.getElementById('adminCheckoutCopyModalKiosco');
           var fma = document.getElementById('adminCheckoutCopyModalAdmin');
+          var fey = document.getElementById('adminCheckoutDistribEyebrow');
+          var fhl = document.getElementById('adminCheckoutDistribSalesHeadline');
+          var fben = document.getElementById('adminCheckoutDistribBeneficiosTitle');
+          var fkit = document.getElementById('adminCheckoutModalDistribKit');
           if (fk) fk.value = copyForUi.kiosco.join('\n');
           if (fa) fa.value = copyForUi.admin.join('\n');
           if (fd) fd.value = copyForUi.distrib.join('\n');
@@ -9766,6 +9822,10 @@ async function showApp() {
           if (fdi) fdi.value = copyForUi.distrib_intro || '';
           if (fmk) fmk.value = copyForUi.modal_kiosco || '';
           if (fma) fma.value = copyForUi.modal_admin || '';
+          if (fey) fey.value = copyForUi.distrib_eyebrow || '';
+          if (fhl) fhl.value = copyForUi.distrib_sales_headline || '';
+          if (fben) fben.value = copyForUi.distrib_beneficios_title || '';
+          if (fkit) fkit.value = copyForUi.modal_distrib_kit || '';
         }
         if (isEmpresaLensSuper()) {
           var elk = document.getElementById('adminPlanAmountKit');
@@ -10730,6 +10790,14 @@ async function showApp() {
         pq.addEventListener('click', function () {
           if (pq.disabled) return;
           if (typeof openKiosqueroPartnerUpgradeModal === 'function') openKiosqueroPartnerUpgradeModal();
+        });
+      }
+      var bdt = document.getElementById('btnPlanDistribOpenTransferModal');
+      if (bdt) {
+        bdt.addEventListener('click', function () {
+          if (typeof window.ferriolOpenEmpresaSubscriptionModal === 'function') {
+            window.ferriolOpenEmpresaSubscriptionModal('kit');
+          }
         });
       }
     })();
