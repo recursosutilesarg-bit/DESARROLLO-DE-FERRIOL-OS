@@ -167,6 +167,22 @@
   <div id="appWrap" class="hidden">
   <div class="fixed inset-0 z-0 pointer-events-none bg-[length:60px_60px]" style="background-image: linear-gradient(rgba(124,58,237,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(124,58,237,0.03) 1px, transparent 1px);"></div>
 
+  <!-- Modal global: cuenta única Ferriol (kioscos y administradores). Fuera de panel-caja para verse desde panel super. -->
+  <div id="kioscoSubscriptionPayModal" class="fixed inset-0 z-[72] hidden flex items-center justify-center p-4" aria-modal="true" role="dialog">
+    <div class="absolute inset-0 bg-black/65 backdrop-blur-sm" id="kioscoSubscriptionPayModalOverlay"></div>
+    <div class="relative glass-strong rounded-2xl p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto scale-in border border-amber-400/25 shadow-xl shadow-amber-900/30">
+      <div class="flex items-start justify-between gap-2 mb-3">
+        <div class="min-w-0 pr-2 flex-1">
+          <h3 id="kioscoSubPayModalTitle" class="font-bold text-lg leading-snug text-amber-100 drop-shadow-md">Suscripción Ferriol · cuenta empresa</h3>
+          <p id="kioscoSubPayModalIntro" class="text-xs text-white/55 mt-2 leading-relaxed">Transferís <strong class="text-white/80">solo a Ferriol (empresa)</strong>. Debajo están los datos. Enviá el comprobante por WhatsApp a los números que la empresa tiene configurados.</p>
+        </div>
+        <button type="button" id="kioscoSubscriptionPayModalClose" class="btn-neomorphic rounded-xl p-2 touch-target shrink-0" title="Cerrar"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div id="kioscoSubPayBankFields"></div>
+      <button type="button" id="kioscoSubscriptionPayModalDone" class="mt-4 w-full py-3 rounded-xl border border-white/15 bg-white/[0.08] hover:bg-white/[0.14] font-semibold touch-target active:scale-[0.99] text-white/90">Listo</button>
+    </div>
+  </div>
+
   <!-- Header: gradiente verde-morado fijo; kiosquero sin botón cerrar sesión (está en Ajustes) -->
   <header id="mainHeader" class="sticky top-0 z-50 border-b border-white/10 px-4 py-3 header-gradient" style="padding-top: max(0.75rem, env(safe-area-inset-top, 0))">
     <div class="flex items-center justify-between max-w-7xl mx-auto">
@@ -430,19 +446,6 @@
 
     <!-- Cierre de caja -->
     <section id="panel-caja" class="panel hidden">
-      <!-- Modal: datos bancarios empresa (kiosquero) -->
-      <div id="kioscoSubscriptionPayModal" class="fixed inset-0 z-[72] hidden flex items-center justify-center p-4" aria-modal="true" role="dialog">
-        <div class="absolute inset-0 bg-black/65 backdrop-blur-sm" id="kioscoSubscriptionPayModalOverlay"></div>
-        <div class="relative glass-strong rounded-2xl p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto scale-in border border-amber-400/25 shadow-xl shadow-amber-900/30">
-          <div class="flex items-start justify-between gap-2 mb-4">
-            <h3 class="font-bold text-lg leading-snug pr-2 text-amber-100 drop-shadow-md">Suscripción Ferriol</h3>
-            <button type="button" id="kioscoSubscriptionPayModalClose" class="btn-neomorphic rounded-xl p-2 touch-target shrink-0" title="Cerrar"><i data-lucide="x" class="w-5 h-5"></i></button>
-          </div>
-          <div id="kioscoSubPayBankFields"></div>
-          <button type="button" id="kioscoSubscriptionPayModalDone" class="mt-4 w-full py-3 rounded-xl border border-white/15 bg-white/[0.08] hover:bg-white/[0.14] font-semibold touch-target active:scale-[0.99] text-white/90">Listo</button>
-        </div>
-      </div>
-
       <!-- HUB: tarjetas (grid 2 columnas) -->
       <div id="caja-hub" class="p-4">
         <h2 class="font-bold text-xl mb-5 flex items-center gap-2 pt-1">
@@ -599,7 +602,7 @@
               <i data-lucide="cpu" class="w-5 h-5 shrink-0 text-amber-300"></i>
               Abono de sistema / Suscripción
             </h2>
-            <p class="text-sm text-white/65 leading-relaxed">Acá abonás la <strong class="text-white/85">licencia mensual</strong> de Ferriol OS y, si corresponde, pedís pasar a <strong class="text-white/85">distribuidor</strong>. Los pagos a <strong class="text-white/85">proveedores de mercadería</strong> se cargan en la tarjeta <strong class="text-amber-200/90">Proveedores</strong>.</p>
+            <p class="text-sm text-white/65 leading-relaxed">Acá abonás la <strong class="text-white/85">licencia mensual</strong> de Ferriol OS <strong class="text-[#86efac]/90">solo a la empresa (Ferriol)</strong> — mismos datos para todos los negocios kiosco. Los pagos a <strong class="text-white/85">proveedores de mercadería</strong> van aparte, en <strong class="text-amber-200/90">Caja → Proveedores</strong>. Si pedís pasar a <strong class="text-white/85">distribuidor</strong>, también se gestiona desde acá (Ferriol revisa la solicitud).</p>
           </div>
           <div id="partnerUpgradeOuterCard" class="kiosquero-only hidden rounded-2xl border border-violet-500/35 bg-gradient-to-br from-violet-950/55 to-purple-950/40 p-4 sm:p-5 shadow-lg shadow-violet-950/30 ring-1 ring-violet-400/20">
             <h3 class="font-semibold mb-1 flex items-center gap-2 text-base text-violet-100">
@@ -1229,8 +1232,26 @@
                     <i data-lucide="refresh-cw" class="w-5 h-5"></i> Renovar / Coordinar</button>
                 </div>
               </div>
-              <p class="text-[10px] text-white/45 leading-snug"><strong class="text-white/60">No hay administradores aparte de los fundadores:</strong> los dos que dirigen la empresa (vos y tu compañero, p. ej. tu hermano) sois esta administración — cada cuenta <code class="text-white/50 text-[9px]">super</code> tiene su cuenta regresiva (<code class="text-white/50 text-[9px]">trial_ends_at</code>). Al vencer la vigencia de una, esa sesión queda bloqueada hasta renovar datos en el sistema.</p>
+              <p class="text-[10px] text-white/45 leading-snug"><strong class="text-white/60">Todos abonan a la empresa (Ferriol):</strong> el contador de vigencia arriba aplica a esta suscripción. Misma cuenta bancaria para negocios kiosco y para administradores · <strong class="text-amber-100/80">Ingresos → «Dónde abonar»</strong> o Caja → Abono sistema.</p>
             </div>
+          </div>
+
+          <!-- Dónde abonar licencia (fundador + socios): misma cuenta Ferriol que kioscos -->
+          <div id="ferriolAdminEmpresaPayCard" class="rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-950/55 via-slate-900/50 to-slate-950/80 p-4 sm:p-5 mb-5 ring-1 ring-cyan-400/20 shadow-lg shadow-black/25">
+            <h3 class="font-bold text-base text-cyan-100 flex items-center gap-2 mb-2">
+              <i data-lucide="landmark" class="w-5 h-5 shrink-0 text-cyan-200"></i>
+              Dónde abonar tu suscripción (empresa Ferriol)
+            </h3>
+            <p class="text-xs text-white/68 leading-relaxed mb-2">
+              <strong class="text-white/90">Fundadores y socios de red:</strong> pagás la licencia <strong class="text-cyan-200/95">solo en la cuenta oficial de Ferriol</strong> (la que figura en Ajustes del sistema). Ferriol verifica el pago, registra la vigencia y luego liquida comisiones a la red según política. <strong class="text-white/80">No transferís al patrocinador</strong> para la cuota del sistema.
+            </p>
+            <p class="text-[10px] text-white/45 leading-snug mb-3 pl-0 border-l-2 border-cyan-500/40 pl-2.5">
+              <strong class="text-white/55">Kiosqueros (negocio):</strong> <strong class="text-[#86efac]/90">Caja</strong> → <strong class="text-white/70">Abono sistema / suscripción</strong> → <strong class="text-amber-200/90">Abonar suscripción</strong> — mismos datos de cuenta Ferriol.
+            </p>
+            <button type="button" id="btnOpenEmpresaSubscriptionAdmin" class="w-full rounded-2xl px-4 py-3.5 font-bold text-sm sm:text-base text-white shadow-lg shadow-cyan-900/40 bg-gradient-to-br from-cyan-600 via-teal-700 to-slate-900 border border-cyan-300/35 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2">
+              <i data-lucide="building-2" class="w-5 h-5 shrink-0"></i>
+              Ver datos para transferir · Ferriol
+            </button>
           </div>
 
           <!-- ── Banner de bienvenida ──────────────────────────── -->
@@ -2929,7 +2950,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260429_partner_upgrade_gate"></script>
+  <script defer src="kiosco-app.js?v=20260430_empresa_suscripcion_clara"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>

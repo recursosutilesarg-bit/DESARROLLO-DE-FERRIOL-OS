@@ -3988,6 +3988,41 @@
         if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
       } catch (_) {}
     };
+
+    window.ferriolOpenEmpresaSubscriptionModal = async function (mode) {
+      mode = mode || 'kiosco';
+      var tit = document.getElementById('kioscoSubPayModalTitle');
+      var intro = document.getElementById('kioscoSubPayModalIntro');
+      if (tit) {
+        tit.textContent = mode === 'admin'
+          ? 'Suscripción · cuenta empresa Ferriol'
+          : 'Suscripción Ferriol · negocio (kiosco)';
+      }
+      if (intro) {
+        intro.innerHTML = mode === 'admin'
+          ? 'Como <strong class="text-white/88">fundador o socio de red</strong>, la cuota del sistema va <strong class="text-cyan-200/95">solo a Ferriol (empresa)</strong>. Transferencia a los datos de abajo. El comprobante por WhatsApp a la empresa (o según indiquen en Ajustes). <strong class="text-white/75">No</strong> al patrocinador para esta cuota: las comisiones las liquida Ferriol.'
+          : 'La <strong class="text-white/85">licencia del negocio</strong> se abona <strong class="text-[#86efac]/95">solo a Ferriol (empresa)</strong>. Usá los datos de abajo y enviá el comprobante por WhatsApp a la empresa.';
+      }
+      var raw = '';
+      if (supabaseClient) {
+        try {
+          var r = await supabaseClient.from('app_settings').select('value').eq('key', 'ferriol_transfer_info').maybeSingle();
+          raw = (r.data && r.data.value) ? String(r.data.value) : '';
+        } catch (_) {}
+      }
+      window._ferriolKioscoEmpresaTransferRaw = raw;
+      if (typeof window._populateKioscoSubscriptionPayModal === 'function') {
+        window._populateKioscoSubscriptionPayModal(raw);
+      }
+      var m = document.getElementById('kioscoSubscriptionPayModal');
+      if (m) {
+        m.classList.remove('hidden');
+        try { document.body.style.overflow = 'hidden'; } catch (_) {}
+      }
+      try {
+        if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
+      } catch (_) {}
+    };
     function ferriolParsePartnerBankingInfo(raw) {
       var s = raw != null ? String(raw).trim() : '';
       var out = { titular: '', banco: '', cbu: '', alias: '' };
@@ -9775,6 +9810,10 @@ async function showApp() {
         }
       }
       function openModal() {
+        if (typeof window.ferriolOpenEmpresaSubscriptionModal === 'function') {
+          window.ferriolOpenEmpresaSubscriptionModal('kiosco');
+          return;
+        }
         if (typeof window._populateKioscoSubscriptionPayModal === 'function') {
           window._populateKioscoSubscriptionPayModal(window._ferriolKioscoEmpresaTransferRaw != null ? window._ferriolKioscoEmpresaTransferRaw : '');
         }
@@ -9790,6 +9829,12 @@ async function showApp() {
       }
       var op = document.getElementById('btnOpenKioscoSubscriptionModal');
       if (op) op.addEventListener('click', openModal);
+      var opAdm = document.getElementById('btnOpenEmpresaSubscriptionAdmin');
+      if (opAdm) opAdm.addEventListener('click', function () {
+        if (typeof window.ferriolOpenEmpresaSubscriptionModal === 'function') {
+          window.ferriolOpenEmpresaSubscriptionModal('admin');
+        }
+      });
       var ov = document.getElementById('kioscoSubscriptionPayModalOverlay');
       if (ov) ov.addEventListener('click', closeModal);
       var cl = document.getElementById('kioscoSubscriptionPayModalClose');
