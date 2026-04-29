@@ -4017,7 +4017,7 @@
         if (admin) {
           foot.innerHTML = 'Distribuidores / fundadores / socios de red: tocá <strong class="text-white/55">tu foto</strong> → último ítem del menú (<strong class="text-emerald-100/90">Abonar cuota</strong>) o <strong class="text-white/55">Más opciones</strong>.';
         } else {
-          foot.innerHTML = 'Todos los perfiles usan el mismo flujo: <strong class="text-white/55">Cuenta</strong> (avatar) → <strong class="text-emerald-100/90">Abonar suscripción</strong> o desde <strong class="text-white/65">Más</strong>. En Caja · Abono sistema está la info de licencia (sin botón de pago ahí).';
+          foot.innerHTML = 'Todos los perfiles usan el mismo flujo: <strong class="text-white/55">Cuenta</strong> (avatar) → <strong class="text-emerald-100/90">Abonar suscripción</strong> o desde <strong class="text-white/65">Más</strong>. Vigencia de licencia: <strong class="text-white/55">Inicio</strong> del negocio (kioscos).';
         }
       }
       var aml = document.getElementById('accountMenuPlanSubline');
@@ -4411,6 +4411,12 @@
       if (name === 'dashboard') {
         updateTrialCountdown();
         updateDashboard();
+        if (currentUser && (currentUser.role === 'kiosquero' || isAnyKioscoPreviewMode())) {
+          if (typeof loadKioscoLicensePaymentInfo === 'function') loadKioscoLicensePaymentInfo().catch(function () {});
+        }
+        if (currentUser && currentUser.role === 'kiosquero') {
+          if (typeof syncKiosqueroPartnerUpgradeUi === 'function') syncKiosqueroPartnerUpgradeUi().catch(function () {});
+        }
         if (ferriolKiosqueroNotifShell()) {
           loadTrialReminderConfigFromSupabase();
           if (currentUser) refreshViewerHelpWhatsApp(currentUser);
@@ -4436,6 +4442,7 @@
       if (name === 'caja') {
         state._suppressCajaHistoryPush = true;
         var ctab = cajaTabOverride != null && cajaTabOverride !== '' ? cajaTabOverride : 'hub';
+        if (ctab === 'sistema') ctab = 'hub';
         window._switchCajaTab(ctab);
         state._suppressCajaHistoryPush = false;
         if (ferriolKiosqueroNotifShell()) loadKioscoLicensePaymentInfo();
@@ -5785,7 +5792,7 @@
 
     window._switchCajaTab = function (tab) {
       var hub = document.getElementById('caja-hub');
-      var subs = ['cierre', 'proveedores', 'gastos', 'sistema'];
+      var subs = ['cierre', 'proveedores', 'gastos'];
       if (tab === 'hub') {
         if (hub) hub.classList.remove('hidden');
         subs.forEach(function (s) { var el = document.getElementById('caja-sub-' + s); if (el) el.classList.add('hidden'); });
@@ -5801,10 +5808,6 @@
       }
       if (tab === 'proveedores') { _resetFormInline('proveedor'); renderGastos('proveedor'); }
       if (tab === 'gastos') { _resetFormInline('gasto_fijo'); renderGastos('gasto_fijo'); }
-      if (tab === 'sistema') {
-        if (typeof loadKioscoLicensePaymentInfo === 'function') loadKioscoLicensePaymentInfo().catch(function () {});
-        if (typeof syncKiosqueroPartnerUpgradeUi === 'function') syncKiosqueroPartnerUpgradeUi().catch(function () {});
-      }
       lucide.createIcons();
     };
 
@@ -6752,7 +6755,7 @@
       libretalSubs.forEach(function (id) { var el = document.getElementById(id); if (el) el.classList.add('hidden'); });
       if (tab === 'libreta') {
         var hub = document.getElementById('caja-hub');
-        var subs = ['cierre', 'proveedores', 'gastos', 'sistema'];
+        var subs = ['cierre', 'proveedores', 'gastos'];
         if (hub) hub.classList.add('hidden');
         subs.forEach(function (s) { var el = document.getElementById('caja-sub-' + s); if (el) el.classList.add('hidden'); });
         var el = document.getElementById('caja-sub-libreta');
@@ -6764,7 +6767,7 @@
       }
       if (tab === 'libreta-cliente') {
         var hub = document.getElementById('caja-hub');
-        var subs = ['cierre', 'proveedores', 'gastos', 'sistema'];
+        var subs = ['cierre', 'proveedores', 'gastos'];
         if (hub) hub.classList.add('hidden');
         subs.forEach(function (s) { var el = document.getElementById('caja-sub-' + s); if (el) el.classList.add('hidden'); });
         document.getElementById('caja-sub-libreta').classList.add('hidden');
