@@ -2856,29 +2856,16 @@
           <i data-lucide="landmark" class="w-[1.125rem] h-[1.125rem] text-gray-500 shrink-0 stroke-[1.75]"></i>
           <span>Mis datos bancarios</span>
         </button>
-        <div id="accountMenuPlanBlock" class="mb-2 rounded-xl border-2 border-orange-300/90 bg-gradient-to-br from-orange-50/95 via-amber-50 to-orange-100/90 shadow-md shadow-orange-200/50 ring-1 ring-orange-200/60 overflow-hidden" role="group" aria-label="Mi plan">
-          <div class="px-3 pt-2.5 pb-1 border-b border-orange-200/60">
-            <div class="flex items-center gap-2 min-w-0">
-              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-500/20 ring-1 ring-orange-400/35" aria-hidden="true">
-                <i data-lucide="layers" class="w-[1.15rem] h-[1.15rem] text-orange-700 shrink-0 stroke-[2]"></i>
-              </span>
-              <span class="font-bold text-sm tracking-wide text-orange-950 uppercase">Mi plan</span>
-            </div>
-            <p class="text-[10px] text-orange-800/75 mt-1 pl-11 leading-snug">Pagos y solicitud de rol distribuidor</p>
-          </div>
-          <div id="accountMenuPlanInner" class="flex flex-col gap-1.5 px-2 py-2.5">
-            <button type="button" id="accountMenuBtnAbonar" class="w-full text-left rounded-xl py-2.5 px-3 touch-target flex items-center gap-2.5 border border-orange-400/70 bg-white/90 hover:bg-orange-50 active:scale-[0.99] shadow-sm">
-              <i data-lucide="credit-card" class="w-[1.125rem] h-[1.125rem] text-orange-600 shrink-0 stroke-[1.85]"></i>
-              <span id="accountMenuPlanAbonarLabel" class="text-sm font-semibold text-orange-950">Abonar suscripción</span>
-            </button>
-            <div id="accountMenuDistribuidorWrap" class="hidden">
-              <button type="button" id="accountMenuBtnDistribuidor" class="w-full rounded-xl py-2.5 px-3 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-white border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 shadow-md shadow-violet-600/30 ring-1 ring-white/10 hover:brightness-110 active:scale-[0.98]">
-                <i data-lucide="badge-check" class="w-4 h-4 shrink-0"></i>
-                Quiero ser distribuidor/a del sistema
-              </button>
-            </div>
-          </div>
-        </div>
+        <button type="button" id="accountMenuBtnOpenPlanSheet" class="w-full text-left rounded-xl py-2.5 px-3 mb-2 touch-target flex items-center gap-3 border-2 border-orange-300/90 bg-gradient-to-br from-orange-50/95 via-amber-50 to-orange-100/90 shadow-md shadow-orange-200/40 ring-1 ring-orange-200/60 hover:brightness-[1.02] active:scale-[0.99] transition-[transform,filter]" aria-haspopup="dialog" aria-controls="accountPlanSheetModal" aria-expanded="false">
+          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-500/20 ring-1 ring-orange-400/35" aria-hidden="true">
+            <i data-lucide="layers" class="w-[1.15rem] h-[1.15rem] text-orange-700 shrink-0 stroke-[2]"></i>
+          </span>
+          <span class="flex-1 min-w-0">
+            <span class="block font-bold text-sm tracking-wide text-orange-950 uppercase">Mi plan</span>
+            <span class="block text-[10px] text-orange-800/75 mt-0.5 leading-snug">Abonar, cuota distribuidor o solicitar rol</span>
+          </span>
+          <i data-lucide="chevron-right" class="w-5 h-5 text-orange-700/90 shrink-0"></i>
+        </button>
         <div class="my-2 border-t border-gray-100"></div>
         <button type="button" id="accountMenuBtnLogout" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-semibold text-red-600 touch-target flex items-center gap-3 hover:bg-red-50 active:bg-red-50/80 transition-colors">
           <i data-lucide="log-out" class="w-[1.125rem] h-[1.125rem] shrink-0 stroke-[1.75]"></i>
@@ -2887,6 +2874,40 @@
       </nav>
     </div>
   </div>
+
+  <!-- Mini ventana Mi plan (action sheet · competencia suele usar panel inferior o centro) -->
+  <div id="accountPlanSheetModal" class="fixed inset-0 z-[93] hidden flex flex-col justify-end sm:justify-center items-stretch sm:items-center p-0 sm:p-4 pointer-events-none" aria-hidden="true">
+    <button type="button" id="accountPlanSheetModalOverlay" class="absolute inset-0 bg-black/45 backdrop-blur-[2px] border-0 cursor-default pointer-events-auto" tabindex="-1" aria-label="Cerrar opciones Mi plan"></button>
+    <div id="accountPlanSheetModalPanel" class="relative z-[1] w-full max-w-md sm:w-full sm:max-w-sm mx-auto pointer-events-auto rounded-t-[1.35rem] sm:rounded-2xl shadow-[0_-8px_40px_rgba(0,0,0,0.12)] sm:shadow-2xl border border-orange-200/85 bg-gradient-to-b from-orange-50 via-amber-50/98 to-orange-50/95 overflow-hidden max-h-[min(78vh,26rem)] flex flex-col scale-in pb-[max(0.65rem,env(safe-area-inset-bottom))] sm:pb-4" role="dialog" aria-modal="true" aria-labelledby="accountPlanSheetTitle">
+      <div class="flex items-center justify-between gap-2 px-4 pt-4 pb-2 border-b border-orange-200/70 shrink-0 bg-orange-50/80">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/25 ring-1 ring-orange-400/35" aria-hidden="true">
+            <i data-lucide="layers" class="w-5 h-5 text-orange-800 shrink-0"></i>
+          </span>
+          <div class="min-w-0">
+            <h3 id="accountPlanSheetTitle" class="font-bold text-base text-orange-950 leading-tight">Mi plan</h3>
+            <p id="accountPlanSheetSubtitle" class="text-[11px] text-orange-800/85 mt-0.5 leading-snug">Elegí qué querés hacer</p>
+          </div>
+        </div>
+        <button type="button" id="accountPlanSheetModalClose" class="p-2 rounded-xl text-orange-800/75 hover:bg-orange-100/90 touch-target shrink-0" title="Cerrar">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="flex flex-col gap-2 px-3 sm:px-4 py-4 min-h-0 overflow-y-auto overscroll-contain">
+        <button type="button" id="accountMenuBtnAbonar" class="w-full text-left rounded-xl py-3 px-3 touch-target flex items-center gap-2.5 border border-orange-400/75 bg-white/95 hover:bg-orange-50 active:scale-[0.99] shadow-sm ring-1 ring-orange-100/60">
+          <i data-lucide="credit-card" class="w-[1.125rem] h-[1.125rem] text-orange-600 shrink-0 stroke-[1.85]"></i>
+          <span id="accountMenuPlanAbonarLabel" class="text-sm font-semibold text-orange-950">Abonar suscripción</span>
+        </button>
+        <div id="accountMenuDistribuidorWrap" class="hidden">
+          <button type="button" id="accountMenuBtnDistribuidor" class="w-full rounded-xl py-3 px-3 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-white border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 shadow-md shadow-violet-600/30 ring-1 ring-white/10 hover:brightness-110 active:scale-[0.98]">
+            <i data-lucide="badge-check" class="w-4 h-4 shrink-0"></i>
+            Quiero ser distribuidor/a del sistema
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Pantalla Mi cuenta (foto + datos editables; en celular ocupa casi toda la pantalla) -->
   <div id="accountProfileModal" class="fixed inset-0 z-[90] hidden flex flex-col sm:items-center sm:justify-center sm:p-4" aria-hidden="true">
     <button type="button" class="absolute inset-0 bg-black/70 backdrop-blur-sm border-0 cursor-default" id="accountProfileModalOverlay" aria-label="Cerrar panel"></button>

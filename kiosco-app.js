@@ -3652,6 +3652,11 @@
 
     function closeAllOverlays() {
       closeAllModals();
+      if (typeof closeAccountPlanSheet === 'function') {
+        try {
+          closeAccountPlanSheet();
+        } catch (_) {}
+      }
       if (typeof closeProductDetail === 'function') closeProductDetail();
       var pm = document.getElementById('productModal');
       if (pm) { pm.classList.add('hidden'); pm.classList.remove('flex'); }
@@ -3857,7 +3862,43 @@
       var show = !!(currentUser && isNetworkAdminRole(currentUser.role) && !isAnyKioscoPreviewMode());
       bankBtn.classList.toggle('hidden', !show);
     }
+
+    /** Panel “Mi plan” (action sheet · opciones sobre el menú cuenta) */
+    function closeAccountPlanSheet() {
+      var m = document.getElementById('accountPlanSheetModal');
+      var opener = document.getElementById('accountMenuBtnOpenPlanSheet');
+      if (!m) return;
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+      m.setAttribute('aria-hidden', 'true');
+      if (opener) opener.setAttribute('aria-expanded', 'false');
+      try {
+        if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+      } catch (_) {}
+    }
+    function openAccountPlanSheet() {
+      var m = document.getElementById('accountPlanSheetModal');
+      var opener = document.getElementById('accountMenuBtnOpenPlanSheet');
+      if (!m) return;
+      try {
+        syncPlanRolePayLabels();
+      } catch (_) {}
+      try {
+        if (typeof syncKiosqueroPartnerUpgradeUi === 'function') syncKiosqueroPartnerUpgradeUi().catch(function () {});
+      } catch (_) {}
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+      m.setAttribute('aria-hidden', 'false');
+      if (opener) opener.setAttribute('aria-expanded', 'true');
+      try {
+        if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+      } catch (_) {}
+    }
+
     function closeAccountMenuDrawer(instant) {
+      try {
+        closeAccountPlanSheet();
+      } catch (_) {}
       var root = document.getElementById('accountMenuDrawer');
       var panel = document.getElementById('accountMenuDrawerPanel');
       var hdrBtn = document.getElementById('headerProfileBtn');
@@ -4624,9 +4665,29 @@
         openAccountProfileModal('personal');
       });
     }
+    var accountMenuBtnOpenPlanSheet = document.getElementById('accountMenuBtnOpenPlanSheet');
+    if (accountMenuBtnOpenPlanSheet) {
+      accountMenuBtnOpenPlanSheet.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        if (typeof openAccountPlanSheet === 'function') openAccountPlanSheet();
+      });
+    }
+    var accountPlanSheetModalOverlay = document.getElementById('accountPlanSheetModalOverlay');
+    if (accountPlanSheetModalOverlay) {
+      accountPlanSheetModalOverlay.addEventListener('click', function () {
+        if (typeof closeAccountPlanSheet === 'function') closeAccountPlanSheet();
+      });
+    }
+    var accountPlanSheetModalClose = document.getElementById('accountPlanSheetModalClose');
+    if (accountPlanSheetModalClose) {
+      accountPlanSheetModalClose.addEventListener('click', function () {
+        if (typeof closeAccountPlanSheet === 'function') closeAccountPlanSheet();
+      });
+    }
     var accountMenuBtnAbonar = document.getElementById('accountMenuBtnAbonar');
     if (accountMenuBtnAbonar) {
       accountMenuBtnAbonar.addEventListener('click', function () {
+        if (typeof closeAccountPlanSheet === 'function') closeAccountPlanSheet();
         closeAccountMenuDrawer(true);
         if (typeof window._ferriolGoToPlanPanel === 'function') window._ferriolGoToPlanPanel();
         else goToPanel('plan');
@@ -4636,6 +4697,7 @@
     if (accountMenuBtnDistribuidor) {
       accountMenuBtnDistribuidor.addEventListener('click', function () {
         if (accountMenuBtnDistribuidor.disabled) return;
+        if (typeof closeAccountPlanSheet === 'function') closeAccountPlanSheet();
         closeAccountMenuDrawer(true);
         openKiosqueroPartnerUpgradeModal();
       });
