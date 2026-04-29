@@ -2856,15 +2856,29 @@
           <i data-lucide="landmark" class="w-[1.125rem] h-[1.125rem] text-gray-500 shrink-0 stroke-[1.75]"></i>
           <span>Mis datos bancarios</span>
         </button>
-        <button type="button" id="accountMenuBtnPlan" class="w-full text-left rounded-xl py-2.5 px-3 touch-target flex items-center gap-3 transition-all hover:brightness-[1.02] active:scale-[0.99] border-2 border-orange-400/85 bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100/95 shadow-md shadow-orange-300/35 ring-2 ring-orange-200/55 mb-1">
-          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/15 ring-1 ring-orange-400/40">
-            <i data-lucide="credit-card" class="w-[1.25rem] h-[1.25rem] text-orange-600 shrink-0 stroke-[1.85]"></i>
-          </span>
-          <span class="flex flex-col items-start leading-snug gap-0.5 min-w-0">
-            <span class="text-[11px] font-semibold uppercase tracking-wide text-orange-800">Cuota Ferriol</span>
-            <span id="accountMenuPlanSubline" class="text-sm font-semibold text-orange-950">Abonar cuota distribuidor</span>
-          </span>
-        </button>
+        <div id="accountMenuPlanBlock" class="mb-2 rounded-xl border-2 border-orange-300/90 bg-gradient-to-br from-orange-50/95 via-amber-50 to-orange-100/90 shadow-md shadow-orange-200/50 ring-1 ring-orange-200/60 overflow-hidden">
+          <button type="button" id="accountMenuPlanToggle" class="w-full text-left flex items-center justify-between gap-2 px-3 py-2.5 touch-target hover:bg-orange-100/50 active:bg-orange-100/70 transition-colors" aria-expanded="true" aria-controls="accountMenuPlanExpanded">
+            <span class="flex items-center gap-2 min-w-0">
+              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-500/20 ring-1 ring-orange-400/35">
+                <i data-lucide="layers" class="w-[1.15rem] h-[1.15rem] text-orange-700 shrink-0 stroke-[2]"></i>
+              </span>
+              <span class="font-bold text-sm tracking-wide text-orange-950 uppercase">Mi plan</span>
+            </span>
+            <i data-lucide="chevron-down" id="accountMenuPlanChevron" class="w-5 h-5 text-orange-700 shrink-0 transition-transform duration-200"></i>
+          </button>
+          <div id="accountMenuPlanExpanded" class="flex flex-col gap-1.5 px-2 pb-2.5 pt-0 border-t border-orange-200/60">
+            <button type="button" id="accountMenuBtnAbonar" class="w-full text-left rounded-xl py-2.5 px-3 touch-target flex items-center gap-2.5 border border-orange-400/70 bg-white/90 hover:bg-orange-50 active:scale-[0.99] shadow-sm">
+              <i data-lucide="credit-card" class="w-[1.125rem] h-[1.125rem] text-orange-600 shrink-0 stroke-[1.85]"></i>
+              <span id="accountMenuPlanAbonarLabel" class="text-sm font-semibold text-orange-950">Abonar suscripción</span>
+            </button>
+            <div id="accountMenuDistribuidorWrap" class="hidden">
+              <button type="button" id="accountMenuBtnDistribuidor" class="w-full rounded-xl py-2.5 px-3 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-white border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 shadow-md shadow-violet-600/30 ring-1 ring-white/10 hover:brightness-110 active:scale-[0.98]">
+                <i data-lucide="badge-check" class="w-4 h-4 shrink-0"></i>
+                Quiero ser distribuidor/a del sistema
+              </button>
+            </div>
+          </div>
+        </div>
         <div class="my-2 border-t border-gray-100"></div>
         <button type="button" id="accountMenuBtnLogout" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-semibold text-red-600 touch-target flex items-center gap-3 hover:bg-red-50 active:bg-red-50/80 transition-colors">
           <i data-lucide="log-out" class="w-[1.125rem] h-[1.125rem] shrink-0 stroke-[1.75]"></i>
@@ -2953,7 +2967,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426_caja_sin_abono_sistema"></script>
+  <script defer src="kiosco-app.js?v=20260426_menu_mi_plan"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>

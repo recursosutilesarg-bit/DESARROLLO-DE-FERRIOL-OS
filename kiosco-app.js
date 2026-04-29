@@ -391,6 +391,8 @@
       if (!currentUser || currentUser.role !== 'kiosquero') {
         wrap.classList.add('hidden');
         if (outer) outer.classList.add('hidden');
+        var amDistHide = document.getElementById('accountMenuDistribuidorWrap');
+        if (amDistHide) amDistHide.classList.add('hidden');
         return;
       }
       if (outer) outer.classList.remove('hidden');
@@ -418,7 +420,25 @@
         }
       } catch (_) {}
       try {
-        if (typeof lucide !== 'undefined' && lucide.createIcons && !btn.disabled) lucide.createIcons();
+        var amd = document.getElementById('accountMenuDistribuidorWrap');
+        var amb = document.getElementById('accountMenuBtnDistribuidor');
+        if (amd && amb) {
+          amd.classList.remove('hidden');
+          amb.disabled = btn.disabled;
+          if (btn.disabled) {
+            amb.className =
+              'w-full rounded-xl py-2.5 px-3 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 touch-target border border-violet-400/40 bg-violet-950/65 text-white/90 opacity-85 cursor-not-allowed';
+            amb.textContent = btn.textContent || 'Solicitud pendiente';
+          } else {
+            amb.className =
+              'w-full rounded-xl py-2.5 px-3 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-white border border-violet-300/55 bg-gradient-to-br from-violet-600 via-violet-600 to-purple-700 shadow-md shadow-violet-600/30 ring-1 ring-white/10 hover:brightness-110 active:scale-[0.98]';
+            amb.innerHTML =
+              '<i data-lucide="badge-check" class="w-4 h-4 shrink-0"></i> Quiero ser distribuidor/a del sistema';
+          }
+        }
+      } catch (_) {}
+      try {
+        if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
       } catch (_) {}
     }
     function openKiosqueroPartnerUpgradeModal() {
@@ -4015,12 +4035,12 @@
       var foot = document.getElementById('planPanelFooterHint');
       if (foot) {
         if (admin) {
-          foot.innerHTML = 'Distribuidores / fundadores / socios de red: tocá <strong class="text-white/55">tu foto</strong> → último ítem del menú (<strong class="text-emerald-100/90">Abonar cuota</strong>) o <strong class="text-white/55">Más opciones</strong>.';
+          foot.innerHTML = 'Distribuidores / fundadores / socios de red: en <strong class="text-white/55">menú foto · Mi plan</strong> tocá <strong class="text-emerald-100/90">Abonar cuota</strong> (o <strong class="text-white/55">Más opciones</strong>).';
         } else {
           foot.innerHTML = 'Todos los perfiles usan el mismo flujo: <strong class="text-white/55">Cuenta</strong> (avatar) → <strong class="text-emerald-100/90">Abonar suscripción</strong> o desde <strong class="text-white/65">Más</strong>. Vigencia de licencia: <strong class="text-white/55">Inicio</strong> del negocio (kioscos).';
         }
       }
-      var aml = document.getElementById('accountMenuPlanSubline');
+      var aml = document.getElementById('accountMenuPlanAbonarLabel');
       if (aml) aml.textContent = admin ? 'Abonar cuota distribuidor' : 'Abonar suscripción';
       var masl1 = document.getElementById('btnMasPlanLine1');
       if (masl1) masl1.textContent = admin ? 'Cuenta · Plan · Abonar cuota distribuidor' : 'Cuenta · Plan · Abonar suscripción';
@@ -4604,12 +4624,34 @@
         openAccountProfileModal('personal');
       });
     }
-    var accountMenuBtnPlan = document.getElementById('accountMenuBtnPlan');
-    if (accountMenuBtnPlan) {
-      accountMenuBtnPlan.addEventListener('click', function () {
+    var accountMenuBtnAbonar = document.getElementById('accountMenuBtnAbonar');
+    if (accountMenuBtnAbonar) {
+      accountMenuBtnAbonar.addEventListener('click', function () {
         closeAccountMenuDrawer(true);
         if (typeof window._ferriolGoToPlanPanel === 'function') window._ferriolGoToPlanPanel();
         else goToPanel('plan');
+      });
+    }
+    var accountMenuPlanToggle = document.getElementById('accountMenuPlanToggle');
+    var accountMenuPlanExpanded = document.getElementById('accountMenuPlanExpanded');
+    var accountMenuPlanChevron = document.getElementById('accountMenuPlanChevron');
+    if (accountMenuPlanToggle && accountMenuPlanExpanded) {
+      accountMenuPlanToggle.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        var open = accountMenuPlanExpanded.classList.toggle('hidden');
+        accountMenuPlanToggle.setAttribute('aria-expanded', open ? 'false' : 'true');
+        if (accountMenuPlanChevron) accountMenuPlanChevron.classList.toggle('rotate-180', open);
+        try {
+          if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        } catch (_) {}
+      });
+    }
+    var accountMenuBtnDistribuidor = document.getElementById('accountMenuBtnDistribuidor');
+    if (accountMenuBtnDistribuidor) {
+      accountMenuBtnDistribuidor.addEventListener('click', function () {
+        if (accountMenuBtnDistribuidor.disabled) return;
+        closeAccountMenuDrawer(true);
+        openKiosqueroPartnerUpgradeModal();
       });
     }
     var accountMenuBtnBank = document.getElementById('accountMenuBtnBank');
