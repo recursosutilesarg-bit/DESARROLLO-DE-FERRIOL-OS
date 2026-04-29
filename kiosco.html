@@ -638,13 +638,7 @@
                   Suscripción mensual Ferriol OS
                 </h3>
                 <p id="kioscoLicensePriceHint" class="text-xs text-white/55"></p>
-                <p class="text-[10px] text-white/45 mt-2 leading-snug">Usá <strong class="text-white/60">Abonar suscripción</strong> para ver datos de pago y enviar comprobante. Los <strong class="text-white/60">pagos a proveedores de mercadería</strong> van en <strong class="text-amber-200/90">Caja → Proveedores</strong>.</p>
-              </div>
-              <div class="shrink-0 w-full sm:max-w-xs sm:pt-1">
-                <button type="button" id="btnOpenKioscoSubscriptionModal" class="w-full rounded-2xl px-4 py-3.5 font-bold text-sm sm:text-base text-white shadow-lg shadow-amber-600/40 bg-gradient-to-br from-amber-400 via-orange-500 to-rose-600 ring-2 ring-amber-200/50 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2">
-                  <i data-lucide="wallet" class="w-5 h-5 shrink-0"></i>
-                  Abonar suscripción
-                </button>
+                <p class="text-[10px] text-white/45 mt-2 leading-snug">Para <strong class="text-white/70">ver datos de pago y enviar comprobante</strong>, tocá tu <strong class="text-white/70">foto arriba</strong> → <strong class="text-[#86efac]/85">Plan</strong> (<strong class="text-[#86efac]/85">Abonar cuota</strong> / suscripción según tu perfil) o en <strong class="text-white/60">Más opciones</strong>. Los <strong class="text-white/60">pagos a proveedores de mercadería</strong> van en <strong class="text-amber-200/90">Caja → Proveedores</strong>.</p>
               </div>
             </div>
             <div class="mt-4 rounded-xl border border-emerald-500/25 bg-black/30 p-3 sm:p-4">
@@ -673,7 +667,7 @@
               <i data-lucide="plus-circle" class="w-4 h-4 text-[#86efac]"></i>
               Registrar pago a proveedor
             </h3>
-            <p class="text-[10px] text-white/45 mb-4 leading-snug">Solo <strong class="text-white/55">mercadería</strong> y proveedores. La <strong class="text-amber-200/80">licencia Ferriol</strong> va en <strong class="text-white/60">Abono sistema / suscripción</strong> en el hub de Caja.</p>
+            <p class="text-[10px] text-white/45 mb-4 leading-snug">Solo <strong class="text-white/55">mercadería</strong> y proveedores. La <strong class="text-amber-200/80">cuota Ferriol / licencia</strong> se abona desde <strong class="text-white/60">Cuenta (foto)</strong> → <strong class="text-white/60">Abonar cuota</strong>, no desde acá.</p>
             <div class="space-y-3">
               <div>
                 <label class="block text-xs text-white/60 mb-1">Proveedor</label>
@@ -1084,9 +1078,7 @@
           <span><span id="planPanelPayBtnPrimary">Abonar suscripción</span><span class="text-white/90 font-semibold hidden sm:inline"> · ver datos Ferriol</span></span>
         </button>
         <p id="planPanelFooterHint" class="text-[10px] text-white/45 leading-relaxed mb-5">
-          Socios / fundadores: también tocá tu foto arriba <strong class="text-white/55">→ Cuenta</strong> y este mismo ítem.<br/>
-          Negocio (kiosco): opcional desde <strong class="text-white/65">Caja → Abono sistema / suscripción</strong>.
-        </p>
+          Pagá desde <strong class="text-white/65">Cuenta (avatar)</strong>: <strong class="text-[#86efac]/85">último ítem</strong> antes de cerrar sesión · o desde <strong class="text-white/65">Más opciones</strong>. Vigencia también en <strong class="text-white/55">Caja → Abono sistema</strong> (<span class="text-white/40">solo info, sin pago ahí</span>).</p>
       </div>
     </section>
 
@@ -1155,7 +1147,7 @@
             <label class="block text-sm text-white/70 mb-2">Nombre del negocio</label>
             <input type="text" id="configKioscoName" placeholder="Ej: Mi Negocio" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
           </div>
-          <p class="text-xs text-white/50 -mt-2 mb-1">Suscripción mensual Ferriol: <strong class="text-white/78">tocá tu foto arriba</strong> → <strong class="text-[#86efac]/90">Plan · Abonar suscripción</strong> · también <strong class="text-white/72">Más opciones</strong> · o desde <strong class="text-white/72">Caja → Abono sistema</strong>.</p>
+          <p class="text-xs text-white/50 -mt-2 mb-1"><strong class="text-white/75">Cuota mensual Ferriol:</strong> tocá tu <strong class="text-white/78">foto arriba</strong> → <strong class="text-[#86efac]/90">último ítem del menú Cuenta</strong> (<strong class="text-[#86efac]/90">Abonar suscripción</strong>) o <strong class="text-white/72">Más opciones</strong>. En <strong class="text-white/60">Caja → Abono sistema</strong> solo figura la info de vigencia.</p>
           <div>
             <label class="block text-sm text-white/70 mb-2">Mensaje de cobro por WhatsApp (usá <code class="text-[#86efac]">{cliente}</code> y <code class="text-[#86efac]">{monto}</code>)</label>
             <textarea id="configWhatsappMsg" rows="4" placeholder="Hola {cliente}, tenés un saldo de ${monto}..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] resize-y"></textarea>
@@ -1271,21 +1263,7 @@
                     <i data-lucide="refresh-cw" class="w-5 h-5"></i> Renovar / Coordinar</button>
                 </div>
               </div>
-              <p class="text-[10px] text-white/45 leading-snug"><strong class="text-white/60">Plan unificado:</strong> tocá tu foto → <strong class="text-amber-100/85">Cuenta · Plan · Abonar suscripción</strong> — mismo lugar para todos. Atajo también abajo o desde Caja (kioscos).</p>
-            </div>
-          </div>
-
-          <!-- Atajo pago empresa (mirror Cuenta → Plan) -->
-          <div id="ferriolAdminEmpresaPayCard" class="rounded-2xl border border-cyan-500/28 bg-gradient-to-br from-cyan-950/50 to-slate-950/70 p-4 sm:p-4 mb-5 ring-1 ring-cyan-400/18">
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div class="min-w-0">
-                <p id="ferriolAdminEmpresaPayKicker" class="text-[10px] font-semibold uppercase tracking-wide text-cyan-100/85 mb-1">Cuota distribuidor</p>
-                <p class="text-xs text-white/70 leading-snug"><strong class="text-white/90">Único lugar preferido:</strong> <strong class="text-cyan-200/95">Cuenta (avatar)</strong> → <strong id="ferriolIngresosPlanCue" class="text-white/85">Plan · Abonar cuota distribuidor</strong>. Misma cuenta Ferriol para fundadores y socios.</p>
-              </div>
-              <button type="button" id="btnOpenEmpresaSubscriptionAdmin" class="shrink-0 rounded-2xl px-4 py-3 font-semibold text-sm text-white whitespace-nowrap shadow-lg bg-gradient-to-br from-cyan-600 to-slate-900 border border-cyan-300/35 hover:brightness-110 active:scale-[0.98] touch-target inline-flex items-center justify-center gap-2">
-                <i data-lucide="credit-card" class="w-4 h-4 shrink-0"></i>
-                <span id="btnOpenEmpresaSubscriptionAdminLabel">Abonar cuota distribuidor</span>
-              </button>
+              <p class="text-[10px] text-white/45 leading-snug"><strong class="text-white/60">Abonar cuota / suscripción:</strong> tocá tu foto → <strong class="text-amber-100/85">último ítem del menú Cuenta</strong> o <strong class="text-amber-100/85">Más opciones</strong> — mismo flujo para todos.</p>
             </div>
           </div>
 
@@ -2893,16 +2871,16 @@
           <i data-lucide="user" class="w-[1.125rem] h-[1.125rem] text-gray-500 shrink-0 stroke-[1.75]"></i>
           <span>Datos personales</span>
         </button>
+        <button type="button" id="accountMenuBtnBank" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors hidden mb-1">
+          <i data-lucide="landmark" class="w-[1.125rem] h-[1.125rem] text-gray-500 shrink-0 stroke-[1.75]"></i>
+          <span>Mis datos bancarios</span>
+        </button>
         <button type="button" id="accountMenuBtnPlan" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-emerald-50 active:bg-emerald-50/80 transition-colors border border-emerald-200/70 bg-emerald-50/[0.45] mb-1">
           <i data-lucide="credit-card" class="w-[1.125rem] h-[1.125rem] text-emerald-600 shrink-0 stroke-[1.75]"></i>
           <span class="flex flex-col items-start leading-snug gap-0.5">
-            <span class="text-[11px] font-semibold uppercase tracking-wide text-emerald-800/85">Plan</span>
-            <span id="accountMenuPlanSubline">Cuenta · Abonar suscripción</span>
+            <span class="text-[11px] font-semibold uppercase tracking-wide text-emerald-800/85">Cuota Ferriol</span>
+            <span id="accountMenuPlanSubline">Abonar cuota distribuidor</span>
           </span>
-        </button>
-        <button type="button" id="accountMenuBtnBank" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors hidden">
-          <i data-lucide="landmark" class="w-[1.125rem] h-[1.125rem] text-gray-500 shrink-0 stroke-[1.75]"></i>
-          <span>Datos bancarios</span>
         </button>
         <div class="my-2 border-t border-gray-100"></div>
         <button type="button" id="accountMenuBtnLogout" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-semibold text-red-600 touch-target flex items-center gap-3 hover:bg-red-50 active:bg-red-50/80 transition-colors">
@@ -2951,7 +2929,7 @@
         </div>
         </div>
         <div id="accountProfileBankWrap" class="hidden mb-4 scroll-mt-4 space-y-3 rounded-xl border border-amber-400/25 bg-amber-500/[0.06] p-3 sm:p-4">
-          <h4 class="text-sm font-semibold text-amber-100/95 flex items-center gap-2"><i data-lucide="landmark" class="w-4 h-4 shrink-0"></i> Datos bancarios</h4>
+          <h4 class="text-sm font-semibold text-amber-100/95 flex items-center gap-2"><i data-lucide="landmark" class="w-4 h-4 shrink-0"></i> Mis datos bancarios</h4>
           <p class="text-[11px] text-amber-200/85 leading-snug">Para retiros de comisiones y acuerdos de red. El <strong class="text-white/80">titular</strong> debe coincidir con tu identidad en la cuenta. No cargues claves ni tokens.</p>
           <label class="block text-xs text-white/55 mb-1" for="accountProfileBankTitular">Titular de la cuenta <span class="text-amber-200/80">*</span></label>
           <input type="text" id="accountProfileBankTitular" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm" placeholder="Como figura en el banco" autocomplete="name">
@@ -2992,7 +2970,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260430_cuota_distribuidor_nombrada"></script>
+  <script defer src="kiosco-app.js?v=20260426_cuenta_cuota_sin_atajos_caja"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>

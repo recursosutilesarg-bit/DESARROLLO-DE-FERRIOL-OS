@@ -4015,13 +4015,13 @@
       var foot = document.getElementById('planPanelFooterHint');
       if (foot) {
         if (admin) {
-          foot.innerHTML = 'Fundadores / socios: también desde <strong class="text-white/55">Cuenta (avatar)</strong> tocá este ítem.<br/>Negocio (kiosco): desde <strong class="text-white/65">Caja → Abono sistema / suscripción</strong>.';
+          foot.innerHTML = 'Distribuidores / fundadores / socios de red: tocá <strong class="text-white/55">tu foto</strong> → último ítem del menú (<strong class="text-emerald-100/90">Abonar cuota</strong>) o <strong class="text-white/55">Más opciones</strong>.';
         } else {
-          foot.innerHTML = 'Socios / fundadores: también tocá tu foto arriba <strong class="text-white/55">→ Cuenta</strong> y este mismo ítem.<br/>Negocio (kiosco): opcional desde <strong class="text-white/65">Caja → Abono sistema / suscripción</strong>.';
+          foot.innerHTML = 'Todos los perfiles usan el mismo flujo: <strong class="text-white/55">Cuenta</strong> (avatar) → <strong class="text-emerald-100/90">Abonar suscripción</strong> o desde <strong class="text-white/65">Más</strong>. En Caja · Abono sistema está la info de licencia (sin botón de pago ahí).';
         }
       }
       var aml = document.getElementById('accountMenuPlanSubline');
-      if (aml) aml.textContent = admin ? 'Cuenta · Abonar cuota distribuidor' : 'Cuenta · Abonar suscripción';
+      if (aml) aml.textContent = admin ? 'Abonar cuota distribuidor' : 'Abonar suscripción';
       var masl1 = document.getElementById('btnMasPlanLine1');
       if (masl1) masl1.textContent = admin ? 'Cuenta · Plan · Abonar cuota distribuidor' : 'Cuenta · Plan · Abonar suscripción';
       var masl2 = document.getElementById('btnMasPlanLine2');
@@ -4030,12 +4030,6 @@
           ? 'Un solo lugar: cuota distribuidor a Ferriol (empresa) — mismos datos oficiales'
           : 'Un solo lugar: datos de cuenta Ferriol (empresa) para todos los perfiles';
       }
-      var payKick = document.getElementById('ferriolAdminEmpresaPayKicker');
-      if (payKick) payKick.textContent = admin ? 'Cuota distribuidor' : 'Licencia / suscripción negocio';
-      var cue = document.getElementById('ferriolIngresosPlanCue');
-      if (cue) cue.textContent = admin ? 'Plan · Abonar cuota distribuidor' : 'Plan · Abonar suscripción';
-      var admLbl = document.getElementById('btnOpenEmpresaSubscriptionAdminLabel');
-      if (admLbl) admLbl.textContent = admin ? 'Abonar cuota distribuidor' : 'Abonar suscripción';
     }
 
     function syncPlanPanelTrialSummary() {
@@ -4186,8 +4180,8 @@
           emailHint.textContent = 'Sesión: ' + (currentUser.email || '—');
           emailHint.classList.remove('hidden');
         }
-        if (titleEl) titleEl.innerHTML = '<i data-lucide="landmark" class="w-5 h-5 text-amber-200"></i> Datos bancarios';
-        if (saveBtn) saveBtn.textContent = 'Guardar datos bancarios';
+        if (titleEl) titleEl.innerHTML = '<i data-lucide="landmark" class="w-5 h-5 text-amber-200"></i> Mis datos bancarios';
+        if (saveBtn) saveBtn.textContent = 'Guardar mis datos bancarios';
         var bankParsedBk = ferriolParsePartnerBankingInfo(currentUser.partnerTransferInfo);
         ferriolFillAccountProfileBankForm(bankParsedBk);
       } else {
@@ -4709,7 +4703,7 @@
             applyAppShell();
             await loadSuperMasBankingSection();
             if (msg) {
-              msg.textContent = 'Datos bancarios guardados.';
+          msg.textContent = 'Mis datos bancarios guardados.';
               msg.classList.remove('hidden', 'text-red-300');
               msg.classList.add('text-emerald-300');
             }
