@@ -2856,17 +2856,17 @@
           <i data-lucide="landmark" class="w-[1.125rem] h-[1.125rem] text-gray-500 shrink-0 stroke-[1.75]"></i>
           <span>Mis datos bancarios</span>
         </button>
-        <div id="accountMenuPlanBlock" class="mb-2 rounded-xl border-2 border-orange-300/90 bg-gradient-to-br from-orange-50/95 via-amber-50 to-orange-100/90 shadow-md shadow-orange-200/50 ring-1 ring-orange-200/60 overflow-hidden">
-          <button type="button" id="accountMenuPlanToggle" class="w-full text-left flex items-center justify-between gap-2 px-3 py-2.5 touch-target hover:bg-orange-100/50 active:bg-orange-100/70 transition-colors" aria-expanded="true" aria-controls="accountMenuPlanExpanded">
-            <span class="flex items-center gap-2 min-w-0">
-              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-500/20 ring-1 ring-orange-400/35">
+        <div id="accountMenuPlanBlock" class="mb-2 rounded-xl border-2 border-orange-300/90 bg-gradient-to-br from-orange-50/95 via-amber-50 to-orange-100/90 shadow-md shadow-orange-200/50 ring-1 ring-orange-200/60 overflow-hidden" role="group" aria-label="Mi plan">
+          <div class="px-3 pt-2.5 pb-1 border-b border-orange-200/60">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-500/20 ring-1 ring-orange-400/35" aria-hidden="true">
                 <i data-lucide="layers" class="w-[1.15rem] h-[1.15rem] text-orange-700 shrink-0 stroke-[2]"></i>
               </span>
               <span class="font-bold text-sm tracking-wide text-orange-950 uppercase">Mi plan</span>
-            </span>
-            <i data-lucide="chevron-down" id="accountMenuPlanChevron" class="w-5 h-5 text-orange-700 shrink-0 transition-transform duration-200"></i>
-          </button>
-          <div id="accountMenuPlanExpanded" class="flex flex-col gap-1.5 px-2 pb-2.5 pt-0 border-t border-orange-200/60">
+            </div>
+            <p class="text-[10px] text-orange-800/75 mt-1 pl-11 leading-snug">Pagos y solicitud de rol distribuidor</p>
+          </div>
+          <div id="accountMenuPlanInner" class="flex flex-col gap-1.5 px-2 py-2.5">
             <button type="button" id="accountMenuBtnAbonar" class="w-full text-left rounded-xl py-2.5 px-3 touch-target flex items-center gap-2.5 border border-orange-400/70 bg-white/90 hover:bg-orange-50 active:scale-[0.99] shadow-sm">
               <i data-lucide="credit-card" class="w-[1.125rem] h-[1.125rem] text-orange-600 shrink-0 stroke-[1.85]"></i>
               <span id="accountMenuPlanAbonarLabel" class="text-sm font-semibold text-orange-950">Abonar suscripción</span>

@@ -4632,20 +4632,6 @@
         else goToPanel('plan');
       });
     }
-    var accountMenuPlanToggle = document.getElementById('accountMenuPlanToggle');
-    var accountMenuPlanExpanded = document.getElementById('accountMenuPlanExpanded');
-    var accountMenuPlanChevron = document.getElementById('accountMenuPlanChevron');
-    if (accountMenuPlanToggle && accountMenuPlanExpanded) {
-      accountMenuPlanToggle.addEventListener('click', function (ev) {
-        ev.stopPropagation();
-        var open = accountMenuPlanExpanded.classList.toggle('hidden');
-        accountMenuPlanToggle.setAttribute('aria-expanded', open ? 'false' : 'true');
-        if (accountMenuPlanChevron) accountMenuPlanChevron.classList.toggle('rotate-180', open);
-        try {
-          if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
-        } catch (_) {}
-      });
-    }
     var accountMenuBtnDistribuidor = document.getElementById('accountMenuBtnDistribuidor');
     if (accountMenuBtnDistribuidor) {
       accountMenuBtnDistribuidor.addEventListener('click', function () {
