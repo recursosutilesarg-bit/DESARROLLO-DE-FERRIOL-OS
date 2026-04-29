@@ -7041,7 +7041,14 @@ async function showApp() {
         sponsor_id: sp.sponsorId || null
       }, { onConflict: 'id' });
       if (upProf.error) {
-        errEl.textContent = 'Usuario registrado, pero el perfil no se guardó: ' + (upProf.error.message || '') + ' Usá «Volver al inicio de sesión» e intentá entrar con el mismo email y contraseña. Si no entrás, revisá en Supabase la tabla profiles (columna phone, políticas RLS).';
+        var em = String(upProf.error.message || '');
+        var sqlHint =
+          em.indexOf('profiles_role_check') !== -1 || em.toLowerCase().indexOf('role_check') !== -1
+            ? ' Abrí Supabase → SQL Editor y ejecutá el archivo «supabase-profiles-allow-role-partner.sql» del proyecto (permite crear cuentas de distribuidor). Después borrá la fila órfana si hace falta y registrate de nuevo, o cambiá el role a partner manualmente desde Supabase.'
+            : '';
+        errEl.textContent =
+          'Usuario registrado, pero el perfil no se guardó: ' + em + sqlHint +
+          ' Podés usar «Volver al inicio de sesión»: si entrás igual, revisá tabla profiles en Supabase (RLS / columna phone).';
         errEl.classList.add('show');
         return;
       }
