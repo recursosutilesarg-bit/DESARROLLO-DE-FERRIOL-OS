@@ -143,9 +143,19 @@
       return String(s).trim().toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 32);
     }
 
-    /** Abre el formulario de alta; definido acá para que funcione aunque falle código más abajo en este archivo. */
+    /** Abre el formulario de alta; definido acá para que funcione aunque falle código más abajo en este archivo.
+     *  Si entraste por link de distribuidor (?ref=&nicho=socio), no pisamos ese nicho si tocás sin querer "Negocio". */
     function openSignUpFlow(nichoExplicit) {
+      var keepSocioFromReferralLink = false;
+      try {
+        keepSocioFromReferralLink =
+          sessionStorage.getItem('ferriol_signup_nicho') === 'socio' &&
+          !!(sessionStorage.getItem('ferriol_signup_ref') || '').trim();
+      } catch (_) {}
       var nicho = nichoExplicit === 'socio' ? 'socio' : 'kiosco';
+      if (keepSocioFromReferralLink && nichoExplicit === 'kiosco') {
+        nicho = 'socio';
+      }
       try { sessionStorage.setItem('ferriol_signup_nicho', nicho); } catch (_) {}
       var loginFormWrap = document.getElementById('loginFormWrap');
       var resetPwdBox = document.getElementById('resetPwdBox');
@@ -6999,6 +7009,10 @@ async function showApp() {
           errEl.classList.add('show');
           return;
         }
+      } else {
+        /** Alta negocio (kiosco) desde ?ref=: también debe guardarse sponsor_id (antes quedaba null). */
+        var sidNk = await getSponsorIdForNewKiosqueroProfile();
+        sp = { sponsorId: sidNk || null, error: null };
       }
       const { data, error } = await supabaseClient.auth.signUp({ email, password });
       if (error) {
