@@ -1259,18 +1259,13 @@
                 </button>
               </div>
               <div class="ferriol-partner-kiosk-proof-btn-wrap hidden shrink-0 min-w-0">
-                <button type="button" id="btnTogglePartnerKioskProofPanel" aria-expanded="false" title="Comprobantes que envían tus referidos antes de cargar la venta ante Ferriol" class="glass inline-flex w-full sm:w-auto min-w-0 items-center justify-center gap-2 rounded-xl border border-teal-400/40 bg-teal-500/[0.1] px-3 py-2.5 transition-all hover:border-teal-400/60 active:scale-[0.98] touch-target">
+                <button type="button" id="btnOpenPartnerProofInbox" title="Abrir comprobantes de comercios y distribuidores. El número es cuántos hay nuevos sin abrir esta pantalla." class="relative glass inline-flex w-full sm:w-auto min-w-0 items-center justify-center gap-2 rounded-xl border border-teal-400/40 bg-teal-500/[0.1] px-3 py-2.5 transition-all hover:border-teal-400/60 active:scale-[0.98] touch-target">
                   <i data-lucide="inbox" class="h-5 w-5 shrink-0 text-teal-200"></i>
-                  <span class="font-semibold text-sm text-white">Comprobantes de comercios</span>
+                  <span class="font-semibold text-sm text-white">Comprobantes</span>
+                  <span id="partnerProofInboxBtnBadge" class="absolute -top-1.5 -right-1.5 min-w-[1.125rem] h-[18px] px-1 rounded-full bg-teal-500 text-white text-[11px] font-bold flex items-center justify-center leading-none hidden">0</span>
                 </button>
               </div>
             </div>
-          </div>
-          <div id="partnerKioskProofQueueBox" class="hidden mb-5 rounded-2xl border border-teal-500/40 bg-teal-950/25 p-4 sm:p-5 ring-1 ring-teal-500/20 scroll-mt-24">
-            <h3 class="text-sm font-semibold text-teal-200 mb-1 flex items-center gap-2"><i data-lucide="inbox" class="w-4 h-4 shrink-0"></i> Comprobantes de tus comercios</h3>
-            <p class="text-[11px] text-white/50 mb-3 leading-relaxed">Cuando un <strong class="text-white/70">referido comercio</strong> paga y sube comprobante desde su app, llega acá. Registrá la <strong class="text-emerald-200/90">venta ante Ferriol</strong> (mismo flujo que “Cargar venta”) para asegurarte la comisión cuando la empresa apruebe.</p>
-            <div id="partnerKioskProofQueueList" class="space-y-3 text-sm min-h-[2rem]"><p class="text-white/35 text-xs py-2">Cargando…</p></div>
-            <p id="partnerKioskProofQueueMsg" class="text-xs mt-2 text-teal-200/80 hidden"></p>
           </div>
           <p id="superDirectoryStats" class="hidden text-xs text-white/45 mb-2 super-only super-main-only"></p>
           <p class="text-xs text-white/50 mb-2 super-only super-main-only">Directorio global: filtro <strong class="text-white/65">Sin referidor</strong> y asignación desde el detalle de cada fila.</p>
@@ -1358,6 +1353,13 @@
                 <option value="180">Últimos 6 meses</option>
                 <option value="365">Últimos 12 meses</option>
               </select>
+              <div class="ferriol-partner-kiosk-proof-btn-wrap hidden shrink-0 min-w-0">
+                <button type="button" id="btnOpenPartnerProofInboxIngresos" title="Abrir comprobantes de comercios y distribuidores. El número es cuántos hay nuevos sin abrir esta pantalla." class="relative glass inline-flex w-full sm:w-auto min-w-0 items-center justify-center gap-2 rounded-xl border border-teal-400/40 bg-teal-500/[0.1] px-3 py-2.5 transition-all hover:border-teal-400/60 active:scale-[0.98] touch-target">
+                  <i data-lucide="inbox" class="h-5 w-5 shrink-0 text-teal-200"></i>
+                  <span class="font-semibold text-sm text-white">Comprobantes</span>
+                  <span id="partnerProofInboxBtnBadgeIngresos" class="absolute -top-1.5 -right-1.5 min-w-[1.125rem] h-[18px] px-1 rounded-full bg-teal-500 text-white text-[11px] font-bold flex items-center justify-center leading-none hidden">0</span>
+                </button>
+              </div>
               <div class="ferriol-partner-client-sale-wrap hidden min-w-0">
                 <button type="button" id="btnOpenClientSaleRequestModal" title="Cargar venta con comprobante: datos del cliente, monto e imagen. La empresa revisa en Solicitudes y acredita tu comisión si aprueba." class="glass inline-flex max-w-full items-center justify-center gap-2 rounded-xl border border-emerald-400/40 bg-emerald-500/[0.1] px-3 py-2.5 text-sm font-semibold text-white transition-all hover:border-emerald-400/60 active:scale-[0.98] touch-target">
                   <i data-lucide="receipt" class="h-4 w-4 shrink-0 text-emerald-200"></i>
@@ -1421,6 +1423,32 @@
             <p class="text-white/45 text-xs py-5 text-center px-2">Cargando…</p>
           </div>
         </div>
+
+        <!-- Partner: pantalla completa comprobantes kiosco → vos (misma idea que Afiliados: 2 pestañas) -->
+        <div id="super-section-partner-comprobantes" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 z-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+          <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-start gap-3 min-w-0">
+              <button type="button" id="btnPartnerProofScreenBack" class="btn-neomorphic rounded-xl p-2.5 touch-target shrink-0 mt-0.5" aria-label="Volver">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+              </button>
+              <div class="min-w-0">
+                <h2 class="font-bold text-xl flex items-center gap-2 text-white">
+                  <i data-lucide="inbox" class="w-5 h-5 shrink-0 text-[#86efac]"></i>
+                  Comprobantes
+                </h2>
+                <p class="text-xs text-white/50 mt-1 leading-snug">Comercios y distribuidores que subieron un comprobante para que registres la venta ante Ferriol.</p>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 mb-4" role="tablist" aria-label="Tipo de comprobante">
+            <button type="button" id="partnerProofScreenTabComercios" role="tab" aria-selected="true" class="partner-proof-screen-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-[#22c55e]/50 bg-[#22c55e]/20 text-white transition-all">Comercios</button>
+            <button type="button" id="partnerProofScreenTabDistribuidores" role="tab" aria-selected="false" class="partner-proof-screen-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-transparent text-white/55 hover:text-white/80 transition-all">Distribuidores</button>
+          </div>
+          <div id="partnerProofScreenPaneComercios" class="partner-proof-screen-pane space-y-3 text-sm min-h-[4rem]" data-pane="comercios"></div>
+          <div id="partnerProofScreenPaneDistribuidores" class="partner-proof-screen-pane hidden space-y-3 text-sm min-h-[4rem]" data-pane="distribuidores"></div>
+          <p id="partnerProofScreenMsg" class="hidden text-xs mt-4 text-center px-1"></p>
+        </div>
+
         <!-- ══════════════════════════════════════════════════════
              SECCIÓN SISTEMA: Tablero visual MLM + Cobros (solo fundador)
              ══════════════════════════════════════════════════════ -->
@@ -3169,7 +3197,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426_comprobantes_en_afiliados"></script>
+  <script defer src="kiosco-app.js?v=20260426_partner_proof_inbox_modal"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>
