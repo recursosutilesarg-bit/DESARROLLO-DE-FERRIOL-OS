@@ -1020,9 +1020,9 @@
           <p id="planCheckoutPaySalesHeadline" class="font-black text-xl sm:text-2xl text-white mb-4 leading-snug">—</p>
           <p id="planCheckoutPayLead" class="text-sm text-white/76 mb-6 leading-relaxed hidden"></p>
           <div id="planCheckoutPriceBox" class="rounded-2xl border border-white/25 bg-gradient-to-b from-black/45 to-black/55 py-6 px-4 mb-6 text-center ring-1 ring-white/12 shadow-xl shadow-black/30">
-            <p id="planCheckoutPriceLabel" class="text-[10px] font-semibold uppercase tracking-wide text-white/55 mb-2">Precio referencia empresa</p>
+            <p id="planCheckoutPriceLabel" class="text-[10px] font-semibold uppercase tracking-wide text-white/55 mb-2">Suscripción mensual · negocio</p>
             <p id="planCheckoutPriceBig" class="text-[2.35rem] sm:text-5xl font-black tabular-nums text-amber-50 tracking-tight leading-none drop-shadow-lg">—</p>
-            <p id="planCheckoutPriceExplain" class="text-[11px] text-white/52 mt-3 leading-snug px-2">—</p>
+            <p id="planCheckoutPriceExplain" class="text-[11px] text-white/52 mt-3 leading-snug px-2 hidden" aria-hidden="true"></p>
           </div>
           <div id="planCheckoutBenefitsBlocksKiosco" class="mb-5">
             <p id="planCheckoutPayKioscoBenefMainLabel" class="text-[10px] font-semibold uppercase tracking-wide text-emerald-200/85 mb-2">Beneficios incluidos con tu suscripción</p>
@@ -1042,7 +1042,7 @@
             <div class="space-y-5">
               <div>
                 <p class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 shrink-0 text-amber-200/95"></i> Transferencia</p>
-                <p id="planCheckoutPayTransferHint" class="text-xs text-white/55 mb-3 leading-relaxed"></p>
+                <p id="planCheckoutPayTransferHint" class="hidden text-xs text-white/55 mb-0 leading-relaxed" aria-hidden="true"></p>
                 <button type="button" id="btnPlanOpenEmpresaSubscription" class="w-full rounded-2xl px-5 py-4 font-bold text-base text-white shadow-xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-700 ring-2 ring-amber-200/45 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2">
                   <i data-lucide="building-2" class="w-6 h-6 shrink-0"></i>
                   <span><span id="planPanelPayBtnPrimary">Ver datos para transferir</span><span id="planPanelPayBtnSubtitle" class="text-white/90 font-semibold hidden sm:inline"> · cuenta Ferriol</span></span>
@@ -1050,7 +1050,7 @@
               </div>
               <div class="border-t border-white/12 pt-5">
                 <p class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i data-lucide="credit-card" class="w-5 h-5 shrink-0 text-sky-200/95"></i> Mercado Pago</p>
-                <p id="planCheckoutPayMpHint" class="text-xs text-white/55 mb-3 leading-relaxed"></p>
+                <p id="planCheckoutPayMpHint" class="hidden text-xs text-white/55 mb-0 leading-relaxed" aria-hidden="true"></p>
                 <div id="planPanelMercadoPagoWrap" class="w-full space-y-2">
                   <button type="button" id="planCheckoutMpRoleBtn" data-mp-product="kioscoMonthly" class="ferriol-mp-pay-btn w-full rounded-xl py-3 px-3 touch-target inline-flex items-center justify-center gap-2 font-bold text-[0.6875rem] sm:text-xs text-white leading-tight text-center border-2 border-sky-400/50 bg-gradient-to-br from-[#009ee3]/90 via-[#008ad4]/95 to-[#006ebb] shadow-lg shadow-sky-900/30 ring-1 ring-white/15 hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:active:scale-100">
                     <i data-lucide="external-link" class="w-[1.125rem] h-[1.125rem] shrink-0 opacity-95"></i>
@@ -1066,7 +1066,7 @@
             </div>
           </div>
           <p id="planPanelLead" class="text-sm text-white/55 mb-3 leading-relaxed hidden"></p>
-          <p id="planPanelFooterHint" class="text-[10px] text-white/45 leading-relaxed"></p>
+          <p id="planPanelFooterHint" class="text-[10px] text-white/45 leading-relaxed hidden" aria-hidden="true"></p>
         </div>
         <!-- Resumen: solicitud rol distribuidor (kit + licencia) -->
         <div id="planCheckoutDistribWrap" class="hidden">
@@ -1074,9 +1074,9 @@
           <p id="planCheckoutDistribSalesHeadline" class="font-black text-xl sm:text-2xl lg:text-[1.65rem] text-white mb-4 leading-snug">Hacete distribuidor del sistema y ganá hasta el 50% mensual</p>
           <p id="planCheckoutDistribLead" class="text-sm text-white/75 mb-5 leading-relaxed hidden"></p>
           <div id="planCheckoutDistribPriceBox" class="rounded-2xl border border-violet-400/45 bg-gradient-to-b from-violet-950/65 to-black/40 py-6 px-4 mb-6 text-center ring-1 ring-violet-400/25 shadow-xl shadow-black/35">
-            <p class="text-[10px] font-semibold uppercase tracking-wide text-violet-200/85 mb-2">Precio referencia empresa</p>
+            <p class="text-[10px] font-semibold uppercase tracking-wide text-violet-200/85 mb-2">Kit + licencia</p>
             <p id="planCheckoutDistribPriceBig" class="text-[2.35rem] sm:text-5xl font-black tabular-nums text-violet-50 tracking-tight leading-none drop-shadow-lg">—</p>
-            <p id="planCheckoutDistribPriceSub" class="text-[11px] text-white/50 mt-3 leading-snug px-2">ARS · mismo monto configurado como <strong class="text-violet-200/95">Kit distribuidor</strong> · puede variar si Ferriol comunica otro valor.</p>
+            <p id="planCheckoutDistribPriceSub" class="hidden text-[11px] text-white/50 mt-3 leading-snug px-2" aria-hidden="true"></p>
           </div>
           <div id="planCheckoutDistribBenefitsBox" class="rounded-2xl border border-violet-500/45 bg-violet-950/35 px-4 py-4 mb-5 ring-1 ring-violet-400/20">
             <p id="planCheckoutDistribBenefitsEyebrow" class="text-[10px] font-semibold uppercase tracking-wide text-violet-200/95 mb-2">Beneficios</p>
@@ -1087,7 +1087,6 @@
             <div class="space-y-5">
               <div>
                 <p class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 shrink-0 text-amber-200/95"></i> Transferencia</p>
-                <p class="text-xs text-white/55 mb-3 leading-relaxed">Te mostramos la <strong class="text-white/75">cuenta empresa Ferriol</strong> para abonar kit + licencia de distribuidor y enviar el comprobante.</p>
                 <button type="button" id="btnPlanDistribOpenTransferModal" class="w-full rounded-2xl px-5 py-4 font-bold text-base text-white shadow-xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-700 ring-2 ring-amber-200/45 hover:brightness-110 active:scale-[0.98] touch-target flex items-center justify-center gap-2">
                   <i data-lucide="building-2" class="w-6 h-6 shrink-0"></i>
                   <span>Ver datos para transferir <span class="text-white/90 font-semibold hidden sm:inline">· cuenta Ferriol</span></span>
@@ -1095,7 +1094,6 @@
               </div>
               <div class="border-t border-white/12 pt-5">
                 <p class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i data-lucide="credit-card" class="w-5 h-5 shrink-0 text-sky-200/95"></i> Mercado Pago</p>
-                <p class="text-xs text-white/55 mb-3 leading-relaxed">Abrís el link y pagás con <strong class="text-white/75">tarjeta o efectivo</strong> (Mercado Pago). Después tocá <strong class="text-emerald-200/90">YA PAGUÉ</strong> para enviar el comprobante.</p>
                 <div id="planCheckoutDistribMercadoInner" class="w-full space-y-2">
                   <button type="button" data-mp-product="kit" class="ferriol-mp-pay-btn w-full rounded-xl py-3 px-3 touch-target inline-flex items-center justify-center gap-2 font-bold text-[0.6875rem] sm:text-xs text-white leading-tight text-center border-2 border-sky-400/50 bg-gradient-to-br from-[#009ee3]/90 via-[#008ad4]/95 to-[#006ebb] shadow-lg hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100">
                     <i data-lucide="external-link" class="w-[1.125rem] h-[1.125rem] shrink-0 opacity-95"></i>
@@ -1359,7 +1357,7 @@
                 </button>
               </div>
               <div class="ferriol-partner-mi-plan-wrap hidden min-w-0">
-                <button type="button" id="btnPartnerOpenMiPlan" title="Pagar cuota a Ferriol, ver precios referencia · mismo menú Mi plan" class="glass inline-flex max-w-full items-center justify-center gap-2 rounded-xl border-2 border-orange-400/50 bg-gradient-to-br from-orange-950/65 via-amber-950/55 to-orange-950/50 px-3 py-2.5 text-sm font-bold text-amber-100 shadow-md shadow-orange-900/30 ring-1 ring-orange-400/30 transition-all hover:border-orange-400/70 active:scale-[0.98] touch-target">
+                <button type="button" id="btnPartnerOpenMiPlan" title="Pagar cuota a Ferriol · mismo menú Mi plan" class="glass inline-flex max-w-full items-center justify-center gap-2 rounded-xl border-2 border-orange-400/50 bg-gradient-to-br from-orange-950/65 via-amber-950/55 to-orange-950/50 px-3 py-2.5 text-sm font-bold text-amber-100 shadow-md shadow-orange-900/30 ring-1 ring-orange-400/30 transition-all hover:border-orange-400/70 active:scale-[0.98] touch-target">
                   <i data-lucide="layers" class="h-4 w-4 shrink-0 text-amber-200"></i>
                   <span>Mi plan</span>
                 </button>
@@ -3173,7 +3171,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260429_kiosk_comprobantes_partner"></script>
+  <script defer src="kiosco-app.js?v=20260426_plan_checkout_copy"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>

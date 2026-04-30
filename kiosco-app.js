@@ -4775,14 +4775,14 @@
       var tr = document.getElementById('planCheckoutPayTransferHint');
       var mp = document.getElementById('planCheckoutPayMpHint');
       if (tr) {
-        tr.textContent = admin
-          ? 'Te mostramos la cuenta empresa Ferriol para abonar la cuota mensual de distribuidor y enviar el comprobante.'
-          : 'Te mostramos la cuenta empresa Ferriol para abonar la suscripción mensual de tu negocio y enviar el comprobante.';
+        tr.textContent = '';
+        tr.classList.add('hidden');
+        tr.classList.remove('mb-3');
       }
       if (mp) {
-        mp.innerHTML = admin
-          ? 'Abrís el link y pagás con <strong class="text-sky-200/90">tarjeta / efectivo</strong> (Mercado Pago, cuota distribuidor). Cuando termines, tocá <strong class="text-emerald-100/90">YA PAGUÉ</strong> para enviar el comprobante.'
-          : 'Abrís el link y pagás con <strong class="text-sky-200/90">tarjeta / efectivo</strong> (Mercado Pago, suscripción del negocio). Cuando termines, tocá <strong class="text-emerald-100/90">YA PAGUÉ</strong> para enviar el comprobante.';
+        mp.innerHTML = '';
+        mp.classList.add('hidden');
+        mp.classList.remove('mb-3');
       }
     }
     window.ferriolFetchCheckoutCopy = function (force) {
@@ -4965,9 +4965,8 @@
       }
       var foot = document.getElementById('planPanelFooterHint');
       if (foot) {
-        foot.innerHTML = admin
-          ? 'Aboná la <strong class="text-cyan-100/80">cuota mensual distribuidor</strong> (referencia abajo). Los montos son de empresa salvo aviso diferente.'
-          : 'Aboná la <strong class="text-emerald-100/85">suscripción mensual del negocio</strong> (referencia abajo). Si Ferriol te pasó otro valor, ese es el válido.';
+        foot.innerHTML = '';
+        foot.classList.add('hidden');
       }
       var aml = document.getElementById('accountMenuPlanAbonarLabel');
       if (aml) aml.textContent = admin ? 'Pagar cuota mensual' : 'Pagar suscripción mensual';
@@ -5001,7 +5000,10 @@
       var box = document.getElementById('planCheckoutPriceBox');
       if (!currentUser) {
         if (big) big.textContent = '—';
-        if (ex) ex.textContent = '';
+        if (ex) {
+          ex.textContent = '';
+          ex.classList.add('hidden');
+        }
         return;
       }
       var admin = ferriolPlanPayModalMode() === 'admin';
@@ -5009,14 +5011,11 @@
       var nf = '$ ' + Number(n).toLocaleString('es-AR') + ' ARS';
       if (big) big.textContent = nf;
       if (label) {
-        label.textContent = admin
-          ? 'Precio referencia · cuota distribuidor'
-          : 'Precio referencia · suscripción del negocio';
+        label.textContent = admin ? 'Cuota mensual · distribuidor' : 'Suscripción mensual · negocio';
       }
       if (ex) {
-        ex.textContent = admin
-          ? 'Este es el monto que usa la app como referencia para la cuota de distribuidor. Si Ferriol te comunicó otro valor, ese es el que vale.'
-          : 'Este es el valor mensual de referencia para la suscripción del negocio. Si la empresa te pasó otro importe oficial, ese es el válido.';
+        ex.textContent = '';
+        ex.classList.add('hidden');
       }
       if (box) {
         box.className = admin
