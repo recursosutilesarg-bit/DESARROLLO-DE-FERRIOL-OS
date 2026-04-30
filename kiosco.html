@@ -1251,12 +1251,26 @@
               <i data-lucide="users" class="w-5 h-5 shrink-0 text-[#86efac]"></i>
               Afiliados
             </h2>
-            <div class="ferriol-partner-affiliate-links-wrap hidden w-full min-w-0 sm:w-auto sm:max-w-md sm:shrink-0">
-              <button type="button" id="btnOpenPartnerAffiliateLinks" title="Enlaces para negocios (kioscos) y para socios (membresía)" class="glass inline-flex w-full min-w-0 items-center justify-center gap-2 rounded-xl border border-cyan-400/35 bg-cyan-500/[0.07] px-3 py-2.5 transition-all hover:border-cyan-400/55 active:scale-[0.98] touch-target sm:w-auto">
-                <i data-lucide="link-2" class="h-5 w-5 shrink-0 text-cyan-200"></i>
-                <span class="font-semibold text-sm text-white">Enlaces de afiliación</span>
-              </button>
+            <div class="flex flex-wrap gap-2 w-full sm:w-auto sm:justify-end sm:shrink-0 items-stretch">
+              <div class="ferriol-partner-affiliate-links-wrap hidden min-w-0 flex-1 sm:flex-initial sm:max-w-md">
+                <button type="button" id="btnOpenPartnerAffiliateLinks" title="Enlaces para negocios (kioscos) y para socios (membresía)" class="glass inline-flex w-full min-w-0 items-center justify-center gap-2 rounded-xl border border-cyan-400/35 bg-cyan-500/[0.07] px-3 py-2.5 transition-all hover:border-cyan-400/55 active:scale-[0.98] touch-target sm:w-auto">
+                  <i data-lucide="link-2" class="h-5 w-5 shrink-0 text-cyan-200"></i>
+                  <span class="font-semibold text-sm text-white">Enlaces de afiliación</span>
+                </button>
+              </div>
+              <div class="ferriol-partner-kiosk-proof-btn-wrap hidden shrink-0 min-w-0">
+                <button type="button" id="btnTogglePartnerKioskProofPanel" aria-expanded="false" title="Comprobantes que envían tus referidos antes de cargar la venta ante Ferriol" class="glass inline-flex w-full sm:w-auto min-w-0 items-center justify-center gap-2 rounded-xl border border-teal-400/40 bg-teal-500/[0.1] px-3 py-2.5 transition-all hover:border-teal-400/60 active:scale-[0.98] touch-target">
+                  <i data-lucide="inbox" class="h-5 w-5 shrink-0 text-teal-200"></i>
+                  <span class="font-semibold text-sm text-white">Comprobantes de comercios</span>
+                </button>
+              </div>
             </div>
+          </div>
+          <div id="partnerKioskProofQueueBox" class="hidden mb-5 rounded-2xl border border-teal-500/40 bg-teal-950/25 p-4 sm:p-5 ring-1 ring-teal-500/20 scroll-mt-24">
+            <h3 class="text-sm font-semibold text-teal-200 mb-1 flex items-center gap-2"><i data-lucide="inbox" class="w-4 h-4 shrink-0"></i> Comprobantes de tus comercios</h3>
+            <p class="text-[11px] text-white/50 mb-3 leading-relaxed">Cuando un <strong class="text-white/70">referido comercio</strong> paga y sube comprobante desde su app, llega acá. Registrá la <strong class="text-emerald-200/90">venta ante Ferriol</strong> (mismo flujo que “Cargar venta”) para asegurarte la comisión cuando la empresa apruebe.</p>
+            <div id="partnerKioskProofQueueList" class="space-y-3 text-sm min-h-[2rem]"><p class="text-white/35 text-xs py-2">Cargando…</p></div>
+            <p id="partnerKioskProofQueueMsg" class="text-xs mt-2 text-teal-200/80 hidden"></p>
           </div>
           <p id="superDirectoryStats" class="hidden text-xs text-white/45 mb-2 super-only super-main-only"></p>
           <p class="text-xs text-white/50 mb-2 super-only super-main-only">Directorio global: filtro <strong class="text-white/65">Sin referidor</strong> y asignación desde el detalle de cada fila.</p>
@@ -1323,13 +1337,6 @@
                 </div>
               </div>
             </div>
-          </div>
-
-          <div id="partnerKioskProofQueueBox" class="hidden mb-5 rounded-2xl border border-teal-500/40 bg-teal-950/25 p-4 sm:p-5 ring-1 ring-teal-500/20 scroll-mt-24">
-            <h3 class="text-sm font-semibold text-teal-200 mb-1 flex items-center gap-2"><i data-lucide="inbox" class="w-4 h-4 shrink-0"></i> Comprobantes de tus comercios</h3>
-            <p class="text-[11px] text-white/50 mb-3 leading-relaxed">Cuando un <strong class="text-white/70">referido comercio</strong> paga y sube comprobante desde su app, llega acá. Registrá la <strong class="text-emerald-200/90">venta ante Ferriol</strong> (mismo flujo que “Cargar venta”) para asegurarte la comisión cuando la empresa apruebe.</p>
-            <div id="partnerKioskProofQueueList" class="space-y-3 text-sm min-h-[2rem]"><p class="text-white/35 text-xs py-2">Cargando…</p></div>
-            <p id="partnerKioskProofQueueMsg" class="text-xs mt-2 text-teal-200/80 hidden"></p>
           </div>
 
           <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
@@ -3162,7 +3169,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426_bienvenida_ingresos_texto"></script>
+  <script defer src="kiosco-app.js?v=20260426_comprobantes_en_afiliados"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>

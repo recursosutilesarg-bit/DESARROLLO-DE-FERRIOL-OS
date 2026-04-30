@@ -523,8 +523,10 @@
       var msgEl = document.getElementById('partnerKioskProofQueueMsg');
       if (!box || !list) return;
       var showShell = isPartnerLens() && !isEmpresaLensSuper() && !isPartnerKioscoPreviewMode();
-      box.classList.toggle('hidden', !showShell);
-      if (!showShell) return;
+      if (!showShell) {
+        box.classList.add('hidden');
+        return;
+      }
       if (!supabaseClient || !currentUser) {
         list.innerHTML = '<p class="text-white/45 text-xs py-2">Iniciá sesión.</p>';
         return;
@@ -5415,6 +5417,10 @@
       } catch (_) {}
       var clientSaleWrap = document.querySelector('.ferriol-partner-client-sale-wrap');
       if (clientSaleWrap) clientSaleWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper() && !isPartnerKioscoPreviewMode()));
+      var partnerKioskProofBtnWrap = document.querySelector('.ferriol-partner-kiosk-proof-btn-wrap');
+      if (partnerKioskProofBtnWrap) {
+        partnerKioskProofBtnWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper() && !isPartnerKioscoPreviewMode()));
+      }
       var affWrap = document.querySelector('.ferriol-partner-affiliate-links-wrap');
       if (affWrap) affWrap.classList.toggle('hidden', !shouldShowPartnerAffiliateLinksUi());
       var ingNav = document.getElementById('navSuperIngresosBtn');
@@ -5600,8 +5606,15 @@
       document.querySelectorAll('.super-nav-btn').forEach(function (btn) {
         btn.classList.toggle('active', btn.dataset.superSection === navHighlight);
       });
+      if (state.superSection !== 'afiliados') {
+        var pqBox = document.getElementById('partnerKioskProofQueueBox');
+        if (pqBox) pqBox.classList.add('hidden');
+        var pqTog = document.getElementById('btnTogglePartnerKioskProofPanel');
+        if (pqTog) pqTog.setAttribute('aria-expanded', 'false');
+      }
       if ((state.superSection === 'sistema' || state.superSection === 'cobros') && isEmpresaLensSuper()) renderSuperCobrosSection();
       if (state.superSection === 'ingresos') void loadSuperIngresosSection();
+      if (state.superSection === 'afiliados') void loadPartnerKioskProofQueue();
       if (state.superSection === 'solicitudes') {
         void renderSuperMembershipDayRequestBanners();
         void loadSuperSolicitudesSection();
@@ -11132,6 +11145,17 @@ async function showApp() {
 
     var btnOpenAff = document.getElementById('btnOpenPartnerAffiliateLinks');
     if (btnOpenAff) btnOpenAff.onclick = function () { openPartnerAffiliateLinksModal(); };
+    var btnTogglePartnerProof = document.getElementById('btnTogglePartnerKioskProofPanel');
+    if (btnTogglePartnerProof) {
+      btnTogglePartnerProof.addEventListener('click', function () {
+        var box = document.getElementById('partnerKioskProofQueueBox');
+        if (!box) return;
+        box.classList.toggle('hidden');
+        var isOpen = !box.classList.contains('hidden');
+        btnTogglePartnerProof.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        if (isOpen) void loadPartnerKioskProofQueue();
+      });
+    }
     var btnAffClose = document.getElementById('partnerAffiliateLinksModalClose');
     if (btnAffClose) btnAffClose.onclick = closePartnerAffiliateLinksModal;
     var btnAffDone = document.getElementById('partnerAffiliateLinksModalDone');
