@@ -903,7 +903,7 @@
                    'equipo';
       if (title) title.textContent = 'Hola, ' + nombre + ', te damos la bienvenida.';
       if (sub) sub.textContent = currentUser.role === 'partner'
-        ? 'Acá podés ver tus comisiones, ventas y un resumen de comercios (kioscos) y distribuidores en tu red.'
+        ? 'Acá podés ver tus comisiones, ventas y un resumen de comercios y distribuidores en tu red.'
         : 'Panel de ingresos y operaciones de Ferriol OS.';
       var isPartner = currentUser.role === 'partner';
       if (statsBox) statsBox.classList.toggle('hidden', !isPartner);
