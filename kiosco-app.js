@@ -516,6 +516,156 @@
       if (t === 'vendor_mantenimiento') return 'Cuota vendedor';
       return t ? String(t) : '—';
     }
+
+    async function loadPartnerKioskProofQueue() {
+      var box = document.getElementById('partnerKioskProofQueueBox');
+      var list = document.getElementById('partnerKioskProofQueueList');
+      var msgEl = document.getElementById('partnerKioskProofQueueMsg');
+      if (!box || !list) return;
+      var showShell = isPartnerLens() && !isEmpresaLensSuper() && !isPartnerKioscoPreviewMode();
+      box.classList.toggle('hidden', !showShell);
+      if (!showShell) return;
+      if (!supabaseClient || !currentUser) {
+        list.innerHTML = '<p class="text-white/45 text-xs py-2">Iniciá sesión.</p>';
+        return;
+      }
+      list.innerHTML = '<p class="text-white/35 text-xs py-2">Cargando…</p>';
+      if (msgEl) {
+        msgEl.classList.add('hidden');
+        msgEl.textContent = '';
+      }
+      try {
+        var r = await supabaseClient
+          .from('ferriol_kiosk_partner_proof_queue')
+          .select('id, created_at, kiosco_user_id, amount_ars, payment_type, comprobante_path, status')
+          .eq('partner_id', currentUser.id)
+          .eq('status', 'pending_sale')
+          .order('created_at', { ascending: false })
+          .limit(30);
+        if (r.error) throw r.error;
+        var rows = r.data || [];
+        var kid = rows.map(function (x) {
+          return x.kiosco_user_id;
+        }).filter(Boolean);
+        var pmap = {};
+        if (kid.length) {
+          var pr = await supabaseClient.from('profiles').select('id, email, kiosco_name').in('id', kid);
+          if (!pr.error && pr.data) {
+            pr.data.forEach(function (p) {
+              if (p && p.id) pmap[p.id] = p;
+            });
+          }
+        }
+        if (!rows.length) {
+          list.innerHTML = '<p class="text-white/45 text-sm py-3">No tenés comprobantes de comercios pendientes.</p>';
+          try {
+            if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
+          } catch (_) {}
+          return;
+        }
+        list.innerHTML = rows
+          .map(function (row) {
+            var p = pmap[row.kiosco_user_id];
+            var label = (p && (p.kiosco_name || p.email)) || 'Comercio';
+            var tipo = ferriolIngresosPaymentTypeLabel(row.payment_type);
+            var d = row.created_at
+              ? new Date(row.created_at).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' })
+              : '';
+            var imgUrl = '';
+            try {
+              if (row.comprobante_path && supabaseClient) {
+                var x = supabaseClient.storage.from('comprobantes-ferriol').getPublicUrl(String(row.comprobante_path).trim());
+                imgUrl = x && x.data && x.data.publicUrl ? x.data.publicUrl : '';
+              }
+            } catch (_) {}
+            var idEsc = ferriolEscapeHtmlLite(String(row.id || ''));
+            return (
+              '<div class="rounded-xl border border-white/12 bg-black/30 p-3 space-y-2">' +
+              '<div class="flex flex-wrap gap-2 justify-between items-start">' +
+              '<div class="min-w-0">' +
+              '<p class="font-semibold text-white truncate">' +
+              ferriolEscapeHtmlLite(label) +
+              '</p>' +
+              '<p class="text-[11px] text-white/45">' +
+              ferriolEscapeHtmlLite(tipo) +
+              ' · ' +
+              ferriolEscapeHtmlLite(d) +
+              '</p>' +
+              '<p class="text-sm text-emerald-200/95 mt-1">$ ' +
+              Number(row.amount_ars || 0).toLocaleString('es-AR') +
+              ' ARS</p>' +
+              '</div>' +
+              (imgUrl
+                ? '<a href="' +
+                  ferriolEscapeHtmlLite(imgUrl) +
+                  '" target="_blank" rel="noopener" class="text-xs text-cyan-300 underline shrink-0">Ver comprobante</a>'
+                : '') +
+              '</div>' +
+              '<button type="button" class="partner-kiosk-proof-register-sale w-full py-2.5 rounded-xl bg-emerald-500/25 border border-emerald-400/45 text-emerald-100 text-sm font-semibold touch-target active:scale-[0.98]" data-queue-id="' +
+              idEsc +
+              '">Registrar venta ante Ferriol</button>' +
+              '</div>'
+            );
+          })
+          .join('');
+        list.querySelectorAll('.partner-kiosk-proof-register-sale').forEach(function (btn) {
+          btn.addEventListener('click', async function () {
+            var qid = btn.getAttribute('data-queue-id');
+            if (!qid || !supabaseClient) return;
+            if (
+              !confirm(
+                '¿Registrar esta venta ante Ferriol? Se crea una solicitud con el mismo comprobante del comercio; cuando la empresa apruebe quedará tu comisión vinculada al cobro.'
+              )
+            )
+              return;
+            var rpc = await supabaseClient.rpc('ferriol_partner_register_sale_from_kiosk_proof', { p_queue_id: qid });
+            if (rpc.error) {
+              var em = rpc.error.message || String(rpc.error);
+              if (msgEl) {
+                msgEl.textContent = em;
+                msgEl.classList.remove('hidden');
+              }
+              alert(em);
+              return;
+            }
+            var out = rpc.data;
+            if (typeof out === 'string') {
+              try {
+                out = JSON.parse(out);
+              } catch (_) {}
+            }
+            if (!out || out.ok !== true) {
+              var em2 = out && out.error ? out.error : 'No se pudo registrar la venta.';
+              if (msgEl) {
+                msgEl.textContent = em2;
+                msgEl.classList.remove('hidden');
+              }
+              alert(em2);
+              return;
+            }
+            if (msgEl) {
+              msgEl.textContent = 'Listo: Ferriol revisará la solicitud en «Ventas con comprobante».';
+              msgEl.classList.remove('hidden');
+              msgEl.className = 'text-xs mt-2 text-emerald-200/90';
+              setTimeout(function () {
+                msgEl.classList.add('hidden');
+              }, 5000);
+            }
+            await loadPartnerKioskProofQueue();
+            void loadSuperIngresosSection();
+          });
+        });
+        try {
+          if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
+        } catch (_) {}
+      } catch (e) {
+        list.innerHTML =
+          '<p class="text-red-300 text-xs">' +
+          ferriolEscapeHtmlLite(String((e && e.message) || e)) +
+          ' · Si falta la tabla, ejecutá <code class="text-white/70">supabase-ferriol-kiosk-proofs-partner-queue.sql</code>.</p>';
+      }
+    }
+
     function ferriolIngresosDayKeyFromIso(iso) {
       if (!iso) return '';
       var d = new Date(iso);
@@ -807,6 +957,9 @@
         return;
       }
       setSuperIngresosSectionMode(false);
+      try {
+        await loadPartnerKioskProofQueue();
+      } catch (_) {}
       var rangeSel = document.getElementById('ingresosRangeFilter');
       var rangeDays = rangeSel && rangeSel.value ? parseInt(rangeSel.value, 10) : 30;
       if (isNaN(rangeDays) || rangeDays < 1) rangeDays = 30;
@@ -11114,7 +11267,7 @@ async function showApp() {
           if (titSp) titSp.textContent = 'Kit + licencia · comprobante';
           if (intro)
             intro.textContent =
-              'Indicá el monto transferido a la cuenta Ferriol y adjuntá la imagen del comprobante.';
+              'Subí el comprobante: se envía a tu distribuidor directo para que registre la venta ante Ferriol y quede vinculado el cobro.';
           if (vw) vw.classList.add('hidden');
           if (amt) amt.value = String(FERRIOL_PLAN_AMOUNTS.kit);
         } else if (mode === 'admin') {
@@ -11132,7 +11285,7 @@ async function showApp() {
           if (titSp) titSp.textContent = 'Suscripción negocio · comprobante';
           if (intro)
             intro.textContent =
-              'Indicá el monto de la suscripción mensual y cargá el comprobante. Opcional: código de patrocinador si aplica tu red.';
+              'Indicá el monto y cargá el comprobante. Se envía a tu distribuidor (socio que te refirió) para que cargue la venta ante Ferriol; así queda su comisión garantizada ante la empresa.';
           if (vw) vw.classList.add('hidden');
           if (amt) amt.value = String(FERRIOL_PLAN_AMOUNTS.kioscoMonthly);
         }
@@ -11255,47 +11408,85 @@ async function showApp() {
             }
             return;
           }
+          var routeKioskToPartnerQueue =
+            currentUser &&
+            currentUser.role === 'kiosquero' &&
+            sponsorResolved &&
+            (paymentType === 'kiosco_licencia' || paymentType === 'kit_inicial');
           var reqId =
             typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + '-epp';
           var ext =
             file.name && file.name.lastIndexOf('.') > 0 ? file.name.slice(file.name.lastIndexOf('.')).toLowerCase() : '.jpg';
           if (ext.length > 6) ext = '.jpg';
-          var path = currentUser.id + '/' + reqId + '/comprobante' + ext;
+          var path = routeKioskToPartnerQueue
+            ? String(sponsorResolved) + '/' + currentUser.id + '/' + reqId + '/comprobante' + ext
+            : currentUser.id + '/' + reqId + '/comprobante' + ext;
           var up = await supabaseClient.storage
             .from('comprobantes-ferriol')
             .upload(path, file, { contentType: file.type || 'image/jpeg', upsert: false });
           if (up.error) {
             if (err) {
               err.textContent =
-                'No se pudo subir el archivo. ¿Bucket comprobantes-ferriol? ' + (up.error.message || '');
+                'No se pudo subir el archivo. ¿Bucket comprobantes-ferriol y políticas de storage nuevas?' +
+                ' ' +
+                (up.error.message || '');
               err.classList.remove('hidden');
             }
             return;
           }
-          var insertRow = {
-            id: reqId,
-            user_id: currentUser.id,
-            payment_type: paymentType,
-            amount_ars: amt,
-            comprobante_path: path,
-            sponsor_code_raw: sponsorCode || null,
-            sponsor_resolved_id: sponsorResolved || null,
-            period_month: periodMonth
-          };
-          var ins = await supabaseClient.from('ferriol_empresa_payment_proof_requests').insert(insertRow);
-          if (ins.error) {
-            try {
-              await supabaseClient.storage.from('comprobantes-ferriol').remove([path]);
-            } catch (_) {}
-            if (err) {
-              err.textContent = ins.error.message + ' · Revisá la tabla ferriol_empresa_payment_proof_requests.';
-              err.classList.remove('hidden');
+          if (routeKioskToPartnerQueue) {
+            var insK = await supabaseClient.from('ferriol_kiosk_partner_proof_queue').insert({
+              id: reqId,
+              kiosco_user_id: currentUser.id,
+              partner_id: sponsorResolved,
+              payment_type: paymentType,
+              amount_ars: amt,
+              comprobante_path: path,
+              sponsor_code_raw: sponsorCode || null,
+              period_month: periodMonth
+            });
+            if (insK.error) {
+              try {
+                await supabaseClient.storage.from('comprobantes-ferriol').remove([path]);
+              } catch (_) {}
+              if (err) {
+                err.textContent =
+                  insK.error.message +
+                  ' · Revisá tabla ferriol_kiosk_partner_proof_queue y el SQL «supabase-ferriol-kiosk-proofs-partner-queue».';
+                err.classList.remove('hidden');
+              }
+              return;
             }
-            return;
+          } else {
+            var insertRow = {
+              id: reqId,
+              user_id: currentUser.id,
+              payment_type: paymentType,
+              amount_ars: amt,
+              comprobante_path: path,
+              sponsor_code_raw: sponsorCode || null,
+              sponsor_resolved_id: sponsorResolved || null,
+              period_month: periodMonth
+            };
+            var ins = await supabaseClient.from('ferriol_empresa_payment_proof_requests').insert(insertRow);
+            if (ins.error) {
+              try {
+                await supabaseClient.storage.from('comprobantes-ferriol').remove([path]);
+              } catch (_) {}
+              if (err) {
+                err.textContent = ins.error.message + ' · Revisá la tabla ferriol_empresa_payment_proof_requests.';
+                err.classList.remove('hidden');
+              }
+              return;
+            }
           }
           closeProofModal();
           if (fileIn) fileIn.value = '';
-          alert('Enviado. La empresa lo revisa en Solicitudes y aplica el cobro al aprobar.');
+          alert(
+            routeKioskToPartnerQueue
+              ? 'Enviado a tu distribuidor directo. Él cargará la venta ante Ferriol desde «Ingresos» para registrar tu pago con su comisión.'
+              : 'Enviado. La empresa lo revisa en Solicitudes y aplica el cobro al aprobar.'
+          );
         });
       }
     })();

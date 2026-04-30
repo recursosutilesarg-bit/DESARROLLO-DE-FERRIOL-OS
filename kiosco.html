@@ -199,7 +199,7 @@
         </h3>
         <button type="button" id="kioscoEmpresaPaymentProofModalClose" class="btn-neomorphic rounded-xl p-2 touch-target" title="Cerrar"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-      <p id="kioscoEmpresaPaymentProofIntro" class="text-sm text-white/60 mb-3 leading-relaxed">Subí una imagen del comprobante. La empresa revisa la solicitud antes de aplicar el pago en el sistema.</p>
+      <p id="kioscoEmpresaPaymentProofIntro" class="text-sm text-white/60 mb-3 leading-relaxed">Subí una imagen del comprobante. Los comercios referidos envían primero el archivo a su distribuidor; él registra la venta ante Ferriol. Tu cuota de socio sigue llegando como solicitud directa a la empresa.</p>
       <div id="kioscoEmpresaPaymentProofErr" class="text-xs text-red-300 mb-3 hidden"></div>
       <div id="kioscoEmpresaPaymentProofVendorMonthWrap" class="hidden mb-3">
         <label class="block text-xs text-white/55 mb-1" for="kioscoEmpresaPaymentProofVendorMonth">Mes abonado (cuota distribuidor)</label>
@@ -1326,6 +1326,13 @@
             </div>
           </div>
 
+          <div id="partnerKioskProofQueueBox" class="hidden mb-5 rounded-2xl border border-teal-500/40 bg-teal-950/25 p-4 sm:p-5 ring-1 ring-teal-500/20 scroll-mt-24">
+            <h3 class="text-sm font-semibold text-teal-200 mb-1 flex items-center gap-2"><i data-lucide="inbox" class="w-4 h-4 shrink-0"></i> Comprobantes de tus comercios</h3>
+            <p class="text-[11px] text-white/50 mb-3 leading-relaxed">Cuando un <strong class="text-white/70">referido comercio</strong> paga y sube comprobante desde su app, llega acá. Registrá la <strong class="text-emerald-200/90">venta ante Ferriol</strong> (mismo flujo que “Cargar venta”) para asegurarte la comisión cuando la empresa apruebe.</p>
+            <div id="partnerKioskProofQueueList" class="space-y-3 text-sm min-h-[2rem]"><p class="text-white/35 text-xs py-2">Cargando…</p></div>
+            <p id="partnerKioskProofQueueMsg" class="text-xs mt-2 text-teal-200/80 hidden"></p>
+          </div>
+
           <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
             <div class="min-w-0">
               <h2 class="font-bold text-xl mb-1 flex items-center gap-2 text-white">
@@ -2312,7 +2319,7 @@
           </div>
           <div id="superEmpresaPaymentProofBox" class="hidden mb-5 rounded-2xl border border-teal-500/40 bg-teal-500/[0.07] p-3 sm:p-4 super-only super-main-only scroll-mt-8">
             <h3 class="text-sm font-semibold text-teal-200 mb-2 flex items-center gap-2"><i data-lucide="banknote" class="w-4 h-4"></i> Comprobantes · pagos propios (cuenta empresa)</h3>
-            <p class="text-[11px] text-white/50 mb-3">Las personas envían desde <strong class="text-white/70">Pagar suscripción / cuota / kit → Cargar y enviar comprobante</strong>. Revisá monto y patrocinador; al aprobá se registra y verifica el cobro.</p>
+            <p class="text-[11px] text-white/50 mb-3">Las <strong class="text-white/70">cuotas de distribuidor</strong> suelen llegar aquí cuando el socio paga y envía el comprobante desde su cuenta. Las <strong class="text-white/70">suscripciones de comercios (kioscos)</strong> llegan primero al partner referidor: él registra la venta ante Ferriol y la ves en «Ventas con comprobante».</p>
             <div id="superEmpresaPaymentProofList" class="space-y-3 text-sm min-h-[2rem]"></div>
             <p id="superEmpresaPaymentProofMsg" class="text-xs mt-2 text-teal-200/80 hidden"></p>
           </div>
@@ -3166,7 +3173,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260429_mp_tarjeta_efectivo_ya_pague"></script>
+  <script defer src="kiosco-app.js?v=20260429_kiosk_comprobantes_partner"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>
