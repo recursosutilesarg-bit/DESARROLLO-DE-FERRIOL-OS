@@ -182,7 +182,7 @@
       <div id="kioscoSubPayBankFields"></div>
       <button type="button" id="btnOpenKioscoEmpresaPaymentProofModal" class="mt-5 w-full py-3.5 rounded-xl font-semibold touch-target active:scale-[0.99] flex items-center justify-center gap-2 border-2 border-[#86efac]/55 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-100 shadow-lg shadow-emerald-900/25">
         <i data-lucide="circle-check" class="w-5 h-5 shrink-0"></i>
-        YA PAGUE
+        YA PAGUÉ
       </button>
       <button type="button" id="kioscoSubscriptionPayModalDone" class="mt-3 w-full py-3 rounded-xl border border-white/15 bg-white/[0.08] hover:bg-white/[0.14] font-semibold touch-target active:scale-[0.99] text-white/90">Listo</button>
     </div>
@@ -1051,10 +1051,14 @@
               <div class="border-t border-white/12 pt-5">
                 <p class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i data-lucide="credit-card" class="w-5 h-5 shrink-0 text-sky-200/95"></i> Mercado Pago</p>
                 <p id="planCheckoutPayMpHint" class="text-xs text-white/55 mb-3 leading-relaxed"></p>
-                <div id="planPanelMercadoPagoWrap" class="w-full">
+                <div id="planPanelMercadoPagoWrap" class="w-full space-y-2">
                   <button type="button" id="planCheckoutMpRoleBtn" data-mp-product="kioscoMonthly" class="ferriol-mp-pay-btn w-full rounded-xl py-3 px-3 touch-target inline-flex items-center justify-center gap-2 font-bold text-[0.6875rem] sm:text-xs text-white leading-tight text-center border-2 border-sky-400/50 bg-gradient-to-br from-[#009ee3]/90 via-[#008ad4]/95 to-[#006ebb] shadow-lg shadow-sky-900/30 ring-1 ring-white/15 hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100 disabled:active:scale-100">
                     <i data-lucide="external-link" class="w-[1.125rem] h-[1.125rem] shrink-0 opacity-95"></i>
-                    <span id="planCheckoutMpRoleBtnLabel">Mercado Pago · Suscripción mensual negocio</span>
+                    <span id="planCheckoutMpRoleBtnLabel">TARJETA / EFECTIVO</span>
+                  </button>
+                  <button type="button" id="planCheckoutMpYaPagueBtn" class="w-full rounded-xl py-3 px-3 touch-target inline-flex items-center justify-center gap-2 font-semibold text-sm text-emerald-100 border-2 border-emerald-400/45 bg-emerald-500/12 hover:bg-emerald-500/22 active:scale-[0.98] ring-1 ring-emerald-500/25">
+                    <i data-lucide="circle-check" class="w-[1.125rem] h-[1.125rem] shrink-0 opacity-95"></i>
+                    <span>YA PAGUÉ</span>
                   </button>
                 </div>
                 <p id="planPanelMercadoPagoMissingHint" class="text-[11px] text-white/45 leading-snug mt-2">Sin link cargado por la empresa para este producto · <strong class="text-white/65">Más → Ajustes del sistema</strong>.</p>
@@ -1091,11 +1095,15 @@
               </div>
               <div class="border-t border-white/12 pt-5">
                 <p class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i data-lucide="credit-card" class="w-5 h-5 shrink-0 text-sky-200/95"></i> Mercado Pago</p>
-                <p class="text-xs text-white/55 mb-3 leading-relaxed">Pago online con link público (tarjeta, efectivo en red u otros según configure la empresa).</p>
-                <div id="planCheckoutDistribMercadoInner" class="w-full">
+                <p class="text-xs text-white/55 mb-3 leading-relaxed">Abrís el link y pagás con <strong class="text-white/75">tarjeta o efectivo</strong> (Mercado Pago). Después tocá <strong class="text-emerald-200/90">YA PAGUÉ</strong> para enviar el comprobante.</p>
+                <div id="planCheckoutDistribMercadoInner" class="w-full space-y-2">
                   <button type="button" data-mp-product="kit" class="ferriol-mp-pay-btn w-full rounded-xl py-3 px-3 touch-target inline-flex items-center justify-center gap-2 font-bold text-[0.6875rem] sm:text-xs text-white leading-tight text-center border-2 border-sky-400/50 bg-gradient-to-br from-[#009ee3]/90 via-[#008ad4]/95 to-[#006ebb] shadow-lg hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100">
                     <i data-lucide="external-link" class="w-[1.125rem] h-[1.125rem] shrink-0 opacity-95"></i>
-                    <span>Mercado Pago · Kit distribuidor</span>
+                    <span>TARJETA / EFECTIVO</span>
+                  </button>
+                  <button type="button" id="planCheckoutDistribMpYaPagueBtn" class="w-full rounded-xl py-3 px-3 touch-target inline-flex items-center justify-center gap-2 font-semibold text-sm text-emerald-100 border-2 border-emerald-400/45 bg-emerald-500/12 hover:bg-emerald-500/22 active:scale-[0.98] ring-1 ring-emerald-500/25">
+                    <i data-lucide="circle-check" class="w-[1.125rem] h-[1.125rem] shrink-0 opacity-95"></i>
+                    <span>YA PAGUÉ</span>
                   </button>
                   <p id="planCheckoutDistribMercadoMissingHint" class="text-[11px] text-white/45 leading-snug mt-2 hidden">Sin link para el kit: cargalo en <strong class="text-white/65">Más → Ajustes del sistema</strong>.</p>
                 </div>
@@ -3158,7 +3166,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260429_vencimiento_productos"></script>
+  <script defer src="kiosco-app.js?v=20260429_mp_tarjeta_efectivo_ya_pague"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>

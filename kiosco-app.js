@@ -1982,10 +1982,7 @@
       if (roleBtn && planProd) {
         roleBtn.setAttribute('data-mp-product', planProd);
         if (roleLbl) {
-          roleLbl.textContent =
-            planProd === 'vendorMonthly'
-              ? 'Mercado Pago · Cuota mensual distribuidor'
-              : 'Mercado Pago · Suscripción mensual negocio';
+          roleLbl.textContent = 'TARJETA / EFECTIVO';
         }
       }
       var subMp =
@@ -2003,12 +2000,7 @@
       if (modalMp) {
         modalMp.setAttribute('data-mp-product', subMp);
         if (modalLbl) {
-          modalLbl.textContent =
-            subMp === 'vendorMonthly'
-              ? 'Mercado Pago · Cuota mensual distribuidor'
-              : subMp === 'kit'
-                ? 'Mercado Pago · Kit distribuidor'
-                : 'Mercado Pago · Suscripción mensual negocio';
+          modalLbl.textContent = 'TARJETA / EFECTIVO';
         }
       }
       document.querySelectorAll('.ferriol-mp-pay-btn[data-mp-product]').forEach(function (btn) {
@@ -4636,8 +4628,8 @@
       }
       if (mp) {
         mp.innerHTML = admin
-          ? 'Link de Mercado Pago <strong class="text-white/80">solo</strong> para la <strong class="text-white/85">cuota mensual distribuidor</strong>.'
-          : 'Link de Mercado Pago <strong class="text-white/80">solo</strong> para la <strong class="text-emerald-100/90">suscripción mensual del negocio</strong>.';
+          ? 'Abrís el link y pagás con <strong class="text-sky-200/90">tarjeta / efectivo</strong> (Mercado Pago, cuota distribuidor). Cuando termines, tocá <strong class="text-emerald-100/90">YA PAGUÉ</strong> para enviar el comprobante.'
+          : 'Abrís el link y pagás con <strong class="text-sky-200/90">tarjeta / efectivo</strong> (Mercado Pago, suscripción del negocio). Cuando termines, tocá <strong class="text-emerald-100/90">YA PAGUÉ</strong> para enviar el comprobante.';
       }
     }
     window.ferriolFetchCheckoutCopy = function (force) {
@@ -5609,6 +5601,20 @@
       },
       false
     );
+    var planCheckoutMpYaPagueBtn = document.getElementById('planCheckoutMpYaPagueBtn');
+    if (planCheckoutMpYaPagueBtn) {
+      planCheckoutMpYaPagueBtn.addEventListener('click', function () {
+        var mode =
+          typeof ferriolPlanPayModalMode === 'function' && ferriolPlanPayModalMode() === 'admin' ? 'admin' : 'kiosco';
+        if (typeof window.ferriolOpenEmpresaPaymentProofModal === 'function') window.ferriolOpenEmpresaPaymentProofModal(mode);
+      });
+    }
+    var planCheckoutDistribMpYaPagueBtn = document.getElementById('planCheckoutDistribMpYaPagueBtn');
+    if (planCheckoutDistribMpYaPagueBtn) {
+      planCheckoutDistribMpYaPagueBtn.addEventListener('click', function () {
+        if (typeof window.ferriolOpenEmpresaPaymentProofModal === 'function') window.ferriolOpenEmpresaPaymentProofModal('kit');
+      });
+    }
     var accountMenuBtnDistribuidor = document.getElementById('accountMenuBtnDistribuidor');
     if (accountMenuBtnDistribuidor) {
       accountMenuBtnDistribuidor.addEventListener('click', function () {
@@ -11149,6 +11155,11 @@ async function showApp() {
           if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
         } catch (_) {}
       }
+      /** modeOpt: 'kiosco' | 'admin' | 'kit' para el formulario de comprobante (desde Mi plan · Mercado Pago). */
+      window.ferriolOpenEmpresaPaymentProofModal = function (modeOpt) {
+        if (modeOpt === 'kit' || modeOpt === 'admin' || modeOpt === 'kiosco') window._ferriolSubPayModalMode = modeOpt;
+        openProofModal();
+      };
       function closeProofModal() {
         var pm = document.getElementById('kioscoEmpresaPaymentProofModal');
         if (pm) {
@@ -11157,7 +11168,9 @@ async function showApp() {
         }
       }
       var btnOp = document.getElementById('btnOpenKioscoEmpresaPaymentProofModal');
-      if (btnOp) btnOp.addEventListener('click', openProofModal);
+      if (btnOp) btnOp.addEventListener('click', function () {
+        openProofModal();
+      });
       var ov = document.getElementById('kioscoEmpresaPaymentProofModalOverlay');
       if (ov) ov.addEventListener('click', closeProofModal);
       var cl = document.getElementById('kioscoEmpresaPaymentProofModalClose');
