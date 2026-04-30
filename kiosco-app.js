@@ -8380,7 +8380,7 @@ async function showApp() {
         if (profile.role === 'partner') {
           partnerFromKUp = await ferriolFetchPartnerKiosqueroUpgradeEligible(uid);
         }
-        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '', phone: profile.phone != null ? String(profile.phone) : '', avatarUrl: profile.avatar_url != null ? String(profile.avatar_url).trim() : '', partnerFromKiosqueroUpgrade: partnerFromKUp, vencimientoAvisoDias: (function () { var x = Number(profile.vencimiento_aviso_dias); return Number.isFinite(x) ? Math.min(365, Math.max(0, Math.floor(x))) : null; })() };
+        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerSponsorId: profile.partner_sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '', phone: profile.phone != null ? String(profile.phone) : '', avatarUrl: profile.avatar_url != null ? String(profile.avatar_url).trim() : '', partnerFromKiosqueroUpgrade: partnerFromKUp, vencimientoAvisoDias: (function () { var x = Number(profile.vencimiento_aviso_dias); return Number.isFinite(x) ? Math.min(365, Math.max(0, Math.floor(x))) : null; })() };
         await showApp();
       } catch (err) {
         console.error('Error en login:', err);
@@ -11253,6 +11253,25 @@ async function showApp() {
       if (dn) dn.addEventListener('click', closeModal);
     })();
     (function bindKioscoEmpresaPaymentProofModalEl() {
+      async function hydrateEmpresaPaymentProofSponsorField() {
+        var sp = document.getElementById('kioscoEmpresaPaymentProofSponsor');
+        if (!sp || !supabaseClient || !currentUser) return;
+        var mode = window._ferriolSubPayModalMode || 'kiosco';
+        var patronId =
+          mode === 'kit' ? currentUser.partnerSponsorId || currentUser.sponsorId : currentUser.sponsorId || null;
+        if (!patronId) {
+          sp.value = '';
+          return;
+        }
+        try {
+          var r = await supabaseClient.from('profiles').select('referral_code').eq('id', patronId).maybeSingle();
+          var code =
+            r && r.data && r.data.referral_code != null ? String(r.data.referral_code).trim() : '';
+          sp.value = code;
+        } catch (_) {
+          sp.value = '';
+        }
+      }
       function syncEmpresaProofFormFromPayModal() {
         var mode = window._ferriolSubPayModalMode || 'kiosco';
         var titSp = document.getElementById('kioscoEmpresaPaymentProofTitleSpan');
@@ -11298,6 +11317,7 @@ async function showApp() {
         }
         if (fi) fi.value = '';
         syncEmpresaProofFormFromPayModal();
+        hydrateEmpresaPaymentProofSponsorField().catch(function () {});
         var pm = document.getElementById('kioscoEmpresaPaymentProofModal');
         if (pm) {
           pm.classList.remove('hidden');
@@ -11396,6 +11416,8 @@ async function showApp() {
               }
               return;
             }
+          } else if (paymentType === 'kit_inicial') {
+            sponsorResolved = currentUser.partnerSponsorId || currentUser.sponsorId || null;
           } else if (currentUser.sponsorId) {
             sponsorResolved = currentUser.sponsorId;
           }
@@ -11795,7 +11817,7 @@ async function showApp() {
         if (profile.role === 'partner') {
           partnerFromKUpInit = await ferriolFetchPartnerKiosqueroUpgradeEligible(uid);
         }
-        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '', phone: profile.phone != null ? String(profile.phone) : '', avatarUrl: profile.avatar_url != null ? String(profile.avatar_url).trim() : '', partnerFromKiosqueroUpgrade: partnerFromKUpInit, vencimientoAvisoDias: (function () { var x = Number(profile.vencimiento_aviso_dias); return Number.isFinite(x) ? Math.min(365, Math.max(0, Math.floor(x))) : null; })() };
+        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerSponsorId: profile.partner_sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '', phone: profile.phone != null ? String(profile.phone) : '', avatarUrl: profile.avatar_url != null ? String(profile.avatar_url).trim() : '', partnerFromKiosqueroUpgrade: partnerFromKUpInit, vencimientoAvisoDias: (function () { var x = Number(profile.vencimiento_aviso_dias); return Number.isFinite(x) ? Math.min(365, Math.max(0, Math.floor(x))) : null; })() };
         await showApp();
       } catch (e) {
         console.error('Error en init:', e);
