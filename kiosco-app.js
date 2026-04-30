@@ -2414,14 +2414,15 @@
     }
     function exportProductosCSV() {
       var prods = getData().products || {};
-      var header = 'Código;Nombre;Precio;Costo;Ganancia unitaria;Stock';
+      var header = 'Código;Nombre;Precio;Costo;Ganancia unitaria;Stock;Vencimiento (YYYY-MM-DD)';
       var rows = Object.entries(prods).map(function (_ref) {
         var codigo = _ref[0];
         var p = _ref[1];
         var precio = Number(p.precio) || 0;
         var costo = Number(p.costo) || 0;
         var ganancia = precio - costo;
-        return escapeCSV(codigo) + ';' + escapeCSV(p.nombre || '') + ';' + precio + ';' + costo + ';' + ganancia + ';' + (p.stock != null ? p.stock : '');
+        var fv = (p.fechaVencimiento || p.fecha_vencimiento) ? String(p.fechaVencimiento || p.fecha_vencimiento).slice(0, 10) : '';
+        return escapeCSV(codigo) + ';' + escapeCSV(p.nombre || '') + ';' + precio + ';' + costo + ';' + ganancia + ';' + (p.stock != null ? p.stock : '') + ';' + escapeCSV(fv);
       });
       var csv = header + '\r\n' + rows.join('\r\n');
       downloadCSV('productos_precios_ganancias_' + new Date().toISOString().slice(0, 10) + '.csv', csv);
@@ -2511,7 +2512,15 @@
           ]);
           const products = {};
           (prodsRes.data || []).forEach(p => {
-            products[p.codigo] = { nombre: p.nombre, codigo: p.codigo, precio: p.precio, stock: p.stock, stockInicial: p.stock_inicial || p.stock, costo: p.costo != null ? Number(p.costo) : 0 };
+            products[p.codigo] = {
+              nombre: p.nombre,
+              codigo: p.codigo,
+              precio: p.precio,
+              stock: p.stock,
+              stockInicial: p.stock_inicial || p.stock,
+              costo: p.costo != null ? Number(p.costo) : 0,
+              fechaVencimiento: p.fecha_vencimiento != null ? String(p.fecha_vencimiento).trim().slice(0, 10) : null
+            };
           });
           const caja = cajaRes.data;
           var productsFinal = products;
@@ -2580,7 +2589,11 @@
                 precio: Number(p.precio) || 0,
                 stock: Math.max(0, parseInt(p.stock, 10) || 0),
                 stock_inicial: Math.max(0, parseInt(p.stockInicial != null ? p.stockInicial : p.stock, 10) || 0),
-                costo: (function () { var c = Number(p.costo); return Number.isFinite(c) ? c : 0; })()
+                costo: (function () { var c = Number(p.costo); return Number.isFinite(c) ? c : 0; })(),
+                fecha_vencimiento: (function () {
+                  var fv = (p && p.fechaVencimiento != null) ? String(p.fechaVencimiento).trim().slice(0, 10) : '';
+                  return (/^\d{4}-\d{2}-\d{2}$/.test(fv)) ? fv : null;
+                })()
               };
             })
             .filter(Boolean);
@@ -2909,6 +2922,42 @@
       return { label: 'Stock Alto', class: 'status-alto' };
     }
 
+    function ferriolParseYmdLocal(ymd) {
+      if (!ymd || typeof ymd !== 'string') return null;
+      var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ymd).trim().slice(0, 10));
+      if (!m) return null;
+      var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+      return isNaN(d.getTime()) ? null : d;
+    }
+    /** Días hasta la fecha calendaria (hora local): 0 = hoy coincide con vencimiento; negativo = ya pasó. */
+    function ferriolDaysUntilExpiryYmd(ymd) {
+      var target = ferriolParseYmdLocal(ymd);
+      if (!target) return null;
+      var today = new Date();
+      var start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      return Math.round((target.getTime() - start.getTime()) / 86400000);
+    }
+    function ferriolVencimientoAvisoDias() {
+      var n = currentUser && currentUser.vencimientoAvisoDias != null ? Number(currentUser.vencimientoAvisoDias) : NaN;
+      if (!Number.isFinite(n) || n < 0) return 7;
+      return Math.min(365, Math.max(0, Math.floor(n)));
+    }
+    /**
+     * @returns {{ kind: 'soon' | 'expired' | null, label: string, days: number | null }}
+     */
+    function ferriolProductExpiryUrgency(p) {
+      var stock = Math.max(0, Number(p && p.stock) || 0);
+      var raw = p && (p.fechaVencimiento || p.fecha_vencimiento);
+      var fv = raw != null && String(raw).trim() !== '' ? String(raw).trim().slice(0, 10) : '';
+      if (!fv || stock <= 0) return { kind: null, label: '', days: null };
+      var days = ferriolDaysUntilExpiryYmd(fv);
+      if (days === null) return { kind: null, label: '', days: null };
+      var aviso = ferriolVencimientoAvisoDias();
+      if (days < 0) return { kind: 'expired', label: 'VENCE PRONTO', days: days };
+      if (days <= aviso) return { kind: 'soon', label: 'VENCE PRONTO', days: days };
+      return { kind: null, label: '', days: days };
+    }
+
     // Beep tipo supermercado: tono agudo corto (escáner / producto agregado)
     function playBeep() {
       try {
@@ -2960,10 +3009,17 @@
       list.innerHTML = items.map(p => {
         const quedan = Math.max(0, Number(p.stock) || 0);
         const stockColor = quedan === 0 ? 'text-red-400' : quedan <= 3 ? 'text-amber-400' : 'text-white/40';
+        var urg = ferriolProductExpiryUrgency(p);
+        var badgeRow = urg.kind
+          ? '<span class="text-[10px] font-bold uppercase tracking-tight text-red-500 leading-tight">' + String(urg.label).replace(/</g, '&lt;') + '</span>'
+          : '';
         return `
           <div class="inventory-item" data-codigo="${p.codigo}" role="button" tabindex="0">
             <div class="inv-item-info">
-              <span class="inv-item-name">${(p.nombre || '').replace(/</g, '&lt;')}</span>
+              <div class="flex flex-col flex-1 min-w-0 gap-0.5">
+                <span class="inv-item-name">${(p.nombre || '').replace(/</g, '&lt;')}</span>
+                ${badgeRow}
+              </div>
               <span class="inv-item-price">$${(p.precio ?? 0).toLocaleString('es-AR')}</span>
               <span class="inv-item-stock ${stockColor}">${quedan}</span>
             </div>
@@ -2996,6 +3052,32 @@
       document.getElementById('productDetailMargin').textContent = margin !== null ? margin + '%' : 'No calculado';
       document.getElementById('productDetailStock').textContent = (Math.max(0, Number(p.stock) || 0)) + ' unidades';
       document.getElementById('productDetailCode').textContent = p.codigo || 'Sin código';
+      var urgDet = ferriolProductExpiryUrgency(p);
+      var fvStr = (p.fechaVencimiento || p.fecha_vencimiento) ? String(p.fechaVencimiento || p.fecha_vencimiento).slice(0, 10) : '';
+      var fvRow = document.getElementById('productDetailVencRow');
+      var fvEl = document.getElementById('productDetailVenc');
+      var ban = document.getElementById('productDetailExpiryBanner');
+      if (fvRow && fvEl) {
+        if (fvStr && /^\d{4}-\d{2}-\d{2}$/.test(fvStr)) {
+          fvRow.classList.remove('hidden');
+          try {
+            var dPv = ferriolParseYmdLocal(fvStr);
+            fvEl.textContent = dPv ? dPv.toLocaleDateString('es-AR', { day: 'numeric', month: 'short', year: 'numeric' }) : fvStr;
+          } catch (_) { fvEl.textContent = fvStr; }
+        } else {
+          fvRow.classList.add('hidden');
+        }
+      }
+      if (ban) {
+        if (urgDet.kind === 'soon' || urgDet.kind === 'expired') {
+          ban.textContent = urgDet.label;
+          ban.classList.remove('hidden');
+          ban.classList.toggle('text-red-500', true);
+        } else {
+          ban.classList.add('hidden');
+          ban.textContent = '';
+        }
+      }
       document.getElementById('productDetailEdit').onclick = function() {
         closeProductDetail();
         openEditProduct(codigo);
@@ -3072,6 +3154,9 @@
       document.getElementById('prodStockInicialWrap').classList.remove('hidden');
       const siEl = document.getElementById('prodStockInicial');
       siEl.value = p.stockInicial ?? p.stock ?? '';
+      var pvFc = p.fechaVencimiento || p.fecha_vencimiento;
+      var fvIn = document.getElementById('prodFechaVencimiento');
+      if (fvIn) fvIn.value = (pvFc && /^\d{4}-\d{2}-\d{2}$/.test(String(pvFc).trim().slice(0, 10))) ? String(pvFc).trim().slice(0, 10) : '';
       document.getElementById('deleteProductInModal').classList.remove('hidden');
       document.getElementById('productModal').classList.remove('hidden');
       document.getElementById('productModal').classList.add('flex');
@@ -7742,6 +7827,8 @@
       document.getElementById('prodStockInicial').value = '';
       document.getElementById('prodStockInicialWrap').classList.add('hidden');
       document.getElementById('deleteProductInModal').classList.add('hidden');
+      var fvInNew = document.getElementById('prodFechaVencimiento');
+      if (fvInNew) fvInNew.value = '';
       document.getElementById('productModal').classList.remove('hidden');
       document.getElementById('productModal').classList.add('flex');
       _userTouchedCost = false;
@@ -7862,6 +7949,9 @@
       const stockInicialEl = document.getElementById('prodStockInicial');
       const stockInicial = stockInicialWrap.classList.contains('hidden') ? stock : (parseInt(stockInicialEl.value) || stock);
       const editCodigo = document.getElementById('prodEditCodigo').value.trim();
+      var fvEl = document.getElementById('prodFechaVencimiento');
+      var fvRaw = fvEl && fvEl.value ? String(fvEl.value).trim().slice(0, 10) : '';
+      var fechaVencimiento = /^\d{4}-\d{2}-\d{2}$/.test(fvRaw) ? fvRaw : null;
       const d = getData();
       d.products = d.products || {};
       const isNew = !editCodigo;
@@ -7876,7 +7966,7 @@
         if (editCodigo !== codigoNuevo) {
           delete d.products[editCodigo];
         }
-        d.products[codigoNuevo] = { nombre, codigo: codigoNuevo, precio, stock, stockInicial: stockInicialFinal, costo };
+        d.products[codigoNuevo] = { nombre, codigo: codigoNuevo, precio, stock, stockInicial: stockInicialFinal, costo, fechaVencimiento };
         state.cart.forEach(item => {
           if (item.codigo === editCodigo || item.codigo === codigoNuevo) {
             item.codigo = codigoNuevo;
@@ -7886,7 +7976,7 @@
           }
         });
       } else {
-        d.products[codigoNuevo] = { nombre, codigo: codigoNuevo, precio, stock, stockInicial: stockInicial || stock, costo };
+        d.products[codigoNuevo] = { nombre, codigo: codigoNuevo, precio, stock, stockInicial: stockInicial || stock, costo, fechaVencimiento };
       }
       setData(d);
       renderInventory();
@@ -8132,7 +8222,7 @@ async function showApp() {
         if (profile.role === 'partner') {
           partnerFromKUp = await ferriolFetchPartnerKiosqueroUpgradeEligible(uid);
         }
-        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '', phone: profile.phone != null ? String(profile.phone) : '', avatarUrl: profile.avatar_url != null ? String(profile.avatar_url).trim() : '', partnerFromKiosqueroUpgrade: partnerFromKUp };
+        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '', phone: profile.phone != null ? String(profile.phone) : '', avatarUrl: profile.avatar_url != null ? String(profile.avatar_url).trim() : '', partnerFromKiosqueroUpgrade: partnerFromKUp, vencimientoAvisoDias: (function () { var x = Number(profile.vencimiento_aviso_dias); return Number.isFinite(x) ? Math.min(365, Math.max(0, Math.floor(x))) : null; })() };
         await showApp();
       } catch (err) {
         console.error('Error en login:', err);
@@ -8528,6 +8618,8 @@ async function showApp() {
       if (!asNegocio) return;
       document.getElementById('configKioscoName').value = currentUser.kioscoName || '';
       document.getElementById('configWhatsappMsg').value = currentUser.whatsappMessage || DEFAULT_WHATSAPP;
+      var vAdv = document.getElementById('configVencimientoAvisoDias');
+      if (vAdv) vAdv.value = String(ferriolVencimientoAvisoDias());
       var ns = document.getElementById('configNotifSoundEnabled');
       if (ns) ns.checked = ferriolNotifSoundEnabled();
       loadKioscoLicensePaymentInfo();
@@ -8545,12 +8637,17 @@ async function showApp() {
       if (!asNegocio) return;
       const kioscoName = document.getElementById('configKioscoName').value.trim();
       const whatsappMessage = document.getElementById('configWhatsappMsg').value.trim() || DEFAULT_WHATSAPP;
+      var vAdvDays = parseInt(document.getElementById('configVencimientoAvisoDias') && document.getElementById('configVencimientoAvisoDias').value, 10);
+      if (!Number.isFinite(vAdvDays) || vAdvDays < 0) vAdvDays = 7;
+      vAdvDays = Math.min(365, Math.max(0, Math.floor(vAdvDays)));
       if (supabaseClient) {
-        await supabaseClient.from('profiles').update({ kiosco_name: kioscoName, whatsapp_message: whatsappMessage }).eq('id', currentUser.id);
+        await supabaseClient.from('profiles').update({ kiosco_name: kioscoName, whatsapp_message: whatsappMessage, vencimiento_aviso_dias: vAdvDays }).eq('id', currentUser.id);
       }
       currentUser.kioscoName = kioscoName;
       currentUser.whatsappMessage = whatsappMessage;
+      currentUser.vencimientoAvisoDias = vAdvDays;
       document.getElementById('headerTitle').textContent = kioscoName || 'Ferriol OS';
+      try { renderInventory(); } catch (_) {}
     }
     document.getElementById('saveConfig').onclick = () => saveConfig();
 
@@ -10431,7 +10528,7 @@ async function showApp() {
           var clientes = [];
           try {
             var pRes = await supabaseClient.from('products').select('*').eq('user_id', uid);
-            if (!pRes.error && pRes.data) pRes.data.forEach(function (p) { products[p.codigo] = { nombre: p.nombre, codigo: p.codigo, precio: p.precio, stock: p.stock, stockInicial: p.stock_inicial || p.stock, costo: p.costo != null ? Number(p.costo) : 0 }; });
+            if (!pRes.error && pRes.data) pRes.data.forEach(function (p) { products[p.codigo] = { nombre: p.nombre, codigo: p.codigo, precio: p.precio, stock: p.stock, stockInicial: p.stock_inicial || p.stock, costo: p.costo != null ? Number(p.costo) : 0, fechaVencimiento: p.fecha_vencimiento != null ? String(p.fecha_vencimiento).trim().slice(0, 10) : null }; });
           } catch (_) {}
           try {
             var cRes = await supabaseClient.from('clientes').select('id, nombre, telefono, email, direccion, notas').eq('user_id', uid);
@@ -10474,7 +10571,17 @@ async function showApp() {
                 var toInsert = Object.entries(u.products).filter(function (e) { return existingCodigos.indexOf(e[1].codigo || e[0]) === -1; }).map(function (e) {
                   var p = e[1];
                   var cod = p.codigo || e[0];
-                  return { user_id: uid, codigo: cod, nombre: p.nombre, precio: p.precio || 0, stock: p.stock || 0, stock_inicial: p.stockInicial ?? p.stock ?? 0, costo: p.costo != null ? Number(p.costo) : 0 };
+                  var fv = (p && p.fechaVencimiento != null) ? String(p.fechaVencimiento).trim().slice(0, 10) : '';
+                  return {
+                    user_id: uid,
+                    codigo: cod,
+                    nombre: p.nombre,
+                    precio: p.precio || 0,
+                    stock: p.stock || 0,
+                    stock_inicial: p.stockInicial ?? p.stock ?? 0,
+                    costo: p.costo != null ? Number(p.costo) : 0,
+                    fecha_vencimiento: /^\d{4}-\d{2}-\d{2}$/.test(fv) ? fv : null
+                  };
                 });
                 if (toInsert.length) await supabaseClient.from('products').insert(toInsert);
               }
@@ -11485,7 +11592,7 @@ async function showApp() {
         if (profile.role === 'partner') {
           partnerFromKUpInit = await ferriolFetchPartnerKiosqueroUpgradeEligible(uid);
         }
-        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '', phone: profile.phone != null ? String(profile.phone) : '', avatarUrl: profile.avatar_url != null ? String(profile.avatar_url).trim() : '', partnerFromKiosqueroUpgrade: partnerFromKUpInit };
+        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '', phone: profile.phone != null ? String(profile.phone) : '', avatarUrl: profile.avatar_url != null ? String(profile.avatar_url).trim() : '', partnerFromKiosqueroUpgrade: partnerFromKUpInit, vencimientoAvisoDias: (function () { var x = Number(profile.vencimiento_aviso_dias); return Number.isFinite(x) ? Math.min(365, Math.max(0, Math.floor(x))) : null; })() };
         await showApp();
       } catch (e) {
         console.error('Error en init:', e);

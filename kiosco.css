@@ -1095,6 +1095,11 @@ body[data-panel="inventory"] #panel-inventory {
   min-width: 0;
 }
 
+/* Nombre + aviso vencimiento apilados en la fila de inventario */
+.inv-item-info .flex.flex-col .inv-item-name {
+  flex: 0 1 auto;
+}
+
 .inv-item-price {
   font-weight: 700;
   font-size: 0.9rem;
