@@ -4585,7 +4585,7 @@
         pay_kiosco_lead: '',
         pay_admin_eyebrow: 'CUOTA MENSUAL · DISTRIBUIDOR',
         pay_admin_headline:
-          'Mantené activo ante la empresa Ferriol tu rol de socio/red (cuota mensual)',
+          'Mantenete activo para no perder las comisiones de tus afiliados',
         pay_admin_lead: '',
         pay_kiosco_benefits_title: 'Beneficios incluidos con tu suscripción',
         pay_kiosco_products_title: 'Propuesta Ferriol',
