@@ -5418,8 +5418,6 @@
       } catch (_) {}
       var clientSaleWrap = document.querySelector('.ferriol-partner-client-sale-wrap');
       if (clientSaleWrap) clientSaleWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper() && !isPartnerKioscoPreviewMode()));
-      var partnerMiPlanWrap = document.querySelector('.ferriol-partner-mi-plan-wrap');
-      if (partnerMiPlanWrap) partnerMiPlanWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper() && !isPartnerKioscoPreviewMode()));
       var affWrap = document.querySelector('.ferriol-partner-affiliate-links-wrap');
       if (affWrap) affWrap.classList.toggle('hidden', !shouldShowPartnerAffiliateLinksUi());
       var ingNav = document.getElementById('navSuperIngresosBtn');
@@ -11545,15 +11543,6 @@ async function showApp() {
     })();
     var btnOpenClientSale = document.getElementById('btnOpenClientSaleRequestModal');
     if (btnOpenClientSale) btnOpenClientSale.onclick = function () { openClientSaleRequestModal(); };
-    var btnPartnerOpenMiPlan = document.getElementById('btnPartnerOpenMiPlan');
-    if (btnPartnerOpenMiPlan) {
-      btnPartnerOpenMiPlan.onclick = function () {
-        try {
-          syncPlanRolePayLabels();
-        } catch (_) {}
-        if (typeof openAccountPlanSheet === 'function') openAccountPlanSheet();
-      };
-    }
 
     if (clientSaleClose) clientSaleClose.onclick = closeClientSaleRequestModal;
     var clientSaleOv = document.getElementById('clientSaleRequestModalOverlay');
