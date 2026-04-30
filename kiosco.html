@@ -1338,7 +1338,7 @@
                 <i data-lucide="line-chart" class="w-5 h-5 text-[#86efac] shrink-0"></i>
                 <span id="ingresosSectionTitle">Gestión de ventas</span>
               </h2>
-              <p id="ingresosSectionSubtitle" class="text-xs text-white/50">Ventas donde <strong class="text-white/70">vos sos el vendedor</strong> en el registro. Los clientes pagan a <strong class="text-white/65">Ferriol</strong>; cuando la empresa verifica el cobro, acá ves tu <strong class="text-white/70">comisión acreditada</strong> (no el monto bruto del cliente).</p>
+              <p id="ingresosSectionSubtitle" class="text-xs text-white/50 hidden mb-0"></p>
             </div>
             <div class="flex flex-wrap items-center gap-2 shrink-0">
               <label class="text-xs text-white/45 sr-only" for="ingresosRangeFilter">Período</label>
@@ -1361,24 +1361,20 @@
           </div>
           <div id="ingresosKpiPartnerRow" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
             <div class="rounded-2xl border border-white/12 bg-gradient-to-b from-white/[0.08] to-transparent p-4">
-              <p class="text-xs text-white/50 flex items-center gap-1.5 mb-1">Comisión acreditada <span class="text-white/35" title="Suma en el libro MLM: sale_commission + renewal aprobados">ⓘ</span></p>
+              <p class="text-xs text-white/50 mb-1">Comisión acreditada</p>
               <p id="ingresosKpiNet" class="text-2xl font-bold text-[#86efac] tabular-nums">—</p>
-              <p class="text-[10px] text-white/40 mt-1">Comisiones de ventas <strong class="text-white/55">aprobadas</strong></p>
             </div>
             <div class="rounded-2xl border border-white/12 bg-gradient-to-b from-white/[0.08] to-transparent p-4">
               <p class="text-xs text-white/50 mb-1">Ventas</p>
               <p id="ingresosKpiCount" class="text-2xl font-bold text-cyan-200 tabular-nums">—</p>
-              <p class="text-[10px] text-white/40 mt-1">Comisiones acreditadas <strong class="text-white/50">más</strong> operaciones rechazadas (mismo período)</p>
             </div>
             <div class="rounded-2xl border border-amber-500/20 bg-gradient-to-b from-amber-500/10 to-transparent p-4">
-              <p class="text-xs text-white/50 mb-1 flex items-center gap-1">Ventas pendientes <span class="text-white/35" title="Suma: ventas con comprobante (Ingresos) + solicitudes de alta kiosco/socio enviadas y aún sin aprobar por Ferriol OS">ⓘ</span></p>
+              <p class="text-xs text-white/50 mb-1">Ventas pendientes</p>
               <p id="ingresosKpiPending" class="text-2xl font-bold text-amber-200 tabular-nums">—</p>
-              <p class="text-[10px] text-white/40 mt-1">Hasta que <strong class="text-amber-200/60">Ferriol OS</strong> apruebe y acredite (desaparecen al aprobarse)</p>
             </div>
             <div id="ingresosKpiRejCard" class="rounded-2xl border border-white/12 bg-gradient-to-b from-red-500/10 to-transparent p-4 cursor-pointer touch-target transition hover:border-red-400/35 active:scale-[0.99]" role="button" tabindex="0" title="Ver listado, motivo y reenviar">
               <p class="text-xs text-white/50 mb-1">Rechazadas</p>
               <p id="ingresosKpiRej" class="text-2xl font-bold text-red-200/90 tabular-nums">—</p>
-              <p id="ingresosKpiRejSub" class="text-[10px] text-white/40 mt-1">Cobros y solicitudes con comprobante <strong class="text-red-200/80">rechazados</strong> por la empresa</p>
             </div>
           </div>
           <div id="ingresosKpiFounderRow" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
@@ -3166,7 +3162,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426_partner_sin_mi_plan_ingresos"></script>
+  <script defer src="kiosco-app.js?v=20260426_ingresos_sin_comentarios_kpi"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>

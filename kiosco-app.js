@@ -684,9 +684,14 @@
       var cl = document.getElementById('ingresosChartLegend');
       if (t) t.textContent = founder ? 'Ingresos (vista empresa)' : 'Gestión de ventas';
       if (s) {
-        s.textContent = founder
-          ? 'Métricas globales: facturación verificada, reserva a favor de la empresa y comisiones liquidadas a la red (libro MLM). No reemplaza la contabilidad formal.'
-          : 'Tu comisión acreditada proviene del libro MLM cuando la empresa verificó el cobro con vos como vendedor. No es el monto bruto que pagó el cliente (ese flujo va siempre a Ferriol).';
+        if (founder) {
+          s.textContent =
+            'Métricas globales: facturación verificada, reserva a favor de la empresa y comisiones liquidadas a la red (libro MLM). No reemplaza la contabilidad formal.';
+          s.classList.remove('hidden');
+        } else {
+          s.textContent = '';
+          s.classList.add('hidden');
+        }
       }
       if (pRow) pRow.classList.toggle('hidden', founder);
       if (fRow) fRow.classList.toggle('hidden', !founder);
@@ -1072,12 +1077,6 @@
         });
         kpiC.textContent = String(ledOk.length + nRej);
         kpiR.textContent = String(nRej);
-        var rejSub = document.getElementById('ingresosKpiRejSub');
-        if (rejSub) {
-          rejSub.innerHTML = nRej > 0
-            ? ('Total declarado (rechazado): <strong class="text-red-200/80">$ ' + sumRej.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS</strong> · tocá para ver motivo y reenviar')
-            : 'Sin rechazos en el período';
-        }
         if (kpiPending) {
           Promise.all([
             supabaseClient
@@ -1205,8 +1204,6 @@
         }
       } catch (e) {
         kpiN.textContent = kpiC.textContent = kpiR.textContent = '—';
-        var rejSubErr = document.getElementById('ingresosKpiRejSub');
-        if (rejSubErr) rejSubErr.textContent = '—';
         window._ferriolIngresosRejectedDetail = { payments: [], csrs: [] };
         wrap.innerHTML = '<p class="text-red-300/90 text-sm py-4 px-2">No se pudieron cargar los ingresos. ' + (e && e.message ? String(e.message) : '') + ' ¿Ejecutaste <code class="text-white/80">supabase-ferriol-payments.sql</code> y las políticas RLS?</p>';
         if (typeof window !== 'undefined' && window.Chart && canvas && window._ferriolIngresosChart) {
