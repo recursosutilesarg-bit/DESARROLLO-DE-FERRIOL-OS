@@ -2829,6 +2829,9 @@
     }
 
     let currentUser = null;
+    try {
+      window._ferriolPartnerKitGateNeedsProof = false;
+    } catch (_) {}
     let _dataCache = { products: {}, ventas: { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 }, transacciones: 0, deudores: [], lastCierreDate: null };
 
     const STORAGE_KEY_PREFIX = 'ferriol_data_';
@@ -3060,6 +3063,35 @@
         return true;
       } catch (_) {
         return false;
+      }
+    }
+
+    /** Socio nuevo con sponsor (no upgrade desde kiosco): falta enviar comprobante de kit a la cola del distribuidor. */
+    async function ferriolPartnerNeedsInitialKitProofGate() {
+      if (!supabaseClient || !currentUser || currentUser.role !== 'partner') return false;
+      if (currentUser.partnerFromKiosqueroUpgrade) return false;
+      if (!currentUser.sponsorId) return false;
+      try {
+        var r = await supabaseClient
+          .from('ferriol_kiosk_partner_proof_queue')
+          .select('id')
+          .eq('kiosco_user_id', currentUser.id)
+          .eq('payment_type', 'kit_inicial')
+          .in('status', ['pending_sale', 'sale_registered'])
+          .limit(1)
+          .maybeSingle();
+        if (r.error) return false;
+        return !r.data;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    async function ferriolRefreshPartnerKitGateFlag() {
+      try {
+        window._ferriolPartnerKitGateNeedsProof = await ferriolPartnerNeedsInitialKitProofGate();
+      } catch (_) {
+        window._ferriolPartnerKitGateNeedsProof = false;
       }
     }
 
@@ -5357,11 +5389,13 @@
       el.classList.remove('hidden');
     }
 
-    /** Ir a pantalla Plan / resumen antes de pagar o antes de solicitar distribuidor */
+    /** Ir a pantalla Plan / resumen antes de pagar o antes de solicitar distribuidor · partner_kit = cierre kit socio nuevo */
     window._ferriolGoToPlanCheckout = function (mode, explicitReturnPanel) {
       try {
-        window._ferriolPlanCheckoutMode =
-          String(mode || '').toLowerCase() === 'distribuidor' ? 'distribuidor' : 'pay';
+        var m = String(mode || '').toLowerCase();
+        if (m === 'distribuidor') window._ferriolPlanCheckoutMode = 'distribuidor';
+        else if (m === 'partner_kit') window._ferriolPlanCheckoutMode = 'partner_kit';
+        else window._ferriolPlanCheckoutMode = 'pay';
       } catch (_) {
         window._ferriolPlanCheckoutMode = 'pay';
       }
@@ -5372,15 +5406,42 @@
 
     function syncPlanCheckoutLayout() {
       var raw = typeof window._ferriolPlanCheckoutMode === 'string' ? window._ferriolPlanCheckoutMode : 'pay';
-      var mode = raw === 'distribuidor' ? 'distribuidor' : 'pay';
+      var mode = raw === 'distribuidor' || raw === 'partner_kit' ? raw : 'pay';
       if (mode === 'distribuidor' && (!currentUser || currentUser.role !== 'kiosquero')) {
+        mode = 'pay';
+      }
+      if (mode === 'partner_kit' && (!currentUser || currentUser.role !== 'partner')) {
         mode = 'pay';
       }
       window._ferriolPlanCheckoutMode = mode;
       var payW = document.getElementById('planCheckoutPayWrap');
       var distW = document.getElementById('planCheckoutDistribWrap');
-      if (payW) payW.classList.toggle('hidden', mode !== 'pay');
-      if (distW) distW.classList.toggle('hidden', mode !== 'distribuidor');
+      var showDistribUi = mode === 'distribuidor' || mode === 'partner_kit';
+      if (payW) payW.classList.toggle('hidden', showDistribUi);
+      if (distW) distW.classList.toggle('hidden', !showDistribUi);
+    }
+
+    /** Textos específicos del checkout kit cuando el usuario ya es partner (alta por referidos). */
+    function syncPartnerKitCheckoutDistribLabels() {
+      if (
+        typeof window._ferriolPlanCheckoutMode !== 'string' ||
+        window._ferriolPlanCheckoutMode !== 'partner_kit' ||
+        !currentUser ||
+        currentUser.role !== 'partner'
+      ) {
+        return;
+      }
+      var deb = document.getElementById('planCheckoutDistribEyebrow');
+      var dsl = document.getElementById('planCheckoutDistribSalesHeadline');
+      var dk = document.getElementById('planCheckoutDistribLead');
+      if (deb) deb.textContent = 'Tu alta como distribuidor';
+      if (dsl) dsl.textContent = 'Kit inicial + licencia';
+      if (dk) {
+        dk.innerHTML = ferriolFormatDistribIntroHtml(
+          'Pagás el kit únicamente a la cuenta empresa Ferriol indicada abajo. Luego adjuntás el comprobante: llega a tu distribuidor para validarlo y cargar la venta ante Ferriol.'
+        );
+        dk.classList.remove('hidden');
+      }
     }
 
     /** Navegar a pantalla Plan; al volver, restaurar panel guardado en _ferriolPlanPanelReturn. */
@@ -5730,6 +5791,18 @@
     }
 
     function showPanel(name, cajaTabOverride) {
+      if (
+        currentUser &&
+        currentUser.role === 'partner' &&
+        window._ferriolPartnerKitGateNeedsProof === true &&
+        name !== 'plan'
+      ) {
+        try {
+          window._ferriolPlanCheckoutMode = 'partner_kit';
+          window._ferriolPlanPanelReturn = 'super';
+        } catch (_) {}
+        name = 'plan';
+      }
       if (name === 'super' && currentUser && currentUser.role === 'super' && state.superUiMode === 'negocio') {
         state.superUiMode = 'empresa';
         try { sessionStorage.setItem('ferriol_super_ui', 'empresa'); } catch (_) {}
@@ -5783,6 +5856,9 @@
           syncPlanCheckoutLayout();
         } catch (_) {}
         try {
+          syncPartnerKitCheckoutDistribLabels();
+        } catch (_) {}
+        try {
           syncPlanCheckoutReferenciasMontos();
         } catch (_) {}
         try {
@@ -5796,7 +5872,10 @@
           if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
         } catch (_) {}
         try {
-          if (window._ferriolPlanCheckoutMode === 'distribuidor' && typeof syncKiosqueroPartnerUpgradeUi === 'function') {
+          if (
+            window._ferriolPlanCheckoutMode === 'distribuidor' &&
+            typeof syncKiosqueroPartnerUpgradeUi === 'function'
+          ) {
             syncKiosqueroPartnerUpgradeUi().catch(function () {});
           }
         } catch (_) {}
@@ -8532,7 +8611,18 @@ async function showApp() {
       lucide.createIcons();
     } else if (isPartner) {
       ferriolStartNotificationPolling();
-      if (state.partnerUiMode === 'negocio') {
+      await ferriolRefreshPartnerKitGateFlag();
+      if (window._ferriolPartnerKitGateNeedsProof === true) {
+        window._ferriolGoToPlanCheckout('partner_kit', 'super');
+        if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
+        window._trialCountdownInterval = null;
+        if (currentUser && currentUser.partnerLicensePending) {
+          window._trialCountdownInterval = setInterval(ferriolTickCountdowns, 1000);
+          ferriolTickCountdowns();
+        }
+        applyAppShell();
+        goToPanel('plan');
+      } else if (state.partnerUiMode === 'negocio') {
         await window._partnerIrModoNegocio();
       } else {
         if (window._trialCountdownInterval) clearInterval(window._trialCountdownInterval);
@@ -9008,6 +9098,9 @@ async function showApp() {
       state.partnerUiMode = 'red';
       try { sessionStorage.removeItem('ferriol_super_ui'); } catch (_) {}
       try { sessionStorage.removeItem('ferriol_partner_ui'); } catch (_) {}
+      try {
+        window._ferriolPartnerKitGateNeedsProof = false;
+      } catch (_) {}
       state.cart = [];
       state.transaccionesList = [];
       _dataCache = { products: {}, ventas: { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 }, transacciones: 0, deudores: [], lastCierreDate: null };
@@ -11717,9 +11810,12 @@ async function showApp() {
         if (sp) sp.value = '';
         if (mode === 'kit') {
           if (titSp) titSp.textContent = 'Kit + licencia · comprobante';
-          if (intro)
+          if (intro) {
             intro.textContent =
-              'Subí el comprobante: se envía a tu distribuidor directo para que registre la venta ante Ferriol y quede vinculado el cobro.';
+              currentUser && currentUser.role === 'partner'
+                ? 'Subí el comprobante del kit inicial: llega al distribuidor que te referenció para que lo valide y cargue la venta ante Ferriol.'
+                : 'Subí el comprobante: se envía a tu distribuidor directo para que registre la venta ante Ferriol y quede vinculado el cobro.';
+          }
           if (vw) vw.classList.add('hidden');
           if (amt) amt.value = String(FERRIOL_PLAN_AMOUNTS.kit);
         } else if (mode === 'admin') {
@@ -11865,9 +11961,10 @@ async function showApp() {
           }
           var routeKioskToPartnerQueue =
             currentUser &&
-            currentUser.role === 'kiosquero' &&
             sponsorResolved &&
-            (paymentType === 'kiosco_licencia' || paymentType === 'kit_inicial');
+            ((currentUser.role === 'kiosquero' &&
+              (paymentType === 'kiosco_licencia' || paymentType === 'kit_inicial')) ||
+              (currentUser.role === 'partner' && paymentType === 'kit_inicial'));
           var reqId =
             typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + '-epp';
           var ext =
@@ -11937,9 +12034,12 @@ async function showApp() {
           }
           closeProofModal();
           if (fileIn) fileIn.value = '';
+          void ferriolRefreshPartnerKitGateFlag();
           alert(
             routeKioskToPartnerQueue
-              ? 'Enviado a tu distribuidor directo. Él cargará la venta ante Ferriol desde «Ingresos» para registrar tu pago con su comisión.'
+              ? currentUser.role === 'partner'
+                ? 'Enviado a tu distribuidor directo. Va a revisar el comprobante y cargará la venta ante Ferriol cuando corresponda.'
+                : 'Enviado a tu distribuidor directo. Él cargará la venta ante Ferriol desde «Ingresos» para registrar tu pago con su comisión.'
               : 'Enviado. La empresa lo revisa en Solicitudes y aplica el cobro al aprobar.'
           );
         });
@@ -11947,19 +12047,32 @@ async function showApp() {
     })();
     (function bindPlanPanel() {
       var back = document.getElementById('planPanelBackBtn');
-      if (back) back.addEventListener('click', function () {
-        var ret = window._ferriolPlanPanelReturn;
-        window._ferriolPlanPanelReturn = null;
-        if (typeof ret === 'string' && ret.length > 0 && ret !== 'plan') {
-          goToPanel(ret);
-          return;
-        }
-        if (currentUser && isNetworkAdminRole(currentUser && currentUser.role) && !isAnyKioscoPreviewMode()) {
-          goToPanel('super');
-        } else {
-          goToPanel('dashboard');
-        }
-      });
+      if (back)
+        back.addEventListener('click', async function () {
+          if (window._ferriolPlanCheckoutMode === 'partner_kit') {
+            var stillNeed = await ferriolPartnerNeedsInitialKitProofGate();
+            if (stillNeed) {
+              alert(
+                'Primero cargá el comprobante del kit inicial ante tu distribuidor directo (datos de pago abajo → «Ya pagué» / Mercado Pago y adjuntá la imagen).'
+              );
+              return;
+            }
+            try {
+              window._ferriolPartnerKitGateNeedsProof = false;
+            } catch (_) {}
+          }
+          var ret = window._ferriolPlanPanelReturn;
+          window._ferriolPlanPanelReturn = null;
+          if (typeof ret === 'string' && ret.length > 0 && ret !== 'plan') {
+            goToPanel(ret);
+            return;
+          }
+          if (currentUser && isNetworkAdminRole(currentUser && currentUser.role) && !isAnyKioscoPreviewMode()) {
+            goToPanel('super');
+          } else {
+            goToPanel('dashboard');
+          }
+        });
       var bp = document.getElementById('btnPlanOpenEmpresaSubscription');
       if (bp) {
         bp.addEventListener('click', function () {
