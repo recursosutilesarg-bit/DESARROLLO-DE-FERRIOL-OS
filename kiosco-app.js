@@ -4758,7 +4758,8 @@
         isEmpresaLensSuper() &&
         !isAnyKioscoPreviewMode()
       );
-      var showPartnerMas = !!(currentUser && currentUser.role === 'partner' && !isPartnerKioscoPreviewMode());
+      /** Partner real o fundador en vista socio (Administración): misma pantalla “Más”. */
+      var showPartnerMas = !!(currentUser && isPartnerLens() && !isEmpresaLensSuper() && !isPartnerKioscoPreviewMode());
       if (founderBtn) founderBtn.classList.toggle('hidden', !showFounder);
       if (partnerMasBtn) partnerMasBtn.classList.toggle('hidden', !showPartnerMas);
       /** Misma pantalla que la tuerca inferior: si ya está en el menú perfil, no duplicar en la barra. */
@@ -6229,7 +6230,7 @@
     var accountMenuBtnPartnerMas = document.getElementById('accountMenuBtnPartnerMas');
     if (accountMenuBtnPartnerMas) {
       accountMenuBtnPartnerMas.addEventListener('click', function () {
-        if (!currentUser || currentUser.role !== 'partner' || isPartnerKioscoPreviewMode()) return;
+        if (!currentUser || !isPartnerLens() || isPartnerKioscoPreviewMode()) return;
         closeAccountMenuDrawer(true);
         state.superSection = 'mas';
         goToPanel('super');
