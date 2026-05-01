@@ -4761,6 +4761,9 @@
       var showPartnerMas = !!(currentUser && currentUser.role === 'partner' && !isPartnerKioscoPreviewMode());
       if (founderBtn) founderBtn.classList.toggle('hidden', !showFounder);
       if (partnerMasBtn) partnerMasBtn.classList.toggle('hidden', !showPartnerMas);
+      /** Misma pantalla que la tuerca inferior: si ya está en el menú perfil, no duplicar en la barra. */
+      var navMas = document.getElementById('navSuperBottomMasBtn');
+      if (navMas) navMas.classList.toggle('hidden', showFounder || showPartnerMas);
     }
 
     /** Kiosquero (y vista negocio simulada): Configuración en menú del avatar; se oculta el tile en Más. */
@@ -6219,7 +6222,7 @@
       accountMenuBtnFounderSettings.addEventListener('click', function () {
         if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper() || isAnyKioscoPreviewMode()) return;
         closeAccountMenuDrawer(true);
-        state.superSection = 'ajustes';
+        state.superSection = 'mas';
         goToPanel('super');
       });
     }
