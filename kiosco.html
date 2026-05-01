@@ -212,10 +212,7 @@
       <label class="block text-xs text-white/55 mb-1" for="kioscoEmpresaPaymentProofFile">Imagen del comprobante</label>
       <input type="file" id="kioscoEmpresaPaymentProofFile" accept="image/jpeg,image/png,image/webp,image/gif" class="w-full text-sm text-white/80 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-white/10 file:text-white">
       <p class="text-[10px] text-white/40 mt-1 mb-3">Hasta 5 MB. JPG, PNG, WebP o GIF.</p>
-      <button type="button" id="kioscoEmpresaPaymentProofSubmit" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target flex items-center justify-center gap-2">
-        <i data-lucide="send" class="w-4 h-4"></i>
-        Enviar a la empresa
-      </button>
+      <button type="button" id="kioscoEmpresaPaymentProofSubmit" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target">Enviar</button>
     </div>
   </div>
 
@@ -2152,6 +2149,10 @@
               <input type="tel" id="adminContactWhatsapp3" placeholder="Opcional" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
               <label class="block text-xs text-white/70 mb-1">Contacto 4 (WhatsApp, opcional)</label>
               <input type="tel" id="adminContactWhatsapp4" placeholder="Opcional" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+              <label class="block text-xs text-white/70 mb-1 mt-2">Soporte · menú del perfil (Ayuda)</label>
+              <p class="text-[10px] text-white/45 mb-2">Número o WhatsApp que ven <strong class="text-white/60">todos los usuarios</strong> al abrir el círculo del avatar → <strong class="text-white/60">Ayuda</strong>. Tocar abre WhatsApp si hay dígitos suficientes; vacío = no se muestra el botón.</p>
+              <input type="tel" id="adminSupportPhone" placeholder="Ej. 5491112345678" maxlength="80" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-400/60 text-base mb-0">
+              <p class="text-[10px] text-white/38 mt-1 mb-0">Clave Supabase <code class="text-white/55">ferriol_support_phone</code> · guardar con <strong class="text-white/55">Guardar ajustes</strong>.</p>
             </div>
             <div>
               <label class="block text-xs text-white/70 mb-1">Contraseña para quitar usuarios (opcional)</label>
@@ -2596,7 +2597,7 @@
         <label class="block text-xs text-white/55 mb-1" for="clientSaleComprobante">Comprobante de transferencia (imagen)</label>
         <input type="file" id="clientSaleComprobante" accept="image/jpeg,image/png,image/webp,image/gif" class="w-full text-sm text-white/80 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-white/10 file:text-white">
         <p class="text-[10px] text-white/40 mt-1 mb-3">Hasta 5 MB. Formato: JPG, PNG, WebP o GIF.</p>
-        <button type="button" id="clientSaleRequestSubmit" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target">Enviar a la empresa</button>
+        <button type="button" id="clientSaleRequestSubmit" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target">Enviar</button>
       </div>
     </div>
 
@@ -3087,6 +3088,15 @@
         <button type="button" id="accountMenuBtnPersonal" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors">
           <i data-lucide="user" class="w-[1.125rem] h-[1.125rem] text-gray-500 shrink-0 stroke-[1.75]"></i>
           <span>Datos personales</span>
+        </button>
+        <button type="button" id="accountMenuBtnHelp" class="w-full text-left rounded-xl py-2.5 px-3 mb-1 text-sm touch-target flex items-center gap-3 border border-sky-100 bg-sky-50/90 hover:bg-sky-100/95 active:bg-sky-100 transition-colors hidden" title="Contactar soporte">
+          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-500/15 ring-1 ring-sky-400/25" aria-hidden="true">
+            <i data-lucide="life-buoy" class="w-[1.125rem] h-[1.125rem] text-sky-700 shrink-0 stroke-[1.75]"></i>
+          </span>
+          <span class="flex-1 min-w-0">
+            <span class="block font-semibold text-sky-950 leading-tight">Ayuda</span>
+            <span id="accountMenuHelpPhoneSub" class="block text-[11px] text-sky-800/95 tabular-nums truncate mt-0.5">—</span>
+          </span>
         </button>
         <button type="button" id="accountMenuBtnBank" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors hidden mb-1">
           <i data-lucide="landmark" class="w-[1.125rem] h-[1.125rem] text-gray-500 shrink-0 stroke-[1.75]"></i>

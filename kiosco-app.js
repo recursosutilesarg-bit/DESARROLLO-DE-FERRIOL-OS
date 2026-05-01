@@ -4689,6 +4689,33 @@
       var show = !!(currentUser && isNetworkAdminRole(currentUser.role) && !isAnyKioscoPreviewMode());
       bankBtn.classList.toggle('hidden', !show);
     }
+    /** Carga ferriol_support_phone y muestra/oculta el botón Ayuda en el menú del avatar. */
+    async function ferriolRefreshAccountMenuHelpButton() {
+      var btn = document.getElementById('accountMenuBtnHelp');
+      var sub = document.getElementById('accountMenuHelpPhoneSub');
+      if (!btn || !sub) return;
+      if (!supabaseClient || !currentUser) {
+        btn.classList.add('hidden');
+        return;
+      }
+      try {
+        var r = await supabaseClient.from('app_settings').select('value').eq('key', 'ferriol_support_phone').maybeSingle();
+        var v = (r && r.data && r.data.value != null) ? String(r.data.value).trim() : '';
+        window._ferriolSupportPhoneCached = v;
+        if (!v) {
+          btn.classList.add('hidden');
+          sub.textContent = '—';
+          return;
+        }
+        sub.textContent = v;
+        btn.classList.remove('hidden');
+        try {
+          if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        } catch (_) {}
+      } catch (_) {
+        btn.classList.add('hidden');
+      }
+    }
     /** Kiosquero (y vista negocio simulada): Configuración en menú del avatar; se oculta el tile en Más. */
     function syncAccountMenuKiosqueroConfigPlacement() {
       var cfgBtn = document.getElementById('accountMenuBtnConfig');
@@ -4777,6 +4804,7 @@
       syncAccountMenuDrawerUserBlock();
       syncAccountMenuDrawerShell();
       syncPlanRolePayLabels();
+      ferriolRefreshAccountMenuHelpButton().catch(function () {});
       positionAccountMenuDrawerPanel();
       var hdrBtn = document.getElementById('headerProfileBtn');
       if (hdrBtn) {
@@ -5983,6 +6011,24 @@
       accountMenuBtnPersonal.addEventListener('click', function () {
         closeAccountMenuDrawer(true);
         openAccountProfileModal('personal');
+      });
+    }
+    var accountMenuBtnHelp = document.getElementById('accountMenuBtnHelp');
+    if (accountMenuBtnHelp) {
+      accountMenuBtnHelp.addEventListener('click', function () {
+        var sub = document.getElementById('accountMenuHelpPhoneSub');
+        var display = (sub && sub.textContent) ? String(sub.textContent).trim() : String(window._ferriolSupportPhoneCached || '').trim();
+        var digits = display.replace(/\D/g, '');
+        if (digits.length >= 8) {
+          try {
+            window.open('https://wa.me/' + digits, '_blank', 'noopener,noreferrer');
+          } catch (_) {}
+        } else if (display.length > 0) {
+          var tel = display.replace(/[^\d+]/g, '');
+          try {
+            window.location.href = 'tel:' + tel;
+          } catch (_) {}
+        }
       });
     }
     var accountMenuBtnConfig = document.getElementById('accountMenuBtnConfig');
@@ -10550,7 +10596,7 @@ async function showApp() {
     async function renderSuper() {
       if (!supabaseClient) return;
       try {
-        const { data: settingsRows } = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4', 'admin_delete_password', 'trial_reminder_config', 'ferriol_transfer_info', 'trial_duration_days', 'partner_kit_review_hours', 'partner_kit_review_message', 'ferriol_checkout_copy', 'ferriol_plan_amounts', 'ferriol_mercadopago_checkout_urls', 'ferriol_mercadopago_checkout_url']);
+        const { data: settingsRows } = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4', 'admin_delete_password', 'trial_reminder_config', 'ferriol_transfer_info', 'trial_duration_days', 'partner_kit_review_hours', 'partner_kit_review_message', 'ferriol_support_phone', 'ferriol_checkout_copy', 'ferriol_plan_amounts', 'ferriol_mercadopago_checkout_urls', 'ferriol_mercadopago_checkout_url']);
         var whatsappInput = document.getElementById('adminContactWhatsapp');
         var whatsapp2Input = document.getElementById('adminContactWhatsapp2');
         var whatsapp3Input = document.getElementById('adminContactWhatsapp3');
@@ -10560,6 +10606,7 @@ async function showApp() {
         var trialDurInput = document.getElementById('adminTrialDurationDays');
         var kitRevHoursInput = document.getElementById('adminPartnerKitReviewHours');
         var kitRevMsgTa = document.getElementById('adminPartnerKitReviewMessage');
+        var adminSupportPhoneEl = document.getElementById('adminSupportPhone');
         var trialCfgParsed = { windowDays: 5, messages: {} };
         if (settingsRows) {
           settingsRows.forEach(function (r) {
@@ -10580,6 +10627,9 @@ async function showApp() {
             if (r.key === 'partner_kit_review_message' && kitRevMsgTa) {
               kitRevMsgTa.value = r.value != null ? String(r.value) : '';
               window._ferriolPartnerKitReviewTooltip = kitRevMsgTa.value.trim() || window._ferriolPartnerKitReviewTooltip;
+            }
+            if (r.key === 'ferriol_support_phone' && adminSupportPhoneEl) {
+              adminSupportPhoneEl.value = r.value != null ? String(r.value) : '';
             }
             if (r.key === 'trial_reminder_config') trialCfgParsed = parseTrialReminderConfigValue(r.value || '');
           });
@@ -10866,6 +10916,10 @@ async function showApp() {
           { key: 'trial_duration_days', value: String(trialDurSave) },
           { key: 'trial_reminder_config', value: trialReminderJson }
         ];
+        var supPhoneEl = document.getElementById('adminSupportPhone');
+        if (supPhoneEl) {
+          rowsUpsert.push({ key: 'ferriol_support_phone', value: String(supPhoneEl.value || '').trim().slice(0, 80) });
+        }
         if (isEmpresaLensSuper()) {
           var khEl = document.getElementById('adminPartnerKitReviewHours');
           var kmEl = document.getElementById('adminPartnerKitReviewMessage');
@@ -10961,6 +11015,9 @@ async function showApp() {
         msgEl.textContent = 'Ajustes guardados.';
         msgEl.classList.remove('hidden');
         setTimeout(() => msgEl.classList.add('hidden'), 3000);
+        try {
+          ferriolRefreshAccountMenuHelpButton().catch(function () {});
+        } catch (_) {}
       } catch (e) {
         msgEl.textContent = 'Error: ' + (e.message || 'Revisá que exista la tabla app_settings.');
         msgEl.classList.remove('hidden');
