@@ -4586,7 +4586,7 @@
         }
       }
       if (btn) {
-        btn.title = kit ? (window._ferriolPartnerKitReviewTooltip || 'Período de aprobación del kit inicial (12–24 h).') : 'Mi cuenta';
+        btn.title = kit ? (window._ferriolPartnerKitReviewTooltip || 'Estás en período de aprobación. Esto puede tardar entre 12hs y 24hs hábiles.') : 'Mi cuenta';
       }
       syncAccountMenuDrawerUserBlock();
     }
@@ -4626,7 +4626,7 @@
       if (dDot) dDot.classList.toggle('hidden', !kit);
       if (note) {
         note.classList.toggle('hidden', !kit);
-        if (kit) note.textContent = window._ferriolPartnerKitReviewTooltip || 'Período de aprobación del kit inicial.';
+        if (kit) note.textContent = window._ferriolPartnerKitReviewTooltip || 'Estás en período de aprobación. Esto puede tardar entre 12hs y 24hs hábiles.';
       }
     }
     function positionAccountMenuDrawerPanel() {
