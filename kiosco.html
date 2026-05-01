@@ -2394,7 +2394,7 @@
             <i data-lucide="settings" class="w-5 h-5 text-[#86efac]"></i>
             Ajustes
           </h2>
-          <p class="text-xs text-white/50 mb-4">Tocá <strong class="text-white/65">Ajustes del sistema</strong> desde acá para WhatsApp empresa, período de prueba, precios y el <strong class="text-sky-200/90">link Mercado Pago</strong> en el recuadro azul. También: aviso global y exportación. Para <strong class="text-white/65">cargar una venta con comprobante</strong>, usá el botón <strong class="text-white/65">Cargar venta</strong> en <strong class="text-white/65">Ingresos</strong> junto al filtro de período. Los <strong class="text-white/65">enlaces para referir negocios o socios</strong> están en <strong class="text-white/65">Afiliados</strong>. Los <strong class="text-white/65">datos bancarios</strong> (tuyos) los cargás en el menú de tu perfil.</p>
+          <p class="text-xs text-white/50 mb-4"><strong class="text-white/70">Menú del perfil:</strong> tocá tu foto arriba a la derecha → el fundador entra a <strong class="text-white/75">Ajustes del sistema</strong>; el socio a <strong class="text-white/75">Más opciones</strong> (texto para retiros, exportar…). También podés usar la pestaña inferior <strong class="text-white/65">Ajustes</strong>. Fundador: desde acá seguís con <strong class="text-white/65">Ajustes del sistema</strong> para WhatsApp empresa, período de prueba, precios y el <strong class="text-sky-200/90">link Mercado Pago</strong>. Para <strong class="text-white/65">cargar una venta con comprobante</strong>, <strong class="text-white/65">Ingresos → Cargar venta</strong>. Enlaces para referir: <strong class="text-white/65">Afiliados</strong>. Datos bancarios propios del socio: menú del perfil → <strong class="text-white/65">Mis datos bancarios</strong>.</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 super-only super-main-only">
             <button type="button" id="btnSuperMasGoSolicitudesVentas" class="glass rounded-2xl p-5 border border-emerald-500/45 bg-emerald-500/[0.12] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-emerald-400/65 active:scale-[0.98] touch-target sm:col-span-2">
               <div class="w-12 h-12 rounded-xl bg-emerald-500/25 flex items-center justify-center shrink-0">
@@ -3101,6 +3101,20 @@
         <button type="button" id="accountMenuBtnBank" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors hidden mb-1">
           <i data-lucide="landmark" class="w-[1.125rem] h-[1.125rem] text-gray-500 shrink-0 stroke-[1.75]"></i>
           <span>Mis datos bancarios</span>
+        </button>
+        <button type="button" id="accountMenuBtnFounderSettings" class="w-full text-left rounded-xl py-2.5 px-3 mb-1 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors hidden">
+          <i data-lucide="sliders-horizontal" class="w-[1.125rem] h-[1.125rem] text-violet-600 shrink-0 stroke-[1.75]"></i>
+          <span class="flex-1 min-w-0 text-left">
+            <span class="block leading-snug">Ajustes del sistema</span>
+            <span class="block text-[11px] text-gray-500 font-normal mt-0.5 leading-snug">WhatsApp empresa, precios, Mercado Pago, avisos…</span>
+          </span>
+        </button>
+        <button type="button" id="accountMenuBtnPartnerMas" class="w-full text-left rounded-xl py-2.5 px-3 mb-1 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors hidden">
+          <i data-lucide="layout-grid" class="w-[1.125rem] h-[1.125rem] text-emerald-600 shrink-0 stroke-[1.75]"></i>
+          <span class="flex-1 min-w-0 text-left">
+            <span class="block leading-snug">Más opciones</span>
+            <span class="block text-[11px] text-gray-500 font-normal mt-0.5 leading-snug">Texto para retiros, exportaciones y herramientas</span>
+          </span>
         </button>
         <button type="button" id="accountMenuBtnConfig" class="w-full text-left rounded-xl py-2.5 px-3 mb-1 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors hidden">
           <i data-lucide="settings" class="w-[1.125rem] h-[1.125rem] text-gray-500 shrink-0 stroke-[1.75]"></i>

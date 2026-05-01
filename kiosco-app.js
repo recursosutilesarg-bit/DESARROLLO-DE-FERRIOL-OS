@@ -4748,6 +4748,21 @@
         btn.classList.add('hidden');
       }
     }
+    /** Fundador (vista empresa) y socio: accesos a pantallas de ajustes / Más desde el menú del avatar. */
+    function syncAccountMenuAdminTools() {
+      var founderBtn = document.getElementById('accountMenuBtnFounderSettings');
+      var partnerMasBtn = document.getElementById('accountMenuBtnPartnerMas');
+      var showFounder = !!(
+        currentUser &&
+        currentUser.role === 'super' &&
+        isEmpresaLensSuper() &&
+        !isAnyKioscoPreviewMode()
+      );
+      var showPartnerMas = !!(currentUser && currentUser.role === 'partner' && !isPartnerKioscoPreviewMode());
+      if (founderBtn) founderBtn.classList.toggle('hidden', !showFounder);
+      if (partnerMasBtn) partnerMasBtn.classList.toggle('hidden', !showPartnerMas);
+    }
+
     /** Kiosquero (y vista negocio simulada): Configuración en menú del avatar; se oculta el tile en Más. */
     function syncAccountMenuKiosqueroConfigPlacement() {
       var cfgBtn = document.getElementById('accountMenuBtnConfig');
@@ -4835,6 +4850,7 @@
       if (!root || !panel) return;
       syncAccountMenuDrawerUserBlock();
       syncAccountMenuDrawerShell();
+      syncAccountMenuAdminTools();
       syncPlanRolePayLabels();
       ferriolRefreshAccountMenuHelpButton().catch(function () {});
       positionAccountMenuDrawerPanel();
@@ -5761,6 +5777,9 @@
       }
       syncHeaderProfileAvatar();
       syncAccountMenuDrawerShell();
+      try {
+        syncAccountMenuAdminTools();
+      } catch (_) {}
       syncAccountMenuKiosqueroConfigPlacement();
       try {
         if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
@@ -6193,6 +6212,24 @@
         if (!currentUser || !isNetworkAdminRole(currentUser.role) || isAnyKioscoPreviewMode()) return;
         closeAccountMenuDrawer(true);
         openAccountProfileModal('bank');
+      });
+    }
+    var accountMenuBtnFounderSettings = document.getElementById('accountMenuBtnFounderSettings');
+    if (accountMenuBtnFounderSettings) {
+      accountMenuBtnFounderSettings.addEventListener('click', function () {
+        if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper() || isAnyKioscoPreviewMode()) return;
+        closeAccountMenuDrawer(true);
+        state.superSection = 'ajustes';
+        goToPanel('super');
+      });
+    }
+    var accountMenuBtnPartnerMas = document.getElementById('accountMenuBtnPartnerMas');
+    if (accountMenuBtnPartnerMas) {
+      accountMenuBtnPartnerMas.addEventListener('click', function () {
+        if (!currentUser || currentUser.role !== 'partner' || isPartnerKioscoPreviewMode()) return;
+        closeAccountMenuDrawer(true);
+        state.superSection = 'mas';
+        goToPanel('super');
       });
     }
     var accountMenuBtnLogout = document.getElementById('accountMenuBtnLogout');
@@ -9592,6 +9629,28 @@ async function showApp() {
       const text = d + 'd ' + h + 'h ' + m + 'm ' + s + 's';
       return { text, d, h, m, s, expired: false };
     }
+
+    /** Lista Afiliados: si el socio está en ventana de aprobación kit, ese plazo — no trial_ends_at (ej. 15 días de prueba). */
+    function ferriolProfileListCountdownEndsAt(u) {
+      if (!u) return null;
+      if (
+        u.role === 'partner' &&
+        u.partner_kit_review_until &&
+        new Date(u.partner_kit_review_until) > new Date()
+      ) {
+        return u.partner_kit_review_until;
+      }
+      return u.trial_ends_at || null;
+    }
+    function ferriolProfileListCountdownIsKitReview(u) {
+      return !!(
+        u &&
+        u.role === 'partner' &&
+        u.partner_kit_review_until &&
+        new Date(u.partner_kit_review_until) > new Date()
+      );
+    }
+
     /** true solo si hay fecha de fin válida y ya pasó (no cuenta perfiles sin trial_ends_at). */
     function isProfileMembershipDateExpired(u) {
       var raw = u && u.trial_ends_at;
@@ -9607,8 +9666,11 @@ async function showApp() {
         var row = span.closest('.super-afiliado-row') || span.closest('.super-user-card');
         var endsAt = row && row.getAttribute('data-trial-ends-at');
         var t = trialLabelFull(endsAt);
+        var isKit = row && row.getAttribute('data-countdown-kit-review') === '1';
         span.textContent = t.expired ? 'Vencida' : t.text;
-        span.className = 'inv-item-price super-list-countdown ' + (t.expired ? 'text-red-300' : 'text-[#86efac]');
+        span.className =
+          'inv-item-price super-list-countdown ' +
+          (t.expired ? 'text-red-300' : isKit ? 'text-amber-200/95' : 'text-[#86efac]');
       });
     }
     function superAfiliadosFilterBySubTab(list) {
@@ -9628,25 +9690,35 @@ async function showApp() {
     }
     function buildSuperAfiliadoRowHtml(u) {
       var name = (u.kiosco_name || u.email || 'Sin nombre').replace(/</g, '&lt;');
-      var trialFull = trialLabelFull(u.trial_ends_at);
+      var endsForList = ferriolProfileListCountdownEndsAt(u);
+      var trialFull = trialLabelFull(endsForList);
       var badge = trialFull.expired ? 'Vencida' : trialFull.text;
-      var endIso = (u.trial_ends_at || '').replace(/"/g, '&quot;');
+      var endIso = (endsForList || '').replace(/"/g, '&quot;');
+      var kitReviewRow = ferriolProfileListCountdownIsKitReview(u);
       var email = (u.email || '').replace(/</g, '&lt;');
       var stockClass = u.active ? 'text-white/45' : 'text-red-400/90';
       var sinRef = (!u.sponsor_id && isEmpresaLensSuper()) ? '<span class="text-amber-200/80 text-[10px] font-normal"> · sin ref.</span>' : '';
-      var priceClass = trialFull.expired ? 'text-red-300' : 'text-[#86efac]';
+      var priceClass = trialFull.expired ? 'text-red-300' : kitReviewRow ? 'text-amber-200/95' : 'text-[#86efac]';
       var kitRev = '';
-      if (u.role === 'partner' && u.partner_kit_review_until && new Date(u.partner_kit_review_until) > new Date()) {
+      if (kitReviewRow) {
         kitRev = ' <span class="ml-1 inline-block text-[9px] font-bold uppercase tracking-wide text-amber-200 bg-amber-500/25 border border-amber-400/40 rounded px-1 py-0.5 align-middle">Kit</span>';
       }
-      return '<button type="button" class="inventory-item super-afiliado-row w-full text-left border-x-0 rounded-none" data-id="' + u.id + '" data-trial-ends-at="' + endIso + '">' +
+      return (
+        '<button type="button" class="inventory-item super-afiliado-row w-full text-left border-x-0 rounded-none" data-id="' +
+        u.id +
+        '" data-trial-ends-at="' +
+        endIso +
+        '" data-countdown-kit-review="' +
+        (kitReviewRow ? '1' : '0') +
+        '">' +
         '<div class="inv-item-info">' +
         '<span class="inv-item-name"><span class="block truncate">' + name + sinRef + kitRev + '</span></span>' +
         '<span class="inv-item-price super-list-countdown ' + priceClass + '">' + badge + '</span>' +
         '<span class="inv-item-stock ' + stockClass + ' max-w-[32vw] sm:max-w-[40%] truncate" title="' + email + '">' + email + '</span>' +
         '</div>' +
         '<i data-lucide="chevron-right" class="w-5 h-5 text-white/35 shrink-0"></i>' +
-        '</button>';
+        '</button>'
+      );
     }
     function closeSuperMdrSumModal() {
       var m = document.getElementById('superUserMdrSumModal');
@@ -9855,7 +9927,9 @@ async function showApp() {
       const content = document.getElementById('superUserDetailContent');
       const name = (user.kiosco_name || user.email || 'Sin nombre').replace(/</g, '&lt;');
       const email = (user.email || '').replace(/</g, '&lt;');
-      const trialFull = trialLabelFull(user.trial_ends_at);
+      var detailEndsAt = ferriolProfileListCountdownEndsAt(user);
+      var kitRevLive = ferriolProfileListCountdownIsKitReview(user);
+      const trialFull = trialLabelFull(detailEndsAt);
       var pool = window._ferriolAllProfilesCache || superUserListCache;
       var sponsorLine = '—';
       if (user.sponsor_id) {
@@ -10073,7 +10147,7 @@ async function showApp() {
           <p><span class="text-white/50">Email:</span> ${email || '—'}</p>
           <p><span class="text-white/50">Rol:</span> ${(user.role || 'kiosquero').replace(/</g, '&lt;')}</p>
           <p><span class="text-white/50">Estado:</span> <span class="${user.active ? 'text-green-300' : 'text-red-300'}">${user.active ? 'Activo' : 'Inactivo'}</span></p>
-          <p><span class="text-white/50">Membresía:</span> <span id="superDetailCountdown" class="${trialFull.expired ? 'text-red-300' : 'text-[#f87171]'}">${trialFull.text}</span></p>
+          <p><span class="text-white/50">${kitRevLive ? 'Aprobación kit (cuenta atrás):' : 'Membresía:'}</span> <span id="superDetailCountdown" class="${trialFull.expired ? 'text-red-300' : kitRevLive ? 'text-amber-200' : 'text-[#f87171]'}">${trialFull.text}</span></p>
           <p><span class="text-white/50">Código de referido:</span> ${refCodeEsc}</p>
           <p><span class="text-white/50">Referido por:</span> ${sponsorLine}</p>
         </div>
@@ -10236,9 +10310,9 @@ async function showApp() {
       const countdownEl = content.querySelector('#superDetailCountdown');
       if (countdownEl) {
         superDetailCountdownInterval = setInterval(function () {
-          const t = trialLabelFull(u.trial_ends_at);
+          const t = trialLabelFull(detailEndsAt);
           countdownEl.textContent = t.text;
-          countdownEl.className = t.expired ? 'text-red-300' : 'text-[#f87171]';
+          countdownEl.className = t.expired ? 'text-red-300' : kitRevLive ? 'text-amber-200' : 'text-[#f87171]';
         }, 1000);
       }
     }
