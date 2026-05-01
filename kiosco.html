@@ -219,6 +219,22 @@
     </div>
   </div>
 
+  <!-- Visor de comprobante (imagen dentro de la app; opción abrir en navegador) -->
+  <div id="ferriolComprobanteViewerModal" class="fixed inset-0 z-[80] hidden flex flex-col bg-black/92 backdrop-blur-md" aria-modal="true" role="dialog" aria-labelledby="ferriolComprobanteViewerTitle">
+    <div class="flex flex-col flex-1 min-h-0">
+      <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-white/10 shrink-0 bg-black/35">
+        <p id="ferriolComprobanteViewerTitle" class="text-sm font-semibold text-white truncate">Comprobante</p>
+        <div class="flex items-center gap-2 shrink-0">
+          <a id="ferriolComprobanteViewerOpenExternal" href="#" target="_blank" rel="noopener" class="text-xs text-cyan-300 underline px-2 py-1.5 touch-target rounded-lg hover:bg-white/10">Abrir en navegador</a>
+          <button type="button" id="ferriolComprobanteViewerClose" class="btn-neomorphic rounded-xl p-2 touch-target" aria-label="Cerrar"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+      </div>
+      <div class="flex-1 min-h-0 overflow-auto flex items-center justify-center p-3 sm:p-6">
+        <img id="ferriolComprobanteViewerImg" src="" alt="" class="max-w-full max-h-[min(78vh,100%)] w-auto h-auto object-contain rounded-xl border border-white/15 shadow-2xl bg-black/40">
+      </div>
+    </div>
+  </div>
+
   <!-- Header: gradiente verde-morado fijo; kiosquero sin botón cerrar sesión (está en Ajustes) -->
   <header id="mainHeader" class="sticky top-0 z-50 border-b border-white/10 px-4 py-3 header-gradient" style="padding-top: max(0.75rem, env(safe-area-inset-top, 0))">
     <div class="flex items-center justify-between max-w-7xl mx-auto">

@@ -621,9 +621,9 @@
       var idEsc = ferriolEscapeHtmlLite(String(row.id || ''));
       var tipoLbl = ferriolIngresosPaymentTypeLabel(row.payment_type);
       return (
-        '<div class="rounded-xl border border-white/12 bg-black/35 p-3 space-y-2">' +
-        '<div class="flex flex-wrap gap-2 justify-between items-start">' +
-        '<div class="min-w-0">' +
+        '<div class="rounded-xl border border-white/12 bg-black/35 p-3 space-y-3">' +
+        '<div class="flex flex-wrap gap-3 items-start">' +
+        '<div class="min-w-0 flex-1">' +
         '<p class="font-medium text-white truncate">' +
         ferriolEscapeHtmlLite(label) +
         '</p>' +
@@ -637,10 +637,17 @@
         '</p>' +
         '</div>' +
         (imgUrl
-          ? '<a href="' +
+          ? '<div class="shrink-0 w-[132px] sm:w-[148px]">' +
+            '<button type="button" class="ferriol-comp-view-trigger w-full rounded-xl border border-white/15 bg-black/25 overflow-hidden touch-target active:scale-[0.98]" data-comp-url="' +
             ferriolEscapeHtmlLite(imgUrl) +
-            '" target="_blank" rel="noopener" class="text-xs text-cyan-300 underline shrink-0">Ver</a>'
-          : '') +
+            '">' +
+            '<img src="' +
+            ferriolEscapeHtmlLite(imgUrl) +
+            '" alt="" class="w-full h-[7.25rem] object-cover object-center pointer-events-none bg-black/30" loading="lazy">' +
+            '</button>' +
+            '<p class="text-[10px] text-white/35 text-center mt-1 leading-tight">Tocá para ampliar</p>' +
+            '</div>'
+          : '<p class="text-[11px] text-white/35 shrink-0 self-center">Sin imagen</p>') +
         '</div>' +
         '<button type="button" class="partner-kiosk-proof-register-sale w-full py-2 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-100 text-sm font-medium touch-target active:scale-[0.99]" data-queue-id="' +
         idEsc +
@@ -1356,6 +1363,57 @@
         return '';
       }
     }
+    function openFerriolComprobanteViewer(imageUrl) {
+      var m = document.getElementById('ferriolComprobanteViewerModal');
+      var img = document.getElementById('ferriolComprobanteViewerImg');
+      var ext = document.getElementById('ferriolComprobanteViewerOpenExternal');
+      if (!m || !img) return;
+      img.src = imageUrl || '';
+      img.alt = 'Comprobante';
+      if (ext) {
+        if (imageUrl) {
+          ext.href = imageUrl;
+          ext.classList.remove('hidden');
+        } else {
+          ext.href = '#';
+          ext.classList.add('hidden');
+        }
+      }
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+      try { document.body.style.overflow = 'hidden'; } catch (_) {}
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    function closeFerriolComprobanteViewer() {
+      var m = document.getElementById('ferriolComprobanteViewerModal');
+      var img = document.getElementById('ferriolComprobanteViewerImg');
+      if (img) {
+        img.removeAttribute('src');
+        img.alt = '';
+      }
+      if (!m) return;
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+      try { document.body.style.overflow = ''; } catch (_) {}
+    }
+    function ferriolInlineComprobantePreviewHtml(imgUrl, altText) {
+      if (!imgUrl) return '';
+      var u = escHtmlCsr(imgUrl);
+      return (
+        '<div class="mt-2">' +
+        '<button type="button" class="ferriol-comp-view-trigger block w-full rounded-xl border border-white/20 bg-black/25 overflow-hidden touch-target active:scale-[0.98]" data-comp-url="' +
+        u +
+        '">' +
+        '<img src="' +
+        u +
+        '" alt="' +
+        escHtmlCsr(altText || 'Comprobante') +
+        '" class="max-h-52 w-full object-contain bg-black/30 pointer-events-none" loading="lazy">' +
+        '</button>' +
+        '<p class="text-[10px] text-white/35 text-center mt-1">Tocá la imagen para verla en grande</p>' +
+        '</div>'
+      );
+    }
     function closeIngresosRechazadasModal() {
       var m = document.getElementById('ingresosRechazadasModal');
       if (!m) return;
@@ -1384,7 +1442,7 @@
           '<p class="text-white/75 text-xs"><strong>Email:</strong> ' + escHtmlCsr(row.client_email) + '</p>' +
           '<p class="text-xs text-white/55">' + escHtmlCsr(ferriolIngresosPaymentTypeLabel(row.payment_type)) + (row.period_month ? ' · Mes: ' + escHtmlCsr(String(row.period_month).slice(0, 7)) : '') + ' · <strong class="text-red-200/90">$ ' + Number(row.amount_ars || 0).toLocaleString('es-AR') + '</strong></p>' +
           '<p class="text-xs text-amber-100/90"><strong>Motivo:</strong> ' + reason + '</p>' +
-          (img ? '<a href="' + escHtmlCsr(img) + '" target="_blank" rel="noopener" class="text-xs text-cyan-300 underline">Ver comprobante enviado</a>' : '') +
+          (img ? ferriolInlineComprobantePreviewHtml(img, 'Comprobante enviado') : '') +
           '<button type="button" class="ferriol-rej-prefill-csr w-full mt-1 py-2 rounded-lg border border-emerald-400/35 text-emerald-200 text-xs font-semibold touch-target" data-csr-id="' + escHtmlCsr(row.id) + '">Corregir y reenviar (cargar formulario)</button>' +
           '</div>'
         );
@@ -1526,7 +1584,7 @@
             '<div class="flex flex-wrap items-center gap-2"><span class="text-xs text-white/50">Monto ARS</span>' +
             '<input type="number" id="csr-amount-' + row.id + '" class="glass rounded-lg px-2 py-1 border border-white/20 text-white text-sm w-36" value="' + String(Number(row.amount_ars) || 0) + '"></div>' +
             (img
-              ? '<a href="' + escHtmlCsr(img) + '" target="_blank" rel="noopener" class="block touch-target"><img src="' + escHtmlCsr(img) + '" alt="Comprobante" class="max-h-48 w-auto max-w-full rounded-lg border border-white/20 object-contain bg-black/20"></a>'
+              ? ferriolInlineComprobantePreviewHtml(img, 'Comprobante')
               : '<p class="text-amber-200 text-xs">No se pudo generar enlace a la imagen. Revisá el bucket y políticas de Storage.</p>') +
             '<div class="flex flex-wrap gap-2 pt-1">' +
             '<button type="button" data-csr-approve="' + row.id + '" class="btn-glow rounded-xl py-2 px-3 text-xs font-semibold">Aprobar y acreditar comisión</button>' +
@@ -1591,7 +1649,7 @@
             '<div class="flex flex-wrap items-center gap-2"><span class="text-xs text-white/50">Monto ARS</span>' +
             '<input type="number" id="ep-proof-amt-' + row.id + '" class="glass rounded-lg px-2 py-1 border border-white/20 text-white text-sm w-36" value="' + String(Number(row.amount_ars) || 0) + '"></div>' +
             (img
-              ? '<a href="' + escHtmlCsr(img) + '" target="_blank" rel="noopener" class="block touch-target"><img src="' + escHtmlCsr(img) + '" alt="Comprobante" class="max-h-48 w-auto max-w-full rounded-lg border border-white/20 object-contain bg-black/20"></a>'
+              ? ferriolInlineComprobantePreviewHtml(img, 'Comprobante')
               : '<p class="text-amber-200 text-xs">Sin URL pública al comprobante.</p>') +
             '<div class="flex flex-wrap gap-2 pt-1">' +
             '<button type="button" data-ep-proof-approve="' + row.id + '" class="btn-glow rounded-xl py-2 px-3 text-xs font-semibold">Aprobar y verificar cobro</button>' +
@@ -11294,6 +11352,21 @@ async function showApp() {
     var partnerProofScreenTabD = document.getElementById('partnerProofScreenTabDistribuidores');
     if (partnerProofScreenTabC) partnerProofScreenTabC.addEventListener('click', function () { ferriolSetPartnerProofScreenTab('comercios'); });
     if (partnerProofScreenTabD) partnerProofScreenTabD.addEventListener('click', function () { ferriolSetPartnerProofScreenTab('distribuidores'); });
+    var ferriolCompViewClose = document.getElementById('ferriolComprobanteViewerClose');
+    if (ferriolCompViewClose) ferriolCompViewClose.addEventListener('click', closeFerriolComprobanteViewer);
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key !== 'Escape') return;
+      var mv = document.getElementById('ferriolComprobanteViewerModal');
+      if (mv && !mv.classList.contains('hidden')) closeFerriolComprobanteViewer();
+    });
+    document.body.addEventListener('click', function (ev) {
+      var trig = ev.target && ev.target.closest && ev.target.closest('.ferriol-comp-view-trigger');
+      if (!trig) return;
+      var u = trig.getAttribute('data-comp-url');
+      if (!u) return;
+      ev.preventDefault();
+      openFerriolComprobanteViewer(u);
+    });
     var btnAffClose = document.getElementById('partnerAffiliateLinksModalClose');
     if (btnAffClose) btnAffClose.onclick = closePartnerAffiliateLinksModal;
     var btnAffDone = document.getElementById('partnerAffiliateLinksModalDone');
