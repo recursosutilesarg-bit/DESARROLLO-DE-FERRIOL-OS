@@ -7050,15 +7050,18 @@
     }
     window._ferriolFlushUsbBarcode = flushUsbWedgeBuffer;
     function ferriolUsbWedgeIgnoreTarget(target) {
-      if (!target || target.nodeType !== 1) return false;
-      if (target.id === 'manualCode') return true;
+      if (!target) return false;
+      /** Texto dentro de contenteditable da nodeType 3; si no lo tratamos, el wedge cancela la pulsación y queda cursor sin escribir. */
+      var el = target.nodeType === 3 ? target.parentElement : target;
+      if (!el || el.nodeType !== 1) return false;
+      if (el.id === 'manualCode') return true;
       var cart = document.getElementById('cartPanel');
       if (cart && cart.classList.contains('translate-x-0')) return true;
-      var tag = (target.tagName || '').toLowerCase();
+      var tag = (el.tagName || '').toLowerCase();
       if (tag === 'textarea' || tag === 'select') return true;
-      if (target.isContentEditable) return true;
+      if (el.isContentEditable || el.closest && el.closest('[contenteditable="true"]')) return true;
       if (tag === 'input') {
-        var typ = (target.type || '').toLowerCase();
+        var typ = (el.type || '').toLowerCase();
         if (typ === 'button' || typ === 'submit' || typ === 'checkbox' || typ === 'radio' || typ === 'hidden') return false;
         return true;
       }
@@ -12446,7 +12449,7 @@ async function showApp() {
     })();
 
     /* ══════════════════════════════════════════════════════════
-       TABLERO SISTEMA: tabs + flujograma editable
+       TABLERO SISTEMA: tabs + flujograma (solo lectura)
        ══════════════════════════════════════════════════════════ */
     (function () {
       var FLUJO_KEY = 'ferriol_flujo_edits_v1';
@@ -12468,56 +12471,19 @@ async function showApp() {
         btn.addEventListener('click', function () { sistemaSwitchTab(btn.dataset.sistemaTab); });
       });
 
-      /* ── Flujograma editable ── */
+      /* ── Textos del flujograma (solo lectura; opcional carga desde localStorage) ── */
       function flujoLoadEdits() {
         try {
           var saved = JSON.parse(localStorage.getItem(FLUJO_KEY) || '{}');
-          document.querySelectorAll('#flujoProcesoBoard [contenteditable]').forEach(function (el) {
-            var step = (el.closest('[data-step]') || {}).dataset && el.closest('[data-step]').dataset.step;
+          document.querySelectorAll('#flujoProcesoBoard .flujo-title, #flujoProcesoBoard .flujo-desc').forEach(function (el) {
+            var stepEl = el.closest('[data-step]');
+            if (!stepEl) return;
+            var step = stepEl.dataset.step;
             var type = el.classList.contains('flujo-title') ? 't' : 'd';
             var key = step + '_' + type;
             if (saved[key] !== undefined) el.textContent = saved[key];
           });
         } catch (_) {}
-      }
-
-      function flujoSaveEdit(el) {
-        try {
-          var saved = JSON.parse(localStorage.getItem(FLUJO_KEY) || '{}');
-          var stepEl = el.closest('[data-step]');
-          if (!stepEl) return;
-          var step = stepEl.dataset.step;
-          var type = el.classList.contains('flujo-title') ? 't' : 'd';
-          saved[step + '_' + type] = el.textContent;
-          localStorage.setItem(FLUJO_KEY, JSON.stringify(saved));
-        } catch (_) {}
-      }
-
-      document.querySelectorAll('#flujoProcesoBoard [contenteditable]').forEach(function (el) {
-        el.addEventListener('focus', function () {
-          var hint = el.parentElement && el.parentElement.querySelector('.flujo-edit-hint');
-          if (hint) hint.style.opacity = '0';
-        });
-        el.addEventListener('blur', function () {
-          flujoSaveEdit(el);
-          var hint = el.parentElement && el.parentElement.querySelector('.flujo-edit-hint');
-          if (hint) hint.style.opacity = '';
-        });
-        el.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' && el.classList.contains('flujo-title')) { e.preventDefault(); el.blur(); }
-          if (e.key === 'Escape') { el.textContent = el.dataset.default; el.blur(); }
-        });
-      });
-
-      var flujoResetBtn = document.getElementById('flujoResetBtn');
-      if (flujoResetBtn) {
-        flujoResetBtn.addEventListener('click', function () {
-          if (!confirm('¿Restablecer el flujograma a los textos originales?')) return;
-          try { localStorage.removeItem(FLUJO_KEY); } catch (_) {}
-          document.querySelectorAll('#flujoProcesoBoard [contenteditable]').forEach(function (el) {
-            el.textContent = el.dataset.default || el.textContent;
-          });
-        });
       }
 
       flujoLoadEdits();
