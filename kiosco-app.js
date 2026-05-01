@@ -4748,23 +4748,37 @@
         btn.classList.add('hidden');
       }
     }
-    /** Fundador (vista empresa) y socio: accesos a pantallas de ajustes / Más desde el menú del avatar. */
+    /** Panel “Más” (tuerca): socio partner o fundador en Empresa / Administración (no modo negocio simulado). */
+    function ferriolAccountMenuNetworkMasEligible() {
+      if (!currentUser) return false;
+      if (currentUser.role === 'partner') return !isPartnerKioscoPreviewMode();
+      if (currentUser.role === 'super') {
+        if (isSuperKioscoPreviewMode()) return false;
+        return state.superUiMode === 'empresa' || state.superUiMode === 'socio';
+      }
+      return false;
+    }
+
+    /** Fundador + vista socio (Administración) + partner: una entrada “Ajustes” en el menú del avatar. */
     function syncAccountMenuAdminTools() {
-      var founderBtn = document.getElementById('accountMenuBtnFounderSettings');
-      var partnerMasBtn = document.getElementById('accountMenuBtnPartnerMas');
-      var showFounder = !!(
-        currentUser &&
-        currentUser.role === 'super' &&
-        isEmpresaLensSuper() &&
-        !isAnyKioscoPreviewMode()
-      );
-      /** Partner real o fundador en vista socio (Administración): misma pantalla “Más”. */
-      var showPartnerMas = !!(currentUser && isPartnerLens() && !isEmpresaLensSuper() && !isPartnerKioscoPreviewMode());
-      if (founderBtn) founderBtn.classList.toggle('hidden', !showFounder);
-      if (partnerMasBtn) partnerMasBtn.classList.toggle('hidden', !showPartnerMas);
-      /** Misma pantalla que la tuerca inferior: si ya está en el menú perfil, no duplicar en la barra. */
+      var masBtn = document.getElementById('accountMenuBtnNetworkMas');
+      var icon = document.getElementById('accountMenuNetworkMasIcon');
+      var subEl = document.getElementById('accountMenuNetworkMasSub');
+      var show = ferriolAccountMenuNetworkMasEligible();
+      if (masBtn) masBtn.classList.toggle('hidden', !show);
+      if (show && icon && subEl) {
+        if (currentUser.role === 'super' && isEmpresaLensSuper()) {
+          icon.classList.remove('text-emerald-600');
+          icon.classList.add('text-violet-600');
+          subEl.textContent = 'Hub empresa: sistema, exportaciones, avisos globales…';
+        } else {
+          icon.classList.remove('text-violet-600');
+          icon.classList.add('text-emerald-600');
+          subEl.textContent = 'Retiros, texto para transferencias, exportar…';
+        }
+      }
       var navMas = document.getElementById('navSuperBottomMasBtn');
-      if (navMas) navMas.classList.toggle('hidden', showFounder || showPartnerMas);
+      if (navMas) navMas.classList.toggle('hidden', show);
     }
 
     /** Kiosquero (y vista negocio simulada): Configuración en menú del avatar; se oculta el tile en Más. */
@@ -6218,19 +6232,10 @@
         openAccountProfileModal('bank');
       });
     }
-    var accountMenuBtnFounderSettings = document.getElementById('accountMenuBtnFounderSettings');
-    if (accountMenuBtnFounderSettings) {
-      accountMenuBtnFounderSettings.addEventListener('click', function () {
-        if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper() || isAnyKioscoPreviewMode()) return;
-        closeAccountMenuDrawer(true);
-        state.superSection = 'mas';
-        goToPanel('super');
-      });
-    }
-    var accountMenuBtnPartnerMas = document.getElementById('accountMenuBtnPartnerMas');
-    if (accountMenuBtnPartnerMas) {
-      accountMenuBtnPartnerMas.addEventListener('click', function () {
-        if (!currentUser || !isPartnerLens() || isPartnerKioscoPreviewMode()) return;
+    var accountMenuBtnNetworkMas = document.getElementById('accountMenuBtnNetworkMas');
+    if (accountMenuBtnNetworkMas) {
+      accountMenuBtnNetworkMas.addEventListener('click', function () {
+        if (!ferriolAccountMenuNetworkMasEligible()) return;
         closeAccountMenuDrawer(true);
         state.superSection = 'mas';
         goToPanel('super');
