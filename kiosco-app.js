@@ -516,6 +516,37 @@
       if (t === 'vendor_mantenimiento') return 'Cuota vendedor';
       return t ? String(t) : '—';
     }
+    /** Tipo de ingreso en tabla Ingresos (partner): regalías vs comisión por venta verificada. */
+    function ferriolIngresosLedgerTipoLabel(L, paymentType) {
+      var ev = L && L.event_type;
+      if (ev === 'renewal') {
+        var sk = L.metadata && L.metadata.sale_kind;
+        if (sk === 'partner_membership_auto') return 'Regalía · cuota socio';
+        if (paymentType === 'vendor_mantenimiento') return 'Regalía · cuota socio';
+        return 'Regalía';
+      }
+      return ferriolIngresosPaymentTypeLabel(paymentType);
+    }
+    /** Nivel MLM para la grilla: regalías por profundidad; ventas por tier/metadata. */
+    function ferriolIngresosLedgerNivelLabel(L) {
+      if (!L) return '—';
+      if (L.event_type === 'renewal') {
+        var d = L.depth != null && L.depth !== '' ? Number(L.depth) : NaN;
+        if (isNaN(d) && L.metadata && L.metadata.depth != null) d = Number(L.metadata.depth);
+        if (d === 1) return 'Referido nivel 1';
+        if (d === 2) return 'Referido nivel 2';
+        return '—';
+      }
+      if (L.event_type === 'sale_commission') {
+        var tier = L.metadata && L.metadata.commission_tier ? String(L.metadata.commission_tier) : '';
+        if (tier === 'intro') return 'Venta · inicial';
+        if (tier === 'normal') return 'Venta · normal';
+        var sk = L.metadata && L.metadata.sale_kind;
+        if (sk === 'kiosco_monthly_auto') return 'Suscripción negocio · auto';
+        return 'Venta directa';
+      }
+      return '—';
+    }
 
     function syncPartnerProofInboxBadgeCount(n) {
       var badges = [
@@ -1116,7 +1147,7 @@
       try {
         var resLed = await supabaseClient
           .from('mlm_ledger')
-          .select('id, created_at, amount, status, metadata, event_type')
+          .select('id, created_at, amount, status, metadata, event_type, depth, origin_user_id')
           .eq('beneficiary_user_id', uid)
           .in('event_type', ['sale_commission', 'renewal'])
           .eq('status', 'approved')
@@ -1307,8 +1338,8 @@
         }
         var allPayer = Array.from(new Set(recentLed.map(function (L) {
           var mid = L.metadata && (L.metadata.payment_id || L.metadata.paymentId);
-          if (!mid || !payTypes[mid]) return null;
-          return payTypes[mid].payer_user_id;
+          if (mid && payTypes[mid] && payTypes[mid].payer_user_id) return payTypes[mid].payer_user_id;
+          return L.origin_user_id || null;
         }).filter(Boolean)));
         var nameBy = {};
         if (allPayer.length) {
@@ -1327,11 +1358,14 @@
             var d = String(L.created_at || '').slice(0, 10);
             var mid = L.metadata && (L.metadata.payment_id || L.metadata.paymentId);
             var ptyp = (mid && payTypes[mid]) ? payTypes[mid].payment_type : '';
-            var tier = (L.metadata && L.metadata.commission_tier) ? String(L.metadata.commission_tier) : '—';
+            var tipoLab = ferriolIngresosLedgerTipoLabel(L, ptyp);
+            var nivelLab = ferriolIngresosLedgerNivelLabel(L);
             var pctV = (L.metadata && (L.metadata.sale_vendor_pct != null)) ? (Number(L.metadata.sale_vendor_pct) * 100).toFixed(1) + '%' : '—';
             var py = (mid && payTypes[mid]) ? payTypes[mid].payer_user_id : null;
-            var nm = py ? (nameBy[py] || '…') : '—';
-            return '<div class="grid grid-cols-12 gap-1 px-3 py-2.5 border-b border-white/[0.06] text-xs items-center"><div class="col-span-2 text-white/55 tabular-nums">' + d + '</div><div class="col-span-2 text-white/85 truncate">' + String(ferriolIngresosPaymentTypeLabel(ptyp)).replace(/</g, '&lt;') + '</div><div class="col-span-2 text-[#86efac] font-semibold tabular-nums">$ ' + Number(L.amount || 0).toLocaleString('es-AR') + '</div><div class="col-span-2 text-amber-200/80">' + String(tier).replace(/</g, '&lt;') + '</div><div class="col-span-2 text-white/50 tabular-nums">' + pctV + '</div><div class="col-span-2 text-white/60 truncate">' + String(nm).replace(/</g, '&lt;') + '</div></div>';
+            var origin = L.origin_user_id || null;
+            var nmWho = py || origin;
+            var nm = nmWho ? (nameBy[nmWho] || '…') : '—';
+            return '<div class="grid grid-cols-12 gap-1 px-3 py-2.5 border-b border-white/[0.06] text-xs items-center"><div class="col-span-2 text-white/55 tabular-nums">' + d + '</div><div class="col-span-2 text-white/85 truncate" title="">' + String(tipoLab).replace(/</g, '&lt;') + '</div><div class="col-span-2 text-[#86efac] font-semibold tabular-nums">$ ' + Number(L.amount || 0).toLocaleString('es-AR') + '</div><div class="col-span-2 text-amber-200/80 truncate">' + String(nivelLab).replace(/</g, '&lt;') + '</div><div class="col-span-2 text-white/50 tabular-nums">' + pctV + '</div><div class="col-span-2 text-white/60 truncate">' + String(nm).replace(/</g, '&lt;') + '</div></div>';
           }).join('');
           wrap.innerHTML = head + body;
         }
