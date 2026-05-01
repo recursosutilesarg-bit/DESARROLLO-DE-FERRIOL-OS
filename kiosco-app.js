@@ -4213,8 +4213,12 @@
       _partnerPendingBannerSyncTicker++;
       if (_partnerPendingBannerSyncTicker >= 20 && supabaseClient && currentUser) {
         _partnerPendingBannerSyncTicker = 0;
-        supabaseClient.from('profiles').select('partner_license_pending, trial_ends_at').eq('id', currentUser.id).maybeSingle().then(function (r) {
+        supabaseClient.from('profiles').select('partner_license_pending, trial_ends_at, partner_kit_review_until').eq('id', currentUser.id).maybeSingle().then(function (r) {
           if (r && r.data && currentUser) {
+            currentUser.partnerKitReviewUntil = r.data.partner_kit_review_until || null;
+            try {
+              syncHeaderProfileAvatar();
+            } catch (_) {}
             if (!r.data.partner_license_pending) {
               currentUser.partnerLicensePending = false;
               if (r.data.trial_ends_at) currentUser.trialEndsAt = r.data.trial_ends_at;
@@ -4231,6 +4235,9 @@
       updatePartnerLicensePendingBanner();
       updateTrialCountdown();
       updateTrialCountdownSuperFundador();
+      try {
+        if (currentUser && currentUser.role === 'partner' && currentUser.partnerKitReviewUntil) syncHeaderProfileAvatar();
+      } catch (_) {}
     }
 
     function showLoginScreenTrialEndedFundador() {
@@ -4493,6 +4500,15 @@
       if (role === 'kiosquero') return 'Kiosquero / negocio';
       return role || '—';
     }
+    function ferriolPartnerKitReviewUntilActive() {
+      if (!currentUser || currentUser.role !== 'partner') return false;
+      var u = currentUser.partnerKitReviewUntil;
+      return !!(u && new Date(u) > new Date());
+    }
+    function ferriolAccountMenuDrawerIsOpen() {
+      var r = document.getElementById('accountMenuDrawer');
+      return !!(r && !r.classList.contains('hidden'));
+    }
     var _accountProfileRemoveAvatarFlag = false;
     var _accountProfileModalMode = 'personal';
     var _accountProfileBodyOverflow = '';
@@ -4523,6 +4539,20 @@
         img.removeAttribute('src');
         ini.classList.remove('hidden');
         ini.textContent = ferriolHeaderProfileInitials(currentUser.kioscoName, currentUser.email);
+      }
+      var dot = document.getElementById('headerProfileKitReviewDot');
+      var kit = ferriolPartnerKitReviewUntilActive();
+      if (dot) dot.classList.toggle('hidden', !kit);
+      if (btn && !ferriolAccountMenuDrawerIsOpen()) {
+        btn.classList.remove('ring-gray-900/85');
+        if (kit) {
+          btn.classList.add('ring-2', 'ring-amber-400');
+        } else {
+          btn.classList.remove('ring-2', 'ring-amber-400');
+        }
+      }
+      if (btn) {
+        btn.title = kit ? (window._ferriolPartnerKitReviewTooltip || 'Período de aprobación del kit inicial (12–24 h).') : 'Mi cuenta';
       }
       syncAccountMenuDrawerUserBlock();
     }
@@ -4555,6 +4585,14 @@
           dIni.classList.remove('hidden');
           dIni.textContent = ferriolHeaderProfileInitials(currentUser.kioscoName, currentUser.email);
         }
+      }
+      var dDot = document.getElementById('accountMenuDrawerKitReviewDot');
+      var note = document.getElementById('accountMenuDrawerKitReviewNote');
+      var kit = ferriolPartnerKitReviewUntilActive();
+      if (dDot) dDot.classList.toggle('hidden', !kit);
+      if (note) {
+        note.classList.toggle('hidden', !kit);
+        if (kit) note.textContent = window._ferriolPartnerKitReviewTooltip || 'Período de aprobación del kit inicial.';
       }
     }
     function positionAccountMenuDrawerPanel() {
@@ -4672,7 +4710,7 @@
       var root = document.getElementById('accountMenuDrawer');
       var panel = document.getElementById('accountMenuDrawerPanel');
       var hdrBtn = document.getElementById('headerProfileBtn');
-      if (hdrBtn) hdrBtn.classList.remove('ring-2', 'ring-gray-900/85');
+      if (hdrBtn) hdrBtn.classList.remove('ring-2', 'ring-gray-900/85', 'ring-amber-400');
       if (!root || !panel) return;
       panel.classList.remove('opacity-100', 'scale-100', 'translate-y-0');
       panel.classList.add('opacity-0', 'scale-[0.98]', 'translate-y-1');
@@ -4681,6 +4719,9 @@
         root.setAttribute('aria-hidden', 'true');
         try {
           document.body.style.overflow = _accountMenuDrawerBodyOverflow || '';
+        } catch (_) {}
+        try {
+          syncHeaderProfileAvatar();
         } catch (_) {}
       }
       if (instant) finish();
@@ -4704,7 +4745,10 @@
       syncPlanRolePayLabels();
       positionAccountMenuDrawerPanel();
       var hdrBtn = document.getElementById('headerProfileBtn');
-      if (hdrBtn) hdrBtn.classList.add('ring-2', 'ring-gray-900/85');
+      if (hdrBtn) {
+        hdrBtn.classList.remove('ring-2', 'ring-gray-900/85', 'ring-amber-400');
+        hdrBtn.classList.add('ring-2', 'ring-gray-900/85');
+      }
       root.classList.remove('hidden');
       root.setAttribute('aria-hidden', 'false');
       try {
@@ -8585,7 +8629,7 @@ async function showApp() {
         if (profile.role === 'partner') {
           partnerFromKUp = await ferriolFetchPartnerKiosqueroUpgradeEligible(uid);
         }
-        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerSponsorId: profile.partner_sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '', phone: profile.phone != null ? String(profile.phone) : '', avatarUrl: profile.avatar_url != null ? String(profile.avatar_url).trim() : '', partnerFromKiosqueroUpgrade: partnerFromKUp, vencimientoAvisoDias: (function () { var x = Number(profile.vencimiento_aviso_dias); return Number.isFinite(x) ? Math.min(365, Math.max(0, Math.floor(x))) : null; })() };
+        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerSponsorId: profile.partner_sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerKitReviewUntil: profile.partner_kit_review_until || null, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '', phone: profile.phone != null ? String(profile.phone) : '', avatarUrl: profile.avatar_url != null ? String(profile.avatar_url).trim() : '', partnerFromKiosqueroUpgrade: partnerFromKUp, vencimientoAvisoDias: (function () { var x = Number(profile.vencimiento_aviso_dias); return Number.isFinite(x) ? Math.min(365, Math.max(0, Math.floor(x))) : null; })() };
         await showApp();
       } catch (err) {
         console.error('Error en login:', err);
@@ -8848,12 +8892,19 @@ async function showApp() {
       if (newRole === 'partner' && newId) {
         try {
           var linkRpc = await supabaseClient.rpc('ferriol_link_partner_pending_kit', { p_profile_id: newId });
-          if (linkRpc.error) console.warn('ferriol_link_partner_pending_kit:', linkRpc.error);
-          else {
+          if (linkRpc.error) {
+            console.warn('ferriol_link_partner_pending_kit:', linkRpc.error);
+            var kitFallback = await supabaseClient.rpc('ferriol_partner_apply_kit_review_window');
+            if (kitFallback.error) console.warn('ferriol_partner_apply_kit_review_window:', kitFallback.error);
+          } else {
             var linkOut = linkRpc.data;
             if (typeof linkOut === 'string') { try { linkOut = JSON.parse(linkOut); } catch (_) {} }
             if (linkOut && linkOut.linked === true && linkOut.grace_hours != null) {
               window._ferriolLastSignupKitGraceHours = linkOut.grace_hours;
+            }
+            if (!linkOut || linkOut.linked !== true) {
+              var kitRpc = await supabaseClient.rpc('ferriol_partner_apply_kit_review_window');
+              if (kitRpc.error) console.warn('ferriol_partner_apply_kit_review_window:', kitRpc.error);
             }
           }
         } catch (e) { console.warn(e); }
@@ -9411,9 +9462,13 @@ async function showApp() {
       var stockClass = u.active ? 'text-white/45' : 'text-red-400/90';
       var sinRef = (!u.sponsor_id && isEmpresaLensSuper()) ? '<span class="text-amber-200/80 text-[10px] font-normal"> · sin ref.</span>' : '';
       var priceClass = trialFull.expired ? 'text-red-300' : 'text-[#86efac]';
+      var kitRev = '';
+      if (u.role === 'partner' && u.partner_kit_review_until && new Date(u.partner_kit_review_until) > new Date()) {
+        kitRev = ' <span class="ml-1 inline-block text-[9px] font-bold uppercase tracking-wide text-amber-200 bg-amber-500/25 border border-amber-400/40 rounded px-1 py-0.5 align-middle">Kit</span>';
+      }
       return '<button type="button" class="inventory-item super-afiliado-row w-full text-left border-x-0 rounded-none" data-id="' + u.id + '" data-trial-ends-at="' + endIso + '">' +
         '<div class="inv-item-info">' +
-        '<span class="inv-item-name"><span class="block truncate">' + name + sinRef + '</span></span>' +
+        '<span class="inv-item-name"><span class="block truncate">' + name + sinRef + kitRev + '</span></span>' +
         '<span class="inv-item-price super-list-countdown ' + priceClass + '">' + badge + '</span>' +
         '<span class="inv-item-stock ' + stockClass + ' max-w-[32vw] sm:max-w-[40%] truncate" title="' + email + '">' + email + '</span>' +
         '</div>' +
@@ -9769,6 +9824,23 @@ async function showApp() {
           <p class="text-[10px] text-white/40">El socio inactivo no puede entrar a la app. Comisiones/libro: gestioná aparte según política. Evitá dejar kiosqueros sin referidor si querés que sigan pagando a alguien de la red.</p>
         </div>`;
       }
+      var kitRevDetailHtml = '';
+      if (isFounderEmpresa && user.role === 'partner' && user.partner_kit_review_until) {
+        var kIso = user.partner_kit_review_until;
+        var kDt = new Date(kIso);
+        var kLab = !isNaN(kDt.getTime()) ? kDt.toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : String(kIso).replace(/</g, '&lt;');
+        var kActive = !isNaN(kDt.getTime()) && kDt > new Date();
+        kitRevDetailHtml =
+          '<div class="border-t border-white/10 pt-4 space-y-2 super-detail-kit-review">' +
+          '<p class="text-sm font-medium text-amber-200 flex items-center gap-2"><i data-lucide="package" class="w-4 h-4"></i> Aprobación kit inicial</p>' +
+          '<p class="text-xs text-white/55">' +
+          (kActive ? 'El socio ve un aviso en el avatar hasta:' : 'La ventana ya pasó; podés limpiar el aviso si sigue figurando:') +
+          ' <strong class="text-amber-100/90">' +
+          kLab +
+          '</strong></p>' +
+          '<button type="button" class="super-detail-clear-kit-review w-full py-2.5 rounded-xl text-sm bg-emerald-600/22 text-emerald-100 border border-emerald-400/45 touch-target font-medium">Confirmé el cobro del kit — quitar aviso del perfil</button>' +
+          '</div>';
+      }
       var quitarHtml = isSocioLens ? '' : `
             <button type="button" class="super-detail-quitar w-full py-2.5 rounded-xl text-sm bg-red-500/20 text-red-300 border border-red-500/40 touch-target flex items-center justify-center gap-2">
               <i data-lucide="user-minus" class="w-4 h-4"></i> Quitar negocio (pide contraseña admin)
@@ -9835,6 +9907,7 @@ async function showApp() {
         ${assignHtml}
         ${defSaleHtml}
         ${partnerNetworkControlHtml}
+        ${kitRevDetailHtml}
         ${adminActionsHtml}
       `;
       modal.classList.remove('hidden');
@@ -9951,6 +10024,23 @@ async function showApp() {
           var idxP = (window._ferriolAllProfilesCache || []).findIndex(function (r) { return r.id === u.id; });
           if (idxP >= 0) window._ferriolAllProfilesCache[idxP].active = false;
           alert('Socio desactivado (penalidad).');
+          renderSuper();
+          openSuperUserDetail(u);
+        };
+      }
+      var clrKitBtn = content.querySelector('.super-detail-clear-kit-review');
+      if (clrKitBtn) {
+        clrKitBtn.onclick = async function () {
+          if (!supabaseClient) return;
+          var rpc = await supabaseClient.rpc('ferriol_founder_clear_partner_kit_review', { p_profile_id: u.id });
+          if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+          var out = rpc.data;
+          if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
+          if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo actualizar.'); return; }
+          u.partner_kit_review_until = null;
+          var ixk = (window._ferriolAllProfilesCache || []).findIndex(function (r) { return r.id === u.id; });
+          if (ixk >= 0) window._ferriolAllProfilesCache[ixk].partner_kit_review_until = null;
+          alert('Listo: aviso de kit quitado.');
           renderSuper();
           openSuperUserDetail(u);
         };
@@ -10426,7 +10516,7 @@ async function showApp() {
     async function renderSuper() {
       if (!supabaseClient) return;
       try {
-        const { data: settingsRows } = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4', 'admin_delete_password', 'trial_reminder_config', 'ferriol_transfer_info', 'trial_duration_days', 'ferriol_checkout_copy', 'ferriol_plan_amounts', 'ferriol_mercadopago_checkout_urls', 'ferriol_mercadopago_checkout_url']);
+        const { data: settingsRows } = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4', 'admin_delete_password', 'trial_reminder_config', 'ferriol_transfer_info', 'trial_duration_days', 'partner_kit_review_hours', 'partner_kit_review_message', 'ferriol_checkout_copy', 'ferriol_plan_amounts', 'ferriol_mercadopago_checkout_urls', 'ferriol_mercadopago_checkout_url']);
         var whatsappInput = document.getElementById('adminContactWhatsapp');
         var whatsapp2Input = document.getElementById('adminContactWhatsapp2');
         var whatsapp3Input = document.getElementById('adminContactWhatsapp3');
@@ -10434,6 +10524,8 @@ async function showApp() {
         var deletePwdInput = document.getElementById('adminDeletePassword');
         var transferInfoTa = document.getElementById('adminTransferInfo');
         var trialDurInput = document.getElementById('adminTrialDurationDays');
+        var kitRevHoursInput = document.getElementById('adminPartnerKitReviewHours');
+        var kitRevMsgTa = document.getElementById('adminPartnerKitReviewMessage');
         var trialCfgParsed = { windowDays: 5, messages: {} };
         if (settingsRows) {
           settingsRows.forEach(function (r) {
@@ -10446,6 +10538,14 @@ async function showApp() {
             if (r.key === 'trial_duration_days' && trialDurInput) {
               var td = parseInt(r.value, 10);
               trialDurInput.value = (!isNaN(td) && td >= 1 && td <= 365) ? String(td) : '15';
+            }
+            if (r.key === 'partner_kit_review_hours' && kitRevHoursInput) {
+              var kh = parseInt(r.value, 10);
+              kitRevHoursInput.value = (!isNaN(kh) && kh >= 1 && kh <= 168) ? String(kh) : '24';
+            }
+            if (r.key === 'partner_kit_review_message' && kitRevMsgTa) {
+              kitRevMsgTa.value = r.value != null ? String(r.value) : '';
+              window._ferriolPartnerKitReviewTooltip = kitRevMsgTa.value.trim() || window._ferriolPartnerKitReviewTooltip;
             }
             if (r.key === 'trial_reminder_config') trialCfgParsed = parseTrialReminderConfigValue(r.value || '');
           });
@@ -10559,7 +10659,7 @@ async function showApp() {
           });
         }
       } catch (_) {}
-      const { data: allProfiles, error: errProfiles } = await supabaseClient.from('profiles').select('id, email, role, active, kiosco_name, trial_ends_at, sponsor_id, referral_code');
+      const { data: allProfiles, error: errProfiles } = await supabaseClient.from('profiles').select('id, email, role, active, kiosco_name, trial_ends_at, sponsor_id, referral_code, partner_kit_review_until');
       window._ferriolAllProfilesCache = allProfiles || [];
       var list = (allProfiles || []).filter(u => u.id !== currentUser?.id);
       if (isPartnerLens()) {
@@ -10732,6 +10832,19 @@ async function showApp() {
           { key: 'trial_duration_days', value: String(trialDurSave) },
           { key: 'trial_reminder_config', value: trialReminderJson }
         ];
+        if (isEmpresaLensSuper()) {
+          var khEl = document.getElementById('adminPartnerKitReviewHours');
+          var kmEl = document.getElementById('adminPartnerKitReviewMessage');
+          if (khEl) {
+            var khSave = Math.min(168, Math.max(1, parseInt(khEl.value, 10) || 24));
+            rowsUpsert.push({ key: 'partner_kit_review_hours', value: String(khSave) });
+          }
+          if (kmEl) {
+            var kmSave = String(kmEl.value || '').trim().slice(0, 600);
+            rowsUpsert.push({ key: 'partner_kit_review_message', value: kmSave });
+            window._ferriolPartnerKitReviewTooltip = kmSave || undefined;
+          }
+        }
         var checkoutSaved = null;
         if (isEmpresaLensSuper() && document.getElementById('adminCheckoutCopyKiosco')) {
           checkoutSaved = ferriolBuildCheckoutCopyObjectFromSettingsForm();
@@ -12038,7 +12151,7 @@ async function showApp() {
         if (profile.role === 'partner') {
           partnerFromKUpInit = await ferriolFetchPartnerKiosqueroUpgradeEligible(uid);
         }
-        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerSponsorId: profile.partner_sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '', phone: profile.phone != null ? String(profile.phone) : '', avatarUrl: profile.avatar_url != null ? String(profile.avatar_url).trim() : '', partnerFromKiosqueroUpgrade: partnerFromKUpInit, vencimientoAvisoDias: (function () { var x = Number(profile.vencimiento_aviso_dias); return Number.isFinite(x) ? Math.min(365, Math.max(0, Math.floor(x))) : null; })() };
+        currentUser = { id: profile.id, email: profile.email, role: profile.role, active: profile.active, kioscoName: profile.kiosco_name || '', whatsappMessage: profile.whatsapp_message || DEFAULT_WHATSAPP, trialEndsAt: trialEndsAt, created_at: userCreatedAt, referralCode: profile.referral_code || '', sponsorId: profile.sponsor_id || null, partnerSponsorId: profile.partner_sponsor_id || null, partnerLicensePending: !!profile.partner_license_pending, partnerKitReviewUntil: profile.partner_kit_review_until || null, partnerTransferInfo: profile.partner_transfer_info != null ? String(profile.partner_transfer_info) : '', phone: profile.phone != null ? String(profile.phone) : '', avatarUrl: profile.avatar_url != null ? String(profile.avatar_url).trim() : '', partnerFromKiosqueroUpgrade: partnerFromKUpInit, vencimientoAvisoDias: (function () { var x = Number(profile.vencimiento_aviso_dias); return Number.isFinite(x) ? Math.min(365, Math.max(0, Math.floor(x))) : null; })() };
         await showApp();
       } catch (e) {
         console.error('Error en init:', e);

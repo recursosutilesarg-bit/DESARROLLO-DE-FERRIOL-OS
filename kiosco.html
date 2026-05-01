@@ -269,6 +269,7 @@
         <button type="button" id="headerProfileBtn" class="relative w-10 h-10 rounded-full border-2 border-white/30 bg-gradient-to-br from-emerald-600/40 to-violet-600/35 overflow-hidden shrink-0 touch-target shadow-md hover:border-emerald-300/50 active:scale-95 transition-all cursor-pointer z-[51]" title="Mi cuenta" aria-label="Abrir menú de mi cuenta">
           <img id="headerProfileImg" alt="" class="hidden absolute inset-0 w-full h-full object-cover z-10 pointer-events-none select-none" draggable="false">
           <span id="headerProfileInitials" class="absolute inset-0 flex items-center justify-center text-sm font-bold text-white/95 pointer-events-none z-0 select-none">?</span>
+          <span id="headerProfileKitReviewDot" class="hidden absolute bottom-0.5 right-0.5 z-20 w-2.5 h-2.5 rounded-full bg-amber-400 border-2 border-emerald-950/90 shadow-[0_0_8px_rgba(251,191,36,0.65)] pointer-events-none" aria-hidden="true"></span>
         </button>
       </div>
     </div>
@@ -2191,6 +2192,18 @@
             </div>
             <div class="border-t border-white/10 pt-4 mt-4 super-only super-main-only">
               <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
+                <i data-lucide="package-check" class="w-4 h-4 text-amber-300"></i>
+                Aprobación del kit inicial (distribuidores)
+              </h3>
+              <p class="text-xs text-white/50 mb-2">Al <strong class="text-white/70">crear</strong> una cuenta socio o al <strong class="text-white/70">aprobar un upgrade</strong> desde negocio, el perfil muestra un aviso en el círculo del avatar durante estas horas (ej. 12–24&nbsp;h). La cuenta funciona con normalidad; cuando confirmás el cobro del kit en el detalle del usuario podés quitar el aviso antes del plazo.</p>
+              <label class="block text-xs text-white/70 mb-1">Ventana en horas (1–168)</label>
+              <input type="number" id="adminPartnerKitReviewHours" min="1" max="168" value="24" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-amber-400/70 text-base mb-2 tabular-nums">
+              <label class="block text-xs text-white/70 mb-1">Texto del aviso (tooltip y menú cuenta)</label>
+              <textarea id="adminPartnerKitReviewMessage" rows="3" maxlength="600" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-1 placeholder-white/35" placeholder="Estás en período de aprobación del kit inicial…"></textarea>
+              <p class="text-[10px] text-white/40 mb-0">Se guarda con <strong class="text-white/55">Guardar ajustes</strong> · claves <code class="text-white/55">partner_kit_review_hours</code> y <code class="text-white/55">partner_kit_review_message</code>.</p>
+            </div>
+            <div class="border-t border-white/10 pt-4 mt-4 super-only super-main-only">
+              <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
                 <i data-lucide="percent" class="w-4 h-4 text-[#86efac]"></i>
                 Comisiones a administradores (kit y suscripción mensual kiosco)
               </h3>
@@ -3059,10 +3072,12 @@
         <div id="accountMenuDrawerUserRing" class="relative w-14 h-14 rounded-full overflow-hidden border-2 border-gray-200 bg-gray-100 shrink-0 flex items-center justify-center">
           <img id="accountMenuDrawerAvatarImg" alt="" class="hidden absolute inset-0 w-full h-full object-cover z-10 pointer-events-none select-none" draggable="false">
           <span id="accountMenuDrawerInitials" class="relative z-0 text-base font-bold text-gray-600 select-none">?</span>
+          <span id="accountMenuDrawerKitReviewDot" class="hidden absolute bottom-0.5 right-0.5 z-20 w-3 h-3 rounded-full bg-amber-400 border-2 border-white shadow-[0_0_10px_rgba(251,191,36,0.55)] pointer-events-none" aria-hidden="true"></span>
         </div>
         <div class="min-w-0 flex-1 pt-0.5 pr-8">
           <p id="accountMenuDrawerDisplayName" class="font-bold text-[0.95rem] text-gray-900 leading-snug truncate">—</p>
           <p id="accountMenuDrawerEmail" class="text-[0.8rem] text-gray-500 mt-0.5 truncate">—</p>
+          <p id="accountMenuDrawerKitReviewNote" class="hidden text-[0.72rem] text-amber-800/95 leading-snug mt-2 pr-1 border-l-2 border-amber-400 pl-2 bg-amber-50/90 rounded-r-md py-1.5"></p>
         </div>
         <button type="button" id="accountMenuDrawerClose" class="absolute top-3 right-3 p-2 rounded-xl text-gray-500 hover:text-gray-800 hover:bg-gray-100 touch-target shrink-0 transition-colors" title="Cerrar">
           <i data-lucide="x" class="w-5 h-5"></i>
