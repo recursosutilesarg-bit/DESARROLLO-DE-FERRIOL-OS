@@ -1841,6 +1841,7 @@
         }
         await loadFounderEmpresaPaymentProofPanel();
         await loadFounderClientSaleRequestsPanel();
+        scheduleRefreshFerriolSolicitudesBadges();
         if (state.superSection === 'sistema' || state.superSection === 'cobros') await renderSuperCobrosSection();
       } catch (e) {
         alert('Error: ' + (e && e.message ? e.message : e));
@@ -1897,6 +1898,7 @@
           msgEl.classList.remove('hidden');
         }
         await loadFounderClientSaleRequestsPanel();
+        scheduleRefreshFerriolSolicitudesBadges();
         if (state.superSection === 'sistema' || state.superSection === 'cobros') await renderSuperCobrosSection();
       } catch (e) {
         alert('Error: ' + (e && e.message ? e.message : e));
@@ -2072,6 +2074,7 @@
             }
             closeFounderWithdrawPayModal();
             await loadFounderPagosPendientesSection();
+            scheduleRefreshFerriolSolicitudesBadges();
             alert('Pago registrado. El socio verá la solicitud como pagada y se actualizará su billetera.');
           } catch (e) {
             if (err) { err.textContent = String(e.message || e); err.classList.remove('hidden'); }
@@ -2169,6 +2172,7 @@
         hist.innerHTML = '<p class="text-red-300/90 text-xs py-2">No se pudo cargar la billetera. ¿Ejecutaste <code class="text-white/80">supabase-ferriol-partner-withdrawals.sql</code>? ' + String(e.message || e) + '</p>';
       }
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+      scheduleRefreshFerriolSolicitudesBadges();
     }
     async function loadFounderWithdrawalReviewList() {
       var box = document.getElementById('founderWithdrawalReviewBox');
@@ -2240,6 +2244,7 @@
         list.innerHTML = '<p class="text-red-300/90 text-xs py-2">' + String(e.message || e) + '</p>';
       }
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+      scheduleRefreshFerriolSolicitudesBadges();
     }
     async function loadFounderPagosPendientesSection() {
       var wrap = document.getElementById('founderPagosPendientesList');
@@ -2286,45 +2291,49 @@
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
     async function loadSuperSolicitudesSection() {
-      var clBox = document.getElementById('superClientSaleRequestsList');
-      var clWrap = document.getElementById('superClientSaleRequestsBox');
-      if (!supabaseClient || !currentUser) {
-        if (clBox) clBox.innerHTML = '';
-        if (clWrap) clWrap.classList.add('hidden');
-        var epBx0 = document.getElementById('superEmpresaPaymentProofBox');
-        var epIn0 = document.getElementById('superEmpresaPaymentProofList');
-        if (epIn0) epIn0.innerHTML = '';
-        if (epBx0) epBx0.classList.add('hidden');
+      try {
+        var clBox = document.getElementById('superClientSaleRequestsList');
+        var clWrap = document.getElementById('superClientSaleRequestsBox');
+        if (!supabaseClient || !currentUser) {
+          if (clBox) clBox.innerHTML = '';
+          if (clWrap) clWrap.classList.add('hidden');
+          var epBx0 = document.getElementById('superEmpresaPaymentProofBox');
+          var epIn0 = document.getElementById('superEmpresaPaymentProofList');
+          if (epIn0) epIn0.innerHTML = '';
+          if (epBx0) epBx0.classList.add('hidden');
+          syncFounderSolicitudesTabShell();
+          syncPartnerSolicitudesTabShell();
+          return;
+        }
+        if (isPartnerLens() && !isEmpresaLensSuper()) {
+          void loadPartnerBilleteraSection();
+        }
+        if (isEmpresaLensSuper() && clWrap) {
+          await loadFounderClientSaleRequestsPanel();
+        } else {
+          if (clBox) clBox.innerHTML = '';
+          if (clWrap) clWrap.classList.add('hidden');
+        }
+        var epBox = document.getElementById('superEmpresaPaymentProofBox');
+        var epInner = document.getElementById('superEmpresaPaymentProofList');
+        if (isEmpresaLensSuper()) {
+          await loadFounderEmpresaPaymentProofPanel();
+        } else {
+          if (epInner) epInner.innerHTML = '';
+          if (epBox) epBox.classList.add('hidden');
+        }
+        if (!isEmpresaLensSuper()) {
+          syncFounderSolicitudesTabShell();
+          syncPartnerSolicitudesTabShell();
+          return;
+        }
+        void loadFounderWithdrawalReviewList();
+        try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
         syncFounderSolicitudesTabShell();
         syncPartnerSolicitudesTabShell();
-        return;
+      } finally {
+        scheduleRefreshFerriolSolicitudesBadges();
       }
-      if (isPartnerLens() && !isEmpresaLensSuper()) {
-        void loadPartnerBilleteraSection();
-      }
-      if (isEmpresaLensSuper() && clWrap) {
-        await loadFounderClientSaleRequestsPanel();
-      } else {
-        if (clBox) clBox.innerHTML = '';
-        if (clWrap) clWrap.classList.add('hidden');
-      }
-      var epBox = document.getElementById('superEmpresaPaymentProofBox');
-      var epInner = document.getElementById('superEmpresaPaymentProofList');
-      if (isEmpresaLensSuper()) {
-        await loadFounderEmpresaPaymentProofPanel();
-      } else {
-        if (epInner) epInner.innerHTML = '';
-        if (epBox) epBox.classList.add('hidden');
-      }
-      if (!isEmpresaLensSuper()) {
-        syncFounderSolicitudesTabShell();
-        syncPartnerSolicitudesTabShell();
-        return;
-      }
-      void loadFounderWithdrawalReviewList();
-      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
-      syncFounderSolicitudesTabShell();
-      syncPartnerSolicitudesTabShell();
     }
     function switchFounderSolicitudesTab(tabId) {
       var valid = { retiros: 1, ventas: 1, empresa: 1, aprobaciones: 1 };
@@ -2446,6 +2455,164 @@
         });
       }
     })();
+
+    var _ferriolSolBadgeRealtimeCh = null;
+    var _ferriolSolBadgeRealtimeUserId = null;
+    var _ferriolSolicBadgeDebounceTimer = null;
+
+    function ferriolSolicBadgeSet(el, n) {
+      if (!el) return;
+      var v = typeof n === 'number' ? n : parseInt(String(n || ''), 10);
+      if (!isFinite(v) || v < 0) v = 0;
+      if (v <= 0) {
+        el.textContent = '';
+        el.classList.add('hidden');
+        el.setAttribute('aria-hidden', 'true');
+        return;
+      }
+      el.textContent = v > 99 ? '99+' : String(v);
+      el.classList.remove('hidden');
+      el.setAttribute('aria-hidden', 'false');
+    }
+
+    function ferriolClearAllSolicitudesBadges() {
+      ferriolSolicBadgeSet(document.getElementById('navSuperSolicitudesBadge'), 0);
+      document.querySelectorAll('[data-founder-solic-badge]').forEach(function (b) { ferriolSolicBadgeSet(b, 0); });
+      document.querySelectorAll('[data-partner-solic-badge]').forEach(function (b) { ferriolSolicBadgeSet(b, 0); });
+    }
+
+    function ferriolTearDownSolicitudesBadgeRealtime() {
+      if (_ferriolSolBadgeRealtimeCh && supabaseClient) {
+        try {
+          supabaseClient.removeChannel(_ferriolSolBadgeRealtimeCh);
+        } catch (_) {}
+      }
+      _ferriolSolBadgeRealtimeCh = null;
+      _ferriolSolBadgeRealtimeUserId = null;
+    }
+
+    function scheduleRefreshFerriolSolicitudesBadges() {
+      if (_ferriolSolicBadgeDebounceTimer) clearTimeout(_ferriolSolicBadgeDebounceTimer);
+      _ferriolSolicBadgeDebounceTimer = setTimeout(function () {
+        _ferriolSolicBadgeDebounceTimer = null;
+        void refreshFerriolSolicitudesBadges();
+      }, 380);
+    }
+
+    async function ferriolSolicBadgeCount(rowsPromise) {
+      try {
+        var r = await rowsPromise;
+        if (r.error || typeof r.count !== 'number') return 0;
+        return r.count;
+      } catch (_) {
+        return 0;
+      }
+    }
+
+    function ferriolWireSolicitudesBadgeRealtimeIfNeeded() {
+      if (!supabaseClient || !currentUser || !currentUser.id) return;
+      if (!isNetworkAdminRole(currentUser.role) || isAnyKioscoPreviewMode()) return;
+      if (_ferriolSolBadgeRealtimeUserId === currentUser.id && _ferriolSolBadgeRealtimeCh) return;
+      ferriolTearDownSolicitudesBadgeRealtime();
+      _ferriolSolBadgeRealtimeUserId = currentUser.id;
+      var tables = [
+        'ferriol_partner_withdrawal_requests',
+        'ferriol_client_sale_requests',
+        'ferriol_empresa_payment_proof_requests',
+        'ferriol_membership_day_requests',
+        'ferriol_partner_provision_requests',
+        'ferriol_kiosquero_provision_requests',
+        'ferriol_kiosquero_partner_upgrade_requests'
+      ];
+      var ch = supabaseClient.channel('ferriol-solic-badges:' + currentUser.id);
+      tables.forEach(function (tbl) {
+        ch.on('postgres_changes', { event: '*', schema: 'public', table: tbl }, function () {
+          scheduleRefreshFerriolSolicitudesBadges();
+        });
+      });
+      try {
+        ch.subscribe();
+      } catch (_) {}
+      _ferriolSolBadgeRealtimeCh = ch;
+    }
+
+    async function refreshFerriolSolicitudesBadges() {
+      var navBd = document.getElementById('navSuperSolicitudesBadge');
+      if (!supabaseClient || !currentUser || !isNetworkAdminRole(currentUser.role) || isAnyKioscoPreviewMode()) {
+        ferriolClearAllSolicitudesBadges();
+        return;
+      }
+      if (isEmpresaLensSuper()) {
+        var cW,
+          cCs,
+          cEp,
+          cMd,
+          cPp,
+          cKp,
+          cKu;
+        try {
+          var counts = await Promise.all([
+            ferriolSolicBadgeCount(supabaseClient.from('ferriol_partner_withdrawal_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending_review')),
+            ferriolSolicBadgeCount(supabaseClient.from('ferriol_client_sale_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
+            ferriolSolicBadgeCount(supabaseClient.from('ferriol_empresa_payment_proof_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
+            ferriolSolicBadgeCount(supabaseClient.from('ferriol_membership_day_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
+            ferriolSolicBadgeCount(supabaseClient.from('ferriol_partner_provision_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
+            ferriolSolicBadgeCount(supabaseClient.from('ferriol_kiosquero_provision_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending')),
+            ferriolSolicBadgeCount(supabaseClient.from('ferriol_kiosquero_partner_upgrade_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'))
+          ]);
+          cW = counts[0];
+          cCs = counts[1];
+          cEp = counts[2];
+          cMd = counts[3];
+          cPp = counts[4];
+          cKp = counts[5];
+          cKu = counts[6];
+        } catch (_) {
+          ferriolClearAllSolicitudesBadges();
+          return;
+        }
+        var cApr = cMd + cPp + cKp + cKu;
+        var total = cW + cCs + cEp + cApr;
+        ferriolSolicBadgeSet(navBd, total);
+        ferriolSolicBadgeSet(document.querySelector('[data-founder-solic-badge="retiros"]'), cW);
+        ferriolSolicBadgeSet(document.querySelector('[data-founder-solic-badge="ventas"]'), cCs);
+        ferriolSolicBadgeSet(document.querySelector('[data-founder-solic-badge="empresa"]'), cEp);
+        ferriolSolicBadgeSet(document.querySelector('[data-founder-solic-badge="aprobaciones"]'), cApr);
+        ferriolSolicBadgeSet(document.querySelector('[data-partner-solic-badge="billetera"]'), 0);
+        ferriolSolicBadgeSet(document.querySelector('[data-partner-solic-badge="tramites"]'), 0);
+        try {
+          if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
+        } catch (_) {}
+        return;
+      }
+      if (isPartnerLens() && !isEmpresaLensSuper()) {
+        var uid = currentUser.id;
+        var b, t;
+        try {
+          var pCounts = await Promise.all([
+            ferriolSolicBadgeCount(supabaseClient.from('ferriol_partner_withdrawal_requests').select('id', { count: 'exact', head: true }).eq('partner_user_id', uid).in('status', ['pending_review', 'approved_pending_payout'])),
+            ferriolSolicBadgeCount(supabaseClient.from('ferriol_membership_day_requests').select('id', { count: 'exact', head: true }).eq('requested_by', uid).eq('status', 'pending')),
+            ferriolSolicBadgeCount(supabaseClient.from('ferriol_partner_provision_requests').select('id', { count: 'exact', head: true }).eq('requested_by', uid).eq('status', 'pending')),
+            ferriolSolicBadgeCount(supabaseClient.from('ferriol_kiosquero_provision_requests').select('id', { count: 'exact', head: true }).eq('requested_by', uid).eq('status', 'pending'))
+          ]);
+          b = pCounts[0];
+          t = pCounts[1] + pCounts[2] + pCounts[3];
+        } catch (_) {
+          ferriolClearAllSolicitudesBadges();
+          return;
+        }
+        ferriolSolicBadgeSet(document.querySelector('[data-partner-solic-badge="billetera"]'), b);
+        ferriolSolicBadgeSet(document.querySelector('[data-partner-solic-badge="tramites"]'), t);
+        ferriolSolicBadgeSet(navBd, b + t);
+        document.querySelectorAll('[data-founder-solic-badge]').forEach(function (el) { ferriolSolicBadgeSet(el, 0); });
+        try {
+          if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
+        } catch (_) {}
+        return;
+      }
+      ferriolClearAllSolicitudesBadges();
+    }
+
     function ferriolKioscoSponsorHintHtml() {
       if (!currentUser || !currentUser.sponsorId) {
         return 'No figura referidor en tu perfil. Pedí en administración si hace falta.';
@@ -6042,6 +6209,13 @@
         }
       }
       syncPartnerBilleteraShell();
+      if (isNetworkAdmin && !uiNegocio) {
+        ferriolWireSolicitudesBadgeRealtimeIfNeeded();
+        scheduleRefreshFerriolSolicitudesBadges();
+      } else {
+        ferriolTearDownSolicitudesBadgeRealtime();
+        ferriolClearAllSolicitudesBadges();
+      }
       try { syncPlanRolePayLabels(); } catch (_) {}
     }
 
@@ -9357,6 +9531,8 @@ async function showApp() {
       if (supabaseClient) supabaseClient.auth.signOut();
       ferriolStopNotificationPolling();
       _ferriolNotifFetchBaselineDone = false;
+      ferriolTearDownSolicitudesBadgeRealtime();
+      ferriolClearAllSolicitudesBadges();
       currentUser = null;
       state.superUiMode = 'empresa';
       state.partnerUiMode = 'red';
@@ -10993,6 +11169,7 @@ async function showApp() {
           syncFounderSolicitudesTabShell();
           syncPartnerSolicitudesTabShell();
         }
+        scheduleRefreshFerriolSolicitudesBadges();
       }
     }
 
@@ -11183,6 +11360,7 @@ async function showApp() {
       if (errProfiles) {
         listEl.innerHTML = '<p class="py-4 text-center text-red-300 text-sm">Error al cargar. Revisá las políticas RLS de la tabla profiles.</p>';
         lucide.createIcons();
+        scheduleRefreshFerriolSolicitudesBadges();
         return;
       }
       if (displayList.length === 0 && (isEmpresaLensSuper() || isPartnerLens())) {
@@ -11205,6 +11383,7 @@ async function showApp() {
       await renderSuperMembershipDayRequestBanners();
       if (state.superSection === 'solicitudes' && isEmpresaLensSuper()) loadSuperSolicitudesSection();
       lucide.createIcons();
+      scheduleRefreshFerriolSolicitudesBadges();
     }
     function renderSuperListFromSearch() {
       var listEl = document.getElementById('superUsersList');
