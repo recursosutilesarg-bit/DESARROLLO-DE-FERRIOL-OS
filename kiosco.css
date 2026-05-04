@@ -2187,14 +2187,30 @@ select.ferriol-sponsor-select:-moz-focusring {
    ═══════════════════════════════════════════════════════════ */
 
 /* Clic llega al <button>; los íconos Lucide (svg) no deben «robar» el hit-test */
-#super-section-sistema .mlm-board.hidden {
-  display: none !important;
+#sistemaMlmTabBar.ferriol-sistema-mlm-tab-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  isolation: isolate;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+#super-section-sistema .sistema-tab {
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 #super-section-sistema .sistema-tab svg {
   pointer-events: none;
 }
 
+#super-section-sistema .mlm-board.hidden {
+  display: none !important;
+}
+
 /* ── Contenedor tipo "tablero" (genérico MLM) ── */
+.mlm-board {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 1rem;
