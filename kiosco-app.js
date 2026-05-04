@@ -3440,7 +3440,7 @@
       _restoringFromHistory: false,
       _suppressCajaHistoryPush: false,
       historialFilter: 'hoy',
-      superSection: 'ingresos',  // afiliados | ingresos | sistema | ajustes | solicitudes | pagos-pendientes | mas | partner-comprobantes
+      superSection: 'ingresos',  // afiliados | ingresos | sistema | ajustes | ajustes-* | solicitudes | pagos-pendientes | mas | partner-comprobantes
       _returnSuperSectionFromComprobantes: 'ingresos',
       afiliadosSubTab: 'usuarios',  // usuarios (kiosquero) | distribuidores (partner)
       superUiMode: 'empresa',  // empresa | socio | negocio — solo si role === 'super'
@@ -6399,11 +6399,14 @@
         if (!allowPc) sn = 'ingresos';
       }
       state.superSection = sn;
-      var reqSuper = state.superSection === 'sistema'
-        || state.superSection === 'aviso-global'
-        || state.superSection === 'admin-sql'
-        || state.superSection === 'export-directorio';
-      if (reqSuper && currentUser && (currentUser.role !== 'super' || !isEmpresaLensSuper())) {
+      var needsEmpresaLens =
+        state.superSection === 'sistema' ||
+        state.superSection === 'aviso-global' ||
+        state.superSection === 'admin-sql' ||
+        state.superSection === 'export-directorio' ||
+        state.superSection === 'ajustes' ||
+        (typeof state.superSection === 'string' && state.superSection.indexOf('ajustes-') === 0);
+      if (needsEmpresaLens && currentUser && (currentUser.role !== 'super' || !isEmpresaLensSuper())) {
         state.superSection = 'ingresos';
       }
       document.querySelectorAll('#panel-super .super-section').forEach(function (el) {
@@ -6418,7 +6421,7 @@
         section.style.zIndex = '10';
       }
       var navHighlight = state.superSection;
-      if (navHighlight === 'ajustes') navHighlight = 'mas';
+      if (navHighlight === 'ajustes' || (typeof navHighlight === 'string' && navHighlight.indexOf('ajustes-') === 0)) navHighlight = 'mas';
       if (navHighlight === 'aviso-global' || navHighlight === 'admin-sql' || navHighlight === 'export-directorio') navHighlight = 'mas';
       if (navHighlight === 'partner-comprobantes') {
         navHighlight = state._returnSuperSectionFromComprobantes || 'ingresos';
@@ -6453,6 +6456,12 @@
         requestAnimationFrame(function () {
           try { window._ferriolSistemaSwitchTab(reopen); } catch (_) {}
         });
+      }
+      if (state.superSection === 'ajustes-renovacion' && !isPartnerLens()) {
+        try {
+          var trBase = window._superTrialReminderEditCache || { windowDays: 5, messages: {} };
+          fillTrialReminderAdminFields(trBase, null);
+        } catch (_) {}
       }
     }
     var btnSuperMasGoSolicitudesVentas = document.getElementById('btnSuperMasGoSolicitudesVentas');
@@ -11531,82 +11540,94 @@ async function showApp() {
         openClientSaleRequestModal();
       });
     }
-    document.getElementById('saveAdminContact').onclick = async () => {
-      if (isPartnerLens()) return;
-      const whatsapp = (document.getElementById('adminContactWhatsapp').value || '').trim().replace(/\D/g, '');
-      const whatsapp2 = (document.getElementById('adminContactWhatsapp2').value || '').trim().replace(/\D/g, '');
-      const whatsapp3 = (document.getElementById('adminContactWhatsapp3').value || '').trim().replace(/\D/g, '');
-      const whatsapp4 = (document.getElementById('adminContactWhatsapp4').value || '').trim().replace(/\D/g, '');
-      const deletePwd = (document.getElementById('adminDeletePassword').value || '').trim();
-      const msgEl = document.getElementById('adminContactMsg');
-      if (!supabaseClient) return;
+    function ferriolShowAdminSliceMsg(slice, text, isErr) {
+      var el = document.getElementById('adminSliceMsg-' + slice);
+      if (!el) return;
+      el.textContent = text;
+      el.classList.remove('hidden', 'text-green-300', 'text-red-300', 'text-amber-300');
+      el.classList.add(isErr ? 'text-red-300' : 'text-green-300');
+      el.classList.remove('hidden');
+      if (!isErr) {
+        setTimeout(function () {
+          try { el.classList.add('hidden'); } catch (_) {}
+        }, 3000);
+      }
+    }
+    async function ferriolSaveAdminSettingsSlice(slice) {
+      if (!supabaseClient) {
+        ferriolShowAdminSliceMsg(slice, 'Configurá Supabase.', true);
+        return;
+      }
+      if (isPartnerLens() || !isEmpresaLensSuper()) {
+        ferriolShowAdminSliceMsg(slice, 'Solo fundador en vista Empresa.', true);
+        return;
+      }
       try {
-        var winEl = document.getElementById('trialReminderWindowDays');
-        var winDays = Math.min(30, Math.max(1, parseInt(winEl && winEl.value, 10) || 5));
-        var msgObj = {};
-        for (var d = winDays; d >= 1; d--) {
-          var ta = document.querySelector('#trialReminderMsgsContainer textarea[data-trial-msg-day="' + d + '"]');
-          msgObj[String(d)] = ta ? String(ta.value || '').trim() : '';
+        if (slice === 'contacto') {
+          var w1 = (document.getElementById('adminContactWhatsapp') && document.getElementById('adminContactWhatsapp').value || '').trim().replace(/\D/g, '');
+          var w2 = (document.getElementById('adminContactWhatsapp2') && document.getElementById('adminContactWhatsapp2').value || '').trim().replace(/\D/g, '');
+          var w3 = (document.getElementById('adminContactWhatsapp3') && document.getElementById('adminContactWhatsapp3').value || '').trim().replace(/\D/g, '');
+          var w4 = (document.getElementById('adminContactWhatsapp4') && document.getElementById('adminContactWhatsapp4').value || '').trim().replace(/\D/g, '');
+          var dp = (document.getElementById('adminDeletePassword') && document.getElementById('adminDeletePassword').value || '').trim();
+          var supRows = [
+            { key: 'admin_whatsapp', value: w1 },
+            { key: 'admin_whatsapp_2', value: w2 },
+            { key: 'admin_whatsapp_3', value: w3 },
+            { key: 'admin_whatsapp_4', value: w4 },
+            { key: 'admin_delete_password', value: dp }
+          ];
+          var supPhoneEl = document.getElementById('adminSupportPhone');
+          if (supPhoneEl) supRows.push({ key: 'ferriol_support_phone', value: String(supPhoneEl.value || '').trim().slice(0, 80) });
+          await supabaseClient.from('app_settings').upsert(supRows, { onConflict: 'key' });
+          adminContact.whatsapp = w1;
+          adminContact.whatsappList = [w1, w2, w3, w4].filter(Boolean);
+          try { ferriolRefreshAccountMenuHelpButton().catch(function () {}); } catch (_) {}
+          ferriolShowAdminSliceMsg(slice, 'Guardado.', false);
+          return;
         }
-        var trialReminderJson = JSON.stringify({ windowDays: winDays, messages: msgObj });
-        var transferInfo = (document.getElementById('adminTransferInfo') && document.getElementById('adminTransferInfo').value != null) ? String(document.getElementById('adminTransferInfo').value || '') : '';
-        var trialDurEl = document.getElementById('adminTrialDurationDays');
-        var trialDurSave = Math.min(365, Math.max(1, parseInt(trialDurEl && trialDurEl.value, 10) || 15));
-        var rowsUpsert = [
-          { key: 'admin_whatsapp', value: whatsapp },
-          { key: 'admin_whatsapp_2', value: whatsapp2 },
-          { key: 'admin_whatsapp_3', value: whatsapp3 },
-          { key: 'admin_whatsapp_4', value: whatsapp4 },
-          { key: 'admin_delete_password', value: deletePwd },
-          { key: 'ferriol_transfer_info', value: transferInfo },
-          { key: 'trial_duration_days', value: String(trialDurSave) },
-          { key: 'trial_reminder_config', value: trialReminderJson }
-        ];
-        var supPhoneEl = document.getElementById('adminSupportPhone');
-        if (supPhoneEl) {
-          rowsUpsert.push({ key: 'ferriol_support_phone', value: String(supPhoneEl.value || '').trim().slice(0, 80) });
+        if (slice === 'transferencia') {
+          var ti = (document.getElementById('adminTransferInfo') && document.getElementById('adminTransferInfo').value != null) ? String(document.getElementById('adminTransferInfo').value || '') : '';
+          await supabaseClient.from('app_settings').upsert([{ key: 'ferriol_transfer_info', value: ti }], { onConflict: 'key' });
+          ferriolShowAdminSliceMsg(slice, 'Guardado.', false);
+          return;
         }
-        if (isEmpresaLensSuper()) {
-          var khEl = document.getElementById('adminPartnerKitReviewHours');
-          var kmEl = document.getElementById('adminPartnerKitReviewMessage');
-          if (khEl) {
-            var khSave = Math.min(168, Math.max(1, parseInt(khEl.value, 10) || 24));
-            rowsUpsert.push({ key: 'partner_kit_review_hours', value: String(khSave) });
-          }
-          if (kmEl) {
-            var kmSave = String(kmEl.value || '').trim().slice(0, 600);
-            rowsUpsert.push({ key: 'partner_kit_review_message', value: kmSave });
-            window._ferriolPartnerKitReviewTooltip = kmSave || undefined;
-          }
-        }
-        var checkoutSaved = null;
-        if (isEmpresaLensSuper() && document.getElementById('adminCheckoutCopyKiosco')) {
-          checkoutSaved = ferriolBuildCheckoutCopyObjectFromSettingsForm();
-          rowsUpsert.push({ key: 'ferriol_checkout_copy', value: JSON.stringify(checkoutSaved) });
-        }
-        var planAmtSaved = null;
-        if (isEmpresaLensSuper() && document.getElementById('adminPlanAmountKit')) {
-          planAmtSaved = ferriolPlanAmountsObjectFromSettingsForm();
-          rowsUpsert.push({ key: 'ferriol_plan_amounts', value: JSON.stringify(planAmtSaved) });
-        }
-        if (isEmpresaLensSuper() && document.getElementById('adminMercadoPagoCheckoutUrlKit')) {
+        if (slice === 'mercadopago') {
           var mk = document.getElementById('adminMercadoPagoCheckoutUrlKit');
           var mko = document.getElementById('adminMercadoPagoCheckoutUrlKiosco');
           var mv = document.getElementById('adminMercadoPagoCheckoutUrlVendor');
           var kitV = mk ? String(mk.value || '').trim() : '';
           var kioscoV = mko ? String(mko.value || '').trim() : '';
           var vendV = mv ? String(mv.value || '').trim() : '';
-          rowsUpsert.push({
-            key: 'ferriol_mercadopago_checkout_urls',
-            value: JSON.stringify({ kit: kitV, kioscoMonthly: kioscoV, vendorMonthly: vendV })
-          });
-          rowsUpsert.push({
-            key: 'ferriol_mercadopago_checkout_url',
-            value: kioscoV || kitV || vendV || ''
-          });
+          await supabaseClient.from('app_settings').upsert([
+            { key: 'ferriol_mercadopago_checkout_urls', value: JSON.stringify({ kit: kitV, kioscoMonthly: kioscoV, vendorMonthly: vendV }) },
+            { key: 'ferriol_mercadopago_checkout_url', value: kioscoV || kitV || vendV || '' }
+          ], { onConflict: 'key' });
+          ferriolApplyMercadoPagoUrlsToWindow({ kit: kitV, kioscoMonthly: kioscoV, vendorMonthly: vendV });
+          try { syncMercadoPagoCheckoutUi(); } catch (_) {}
+          ferriolShowAdminSliceMsg(slice, 'Guardado.', false);
+          return;
         }
-        await supabaseClient.from('app_settings').upsert(rowsUpsert, { onConflict: 'key' });
-        if (isEmpresaLensSuper()) {
+        if (slice === 'trial') {
+          var trialDurEl = document.getElementById('adminTrialDurationDays');
+          var trialDurSave = Math.min(365, Math.max(1, parseInt(trialDurEl && trialDurEl.value, 10) || 15));
+          await supabaseClient.from('app_settings').upsert([{ key: 'trial_duration_days', value: String(trialDurSave) }], { onConflict: 'key' });
+          ferriolShowAdminSliceMsg(slice, 'Guardado.', false);
+          return;
+        }
+        if (slice === 'kit') {
+          var khEl = document.getElementById('adminPartnerKitReviewHours');
+          var kmEl = document.getElementById('adminPartnerKitReviewMessage');
+          var khSave = Math.min(168, Math.max(1, parseInt(khEl && khEl.value, 10) || 24));
+          var kmSave = String(kmEl && kmEl.value || '').trim().slice(0, 600);
+          await supabaseClient.from('app_settings').upsert([
+            { key: 'partner_kit_review_hours', value: String(khSave) },
+            { key: 'partner_kit_review_message', value: kmSave }
+          ], { onConflict: 'key' });
+          window._ferriolPartnerKitReviewTooltip = kmSave || undefined;
+          ferriolShowAdminSliceMsg(slice, 'Guardado.', false);
+          return;
+        }
+        if (slice === 'comisiones') {
           var pl = await supabaseClient.from('mlm_plan_config').select('value').eq('key', 'compensation_v1').maybeSingle();
           var base = (pl.data && pl.data.value) || {};
           if (typeof base === 'string') { try { base = JSON.parse(base); } catch (_) { base = {}; } }
@@ -11631,45 +11652,74 @@ async function showApp() {
           });
           var upP = await supabaseClient.from('mlm_plan_config').upsert({ key: 'compensation_v1', value: merged, updated_at: new Date().toISOString() }, { onConflict: 'key' });
           if (upP.error) throw upP.error;
+          ferriolShowAdminSliceMsg(slice, 'Guardado.', false);
+          return;
         }
-        adminContact.whatsapp = whatsapp;
-        adminContact.whatsappList = [whatsapp, whatsapp2, whatsapp3, whatsapp4].filter(Boolean);
-        window._superTrialReminderEditCache = parseTrialReminderConfigValue(trialReminderJson);
-        if (checkoutSaved) {
-          window._ferriolCheckoutCopyParsed = ferriolParseCheckoutCopyValue(JSON.stringify(checkoutSaved));
-          try {
-            ferriolApplyCheckoutBenefitsToPanels();
-          } catch (_) {}
+        if (slice === 'renovacion') {
+          var winEl = document.getElementById('trialReminderWindowDays');
+          var winDays = Math.min(30, Math.max(1, parseInt(winEl && winEl.value, 10) || 5));
+          var msgObj = {};
+          for (var d = winDays; d >= 1; d--) {
+            var ta = document.querySelector('#trialReminderMsgsContainer textarea[data-trial-msg-day="' + d + '"]');
+            msgObj[String(d)] = ta ? String(ta.value || '').trim() : '';
+          }
+          var trialReminderJson = JSON.stringify({ windowDays: winDays, messages: msgObj });
+          await supabaseClient.from('app_settings').upsert([{ key: 'trial_reminder_config', value: trialReminderJson }], { onConflict: 'key' });
+          window._superTrialReminderEditCache = parseTrialReminderConfigValue(trialReminderJson);
+          fillTrialReminderAdminFields(window._superTrialReminderEditCache, null);
+          ferriolShowAdminSliceMsg(slice, 'Guardado.', false);
+          return;
         }
-        if (planAmtSaved) {
+        if (slice === 'precios') {
+          var planAmtSaved = ferriolPlanAmountsObjectFromSettingsForm();
+          await supabaseClient.from('app_settings').upsert([{ key: 'ferriol_plan_amounts', value: JSON.stringify(planAmtSaved) }], { onConflict: 'key' });
           ferriolMergePlanAmountsFromParsed(planAmtSaved);
-          try {
-            syncPlanCheckoutPrices();
-          } catch (_) {}
+          try { syncPlanCheckoutPrices(); } catch (_) {}
+          ferriolShowAdminSliceMsg(slice, 'Guardado.', false);
+          return;
         }
-        var mkSv = document.getElementById('adminMercadoPagoCheckoutUrlKit');
-        var mkoSv = document.getElementById('adminMercadoPagoCheckoutUrlKiosco');
-        var mvSv = document.getElementById('adminMercadoPagoCheckoutUrlVendor');
-        if (isEmpresaLensSuper() && (mkSv || mkoSv || mvSv)) {
-          ferriolApplyMercadoPagoUrlsToWindow({
-            kit: mkSv ? String(mkSv.value || '').trim() : '',
-            kioscoMonthly: mkoSv ? String(mkoSv.value || '').trim() : '',
-            vendorMonthly: mvSv ? String(mvSv.value || '').trim() : ''
-          });
-          try { syncMercadoPagoCheckoutUi(); } catch (_) {}
+        if (slice === 'checkout') {
+          var checkoutSaved = ferriolBuildCheckoutCopyObjectFromSettingsForm();
+          await supabaseClient.from('app_settings').upsert([{ key: 'ferriol_checkout_copy', value: JSON.stringify(checkoutSaved) }], { onConflict: 'key' });
+          window._ferriolCheckoutCopyParsed = ferriolParseCheckoutCopyValue(JSON.stringify(checkoutSaved));
+          try { ferriolApplyCheckoutBenefitsToPanels(); } catch (_) {}
+          ferriolShowAdminSliceMsg(slice, 'Guardado.', false);
+          return;
         }
-        msgEl.textContent = 'Ajustes guardados.';
-        msgEl.classList.remove('hidden');
-        setTimeout(() => msgEl.classList.add('hidden'), 3000);
-        try {
-          ferriolRefreshAccountMenuHelpButton().catch(function () {});
-        } catch (_) {}
-      } catch (e) {
-        msgEl.textContent = 'Error: ' + (e.message || 'Revisá que exista la tabla app_settings.');
-        msgEl.classList.remove('hidden');
+        ferriolShowAdminSliceMsg(slice, 'Sin acción para este bloque.', true);
+      } catch (err) {
+        ferriolShowAdminSliceMsg(slice, 'Error: ' + (err.message || ''), true);
       }
-      lucide.createIcons();
-    };
+      try { if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    (function ferriolSetupPanelSuperAjustesHub() {
+      var root = document.getElementById('panel-super');
+      if (!root) return;
+      root.addEventListener('click', function (ev) {
+        var hubBtn = ev.target.closest('[data-ferriol-ajustes-target]');
+        if (hubBtn && isEmpresaLensSuper()) {
+          var sec = hubBtn.getAttribute('data-ferriol-ajustes-target');
+          if (sec) {
+            ev.preventDefault();
+            switchSuperSection(sec);
+            return;
+          }
+        }
+        if (ev.target.closest('.btnSuperAjustesVolverHub') && isEmpresaLensSuper()) {
+          ev.preventDefault();
+          switchSuperSection('ajustes');
+          return;
+        }
+        var saveSliceBtn = ev.target.closest('.ferriol-save-admin-slice');
+        if (saveSliceBtn && isEmpresaLensSuper()) {
+          var sl = saveSliceBtn.getAttribute('data-admin-slice');
+          if (sl) {
+            ev.preventDefault();
+            void ferriolSaveAdminSettingsSlice(sl);
+          }
+        }
+      });
+    })();
     (function setupTrialReminderWindowDaysListener() {
       var el = document.getElementById('trialReminderWindowDays');
       if (!el) return;
@@ -11827,8 +11877,10 @@ async function showApp() {
       };
       reader.readAsText(file);
     }
-    document.getElementById('btnExportAllUsersBackup').onclick = exportAllUsersBackup;
-    document.getElementById('inputImportAllUsersBackup').onchange = function (e) {
+    var btnExportAllUsersBackup = document.getElementById('btnExportAllUsersBackup');
+    if (btnExportAllUsersBackup) btnExportAllUsersBackup.onclick = exportAllUsersBackup;
+    var inputImportAllUsersBackup = document.getElementById('inputImportAllUsersBackup');
+    if (inputImportAllUsersBackup) inputImportAllUsersBackup.onchange = function (e) {
       var f = e.target.files[0];
       if (f) {
         if (!confirm('¿Importar y complementar datos? Se sumarán los productos, clientes y deudas del archivo a lo que ya tiene cada usuario (no se borra nada existente). Los usuarios pueden recargar la app para ver los cambios.')) { e.target.value = ''; return; }
@@ -11836,6 +11888,7 @@ async function showApp() {
       }
       e.target.value = '';
     };
+    }
 
     document.querySelectorAll('.super-filter-btn').forEach(function (btn) {
       btn.onclick = function () {

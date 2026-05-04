@@ -2184,208 +2184,285 @@
         <!-- super-section-cobros: vacío (redirigido a sistema) -->
         <div id="super-section-cobros" class="super-section hidden absolute" style="display:none!important;"></div>
         <!-- Sección Ajustes -->
-        <div id="super-section-ajustes" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
-          <button type="button" id="btnSuperAjustesVolverMas" class="mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5 super-only super-main-only">
+        <div id="super-section-ajustes" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+          <button type="button" id="btnSuperAjustesVolverMas" class="mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
             Volver a opciones principales
           </button>
-          <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
+          <h2 class="font-bold text-xl mb-2 flex items-center gap-2">
             <i data-lucide="settings" class="w-5 h-5 text-[#86efac]"></i>
             Ajustes del sistema
           </h2>
-          <p class="text-xs text-sky-200/95 mb-3 leading-relaxed rounded-lg border border-sky-500/35 bg-sky-950/40 px-3 py-2.5 super-only super-main-only"><strong class="text-white/95">Link Mercado Pago:</strong> bajá en esta pantalla hasta el <strong class="text-white/95">recuadro azul</strong> y pegá el link público (<code class="text-sky-100/95">https://...</code>). Si no ves ese bloque, no estás como fundador en vista <strong class="text-white/95">Empresa</strong>.</p>
+          <p class="text-xs text-white/50 mb-4">Elegí un tema: cada pantalla tiene su propio <strong class="text-white/70">Guardar</strong>. Los datos se cargan al abrir el panel de administración.</p>
+          <p class="text-xs text-sky-200/95 mb-4 leading-relaxed rounded-lg border border-sky-500/35 bg-sky-950/40 px-3 py-2.5"><strong class="text-white/95">Mercado Pago:</strong> abrí <strong class="text-white/95">Links Mercado Pago</strong> en esta lista y pegá cada link público (<code class="text-sky-100/95">https://...</code>).</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button type="button" data-ferriol-ajustes-target="ajustes-contacto" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/45 active:scale-[0.98] touch-target">
+              <div class="w-10 h-10 rounded-xl bg-[#22c55e]/20 flex items-center justify-center shrink-0"><i data-lucide="phone" class="w-5 h-5 text-[#86efac]"></i></div>
+              <span class="font-semibold text-white">Contacto y seguridad</span>
+              <span class="text-xs text-white/50">WhatsApp empresa, Ayuda en el menú, contraseña para quitar usuarios</span>
+            </button>
+            <button type="button" data-ferriol-ajustes-target="ajustes-transferencia" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/45 active:scale-[0.98] touch-target">
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0"><i data-lucide="landmark" class="w-5 h-5 text-emerald-200"></i></div>
+              <span class="font-semibold text-white">Datos de transferencia Ferriol</span>
+              <span class="text-xs text-white/50">Texto que ven los kioscos para abonar a la empresa</span>
+            </button>
+            <button type="button" data-ferriol-ajustes-target="ajustes-mercadopago" class="glass rounded-2xl p-4 border border-sky-400/35 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-sky-400/60 active:scale-[0.98] touch-target sm:col-span-2">
+              <div class="w-10 h-10 rounded-xl bg-sky-500/25 flex items-center justify-center shrink-0"><i data-lucide="link-2" class="w-5 h-5 text-sky-300"></i></div>
+              <span class="font-semibold text-white">Links Mercado Pago</span>
+              <span class="text-xs text-white/50">Kit, suscripción kiosco y cuota distribuidor</span>
+            </button>
+            <button type="button" data-ferriol-ajustes-target="ajustes-trial" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-cyan-400/45 active:scale-[0.98] touch-target">
+              <div class="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center shrink-0"><i data-lucide="calendar-clock" class="w-5 h-5 text-cyan-200"></i></div>
+              <span class="font-semibold text-white">Período de prueba</span>
+              <span class="text-xs text-white/50">Días de prueba para nuevos registros</span>
+            </button>
+            <button type="button" data-ferriol-ajustes-target="ajustes-kit" class="glass rounded-2xl p-4 border border-amber-400/30 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-amber-400/55 active:scale-[0.98] touch-target">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0"><i data-lucide="package-check" class="w-5 h-5 text-amber-200"></i></div>
+              <span class="font-semibold text-white">Aprobación kit distribuidor</span>
+              <span class="text-xs text-white/50">Ventana en horas y mensaje en el avatar</span>
+            </button>
+            <button type="button" data-ferriol-ajustes-target="ajustes-comisiones" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/45 active:scale-[0.98] touch-target sm:col-span-2">
+              <div class="w-10 h-10 rounded-xl bg-[#22c55e]/20 flex items-center justify-center shrink-0"><i data-lucide="percent" class="w-5 h-5 text-[#86efac]"></i></div>
+              <span class="font-semibold text-white">Comisiones administradores</span>
+              <span class="text-xs text-white/50">Período inicial y % en Cobros (mlm_plan_config)</span>
+            </button>
+            <button type="button" data-ferriol-ajustes-target="ajustes-renovacion" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-amber-400/45 active:scale-[0.98] touch-target sm:col-span-2">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0"><i data-lucide="bell-ring" class="w-5 h-5 text-amber-200"></i></div>
+              <span class="font-semibold text-white">Avisos de renovación (prueba)</span>
+              <span class="text-xs text-white/50">Ventana en días y textos por día en la campana</span>
+            </button>
+            <button type="button" data-ferriol-ajustes-target="ajustes-precios" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-emerald-400/45 active:scale-[0.98] touch-target sm:col-span-2">
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0"><i data-lucide="coins" class="w-5 h-5 text-emerald-200"></i></div>
+              <span class="font-semibold text-white">Precios de referencia (ARS)</span>
+              <span class="text-xs text-white/50">Kit, suscripción kiosco y cuota distribuidor</span>
+            </button>
+            <button type="button" data-ferriol-ajustes-target="ajustes-checkout" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-violet-400/45 active:scale-[0.98] touch-target sm:col-span-2">
+              <div class="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center shrink-0"><i data-lucide="sparkles" class="w-5 h-5 text-violet-200"></i></div>
+              <span class="font-semibold text-white">Textos Mi plan / checkout</span>
+              <span class="text-xs text-white/50">Cierres, beneficios y modales de pago</span>
+            </button>
+            <button type="button" data-ferriol-ajustes-target="ajustes-respaldo" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-white/25 active:scale-[0.98] touch-target sm:col-span-2">
+              <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0"><i data-lucide="database-backup" class="w-5 h-5 text-[#86efac]"></i></div>
+              <span class="font-semibold text-white">Respaldo masivo de usuarios</span>
+              <span class="text-xs text-white/50">Exportar / importar JSON (sin botón Guardar)</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="super-section-ajustes-contacto" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+          <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
+            <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
+            Volver a ajustes del sistema
+          </button>
+          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="phone" class="w-5 h-5 text-[#86efac]"></i> Contacto y seguridad</h2>
           <div class="space-y-4">
+            <p class="text-xs text-white/50 mb-2">Números de WhatsApp que verán los <strong class="text-white/65">administradores de red</strong> (socios) si su cuenta se desactiva o deben renovar o pagar. Los <strong class="text-white/65">negocios (kioscos)</strong> ven el teléfono que cargó su referidor en el perfil.</p>
+            <label class="block text-xs text-white/70 mb-1">Contacto 1 (WhatsApp)</label>
+            <input type="tel" id="adminContactWhatsapp" placeholder="Ej. 5491112345678" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+            <label class="block text-xs text-white/70 mb-1">Contacto 2 (WhatsApp)</label>
+            <input type="tel" id="adminContactWhatsapp2" placeholder="Ej. 5491198765432 (opcional)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+            <label class="block text-xs text-white/70 mb-1">Contacto 3 (WhatsApp, opcional)</label>
+            <input type="tel" id="adminContactWhatsapp3" placeholder="Opcional" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+            <label class="block text-xs text-white/70 mb-1">Contacto 4 (WhatsApp, opcional)</label>
+            <input type="tel" id="adminContactWhatsapp4" placeholder="Opcional" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+            <label class="block text-xs text-white/70 mb-1 mt-2">Soporte · menú del perfil (Ayuda)</label>
+            <p class="text-[10px] text-white/45 mb-2">Número o WhatsApp que ven <strong class="text-white/60">todos los usuarios</strong> al abrir el círculo del avatar → <strong class="text-white/60">Ayuda</strong>.</p>
+            <input type="tel" id="adminSupportPhone" placeholder="Ej. 5491112345678" maxlength="80" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-400/60 text-base mb-3">
+            <label class="block text-xs text-white/70 mb-1">Contraseña para quitar usuarios (opcional)</label>
+            <input type="password" id="adminDeletePassword" placeholder="Al quitar un negocio se pedirá esta contraseña" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+            <button type="button" class="ferriol-save-admin-slice btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold" data-admin-slice="contacto">Guardar</button>
+            <p id="adminSliceMsg-contacto" class="text-xs mt-2 hidden"></p>
+          </div>
+        </div>
+
+        <div id="super-section-ajustes-transferencia" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+          <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
+            <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
+            Volver a ajustes del sistema
+          </button>
+          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 text-[#86efac]"></i> Datos de transferencia (Ferriol)</h2>
+          <p class="text-xs text-white/50 mb-3">Los kiosqueros ven estos datos solo como <strong class="text-white/70">instrucciones de pago de la empresa (Ferriol)</strong>. Los datos bancarios personales del socio <strong class="text-white/70">no se muestran</strong> al negocio referido.</p>
+          <textarea id="adminTransferInfo" rows="8" placeholder="Titular, CBU, alias, instrucciones..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm resize-y mb-4"></textarea>
+          <button type="button" class="ferriol-save-admin-slice btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold" data-admin-slice="transferencia">Guardar</button>
+          <p id="adminSliceMsg-transferencia" class="text-xs mt-2 hidden"></p>
+        </div>
+
+        <div id="super-section-ajustes-mercadopago" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+          <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
+            <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
+            Volver a ajustes del sistema
+          </button>
+          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="link-2" class="w-5 h-5 text-sky-300"></i> Links Mercado Pago</h2>
+          <div id="ferriolMercadoPagoCheckoutSettings" class="rounded-xl border border-sky-400/45 bg-sky-950/25 ring-1 ring-sky-400/20 p-3 sm:p-4 scroll-mt-28">
+            <p class="text-xs text-white/65 mb-3 leading-relaxed">Los links se muestran en <strong class="text-white/75">Plan</strong>, modal de transferencia y <strong class="text-white/75">«Quiero ser distribuidor»</strong> según corresponda.</p>
+            <label class="block text-xs font-medium text-white/85 mb-1" for="adminMercadoPagoCheckoutUrlKit">Kit distribuidor (venta inicial)</label>
+            <input type="url" id="adminMercadoPagoCheckoutUrlKit" name="mercadopago_checkout_url_kit" inputmode="url" autocomplete="off" placeholder="https://www.mercadopago.com.ar/..." class="w-full glass rounded-xl px-4 py-3 border border-sky-400/35 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-400/60 text-sm mb-3 font-mono">
+            <label class="block text-xs font-medium text-white/85 mb-1" for="adminMercadoPagoCheckoutUrlKiosco">Suscripción mensual · negocio (kiosco)</label>
+            <input type="url" id="adminMercadoPagoCheckoutUrlKiosco" name="mercadopago_checkout_url_kiosco" inputmode="url" autocomplete="off" placeholder="https://www.mercadopago.com.ar/..." class="w-full glass rounded-xl px-4 py-3 border border-sky-400/35 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-400/60 text-sm mb-3 font-mono">
+            <label class="block text-xs font-medium text-white/85 mb-1" for="adminMercadoPagoCheckoutUrlVendor">Cuota mensual · distribuidor (socio / red)</label>
+            <input type="url" id="adminMercadoPagoCheckoutUrlVendor" name="mercadopago_checkout_url_vendor" inputmode="url" autocomplete="off" placeholder="https://www.mercadopago.com.ar/..." class="w-full glass rounded-xl px-4 py-3 border border-sky-400/35 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-400/60 text-sm mb-2 font-mono">
+            <p class="text-[10px] text-white/45 mb-3">Vacío = sin botón MP en esa pantalla.</p>
+            <button type="button" class="ferriol-save-admin-slice btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold" data-admin-slice="mercadopago">Guardar</button>
+            <p id="adminSliceMsg-mercadopago" class="text-xs mt-2 hidden"></p>
+          </div>
+        </div>
+
+        <div id="super-section-ajustes-trial" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+          <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
+            <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
+            Volver a ajustes del sistema
+          </button>
+          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="calendar-clock" class="w-5 h-5 text-cyan-300"></i> Período de prueba</h2>
+          <p class="text-xs text-white/50 mb-3">Solo afecta <strong class="text-white/75">nuevos</strong> registros (kiosco o socio).</p>
+          <label class="block text-xs text-white/70 mb-1">Duración en días (1–365)</label>
+          <input type="number" id="adminTrialDurationDays" min="1" max="365" value="15" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-4">
+          <button type="button" class="ferriol-save-admin-slice btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold" data-admin-slice="trial">Guardar</button>
+          <p id="adminSliceMsg-trial" class="text-xs mt-2 hidden"></p>
+        </div>
+
+        <div id="super-section-ajustes-kit" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+          <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
+            <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
+            Volver a ajustes del sistema
+          </button>
+          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="package-check" class="w-5 h-5 text-amber-300"></i> Aprobación del kit inicial</h2>
+          <p class="text-xs text-white/50 mb-3">Aviso en el avatar del socio durante la ventana configurada.</p>
+          <label class="block text-xs text-white/70 mb-1">Ventana en horas (1–168)</label>
+          <input type="number" id="adminPartnerKitReviewHours" min="1" max="168" value="24" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-amber-400/70 text-base mb-3 tabular-nums">
+          <label class="block text-xs text-white/70 mb-1">Texto del aviso</label>
+          <textarea id="adminPartnerKitReviewMessage" rows="4" maxlength="600" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-4 placeholder-white/35" placeholder="Estás en período de aprobación…"></textarea>
+          <button type="button" class="ferriol-save-admin-slice btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold" data-admin-slice="kit">Guardar</button>
+          <p id="adminSliceMsg-kit" class="text-xs mt-2 hidden"></p>
+        </div>
+
+        <div id="super-section-ajustes-comisiones" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+          <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
+            <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
+            Volver a ajustes del sistema
+          </button>
+          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="percent" class="w-5 h-5 text-[#86efac]"></i> Comisiones a administradores</h2>
+          <p class="text-xs text-white/50 mb-3">Sobre el monto bruto verificado en Cobros.</p>
+          <label class="block text-xs text-white/70 mb-1">Meses de período inicial (0 = solo comisión normal)</label>
+          <input type="number" id="adminPartnerIntroMonths" min="0" max="36" value="1" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
             <div>
-              <p class="text-xs text-white/50 mb-2">Números de WhatsApp que verán los <strong class="text-white/65">administradores de red</strong> (socios) si su cuenta se desactiva o deben renovar o pagar. Los <strong class="text-white/65">negocios (kioscos)</strong> ven el teléfono que cargó su referidor en el perfil.</p>
-              <label class="block text-xs text-white/70 mb-1">Contacto 1 (WhatsApp)</label>
-              <input type="tel" id="adminContactWhatsapp" placeholder="Ej. 5491112345678" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
-              <label class="block text-xs text-white/70 mb-1">Contacto 2 (WhatsApp)</label>
-              <input type="tel" id="adminContactWhatsapp2" placeholder="Ej. 5491198765432 (opcional)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
-              <label class="block text-xs text-white/70 mb-1">Contacto 3 (WhatsApp, opcional)</label>
-              <input type="tel" id="adminContactWhatsapp3" placeholder="Opcional" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
-              <label class="block text-xs text-white/70 mb-1">Contacto 4 (WhatsApp, opcional)</label>
-              <input type="tel" id="adminContactWhatsapp4" placeholder="Opcional" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
-              <label class="block text-xs text-white/70 mb-1 mt-2">Soporte · menú del perfil (Ayuda)</label>
-              <p class="text-[10px] text-white/45 mb-2">Número o WhatsApp que ven <strong class="text-white/60">todos los usuarios</strong> al abrir el círculo del avatar → <strong class="text-white/60">Ayuda</strong>. Tocar abre WhatsApp si hay dígitos suficientes; vacío = no se muestra el botón.</p>
-              <input type="tel" id="adminSupportPhone" placeholder="Ej. 5491112345678" maxlength="80" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-400/60 text-base mb-0">
-              <p class="text-[10px] text-white/38 mt-1 mb-0">Clave Supabase <code class="text-white/55">ferriol_support_phone</code> · guardar con <strong class="text-white/55">Guardar ajustes</strong>.</p>
+              <label class="block text-xs text-white/70 mb-1">% administrador (período inicial)</label>
+              <input type="number" id="adminPartnerPctIntro" min="0" max="100" step="0.5" value="80" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white text-base">
+              <p class="text-[10px] text-white/40 mt-1">Empresa: <span id="adminCompanyPctIntroLabel">20</span>%</p>
             </div>
             <div>
-              <label class="block text-xs text-white/70 mb-1">Contraseña para quitar usuarios (opcional)</label>
-              <input type="password" id="adminDeletePassword" placeholder="Al quitar un negocio se pedirá esta contraseña" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
-            </div>
-            <div class="border-t border-white/10 pt-4 mt-4">
-              <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
-                <i data-lucide="landmark" class="w-4 h-4 text-[#86efac]"></i>
-                Datos de transferencia (suscripción mensual kioscos / socios)
-              </h3>
-              <p class="text-xs text-white/50 mb-2">Los kiosqueros ven estos datos solo como <strong class="text-white/70">instrucciones de pago de la empresa (Ferriol)</strong> donde corresponde abonar la suscripción mensual según política oficial. Los datos bancarios personales que el socio cargue en su cuenta <strong class="text-white/70">no se muestran</strong> al negocio referido.</p>
-              <textarea id="adminTransferInfo" rows="5" placeholder="Titular, CBU, alias, instrucciones..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm resize-y mb-2"></textarea>
-            </div>
-            <div id="ferriolMercadoPagoCheckoutSettings" class="rounded-xl border border-sky-400/45 bg-sky-950/25 ring-1 ring-sky-400/20 p-3 sm:p-4 mt-4 scroll-mt-28 super-only super-main-only">
-              <p class="text-[10px] font-semibold uppercase tracking-wider text-sky-200/90 mb-2">Solo fundador (vista empresa)</p>
-              <h3 class="font-bold mb-2 flex flex-wrap items-center gap-2 text-base sm:text-lg text-white leading-snug">
-                <i data-lucide="link-2" class="w-5 h-5 text-sky-300 shrink-0"></i>
-                Link Mercado Pago (tarjeta / efectivo / MP)
-              </h3>
-              <p class="text-xs text-white/65 mb-3 leading-relaxed"><strong class="text-white/90">Dónde estás:</strong> pestaña inferior <strong class="text-[#86efac]">Más</strong> → <strong class="text-[#86efac]">Ajustes del sistema</strong> (entrá por el menú de opciones). Si <strong class="text-amber-200/95">no ves este recuadro azul</strong>, no estás como fundador en vista <strong class="text-white/90">Empresa</strong>: tocá el modo en el encabezado y pasá a esa vista (no «negocio» ni modo socio).</p>
-              <p class="text-xs text-white/50 mb-3">Los links se muestran donde corresponde cada producto: <strong class="text-white/75">Plan</strong> (suscripción o cuota según cuenta), <strong class="text-white/75">modal de datos bancarios</strong> al abrir transferencia, y en <strong class="text-white/75">«Quiero ser distribuidor»</strong> para el kit.</p>
-              <label class="block text-xs font-medium text-white/85 mb-1" for="adminMercadoPagoCheckoutUrlKit">Kit distribuidor (venta inicial)</label>
-              <input type="url" id="adminMercadoPagoCheckoutUrlKit" name="mercadopago_checkout_url_kit" inputmode="url" autocomplete="off" placeholder="https://www.mercadopago.com.ar/..." class="w-full glass rounded-xl px-4 py-3 border border-sky-400/35 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-400/60 text-sm mb-3 font-mono">
-              <label class="block text-xs font-medium text-white/85 mb-1" for="adminMercadoPagoCheckoutUrlKiosco">Suscripción mensual · negocio (kiosco)</label>
-              <input type="url" id="adminMercadoPagoCheckoutUrlKiosco" name="mercadopago_checkout_url_kiosco" inputmode="url" autocomplete="off" placeholder="https://www.mercadopago.com.ar/..." class="w-full glass rounded-xl px-4 py-3 border border-sky-400/35 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-400/60 text-sm mb-3 font-mono">
-              <label class="block text-xs font-medium text-white/85 mb-1" for="adminMercadoPagoCheckoutUrlVendor">Cuota mensual · distribuidor (socio / red)</label>
-              <input type="url" id="adminMercadoPagoCheckoutUrlVendor" name="mercadopago_checkout_url_vendor" inputmode="url" autocomplete="off" placeholder="https://www.mercadopago.com.ar/..." class="w-full glass rounded-xl px-4 py-3 border border-sky-400/35 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-400/60 text-sm mb-2 font-mono">
-              <p class="text-[10px] text-white/45 mb-0">Al final tocá <strong class="text-[#86efac]">Guardar ajustes</strong>. Un campo vacío desactiva el botón Mercado Pago solo en la pantalla que use ese producto.</p>
-            </div>
-            <div class="border-t border-white/10 pt-4 mt-4">
-              <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
-                <i data-lucide="calendar-clock" class="w-4 h-4 text-cyan-300"></i>
-                Período de prueba (estrategia)
-              </h3>
-              <p class="text-xs text-white/50 mb-2">Días de prueba al registrarse un <strong class="text-white/75">kiosco</strong> o <strong class="text-white/75">socio</strong>. Solo afecta <strong class="text-white/75">nuevos</strong> registros; no modifica cuentas existentes.</p>
-              <label class="block text-xs text-white/70 mb-1">Duración en días (1–365)</label>
-              <input type="number" id="adminTrialDurationDays" min="1" max="365" value="15" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-2">
-            </div>
-            <div class="border-t border-white/10 pt-4 mt-4 super-only super-main-only">
-              <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
-                <i data-lucide="package-check" class="w-4 h-4 text-amber-300"></i>
-                Aprobación del kit inicial (distribuidores)
-              </h3>
-              <p class="text-xs text-white/50 mb-2">Al <strong class="text-white/70">crear</strong> una cuenta socio o al <strong class="text-white/70">aprobar un upgrade</strong> desde negocio, el perfil muestra un aviso en el círculo del avatar durante estas horas (ej. 12–24&nbsp;h). La cuenta funciona con normalidad; cuando confirmás el cobro del kit en el detalle del usuario podés quitar el aviso antes del plazo.</p>
-              <label class="block text-xs text-white/70 mb-1">Ventana en horas (1–168)</label>
-              <input type="number" id="adminPartnerKitReviewHours" min="1" max="168" value="24" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-amber-400/70 text-base mb-2 tabular-nums">
-              <label class="block text-xs text-white/70 mb-1">Texto del aviso (tooltip y menú cuenta)</label>
-              <textarea id="adminPartnerKitReviewMessage" rows="3" maxlength="600" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-1 placeholder-white/35" placeholder="Estás en período de aprobación. Esto puede tardar entre 12hs y 24hs hábiles."></textarea>
-              <p class="text-[10px] text-white/40 mb-0">Se guarda con <strong class="text-white/55">Guardar ajustes</strong> · claves <code class="text-white/55">partner_kit_review_hours</code> y <code class="text-white/55">partner_kit_review_message</code>.</p>
-            </div>
-            <div class="border-t border-white/10 pt-4 mt-4 super-only super-main-only">
-              <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
-                <i data-lucide="percent" class="w-4 h-4 text-[#86efac]"></i>
-                Comisiones a administradores (kit y suscripción mensual kiosco)
-              </h3>
-              <p class="text-xs text-white/50 mb-3">Desde el alta del socio (<code class="text-white/60">network_joined_at</code> o fecha de cuenta) podés definir un <strong class="text-white/70">período inicial</strong> con un % mayor para el vendedor; después aplica la comisión normal. Los porcentajes son sobre el <strong class="text-white/70">monto bruto</strong> que verificás en Cobros.</p>
-              <label class="block text-xs text-white/70 mb-1">Meses de período inicial (0 = solo comisión normal)</label>
-              <input type="number" id="adminPartnerIntroMonths" min="0" max="36" value="1" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
-                <div>
-                  <label class="block text-xs text-white/70 mb-1">% administrador (período inicial)</label>
-                  <input type="number" id="adminPartnerPctIntro" min="0" max="100" step="0.5" value="80" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white text-base">
-                  <p class="text-[10px] text-white/40 mt-1">Empresa: <span id="adminCompanyPctIntroLabel">20</span>%</p>
-                </div>
-                <div>
-                  <label class="block text-xs text-white/70 mb-1">% administrador (comisión normal)</label>
-                  <input type="number" id="adminPartnerPctNormal" min="0" max="100" step="0.5" value="50" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white text-base">
-                  <p class="text-[10px] text-white/40 mt-1">Empresa: <span id="adminCompanyPctNormalLabel">50</span>%</p>
-                </div>
-              </div>
-            </div>
-            <div class="border-t border-white/10 pt-4 mt-4">
-              <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
-                <i data-lucide="bell-ring" class="w-4 h-4 text-amber-300"></i>
-                Avisos de renovación (prueba)
-              </h3>
-              <p class="text-xs text-white/50 mb-3">Cada kiosquero verá en la campana un aviso por cada día que le quede dentro de la ventana (ej. “quedan 5… 4… 3… días”). Podés editar el texto de cada día. Placeholders: <span class="text-white/70">{dias}</span>, <span class="text-white/70">{nombre}</span> (nombre del negocio).</p>
-              <label class="block text-xs text-white/70 mb-1">Días antes del vencimiento para avisar (1–30)</label>
-              <input type="number" id="trialReminderWindowDays" min="1" max="30" value="5" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
-              <div id="trialReminderMsgsContainer" class="space-y-1 max-h-[40vh] overflow-y-auto pr-1"></div>
-            </div>
-            <div class="border-t border-white/10 pt-4 mt-4 super-only super-main-only">
-              <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
-                <i data-lucide="coins" class="w-4 h-4 text-emerald-300"></i>
-                Precios de referencia (ARS · sin centavos)
-              </h3>
-              <p class="text-xs text-white/50 mb-3">Montos orientativos que usa la app en <strong class="text-white/70">Cuenta → Mi plan</strong>, texto del kit inicial y formularios de cobros según política empresa. Son <strong class="text-white/70">enteros en pesos</strong>; al guardar, kioscos y socios ven el cambio tras recargar o al abrir Mi plan.</p>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-2">
-                <div>
-                  <label class="block text-xs text-white/70 mb-1">Kit distribuidor (venta inicial)</label>
-                  <input type="number" id="adminPlanAmountKit" min="0" step="1" value="60000" placeholder="60000" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-base tabular-nums">
-                </div>
-                <div>
-                  <label class="block text-xs text-white/70 mb-1">Suscripción mensual · negocio (kiosco)</label>
-                  <input type="number" id="adminPlanAmountKioscoMonthly" min="0" step="1" value="9900" placeholder="9900" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-base tabular-nums">
-                </div>
-                <div>
-                  <label class="block text-xs text-white/70 mb-1">Cuota mensual distribuidor</label>
-                  <input type="number" id="adminPlanAmountVendorMonthly" min="0" step="1" value="20000" placeholder="20000" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-base tabular-nums">
-                </div>
-              </div>
-              <p class="text-[10px] text-white/40 mb-0">Se guarda con <strong class="text-white/55">Guardar ajustes</strong> · <code class="text-white/55">app_settings.ferriol_plan_amounts</code> (JSON: kit, kioscoMonthly, vendorMonthly).</p>
-            </div>
-            <div class="border-t border-white/10 pt-4 mt-4 super-only super-main-only">
-              <h3 class="font-semibold mb-1 flex items-center gap-2 text-sm text-white/90">
-                <i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i>
-                Textos de cierre (pago · suscripción mensual · distribuidor)
-              </h3>
-              <p class="text-xs text-white/50 mb-3">Los kioscos y socios ven estas listas en <strong class="text-white/70">Cuenta → Mi plan</strong>. Para <strong class="text-violet-200/90">«Quiero ser distribuidor»</strong>: encabezado, título, precio grande (usa el monto <strong class="text-white/70">Kit</strong>), beneficios y métodos de pago iguales al resto de cierres. <strong>Una línea = un beneficio</strong>; vacíos = valores por defecto.</p>
-              <label class="block text-xs text-white/70 mb-1">Encabezado · pantalla distribuidor (ej. KIT + LICENCIA DE DISTRIBUIDOR)</label>
-              <input type="text" id="adminCheckoutDistribEyebrow" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-3 font-mono" placeholder="KIT + LICENCIA DE DISTRIBUIDOR" maxlength="140">
-              <label class="block text-xs text-white/70 mb-1">Titular promocional · pantalla distribuidor</label>
-              <input type="text" id="adminCheckoutDistribSalesHeadline" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-3" placeholder="Hacete distribuidor del sistema y ganá hasta el 50% mensual" maxlength="220">
-              <label class="block text-xs text-white/70 mb-1">Título sección beneficios · pantalla distribuidor</label>
-              <input type="text" id="adminCheckoutDistribBeneficiosTitle" placeholder="Beneficios" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-3" maxlength="80">
-              <hr class="border-white/15 my-4">
-              <p class="text-xs text-emerald-200/90 font-semibold mb-2 uppercase tracking-wide">Plan · cerrar suscripción mensual (negocio)</p>
-              <label class="block text-xs text-white/70 mb-1">Encabezado</label>
-              <input type="text" id="adminCheckoutPayKioscoEyebrow" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-2 font-mono" maxlength="140">
-              <label class="block text-xs text-white/70 mb-1">Titular</label>
-              <input type="text" id="adminCheckoutPayKioscoHeadline" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-2">
-              <label class="block text-xs text-white/70 mb-1">Texto opcional entre titular y precio</label>
-              <textarea id="adminCheckoutPayKioscoLead" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2"></textarea>
-              <label class="block text-xs text-white/70 mb-1">Título primer bloque de beneficios</label>
-              <input type="text" id="adminCheckoutPayKioscoBenefitsTitle" placeholder="Beneficios incluidos con tu suscripción" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-2" maxlength="120">
-              <label class="block text-xs text-white/70 mb-1">Título segundo bloque (propuesta valor)</label>
-              <input type="text" id="adminCheckoutPayKioscoProductsTitle" placeholder="Propuesta Ferriol" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-3" maxlength="120">
-              <hr class="border-white/15 my-4">
-              <p class="text-xs text-cyan-200/90 font-semibold mb-2 uppercase tracking-wide">Plan · cerrar cuota mensual (distribuidor)</p>
-              <label class="block text-xs text-white/70 mb-1">Encabezado</label>
-              <input type="text" id="adminCheckoutPayAdminEyebrow" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-2 font-mono" maxlength="140">
-              <label class="block text-xs text-white/70 mb-1">Titular</label>
-              <input type="text" id="adminCheckoutPayAdminHeadline" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-2">
-              <label class="block text-xs text-white/70 mb-1">Texto opcional</label>
-              <textarea id="adminCheckoutPayAdminLead" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2"></textarea>
-              <label class="block text-xs text-white/70 mb-1">Título primer bloque de beneficios</label>
-              <input type="text" id="adminCheckoutPayAdminBenefitsTitle" placeholder="Beneficios de esta cuota" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-2" maxlength="120">
-              <label class="block text-xs text-white/70 mb-1">Título segundo bloque</label>
-              <input type="text" id="adminCheckoutPayAdminProductsTitle" placeholder="Propuesta Ferriol" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-3" maxlength="120">
-              <label class="block text-xs text-white/70 mb-1">Beneficios · pantalla pagar como kiosco (negocio)</label>
-              <textarea id="adminCheckoutCopyKiosco" rows="5" placeholder="Ej. Tu caja y stock ordenados todos los días&#10;Soporte oficial Ferriol" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm resize-y mb-3 font-mono"></textarea>
-              <label class="block text-xs text-white/70 mb-1">Beneficios · pantalla cuota distribuidor (fundador / socio)</label>
-              <textarea id="adminCheckoutCopyAdmin" rows="5" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm resize-y mb-3 font-mono"></textarea>
-              <label class="block text-xs text-white/70 mb-1">Beneficios · «Quiero ser distribuidor» (resumen)</label>
-              <textarea id="adminCheckoutCopyDistrib" rows="5" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm resize-y mb-3 font-mono"></textarea>
-              <label class="block text-xs text-white/70 mb-1">Suscripción mensual · propuesta Ferriol / valor (se muestra en kiosco y cuota distribuidor)</label>
-              <textarea id="adminCheckoutCopyProducts" rows="4" placeholder="Ej. Sistema pensado para kioscos de barrio&#10;Suscripción mensual clara&#10;Acompañamiento por WhatsApp empresa" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm resize-y mb-3 font-mono"></textarea>
-              <label class="block text-xs text-white/70 mb-1">Párrafo opcional · pantalla «Quiero ser distribuidor» (entre título y precio)</label>
-              <textarea id="adminCheckoutCopyDistribIntro" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-3"></textarea>
-              <label class="block text-xs text-white/70 mb-1">Texto modal · datos bancarios (kit + licencia)</label>
-              <textarea id="adminCheckoutModalDistribKit" rows="3" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm resize-y mb-2 font-mono" placeholder="Ej. Abonás kit + licencia solo a cuenta Ferriol. Copiás CBU, transferís…"></textarea>
-              <p class="text-[10px] text-white/38 mb-2">Vacío = texto corto por defecto en la app.</p>
-              <label class="block text-xs text-white/70 mb-1">Frase extra · modal datos bancarios (kiosco)</label>
-              <input type="text" id="adminCheckoutCopyModalKiosco" placeholder="Ej. Copiás, transferís, mandás comprobante — listo." class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-2">
-              <label class="block text-xs text-white/70 mb-1">Frase extra · modal datos bancarios (cuota distribuidor)</label>
-              <input type="text" id="adminCheckoutCopyModalAdmin" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm mb-1">
-              <p class="text-[10px] text-white/40 mb-0">Todo se guarda con el botón <strong class="text-white/55">Guardar ajustes</strong> · clave Supabase <code class="text-white/55">app_settings.ferriol_checkout_copy</code>.</p>
-            </div>
-            <button type="button" id="saveAdminContact" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold">Guardar ajustes</button>
-            <p id="adminContactMsg" class="text-xs mt-2 text-green-300 hidden"></p>
-            <div class="border-t border-white/10 pt-4 mt-6">
-              <h3 class="font-semibold mb-2 flex items-center gap-2 text-sm text-white/90">
-                <i data-lucide="database-backup" class="w-4 h-4 text-[#86efac]"></i> Respaldo de todos los usuarios
-              </h3>
-              <p class="text-xs text-white/50 mb-3">Exportá una copia o importá para complementar: al importar se suman los datos del archivo a lo que ya tiene cada usuario (no se reemplaza nada).</p>
-              <div class="flex flex-wrap gap-2 mb-2">
-                <button type="button" id="btnExportAllUsersBackup" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold flex items-center gap-2 touch-target">
-                  <i data-lucide="download" class="w-4 h-4"></i> Exportar copia
-                </button>
-                <label class="btn-neomorphic rounded-xl py-2.5 px-4 text-sm font-semibold flex items-center gap-2 touch-target cursor-pointer">
-                  <i data-lucide="upload" class="w-4 h-4"></i> Importar copia
-                  <input type="file" id="inputImportAllUsersBackup" accept=".json,application/json" class="hidden">
-                </label>
-              </div>
-              <p id="adminBackupAllMsg" class="text-xs mt-2 hidden"></p>
+              <label class="block text-xs text-white/70 mb-1">% administrador (comisión normal)</label>
+              <input type="number" id="adminPartnerPctNormal" min="0" max="100" step="0.5" value="50" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white text-base">
+              <p class="text-[10px] text-white/40 mt-1">Empresa: <span id="adminCompanyPctNormalLabel">50</span>%</p>
             </div>
           </div>
+          <button type="button" class="ferriol-save-admin-slice btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold" data-admin-slice="comisiones">Guardar</button>
+          <p id="adminSliceMsg-comisiones" class="text-xs mt-2 hidden"></p>
+        </div>
+
+        <div id="super-section-ajustes-renovacion" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+          <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
+            <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
+            Volver a ajustes del sistema
+          </button>
+          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="bell-ring" class="w-5 h-5 text-amber-300"></i> Avisos de renovación (prueba)</h2>
+          <p class="text-xs text-white/50 mb-3">Placeholders: <span class="text-white/70">{dias}</span>, <span class="text-white/70">{nombre}</span>.</p>
+          <label class="block text-xs text-white/70 mb-1">Días antes del vencimiento para avisar (1–30)</label>
+          <input type="number" id="trialReminderWindowDays" min="1" max="30" value="5" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+          <div id="trialReminderMsgsContainer" class="space-y-1 max-h-[40vh] overflow-y-auto pr-1 mb-4"></div>
+          <button type="button" class="ferriol-save-admin-slice btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold" data-admin-slice="renovacion">Guardar</button>
+          <p id="adminSliceMsg-renovacion" class="text-xs mt-2 hidden"></p>
+        </div>
+
+        <div id="super-section-ajustes-precios" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+          <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
+            <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
+            Volver a ajustes del sistema
+          </button>
+          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="coins" class="w-5 h-5 text-emerald-300"></i> Precios de referencia (ARS)</h2>
+          <p class="text-xs text-white/50 mb-3">Enteros en pesos · <code class="text-white/55">app_settings.ferriol_plan_amounts</code></p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            <div>
+              <label class="block text-xs text-white/70 mb-1">Kit distribuidor</label>
+              <input type="number" id="adminPlanAmountKit" min="0" step="1" value="60000" placeholder="60000" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-base tabular-nums">
+            </div>
+            <div>
+              <label class="block text-xs text-white/70 mb-1">Suscripción mensual · kiosco</label>
+              <input type="number" id="adminPlanAmountKioscoMonthly" min="0" step="1" value="9900" placeholder="9900" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-base tabular-nums">
+            </div>
+            <div>
+              <label class="block text-xs text-white/70 mb-1">Cuota mensual distribuidor</label>
+              <input type="number" id="adminPlanAmountVendorMonthly" min="0" step="1" value="20000" placeholder="20000" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-base tabular-nums">
+            </div>
+          </div>
+          <button type="button" class="ferriol-save-admin-slice btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold" data-admin-slice="precios">Guardar</button>
+          <p id="adminSliceMsg-precios" class="text-xs mt-2 hidden"></p>
+        </div>
+
+        <div id="super-section-ajustes-checkout" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+          <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
+            <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
+            Volver a ajustes del sistema
+          </button>
+          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-amber-300"></i> Textos Mi plan / checkout</h2>
+          <p class="text-xs text-white/50 mb-3">Una línea = un beneficio donde aplique. <code class="text-white/55">ferriol_checkout_copy</code></p>
+          <div class="space-y-3 max-w-3xl">
+            <label class="block text-xs text-white/70 mb-1">Encabezado · pantalla distribuidor</label>
+            <input type="text" id="adminCheckoutDistribEyebrow" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm font-mono" placeholder="KIT + LICENCIA DE DISTRIBUIDOR" maxlength="140">
+            <label class="block text-xs text-white/70 mb-1">Titular promocional · distribuidor</label>
+            <input type="text" id="adminCheckoutDistribSalesHeadline" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm" maxlength="220">
+            <label class="block text-xs text-white/70 mb-1">Título beneficios · distribuidor</label>
+            <input type="text" id="adminCheckoutDistribBeneficiosTitle" placeholder="Beneficios" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm" maxlength="80">
+            <hr class="border-white/15 my-3">
+            <p class="text-xs text-emerald-200/90 font-semibold uppercase">Plan · suscripción mensual (negocio)</p>
+            <input type="text" id="adminCheckoutPayKioscoEyebrow" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2 font-mono" maxlength="140" placeholder="Encabezado">
+            <input type="text" id="adminCheckoutPayKioscoHeadline" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2" placeholder="Titular">
+            <textarea id="adminCheckoutPayKioscoLead" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2" placeholder="Texto opcional"></textarea>
+            <input type="text" id="adminCheckoutPayKioscoBenefitsTitle" placeholder="Título beneficios" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2" maxlength="120">
+            <input type="text" id="adminCheckoutPayKioscoProductsTitle" placeholder="Título propuesta valor" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2" maxlength="120">
+            <hr class="border-white/15 my-3">
+            <p class="text-xs text-cyan-200/90 font-semibold uppercase">Plan · cuota distribuidor</p>
+            <input type="text" id="adminCheckoutPayAdminEyebrow" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2 font-mono" maxlength="140">
+            <input type="text" id="adminCheckoutPayAdminHeadline" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2">
+            <textarea id="adminCheckoutPayAdminLead" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2"></textarea>
+            <input type="text" id="adminCheckoutPayAdminBenefitsTitle" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2" maxlength="120">
+            <input type="text" id="adminCheckoutPayAdminProductsTitle" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2" maxlength="120">
+            <label class="block text-xs text-white/70 mb-1">Beneficios · kiosco</label>
+            <textarea id="adminCheckoutCopyKiosco" rows="4" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2 font-mono"></textarea>
+            <label class="block text-xs text-white/70 mb-1">Beneficios · cuota distribuidor</label>
+            <textarea id="adminCheckoutCopyAdmin" rows="4" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2 font-mono"></textarea>
+            <label class="block text-xs text-white/70 mb-1">Beneficios · «Quiero ser distribuidor»</label>
+            <textarea id="adminCheckoutCopyDistrib" rows="4" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2 font-mono"></textarea>
+            <label class="block text-xs text-white/70 mb-1">Propuesta Ferriol / valor</label>
+            <textarea id="adminCheckoutCopyProducts" rows="3" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2 font-mono"></textarea>
+            <label class="block text-xs text-white/70 mb-1">Párrafo opcional · «Quiero ser distribuidor»</label>
+            <textarea id="adminCheckoutCopyDistribIntro" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2"></textarea>
+            <label class="block text-xs text-white/70 mb-1">Modal datos bancarios (kit + licencia)</label>
+            <textarea id="adminCheckoutModalDistribKit" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2 font-mono"></textarea>
+            <input type="text" id="adminCheckoutCopyModalKiosco" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2" placeholder="Frase extra modal kiosco">
+            <input type="text" id="adminCheckoutCopyModalAdmin" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-4" placeholder="Frase extra modal distribuidor">
+            <button type="button" class="ferriol-save-admin-slice btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold" data-admin-slice="checkout">Guardar</button>
+            <p id="adminSliceMsg-checkout" class="text-xs mt-2 hidden"></p>
+          </div>
+        </div>
+
+        <div id="super-section-ajustes-respaldo" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+          <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
+            <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
+            Volver a ajustes del sistema
+          </button>
+          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="database-backup" class="w-5 h-5 text-[#86efac]"></i> Respaldo de todos los usuarios</h2>
+          <p class="text-xs text-white/50 mb-3">Exportá o importá JSON; al importar se complementan datos (no se borra lo existente).</p>
+          <div class="flex flex-wrap gap-2 mb-2">
+            <button type="button" id="btnExportAllUsersBackup" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold flex items-center gap-2 touch-target">
+              <i data-lucide="download" class="w-4 h-4"></i> Exportar copia
+            </button>
+            <label class="btn-neomorphic rounded-xl py-2.5 px-4 text-sm font-semibold flex items-center gap-2 touch-target cursor-pointer">
+              <i data-lucide="upload" class="w-4 h-4"></i> Importar copia
+              <input type="file" id="inputImportAllUsersBackup" accept=".json,application/json" class="hidden">
+            </label>
+          </div>
+          <p id="adminBackupAllMsg" class="text-xs mt-2 hidden"></p>
         </div>
         <!-- Sección Solicitudes: colas de acción + historial (fundador) -->
         <div id="super-section-solicitudes" class="super-section super-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; min-height: 100%; max-height: 85vh; padding-bottom: 6rem;">
@@ -3404,7 +3481,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260505_profile_ajustes_menu"></script>
+  <script defer src="kiosco-app.js?v=20260505_ajustes_sistema_slices"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>
