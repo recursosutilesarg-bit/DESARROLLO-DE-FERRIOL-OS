@@ -12548,22 +12548,34 @@ async function showApp() {
     (function () {
       var FLUJO_KEY = 'ferriol_flujo_edits_v1';
 
+      function sistemaDataTab(el) {
+        if (!el || !el.getAttribute) return '';
+        return String(el.getAttribute('data-sistema-tab') || '').trim();
+      }
+
       function sistemaSwitchTab(tabId) {
+        if (!tabId) return;
         document.querySelectorAll('.sistema-tab').forEach(function (btn) {
-          var active = btn.dataset.sistemaTab === tabId;
+          var active = sistemaDataTab(btn) === tabId;
           btn.className = 'sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border ' +
             (active ? 'border-[#22c55e]/50 bg-[#22c55e]/20 text-white' : 'border-transparent text-white/50 hover:text-white/75');
         });
         document.querySelectorAll('.mlm-board[data-sistema-tab]').forEach(function (el) {
-          el.classList.toggle('hidden', el.dataset.sistemaTab !== tabId);
+          el.classList.toggle('hidden', sistemaDataTab(el) !== tabId);
         });
         try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (_) {}
       }
       sistemaSwitchTab('flujo');
 
-      document.querySelectorAll('.sistema-tab').forEach(function (btn) {
-        btn.addEventListener('click', function () { sistemaSwitchTab(btn.dataset.sistemaTab); });
-      });
+      var sistemaTabBar = document.querySelector('#super-section-sistema [role="tablist"]');
+      function onSistemaTabBarClick(ev) {
+        var t = ev.target;
+        var btn = t && t.closest && t.closest('button.sistema-tab');
+        if (!btn || !sistemaTabBar || !sistemaTabBar.contains(btn)) return;
+        var id = sistemaDataTab(btn);
+        if (id) sistemaSwitchTab(id);
+      }
+      if (sistemaTabBar) sistemaTabBar.addEventListener('click', onSistemaTabBarClick);
 
       /* ── Textos del flujograma (solo lectura; opcional carga desde localStorage) ── */
       function flujoLoadEdits() {

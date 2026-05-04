@@ -35,7 +35,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-  <link rel="stylesheet" href="kiosco.css?v=20260504_chart_tip_click">
+  <link rel="stylesheet" href="kiosco.css?v=20260504_sistema_tabs_fix">
 </head>
 <body class="relative">
   <!-- Banner instalar como app (PWA) — visible al abrir el link -->
@@ -1481,7 +1481,7 @@
           </div>
 
           <!-- ── TABS: Flujograma / Estructura / Dinero / Notas ── -->
-          <div class="flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 mb-5 flex-wrap" role="tablist" aria-label="Secciones del tablero">
+          <div class="relative z-20 flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 mb-5 flex-wrap" role="tablist" aria-label="Secciones del tablero">
             <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-[#22c55e]/50 bg-[#22c55e]/20 text-white" data-sistema-tab="flujo">Proceso de venta</button>
             <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-sistema-tab="dinero">Dinero</button>
             <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-sistema-tab="estructura">Estructura MLM</button>
@@ -3246,7 +3246,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260426_partner_proof_inbox_modal"></script>
+  <script defer src="kiosco-app.js?v=20260504_sistema_tabs_fix"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>

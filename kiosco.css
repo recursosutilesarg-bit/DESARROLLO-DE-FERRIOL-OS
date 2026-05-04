@@ -2186,6 +2186,11 @@ select.ferriol-sponsor-select:-moz-focusring {
    TABLERO SISTEMA MLM  (super-section-sistema)
    ═══════════════════════════════════════════════════════════ */
 
+/* Clic llega al <button>; los íconos Lucide (svg) no deben «robar» el hit-test */
+#super-section-sistema .sistema-tab svg {
+  pointer-events: none;
+}
+
 /* ── Contenedor tipo "tablero" ── */
 .mlm-board {
   background: rgba(255,255,255,0.04);
