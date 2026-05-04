@@ -12549,77 +12549,11 @@ async function showApp() {
     })();
 
     /* ══════════════════════════════════════════════════════════
-       TABLERO SISTEMA: tabs + flujograma (solo lectura)
+       TABLERO SISTEMA: edición local del flujograma (solo lectura en UI).
+       Las pestañas Proceso/Dinero/Estructura/Notas: kiosco-sistema-mlm-tabs.js
        ══════════════════════════════════════════════════════════ */
     (function () {
       var FLUJO_KEY = 'ferriol_flujo_edits_v1';
-      var _stmLastId = '';
-      var _stmLastAt = 0;
-
-      function sistemaDataTab(el) {
-        if (!el || !el.getAttribute) return '';
-        return String(el.getAttribute('data-sistema-tab') || '').trim();
-      }
-
-      function sistemaSwitchTab(tabId) {
-        if (!tabId) return;
-        var now = Date.now();
-        if (tabId === _stmLastId && now - _stmLastAt < 100) return;
-        _stmLastId = tabId;
-        _stmLastAt = now;
-        var wrap = document.getElementById('super-section-sistema');
-        if (!wrap) return;
-        wrap.querySelectorAll('.sistema-tab').forEach(function (btn) {
-          var active = sistemaDataTab(btn) === tabId;
-          btn.className = 'sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border ' +
-            (active ? 'border-[#22c55e]/50 bg-[#22c55e]/20 text-white' : 'border-transparent text-white/50 hover:text-white/75');
-        });
-        wrap.querySelectorAll('.mlm-board[data-sistema-tab]').forEach(function (el) {
-          var show = sistemaDataTab(el) === tabId;
-          if (show) {
-            el.classList.remove('hidden');
-            el.style.removeProperty('display');
-            try { el.setAttribute('aria-hidden', 'false'); } catch (_) {}
-          } else {
-            el.classList.add('hidden');
-            el.style.setProperty('display', 'none', 'important');
-            try { el.setAttribute('aria-hidden', 'true'); } catch (_) {}
-          }
-        });
-        try { window._ferriolSistemaMlmActiveTab = tabId; } catch (_) {}
-        try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (_) {}
-      }
-      try {
-        window._ferriolSistemaSwitchTab = sistemaSwitchTab;
-      } catch (_) {}
-
-      sistemaSwitchTab('flujo');
-
-      function sistemaMlmTabsFromDelegatedEvent(ev) {
-        var tel = document.getElementById('sistemaMlmTabBar');
-        var t = ev.target;
-        if (!tel || !t || !t.closest) return false;
-        if (!tel.contains(t)) return false;
-        var btn = t.closest('button.sistema-tab');
-        if (!btn || !tel.contains(btn)) return false;
-        var id = sistemaDataTab(btn);
-        if (!id) return false;
-        sistemaSwitchTab(id);
-        return true;
-      }
-      document.addEventListener('click', function (ev) {
-        sistemaMlmTabsFromDelegatedEvent(ev);
-      }, true);
-      document.addEventListener(
-        'pointerdown',
-        function (ev) {
-          if (!(ev.pointerType === 'touch' || ev.pointerType === 'pen')) return;
-          if (sistemaMlmTabsFromDelegatedEvent(ev)) {
-            try { ev.preventDefault(); } catch (_) {}
-          }
-        },
-        true
-      );
 
       /* ── Textos del flujograma (solo lectura; opcional carga desde localStorage) ── */
       function flujoLoadEdits() {
