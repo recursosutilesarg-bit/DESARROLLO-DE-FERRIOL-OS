@@ -2350,6 +2350,9 @@
         if (show) {
           pane.classList.remove('hidden');
           pane.style.removeProperty('display');
+          if (pane.classList.contains('super-only')) {
+            pane.style.display = pane.tagName === 'BUTTON' ? 'inline-flex' : 'block';
+          }
         } else {
           pane.classList.add('hidden');
           pane.style.setProperty('display', 'none', 'important');
