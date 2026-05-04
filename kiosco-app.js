@@ -11888,7 +11888,6 @@ async function showApp() {
       }
       e.target.value = '';
     };
-    }
 
     document.querySelectorAll('.super-filter-btn').forEach(function (btn) {
       btn.onclick = function () {
