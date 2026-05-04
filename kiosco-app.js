@@ -2174,7 +2174,6 @@
       var box = document.getElementById('founderWithdrawalReviewBox');
       var list = document.getElementById('founderWithdrawalReviewList');
       if (!box || !list || !supabaseClient || !isEmpresaLensSuper()) return;
-      box.classList.remove('hidden');
       list.innerHTML = '<p class="text-white/45 text-xs py-2">Cargando…</p>';
       try {
         var r = await supabaseClient.from('ferriol_partner_withdrawal_requests').select('*').eq('status', 'pending_review').order('created_at', { ascending: true }).limit(50);
@@ -2296,13 +2295,14 @@
         var epIn0 = document.getElementById('superEmpresaPaymentProofList');
         if (epIn0) epIn0.innerHTML = '';
         if (epBx0) epBx0.classList.add('hidden');
+        syncFounderSolicitudesTabShell();
+        syncPartnerSolicitudesTabShell();
         return;
       }
       if (isPartnerLens() && !isEmpresaLensSuper()) {
         void loadPartnerBilleteraSection();
       }
       if (isEmpresaLensSuper() && clWrap) {
-        clWrap.classList.remove('hidden');
         await loadFounderClientSaleRequestsPanel();
       } else {
         if (clBox) clBox.innerHTML = '';
@@ -2311,18 +2311,138 @@
       var epBox = document.getElementById('superEmpresaPaymentProofBox');
       var epInner = document.getElementById('superEmpresaPaymentProofList');
       if (isEmpresaLensSuper()) {
-        if (epBox) epBox.classList.remove('hidden');
         await loadFounderEmpresaPaymentProofPanel();
       } else {
         if (epInner) epInner.innerHTML = '';
         if (epBox) epBox.classList.add('hidden');
       }
       if (!isEmpresaLensSuper()) {
+        syncFounderSolicitudesTabShell();
+        syncPartnerSolicitudesTabShell();
         return;
       }
       void loadFounderWithdrawalReviewList();
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+      syncFounderSolicitudesTabShell();
+      syncPartnerSolicitudesTabShell();
     }
+    function switchFounderSolicitudesTab(tabId) {
+      var valid = { retiros: 1, ventas: 1, empresa: 1, aprobaciones: 1 };
+      var bar = document.getElementById('founderSolicitudesTabBar');
+      if (!bar || !valid[tabId]) return;
+      try { sessionStorage.setItem('ferriol_founder_solic_tab', tabId); } catch (_) {}
+      bar.querySelectorAll('.founder-solic-tab').forEach(function (btn) {
+        var on = btn.getAttribute('data-solicitud-tab') === tabId;
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+        if (on) {
+          btn.style.border = '1px solid rgba(34, 197, 94, 0.55)';
+          btn.style.background = 'rgba(34, 197, 94, 0.22)';
+          btn.style.color = '#ffffff';
+        } else {
+          btn.style.border = '1px solid transparent';
+          btn.style.background = 'transparent';
+          btn.style.color = 'rgba(255, 255, 255, 0.55)';
+        }
+      });
+      document.querySelectorAll('#super-section-solicitudes .ferriol-solic-fundador-pane').forEach(function (pane) {
+        var k = pane.getAttribute('data-solicitud-pane');
+        var show = k === tabId;
+        if (show) {
+          pane.classList.remove('hidden');
+          pane.style.removeProperty('display');
+        } else {
+          pane.classList.add('hidden');
+          pane.style.setProperty('display', 'none', 'important');
+        }
+      });
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    function syncFounderSolicitudesTabShell() {
+      var bar = document.getElementById('founderSolicitudesTabBar');
+      if (!bar) return;
+      if (!isEmpresaLensSuper()) {
+        bar.classList.add('hidden');
+        return;
+      }
+      bar.classList.remove('hidden');
+      var pref = '';
+      try { pref = sessionStorage.getItem('ferriol_founder_solic_tab') || ''; } catch (_) {}
+      var valid = { retiros: 1, ventas: 1, empresa: 1, aprobaciones: 1 };
+      if (!valid[pref]) pref = 'retiros';
+      switchFounderSolicitudesTab(pref);
+    }
+    function switchPartnerSolicitudesTab(tabId) {
+      var bar = document.getElementById('partnerSolicitudesTabBar');
+      var bPan = document.getElementById('partnerSolicPaneBilletera');
+      var tPan = document.getElementById('partnerSolicPaneTramites');
+      if (!bar || !bPan || !tPan) return;
+      if (tabId !== 'billetera' && tabId !== 'tramites') return;
+      try { sessionStorage.setItem('ferriol_partner_solic_tab', tabId); } catch (_) {}
+      bar.querySelectorAll('.partner-solic-tab').forEach(function (btn) {
+        var on = btn.getAttribute('data-partner-solic-tab') === tabId;
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+        if (on) {
+          btn.style.border = '1px solid rgba(34, 197, 94, 0.55)';
+          btn.style.background = 'rgba(34, 197, 94, 0.22)';
+          btn.style.color = '#ffffff';
+        } else {
+          btn.style.border = '1px solid transparent';
+          btn.style.background = 'transparent';
+          btn.style.color = 'rgba(255, 255, 255, 0.55)';
+        }
+      });
+      var showWallet = tabId === 'billetera';
+      if (showWallet) {
+        bPan.classList.remove('hidden');
+        bPan.style.removeProperty('display');
+        tPan.classList.add('hidden');
+        tPan.style.setProperty('display', 'none', 'important');
+      } else {
+        bPan.classList.add('hidden');
+        bPan.style.setProperty('display', 'none', 'important');
+        tPan.classList.remove('hidden');
+        tPan.style.removeProperty('display');
+      }
+      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    function syncPartnerSolicitudesTabShell() {
+      var bar = document.getElementById('partnerSolicitudesTabBar');
+      var pan = document.getElementById('partnerBilleteraPanel');
+      if (!bar) return;
+      if (!currentUser || !isPartnerLens() || isEmpresaLensSuper() || !isNetworkAdminRole(currentUser.role) || isAnyKioscoPreviewMode()) {
+        bar.classList.add('hidden');
+        return;
+      }
+      if (pan && pan.style.display === 'none') {
+        bar.classList.add('hidden');
+        return;
+      }
+      bar.classList.remove('hidden');
+      var pref = '';
+      try { pref = sessionStorage.getItem('ferriol_partner_solic_tab') || ''; } catch (_) {}
+      if (pref !== 'tramites') pref = 'billetera';
+      switchPartnerSolicitudesTab(pref);
+    }
+    (function wireSolicitudesSubTabs() {
+      var fb = document.getElementById('founderSolicitudesTabBar');
+      if (fb) {
+        fb.addEventListener('click', function (e) {
+          var t = e.target && e.target.closest && e.target.closest('[data-solicitud-tab]');
+          if (!t || !fb.contains(t)) return;
+          var id = t.getAttribute('data-solicitud-tab');
+          if (id) switchFounderSolicitudesTab(id);
+        });
+      }
+      var pb = document.getElementById('partnerSolicitudesTabBar');
+      if (pb) {
+        pb.addEventListener('click', function (e) {
+          var t = e.target && e.target.closest && e.target.closest('[data-partner-solic-tab]');
+          if (!t || !pb.contains(t)) return;
+          var id = t.getAttribute('data-partner-solic-tab');
+          if (id) switchPartnerSolicitudesTab(id);
+        });
+      }
+    })();
     function ferriolKioscoSponsorHintHtml() {
       if (!currentUser || !currentUser.sponsorId) {
         return 'No figura referidor en tu perfil. Pedí en administración si hace falta.';
@@ -4642,6 +4762,7 @@
           if (navIcon) navIcon.setAttribute('data-lucide', 'wallet');
         }
       }
+      syncPartnerSolicitudesTabShell();
     }
 
     function ferriolHeaderProfileInitials(kioscoName, email) {
@@ -6159,17 +6280,8 @@
     var btnSuperMasGoSolicitudesVentas = document.getElementById('btnSuperMasGoSolicitudesVentas');
     if (btnSuperMasGoSolicitudesVentas) {
       btnSuperMasGoSolicitudesVentas.addEventListener('click', function () {
+        try { sessionStorage.setItem('ferriol_founder_solic_tab', 'ventas'); } catch (_) {}
         switchSuperSection('solicitudes');
-        setTimeout(function () {
-          var el = document.getElementById('superClientSaleRequestsBox');
-          if (el) {
-            try {
-              el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            } catch (_) {
-              el.scrollIntoView(true);
-            }
-          }
-        }, 450);
       });
     }
     var btnSuperMasOpenAjustes = document.getElementById('btnSuperMasOpenAjustes');
@@ -10543,7 +10655,13 @@ async function showApp() {
         partnerBox.classList.add('hidden');
         partnerBox.innerHTML = '';
       }
-      if (!supabaseClient || !currentUser) return;
+      if (!supabaseClient || !currentUser) {
+        if (state.superSection === 'solicitudes') {
+          syncFounderSolicitudesTabShell();
+          syncPartnerSolicitudesTabShell();
+        }
+        return;
+      }
       try {
         if (isEmpresaLensSuper() && founderBox) {
           var r = await supabaseClient.from('ferriol_membership_day_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false }).limit(50);
@@ -10558,7 +10676,6 @@ async function showApp() {
           var provRows = provErr ? [] : (rProv.data || []);
           var kprRows = kprErr ? [] : (rKpr.data || []);
           var kpurRows = kpurErr ? [] : (rKpur.data || []);
-          founderBox.classList.remove('hidden');
           if (dayErr && provErr && kprErr && kpurErr) {
             founderBox.innerHTML = '<p class="text-xs text-amber-200/90 font-medium mb-1">Aprobaciones pendientes</p><p class="text-xs text-white/55">No se pudieron cargar las colas. Ejecutá los SQL del proyecto (membresía, partner-provision, kiosquero-provision, <strong class="text-white/70">supabase-ferriol-kiosquero-partner-upgrade-requests.sql</strong>, mdr-partner-target). ' + String(dayErr.message || provErr.message || kprErr.message || kpurErr.message || '') + '</p>';
             lucide.createIcons();
@@ -10774,7 +10891,6 @@ async function showApp() {
           var r2 = await supabaseClient.from('ferriol_membership_day_requests').select('*').eq('requested_by', currentUser.id).order('created_at', { ascending: false }).limit(20);
           var r2p = await supabaseClient.from('ferriol_partner_provision_requests').select('*').eq('requested_by', currentUser.id).order('created_at', { ascending: false }).limit(25);
           var r2k = await supabaseClient.from('ferriol_kiosquero_provision_requests').select('*').eq('requested_by', currentUser.id).order('created_at', { ascending: false }).limit(25);
-          partnerBox.classList.remove('hidden');
           var pool2 = window._ferriolAllProfilesCache || [];
           function nameOf2(id) {
             var p = pool2.find(function (x) { return x.id === id; });
@@ -10845,6 +10961,7 @@ async function showApp() {
             }
           }
           partnerBox.innerHTML = h2;
+          partnerBox.classList.remove('hidden');
           partnerBox.querySelectorAll('.ferriol-ppr-complete').forEach(function (btn) {
             btn.onclick = function () {
               var tok = btn.getAttribute('data-token');
@@ -10866,8 +10983,12 @@ async function showApp() {
         }
       } catch (_) {
         if (founderBox && isEmpresaLensSuper()) {
-          founderBox.classList.remove('hidden');
           founderBox.innerHTML = '<p class="text-xs text-white/60">Aprobaciones: error al cargar.</p>';
+        }
+      } finally {
+        if (state.superSection === 'solicitudes') {
+          syncFounderSolicitudesTabShell();
+          syncPartnerSolicitudesTabShell();
         }
       }
     }

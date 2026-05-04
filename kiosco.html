@@ -2391,6 +2391,11 @@
               <i data-lucide="wallet" class="w-5 h-5 text-[#86efac]"></i>
               Billetera
             </h2>
+            <div id="partnerSolicitudesTabBar" class="partner-solicitudes-tab-bar mb-4 hidden flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 flex-wrap overflow-x-auto" role="tablist" aria-label="Secciones billetera">
+              <button type="button" class="partner-solic-tab flex-1 min-w-[5.5rem] py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-[#22c55e]/50 bg-[#22c55e]/20 text-white" data-partner-solic-tab="billetera" role="tab" aria-selected="true">Saldo · retiros</button>
+              <button type="button" class="partner-solic-tab flex-1 min-w-[5.5rem] py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-partner-solic-tab="tramites" role="tab" aria-selected="false">Trámites</button>
+            </div>
+            <div id="partnerSolicPaneBilletera" class="ferriol-solic-partner-pane mb-4" data-partner-solic-pane="billetera">
             <p class="text-xs text-white/50 mb-4">El monto verde es <strong class="text-white/70">todo lo acreditado en Ingresos</strong> (mismo criterio: comisiones de venta aprobadas, histórico) <strong class="text-white/70">menos</strong> lo que ya figura en tu historial de retiros (pagados y pedidos en curso; los rechazados no restan). En <strong class="text-white/65">Ingresos</strong> el gráfico usa el período del filtro; acá el saldo es siempre <strong class="text-white/65">histórico completo</strong>. La empresa valida fondos y transfiere según los datos que cargaste en <strong class="text-white/65">Ajustes del sistema</strong> o en tu perfil (titular = nombre de tu cuenta).</p>
             <div class="rounded-2xl border border-emerald-500/35 bg-emerald-500/[0.08] p-4 mb-4">
               <p class="text-xs text-white/50 mb-1">Disponible para retirar</p>
@@ -2402,36 +2407,45 @@
               <h3 class="text-sm font-semibold text-white/90 mb-2">Historial de retiros</h3>
               <div id="partnerWithdrawHistory" class="text-sm min-h-[3rem]"><p class="text-white/45 text-xs py-2 text-center">Cargando…</p></div>
             </div>
+            </div><!-- /partnerSolicPaneBilletera -->
+            <div id="partnerSolicPaneTramites" class="ferriol-solic-partner-pane hidden mb-4" style="display: none;" data-partner-solic-pane="tramites">
             <div class="rounded-xl border border-cyan-500/25 bg-cyan-500/05 p-3 mb-2">
               <h3 class="text-xs font-semibold text-cyan-200/90 mb-2">Seguimiento de otros trámites</h3>
               <p class="text-[10px] text-white/45 mb-2">Solicitudes de días, altas de negocio, etc.</p>
             </div>
             <div id="superDayRequestsPartnerBox" class="hidden rounded-xl border border-cyan-500/35 bg-cyan-500/08 px-3 py-3 text-sm"></div>
+            </div><!-- /partnerSolicPaneTramites -->
           </div>
           <h2 class="founder-solicitudes-heading font-bold text-xl mb-1 flex items-center gap-2 super-only super-main-only">
             <i data-lucide="clipboard-list" class="w-5 h-5 text-[#86efac]"></i>
             Solicitudes
           </h2>
-          <p class="text-[11px] text-white/42 mb-3 super-only super-main-only">Orden típico: <strong class="text-white/55">revisión de retiros</strong> → <strong class="text-emerald-200/85">ventas con comprobante</strong> → <strong class="text-teal-200/85">pagos empresa</strong> · Transferencias en <strong class="text-white/55">Pagos</strong>.</p>
-          <p class="text-xs text-white/50 mb-3 super-only super-main-only"><strong class="text-amber-200/90">Retiros de socios</strong>: revisá fondos en el libro y aprobá; el pago bancario lo registrás en <strong class="text-white/65">Pagos</strong>. <strong class="text-emerald-200/90">Ventas con comprobante (socios)</strong> están abajo. Las solicitudes de <strong class="text-white/70">alta de negocio (kiosco)</strong> los cargan los <strong class="text-white/70">partners desde su panel</strong>. Los nuevos socios se registran con el <strong class="text-white/65">enlace de afiliación para vendedores</strong>.</p>
-          <div id="founderWithdrawalReviewBox" class="hidden mb-5 rounded-2xl border border-amber-500/45 bg-amber-500/[0.1] p-3 sm:p-4 super-only super-main-only">
+          <div id="founderSolicitudesTabBar" class="founder-solicitudes-tab-bar super-only super-main-only hidden mb-3 flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 flex-wrap" role="tablist" aria-label="Tipo de solicitud">
+            <button type="button" class="founder-solic-tab flex-1 min-w-[6.75rem] py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-[#22c55e]/50 bg-[#22c55e]/20 text-white" data-solicitud-tab="retiros" role="tab" aria-selected="true">Retiros</button>
+            <button type="button" class="founder-solic-tab flex-1 min-w-[6.75rem] py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-solicitud-tab="ventas" role="tab" aria-selected="false">Ventas</button>
+            <button type="button" class="founder-solic-tab flex-1 min-w-[6.75rem] py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-solicitud-tab="empresa" role="tab" aria-selected="false">Pagos empresa</button>
+            <button type="button" class="founder-solic-tab flex-1 min-w-[6.75rem] py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-solicitud-tab="aprobaciones" role="tab" aria-selected="false">Aprobaciones</button>
+          </div>
+          <p class="text-[11px] text-white/42 mb-3 super-only super-main-only"><strong class="text-white/55">Fundador:</strong> elegí la pestaña del tipo de cola · transferencias ejecutadas te esperan en <strong class="text-white/55">Pagos</strong>.</p>
+          <p class="text-xs text-white/50 mb-3 super-only super-main-only founder-solicitudes-hint">En <strong class="text-amber-200/90">Retiros</strong> revisá fondos del libro y aprobá solicitudes de socios. En <strong class="text-emerald-200/90">Ventas</strong> están los comprobantes de venta de distribuidores. En <strong class="text-teal-200/90">Pagos empresa</strong>, comprobantes de cuotas cuenta empresa. En <strong class="text-amber-100/90">Aprobaciones</strong>: días de vigencia, altas socio/negocio y upgrade kiosco→socio.</p>
+          <div id="founderWithdrawalReviewBox" class="ferriol-solic-fundador-pane hidden mb-5 rounded-2xl border border-amber-500/45 bg-amber-500/[0.1] p-3 sm:p-4 super-only super-main-only" style="display: none;" data-solicitud-pane="retiros">
             <h3 class="text-sm font-semibold text-amber-200 mb-2 flex items-center gap-2"><i data-lucide="wallet" class="w-4 h-4"></i> Retiros de comisiones (revisión)</h3>
             <p class="text-[11px] text-white/50 mb-3">Solicitudes enviadas por administradores de red. Verificá que el saldo en el libro alcance; al aprobar pasan a <strong class="text-white/70">Pagos</strong> para transferir y adjuntar comprobante.</p>
             <div id="founderWithdrawalReviewList" class="space-y-2 text-sm min-h-[2rem]"></div>
           </div>
-          <div id="superClientSaleRequestsBox" class="hidden mb-5 rounded-2xl border border-emerald-500/40 bg-emerald-500/[0.08] p-3 sm:p-4 super-only super-main-only scroll-mt-8">
+          <div id="superClientSaleRequestsBox" class="ferriol-solic-fundador-pane hidden mb-5 rounded-2xl border border-emerald-500/40 bg-emerald-500/[0.08] p-3 sm:p-4 super-only super-main-only scroll-mt-8" style="display: none;" data-solicitud-pane="ventas">
             <h3 class="text-sm font-semibold text-emerald-200 mb-2 flex items-center gap-2"><i data-lucide="image-plus" class="w-4 h-4"></i> Ventas con comprobante (socios)</h3>
             <p class="text-[11px] text-white/50 mb-3">Revisá nombre, email y monto, mirá el comprobante, y aprobá para generar el cobro y la <strong class="text-white/70">comisión del administrador en Ingresos</strong> (mismo flujo que verificar pago en Cobros).</p>
             <div id="superClientSaleRequestsList" class="space-y-3 text-sm min-h-[2rem]"></div>
             <p id="superClientSaleRequestsMsg" class="text-xs mt-2 text-emerald-200/80 hidden"></p>
           </div>
-          <div id="superEmpresaPaymentProofBox" class="hidden mb-5 rounded-2xl border border-teal-500/40 bg-teal-500/[0.07] p-3 sm:p-4 super-only super-main-only scroll-mt-8">
+          <div id="superEmpresaPaymentProofBox" class="ferriol-solic-fundador-pane hidden mb-5 rounded-2xl border border-teal-500/40 bg-teal-500/[0.07] p-3 sm:p-4 super-only super-main-only scroll-mt-8" style="display: none;" data-solicitud-pane="empresa">
             <h3 class="text-sm font-semibold text-teal-200 mb-2 flex items-center gap-2"><i data-lucide="banknote" class="w-4 h-4"></i> Comprobantes · pagos propios (cuenta empresa)</h3>
             <p class="text-[11px] text-white/50 mb-3">Las <strong class="text-white/70">cuotas de distribuidor</strong> suelen llegar aquí cuando el socio paga y envía el comprobante desde su cuenta. Las <strong class="text-white/70">suscripciones de comercios (kioscos)</strong> llegan primero al partner referidor: él registra la venta ante Ferriol y la ves en «Ventas con comprobante».</p>
             <div id="superEmpresaPaymentProofList" class="space-y-3 text-sm min-h-[2rem]"></div>
             <p id="superEmpresaPaymentProofMsg" class="text-xs mt-2 text-teal-200/80 hidden"></p>
           </div>
-          <div id="superDayRequestsFounderBox" class="hidden mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-3 text-sm super-only super-main-only"></div>
+          <div id="superDayRequestsFounderBox" class="ferriol-solic-fundador-pane hidden mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-3 text-sm super-only super-main-only" style="display: none;" data-solicitud-pane="aprobaciones"></div>
         </div>
         <!-- Pagos pendientes: retiros aprobados → transferencia + comprobante (solo fundador) -->
         <div id="super-section-pagos-pendientes" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; min-height: 100%; max-height: 85vh; padding-bottom: 6rem;">
@@ -3313,7 +3327,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260505_sistema_head_inline"></script>
+  <script defer src="kiosco-app.js?v=20260505_sistema_solicitudes_subtabs"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>
