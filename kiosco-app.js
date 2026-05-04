@@ -9174,7 +9174,8 @@ async function showApp() {
       const pass = document.getElementById('loginPassword').value;
       const errEl = document.getElementById('loginErr');
       errEl.classList.remove('show');
-      document.getElementById('loginContactAdminWrap').classList.add('hidden');
+      var _loginContactWrap = document.getElementById('loginContactAdminWrap');
+      if (_loginContactWrap) _loginContactWrap.classList.add('hidden');
       errEl.style.color = '#fca5a5';
       if (!supabaseClient) {
         errEl.textContent = (!window.supabase || typeof window.supabase.createClient !== 'function')
@@ -12698,6 +12699,7 @@ async function showApp() {
     var btnOpenClientSale = document.getElementById('btnOpenClientSaleRequestModal');
     if (btnOpenClientSale) btnOpenClientSale.onclick = function () { openClientSaleRequestModal(); };
 
+    var clientSaleClose = document.getElementById('clientSaleRequestModalClose');
     if (clientSaleClose) clientSaleClose.onclick = closeClientSaleRequestModal;
     var clientSaleOv = document.getElementById('clientSaleRequestModalOverlay');
     if (clientSaleOv) clientSaleOv.onclick = closeClientSaleRequestModal;
