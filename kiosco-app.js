@@ -866,6 +866,90 @@
           : 'Leyenda: verde = comisión; rojo = rech. ($); azul = nº ventas (acred. + rech.) / día';
       }
     }
+    function ferriolIngresosPinnedTipRemoveEl(chart) {
+      if (!chart || !chart.canvas || !chart.canvas.parentElement) return;
+      var t = chart.canvas.parentElement.querySelector('[data-ingresos-pinned-tip]');
+      if (t && t.parentNode) t.parentNode.removeChild(t);
+      chart._ferriolPinnedTipIdx = null;
+    }
+    function ferriolIngresosPinnedTipFormatVal(v, datasetLabel) {
+      var n = Number(v);
+      if (!Number.isFinite(n)) return '—';
+      if (/Nº/i.test(datasetLabel || '')) return String(Math.round(n));
+      return '$ ' + n.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    }
+    function ferriolIngresosPinnedTipOnClick(evt, elements, chart) {
+      if (!chart || !chart.canvas || !evt) return;
+      var wrap = chart.canvas.parentElement;
+      if (!wrap || !wrap.classList || !wrap.classList.contains('ingresos-chart-wrap')) return;
+      var tip = wrap.querySelector('[data-ingresos-pinned-tip]');
+      if (!elements.length) {
+        if (tip) tip.style.opacity = '0';
+        chart._ferriolPinnedTipIdx = null;
+        return;
+      }
+      var idx = elements[0].index;
+      if (tip && chart._ferriolPinnedTipIdx === idx && tip.style.opacity === '1') {
+        tip.style.opacity = '0';
+        chart._ferriolPinnedTipIdx = null;
+        return;
+      }
+      if (!tip) {
+        tip = document.createElement('div');
+        tip.setAttribute('data-ingresos-pinned-tip', '1');
+        tip.className = 'ferriol-ingresos-pinned-tip';
+        tip.setAttribute('role', 'status');
+        wrap.appendChild(tip);
+      }
+      var lbl = chart.data.labels && chart.data.labels[idx];
+      var labelRaw = lbl != null ? String(lbl) : 'Día ' + (idx + 1);
+      var rows = (chart.data.datasets || [])
+        .map(function (ds) {
+          var raw = ds.data[idx];
+          var val = ferriolIngresosPinnedTipFormatVal(raw, ds.label);
+          var lab = String(ds.label || '').replace(/</g, '&lt;').replace(/&/g, '&amp;');
+          var vale = String(val).replace(/</g, '&lt;').replace(/&/g, '&amp;');
+          return '<div class="ferriol-ingresos-pinned-tip-row"><span class="ferriol-ingresos-pinned-tip-lab">' + lab + '</span><span class="ferriol-ingresos-pinned-tip-val">' + vale + '</span></div>';
+        })
+        .join('');
+      tip.innerHTML =
+        '<div class="ferriol-ingresos-pinned-tip-date">' +
+        labelRaw.replace(/</g, '&lt;').replace(/&/g, '&amp;') +
+        '</div>' +
+        rows;
+      chart._ferriolPinnedTipIdx = idx;
+      tip.style.opacity = '1';
+      var native = evt.native != null ? evt.native : evt;
+      var tcx;
+      var tcy;
+      var wr = wrap.getBoundingClientRect();
+      if (native && native.changedTouches && native.changedTouches[0]) {
+        tcx = native.changedTouches[0].clientX;
+        tcy = native.changedTouches[0].clientY;
+      } else if (native && native.clientX != null) {
+        tcx = native.clientX;
+        tcy = native.clientY;
+      } else {
+        tcx = wr.left + wr.width / 2;
+        tcy = wr.top + wr.height / 2;
+      }
+      var nx = tcx - wr.left;
+      var ny = tcy - wr.top;
+      requestAnimationFrame(function () {
+        if (!tip.parentNode) return;
+        var tw = tip.offsetWidth || 160;
+        var th = tip.offsetHeight || 90;
+        var pad = 6;
+        var lx = nx + 12;
+        var ly = ny - th - 10;
+        if (lx + tw > wrap.clientWidth - pad) lx = Math.max(pad, wrap.clientWidth - tw - pad);
+        if (lx < pad) lx = pad;
+        if (ly < pad) ly = ny + 14;
+        if (ly + th > wrap.clientHeight - pad) ly = Math.max(pad, wrap.clientHeight - th - pad);
+        tip.style.left = lx + 'px';
+        tip.style.top = ly + 'px';
+      });
+    }
     async function loadSuperIngresosFounderSection() {
       var kpiG = document.getElementById('ingresosKpiGross');
       var kpiCo = document.getElementById('ingresosKpiCompany');
@@ -978,6 +1062,7 @@
           if (fb) { fb.classList.remove('hidden'); fb.textContent = 'Gráfico no disponible (librería de gráficos). Revisá la conexión a internet.'; }
         } else {
           if (window._ferriolIngresosChart) {
+            try { ferriolIngresosPinnedTipRemoveEl(window._ferriolIngresosChart); } catch (_) {}
             try { window._ferriolIngresosChart.destroy(); } catch (_) {}
             window._ferriolIngresosChart = null;
           }
@@ -997,11 +1082,15 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 interaction: { mode: 'index', intersect: false },
-                plugins: { legend: { position: 'top', labels: { color: 'rgba(255,255,255,0.75)', font: { size: 11 } } } },
+                plugins: {
+                  tooltip: { enabled: false },
+                  legend: { position: 'top', labels: { color: 'rgba(255,255,255,0.75)', font: { size: 11 } } }
+                },
                 scales: {
                   x: { ticks: { color: 'rgba(255,255,255,0.45)', maxRotation: 45, minRotation: 0, autoSkip: true, maxTicksLimit: 12 }, grid: { color: 'rgba(255,255,255,0.06)' } },
                   y: { position: 'left', ticks: { color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255,255,255,0.08)' } }
-                }
+                },
+                onClick: ferriolIngresosPinnedTipOnClick
               }
             });
           }
@@ -1046,6 +1135,7 @@
         kpiG.textContent = kpiCo.textContent = kpiPo.textContent = kpiRj.textContent = '—';
         wrap.innerHTML = '<p class="text-red-300/90 text-sm py-4 px-2">No se pudieron cargar ingresos (empresa). ' + (e && e.message ? String(e.message) : '') + '</p>';
         if (typeof window !== 'undefined' && window.Chart && canvas && window._ferriolIngresosChart) {
+          try { ferriolIngresosPinnedTipRemoveEl(window._ferriolIngresosChart); } catch (_) {}
           try { window._ferriolIngresosChart.destroy(); } catch (_) {}
           window._ferriolIngresosChart = null;
         }
@@ -1291,6 +1381,7 @@
           if (fb) { fb.classList.remove('hidden'); fb.textContent = 'Gráfico no disponible (librería de gráficos). Revisá la conexión a internet.'; }
         } else {
           if (window._ferriolIngresosChart) {
+            try { ferriolIngresosPinnedTipRemoveEl(window._ferriolIngresosChart); } catch (_) {}
             try { window._ferriolIngresosChart.destroy(); } catch (_) {}
             window._ferriolIngresosChart = null;
           }
@@ -1311,13 +1402,15 @@
                 maintainAspectRatio: false,
                 interaction: { mode: 'index', intersect: false },
                 plugins: {
+                  tooltip: { enabled: false },
                   legend: { position: 'top', labels: { color: 'rgba(255,255,255,0.75)', font: { size: 11 } } }
                 },
                 scales: {
                   x: { ticks: { color: 'rgba(255,255,255,0.45)', maxRotation: 45, minRotation: 0, autoSkip: true, maxTicksLimit: 12 }, grid: { color: 'rgba(255,255,255,0.06)' } },
                   y: { position: 'left', ticks: { color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255,255,255,0.08)' } },
                   y1: { position: 'right', min: 0, ticks: { color: 'rgba(56, 189, 248, 0.7)', stepSize: 1 }, grid: { drawOnChartArea: false } }
-                }
+                },
+                onClick: ferriolIngresosPinnedTipOnClick
               }
             });
           }
@@ -1374,6 +1467,7 @@
         window._ferriolIngresosRejectedDetail = { payments: [], csrs: [] };
         wrap.innerHTML = '<p class="text-red-300/90 text-sm py-4 px-2">No se pudieron cargar los ingresos. ' + (e && e.message ? String(e.message) : '') + ' ¿Ejecutaste <code class="text-white/80">supabase-ferriol-payments.sql</code> y las políticas RLS?</p>';
         if (typeof window !== 'undefined' && window.Chart && canvas && window._ferriolIngresosChart) {
+          try { ferriolIngresosPinnedTipRemoveEl(window._ferriolIngresosChart); } catch (_) {}
           try { window._ferriolIngresosChart.destroy(); } catch (_) {}
           window._ferriolIngresosChart = null;
         }

@@ -962,6 +962,54 @@ textarea:focus-visible {
   height: 260px;
 }
 
+/* Tooltip solo al clic (no sigue el cursor como el nativo de Chart.js) */
+.ingresos-chart-wrap .ferriol-ingresos-pinned-tip {
+  position: absolute;
+  z-index: 6;
+  min-width: 9.5rem;
+  max-width: min(280px, 94%);
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.65rem;
+  font-size: 0.6875rem;
+  line-height: 1.35;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s ease-out;
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(5, 20, 10, 0.92);
+  border: 1px solid rgba(134, 239, 172, 0.28);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+.ingresos-chart-wrap .ferriol-ingresos-pinned-tip-date {
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.35rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ingresos-chart-wrap .ferriol-ingresos-pinned-tip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.ingresos-chart-wrap .ferriol-ingresos-pinned-tip-lab {
+  color: rgba(255, 255, 255, 0.55);
+  min-width: 0;
+}
+
+.ingresos-chart-wrap .ferriol-ingresos-pinned-tip-val {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
 /* ===== PANTALLAS COMPLETAS SIN LÍMITES ===== */
 
 /* App wrapper ocupa toda la pantalla en columna */
