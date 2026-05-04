@@ -35,7 +35,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-  <link rel="stylesheet" href="kiosco.css?v=20260504_touch_no_text_caret">
+  <link rel="stylesheet" href="kiosco.css?v=20260504_founder_nav_hub">
 </head>
 <body class="relative">
   <!-- Banner instalar como app (PWA) — visible al abrir el link -->
@@ -293,25 +293,25 @@
   <nav id="navSuperBottom" class="ferriol-bottom-nav fixed bottom-0 left-0 right-0 z-40 super-only hidden">
     <div class="bottom-nav-bar glass-strong border-t border-white/10 px-2 py-3 max-w-2xl mx-auto">
       <div class="flex items-stretch justify-between gap-0.5 sm:gap-1 flex-nowrap overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <button type="button" id="navSuperIngresosBtn" data-super-section="ingresos" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Ingresos · ventas como vendedor">
+        <button type="button" data-super-section="solicitudes" id="navSuperWalletOrSolicitudesBtn" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Cola de trabajo: solicitudes o billetera">
+          <i data-lucide="clipboard-list" id="navSuperWalletOrSolicitudesIcon" class="w-5 h-5 shrink-0"></i>
+          <span class="truncate w-full text-center" id="navSuperWalletOrSolicitudesLabel">Solicitudes</span>
+        </button>
+        <button type="button" data-super-section="pagos-pendientes" class="super-nav-btn super-only super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Registrar transferencias de retiros a socios">
+          <i data-lucide="banknote" class="w-5 h-5 shrink-0"></i>
+          <span class="truncate w-full text-center">Pagos</span>
+        </button>
+        <button type="button" id="navSuperIngresosBtn" data-super-section="ingresos" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Ingresos · métricas y ventas">
           <i data-lucide="trending-up" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Ingresos</span>
         </button>
-        <button data-super-section="afiliados" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Afiliados">
+        <button data-super-section="afiliados" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Directorio Comercios / Distribuidores">
           <i data-lucide="users" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Afiliados</span>
         </button>
-        <button data-super-section="sistema" class="super-nav-btn super-only super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Tablero del sistema MLM y cobros">
+        <button data-super-section="sistema" class="super-nav-btn super-only super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Tablero MLM, cobros y referencia">
           <i data-lucide="git-fork" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Sistema</span>
-        </button>
-        <button type="button" data-super-section="solicitudes" id="navSuperWalletOrSolicitudesBtn" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Billetera o solicitudes">
-          <i data-lucide="wallet" id="navSuperWalletOrSolicitudesIcon" class="w-5 h-5 shrink-0"></i>
-          <span class="truncate w-full text-center" id="navSuperWalletOrSolicitudesLabel">Billetera</span>
-        </button>
-        <button type="button" data-super-section="pagos-pendientes" class="super-nav-btn super-only super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Pagos de retiros a socios">
-          <i data-lucide="banknote" class="w-5 h-5 shrink-0"></i>
-          <span class="truncate w-full text-center">Pagos</span>
         </button>
         <button type="button" id="navSuperBottomMasBtn" data-super-section="mas" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Ajustes y herramientas">
           <i data-lucide="settings" class="w-5 h-5 shrink-0"></i>
@@ -1258,6 +1258,14 @@
     <!-- Panel Admin: secciones al pie (Afiliados, Ingresos, …, Ajustes) -->
     <section id="panel-super" class="panel hidden">
       <div class="relative isolate min-h-[70vh] pb-24">
+        <div class="super-only super-main-only mb-3 px-0.5 sm:px-0">
+          <p class="founder-panel-hint text-[11px] sm:text-xs text-white/55 leading-snug rounded-xl border border-amber-500/25 bg-amber-950/20 px-3 py-2.5">
+            <strong class="text-amber-100/95 font-semibold">Vista fundador · Empresa:</strong>
+            revisá pendientes en <strong class="text-white/75">Solicitudes</strong> y <strong class="text-white/75">Pagos</strong>;
+            métricas en <strong class="text-white/75">Ingresos</strong>; red en <strong class="text-white/75">Afiliados</strong>;
+            documentación MLM en <strong class="text-white/65">Sistema</strong>; WhatsApp, precios y MP en <strong class="text-white/75">Ajustes</strong>.
+          </p>
+        </div>
         <!-- Sección Afiliados (comercios kiosco / distribuidores) -->
         <div id="super-section-afiliados" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up absolute inset-x-0 top-0 z-0 overflow-y-auto" style="max-height: 85vh; padding-bottom: 6rem;">
           <div class="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
@@ -1481,10 +1489,10 @@
           </div>
 
           <!-- ── TABS: Flujograma / Estructura / Dinero / Notas ── -->
-          <div class="flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 mb-5 flex-wrap" role="tablist">
+          <div class="flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 mb-5 flex-wrap" role="tablist" aria-label="Secciones del tablero">
             <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-[#22c55e]/50 bg-[#22c55e]/20 text-white" data-sistema-tab="flujo">Proceso de venta</button>
-            <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-sistema-tab="estructura">Estructura MLM</button>
             <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-sistema-tab="dinero">Dinero</button>
+            <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-sistema-tab="estructura">Estructura MLM</button>
             <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-sistema-tab="notas"><i data-lucide="notebook-pen" class="w-3 h-3 inline -mt-0.5 mr-0.5"></i> Notas</button>
           </div>
 
@@ -2345,6 +2353,7 @@
             <i data-lucide="clipboard-list" class="w-5 h-5 text-[#86efac]"></i>
             Solicitudes
           </h2>
+          <p class="text-[11px] text-white/42 mb-3 super-only super-main-only">Orden típico: <strong class="text-white/55">revisión de retiros</strong> → <strong class="text-emerald-200/85">ventas con comprobante</strong> → <strong class="text-teal-200/85">pagos empresa</strong> · Transferencias en <strong class="text-white/55">Pagos</strong>.</p>
           <p class="text-xs text-white/50 mb-3 super-only super-main-only"><strong class="text-amber-200/90">Retiros de socios</strong>: revisá fondos en el libro y aprobá; el pago bancario lo registrás en <strong class="text-white/65">Pagos</strong>. <strong class="text-emerald-200/90">Ventas con comprobante (socios)</strong> están abajo. Las solicitudes de <strong class="text-white/70">alta de negocio (kiosco)</strong> los cargan los <strong class="text-white/70">partners desde su panel</strong>. Los nuevos socios se registran con el <strong class="text-white/65">enlace de afiliación para vendedores</strong>.</p>
           <div id="founderWithdrawalReviewBox" class="hidden mb-5 rounded-2xl border border-amber-500/45 bg-amber-500/[0.1] p-3 sm:p-4 super-only super-main-only">
             <h3 class="text-sm font-semibold text-amber-200 mb-2 flex items-center gap-2"><i data-lucide="wallet" class="w-4 h-4"></i> Retiros de comisiones (revisión)</h3>
@@ -2381,43 +2390,56 @@
             Ajustes
           </h2>
           <p class="text-xs text-white/50 mb-4"><strong class="text-white/70">Menú del perfil (tuerca):</strong> tocá tu foto arriba a la derecha → <strong class="text-white/75">Ajustes</strong> abre esta pantalla (misma que la pestaña inferior cuando está visible). Fundador en vista empresa: desde acá tocá <strong class="text-white/65">Ajustes del sistema</strong> para WhatsApp empresa, período de prueba, precios y el <strong class="text-sky-200/90">link Mercado Pago</strong>. Socio: retiros, texto para transferencias y exportaciones están más abajo. Para <strong class="text-white/65">cargar una venta con comprobante</strong>, <strong class="text-white/65">Ingresos → Cargar venta</strong>. Enlaces para referir: <strong class="text-white/65">Afiliados</strong>. Datos bancarios propios: menú del perfil → <strong class="text-white/65">Mis datos bancarios</strong>.</p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 super-only super-main-only">
+          <div class="super-only super-main-only mb-2">
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-[#86efac]/55">Fundador · accesos rápidos</p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 super-only super-main-only">
+            <button type="button" id="btnSuperMasOpenAjustes" class="glass rounded-2xl p-5 border border-[#22c55e]/30 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/55 active:scale-[0.98] touch-target sm:col-span-2">
+              <div class="w-12 h-12 rounded-xl bg-[#22c55e]/25 flex items-center justify-center shrink-0">
+                <i data-lucide="settings" class="w-6 h-6 text-[#86efac]"></i>
+              </div>
+              <span class="font-semibold text-base text-white">Ajustes del sistema</span>
+              <span class="text-xs text-white/55">WhatsApp empresa, datos de transferencia, período de prueba, comisiones, precios y <strong class="text-sky-200/95">link Mercado Pago</strong>. Respaldo masivo.</span>
+            </button>
             <button type="button" id="btnSuperMasGoSolicitudesVentas" class="glass rounded-2xl p-5 border border-emerald-500/45 bg-emerald-500/[0.12] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-emerald-400/65 active:scale-[0.98] touch-target sm:col-span-2">
               <div class="w-12 h-12 rounded-xl bg-emerald-500/25 flex items-center justify-center shrink-0">
                 <i data-lucide="clipboard-check" class="w-6 h-6 text-emerald-200"></i>
               </div>
               <div class="min-w-0 flex-1">
-                <span class="font-semibold text-base text-white block">Ventas con comprobante de administradores</span>
-                <span class="text-xs text-white/55 mt-0.5 block">Abrí <strong class="text-white/70">Solicitudes</strong> y el listado donde cada socio adjunta la venta para que la empresa la apruebe y acredite comisiones.</span>
+                <span class="font-semibold text-base text-white block">Ventas con comprobante (socios)</span>
+                <span class="text-xs text-white/55 mt-0.5 block">Abre la pestaña <strong class="text-white/70">Solicitudes</strong> en el listado donde cada socio adjunta la venta para aprobar y acreditar comisiones.</span>
               </div>
             </button>
-            <button type="button" id="btnSuperMasOpenAjustes" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
-              <div class="w-12 h-12 rounded-xl bg-[#22c55e]/25 flex items-center justify-center shrink-0">
-                <i data-lucide="settings" class="w-6 h-6 text-[#86efac]"></i>
-              </div>
-              <span class="font-semibold text-base text-white">Ajustes del sistema</span>
-              <span class="text-xs text-white/55">WhatsApp empresa, datos de transferencia, período de prueba, precios y <strong class="text-sky-200/95">link Mercado Pago</strong> (recuadro azul dentro de esa pantalla). Respaldo masivo.</span>
-            </button>
-            <button type="button" id="btnSuperMasScrollAviso" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
+          </div>
+          <div class="super-only super-main-only mb-2 mt-2">
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-white/40">Comunicación y datos</p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 super-only super-main-only">
+            <button type="button" id="btnSuperMasScrollAviso" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-amber-400/45 active:scale-[0.98] touch-target">
               <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
                 <i data-lucide="megaphone" class="w-6 h-6 text-amber-200"></i>
               </div>
               <span class="font-semibold text-base text-white">Aviso global</span>
-              <span class="text-xs text-white/55">Mensaje a kiosqueros y administradores de red (campana).</span>
+              <span class="text-xs text-white/55">Mensaje a kiosqueros y administradores (campana).</span>
             </button>
             <button type="button" id="btnExportDirectorioCSV" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
               <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
                 <i data-lucide="file-spreadsheet" class="w-6 h-6 text-[#86efac]"></i>
               </div>
               <span class="font-semibold text-base text-white">Exportar directorio (CSV)</span>
-              <span class="text-xs text-white/55">Descarga de perfiles para análisis externo.</span>
+              <span class="text-xs text-white/55">Perfiles para análisis externo.</span>
             </button>
-            <button type="button" id="btnSuperMasScrollAdmin" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target sm:col-span-2">
+          </div>
+          <div class="super-only super-main-only mb-2">
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-violet-300/45">Avanzado</p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 super-only super-main-only">
+            <button type="button" id="btnSuperMasScrollAdmin" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-violet-400/45 active:scale-[0.98] touch-target sm:col-span-2">
               <div class="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center shrink-0">
                 <i data-lucide="terminal" class="w-6 h-6 text-violet-200"></i>
               </div>
               <span class="font-semibold text-base text-white">Promover administrador (SQL)</span>
-              <span class="text-xs text-white/55">Instrucción para rol <strong class="text-white/65">super</strong> en Supabase (casos excepcionales).</span>
+              <span class="text-xs text-white/55">Rol <strong class="text-white/65">super</strong> en Supabase solo para casos excepcionales.</span>
             </button>
           </div>
           <div id="superMasBlockAviso" class="super-only super-main-only scroll-mt-6 rounded-xl border border-white/10 bg-black/10 p-4 sm:p-5 mb-6">

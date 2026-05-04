@@ -4540,7 +4540,7 @@
       if (navLbl && navBtn && currentUser && isNetworkAdminRole(currentUser.role) && !isAnyKioscoPreviewMode()) {
         if (isEmpresaLensSuper()) {
           navLbl.textContent = 'Solicitudes';
-          navBtn.title = 'Solicitudes';
+          navBtn.title = 'Solicitudes · retiros, ventas y comprobantes';
           if (navIcon) navIcon.setAttribute('data-lucide', 'clipboard-list');
         } else if (isPartnerLens()) {
           navLbl.textContent = 'Billetera';
