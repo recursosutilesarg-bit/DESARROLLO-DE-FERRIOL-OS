@@ -6139,6 +6139,12 @@
         void loadSuperMasBankingSection();
       }
       lucide.createIcons();
+      if (state.superSection === 'sistema' && typeof window._ferriolSistemaSwitchTab === 'function') {
+        var reopen = window._ferriolSistemaMlmActiveTab || 'flujo';
+        requestAnimationFrame(function () {
+          try { window._ferriolSistemaSwitchTab(reopen); } catch (_) {}
+        });
+      }
     }
     function superMasScrollTo(elId) {
       var el = document.getElementById(elId);
@@ -12555,27 +12561,36 @@ async function showApp() {
 
       function sistemaSwitchTab(tabId) {
         if (!tabId) return;
-        document.querySelectorAll('.sistema-tab').forEach(function (btn) {
+        var wrap = document.getElementById('super-section-sistema');
+        if (!wrap) return;
+        wrap.querySelectorAll('.sistema-tab').forEach(function (btn) {
           var active = sistemaDataTab(btn) === tabId;
           btn.className = 'sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border ' +
             (active ? 'border-[#22c55e]/50 bg-[#22c55e]/20 text-white' : 'border-transparent text-white/50 hover:text-white/75');
         });
-        document.querySelectorAll('.mlm-board[data-sistema-tab]').forEach(function (el) {
+        wrap.querySelectorAll('.mlm-board[data-sistema-tab]').forEach(function (el) {
           el.classList.toggle('hidden', sistemaDataTab(el) !== tabId);
         });
+        try { window._ferriolSistemaMlmActiveTab = tabId; } catch (_) {}
         try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (_) {}
       }
+      try {
+        window._ferriolSistemaSwitchTab = sistemaSwitchTab;
+      } catch (_) {}
+
       sistemaSwitchTab('flujo');
 
-      var sistemaTabBar = document.querySelector('#super-section-sistema [role="tablist"]');
-      function onSistemaTabBarClick(ev) {
+      var panelSuperRoot = document.getElementById('panel-super');
+      function sistemaMlmTabsOnClickCapture(ev) {
+        var tel = document.getElementById('sistemaMlmTabBar');
         var t = ev.target;
-        var btn = t && t.closest && t.closest('button.sistema-tab');
-        if (!btn || !sistemaTabBar || !sistemaTabBar.contains(btn)) return;
+        if (!tel || !t || !t.closest || !tel.contains(t)) return;
+        var btn = t.closest('button.sistema-tab');
+        if (!btn || !tel.contains(btn)) return;
         var id = sistemaDataTab(btn);
         if (id) sistemaSwitchTab(id);
       }
-      if (sistemaTabBar) sistemaTabBar.addEventListener('click', onSistemaTabBarClick);
+      if (panelSuperRoot) panelSuperRoot.addEventListener('click', sistemaMlmTabsOnClickCapture, true);
 
       /* ── Textos del flujograma (solo lectura; opcional carga desde localStorage) ── */
       function flujoLoadEdits() {

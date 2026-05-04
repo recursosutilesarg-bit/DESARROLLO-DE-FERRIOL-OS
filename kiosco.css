@@ -2187,12 +2187,14 @@ select.ferriol-sponsor-select:-moz-focusring {
    ═══════════════════════════════════════════════════════════ */
 
 /* Clic llega al <button>; los íconos Lucide (svg) no deben «robar» el hit-test */
+#super-section-sistema .mlm-board.hidden {
+  display: none !important;
+}
 #super-section-sistema .sistema-tab svg {
   pointer-events: none;
 }
 
-/* ── Contenedor tipo "tablero" ── */
-.mlm-board {
+/* ── Contenedor tipo "tablero" (genérico MLM) ── */
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 1rem;
