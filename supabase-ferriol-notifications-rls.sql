@@ -1,5 +1,6 @@
 -- Ferriol OS · Notificaciones: solo la empresa (role = super) puede insertar filas.
 -- Los kiosqueros y socios (partner) siguen pudiendo leer (SELECT) según tu política actual.
+-- Columna audience (destinatarios): ver supabase-ferriol-notifications-audience.sql
 -- Ejecutá en Supabase si tenías INSERT abierto a cualquier usuario autenticado.
 
 DROP POLICY IF EXISTS "notifications_insert" ON notifications;

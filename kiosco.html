@@ -2540,11 +2540,18 @@
             <i data-lucide="megaphone" class="w-5 h-5 text-amber-200"></i>
             Aviso global
           </h2>
-          <p class="text-xs text-white/50 mb-3">Lo reciben kiosqueros y administradores de red en la campana del encabezado.</p>
-          <label class="block text-sm font-medium text-white/80 mb-2">Mensaje</label>
+          <p class="text-xs text-white/50 mb-3">Elegí a quién va dirigido y escribí el texto. Lo ven en la <strong class="text-white/70">campana</strong> del encabezado quienes correspondan; el número rojo baja cuando abren el panel y no vuelve hasta que llegue un <strong class="text-white/70">aviso nuevo</strong>.</p>
+          <label class="block text-sm font-medium text-white/80 mb-1" for="adminNotificationAudience">Destinatarios</label>
+          <select id="adminNotificationAudience" class="ferriol-native-select w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-3 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+            <option value="all">Todos (kiosqueros y red comercial)</option>
+            <option value="kiosquero">Solo negocios (kiosqueros)</option>
+            <option value="partner">Solo distribuidores (rol partner)</option>
+            <option value="red">Solo red comercial (socios + fundador en vista socio)</option>
+          </select>
+          <label class="block text-sm font-medium text-white/80 mb-2" for="adminNotificationMessage">Mensaje</label>
           <textarea id="adminNotificationMessage" rows="4" placeholder="Ej: Mañana cerramos a las 18 hs. / Recordá cargar stock de..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base resize-y mb-3 min-h-[100px]"></textarea>
           <button type="button" id="sendNotificationBtn" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold flex items-center justify-center gap-2 touch-target w-full sm:w-auto">
-            <i data-lucide="send" class="w-4 h-4"></i> Enviar a todos
+            <i data-lucide="send" class="w-4 h-4"></i> Enviar aviso
           </button>
           <p id="adminNotificationMsg" class="text-xs mt-2 text-green-300 hidden"></p>
         </div>
@@ -3397,7 +3404,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260505_profile_menu_trim"></script>
+  <script defer src="kiosco-app.js?v=20260505_notif_audience"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>

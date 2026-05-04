@@ -12,9 +12,9 @@
     // Fiados y cuentas corrientes: Caja → Libreta (libreta_clientes / libreta_items en Supabase).
     // Tabla legacy saldos_acobrar: ya no la usa la app; podés ignorarla o borrarla en Supabase si no la necesitás.
     // Si el kiosquero no ve datos del referidor por RLS: ejecutá supabase-ferriol-kiosquero-sponsor-display.sql (función ferriol_get_my_sponsor_display).
-    // Notificaciones globales: las inserta solo role super (RLS: supabase-ferriol-notifications-rls.sql). Las leen kiosqueros y socios en la campana.
-    // CREATE TABLE notifications ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now(), message text NOT NULL );
-    // ALTER TABLE notifications ENABLE ROW LEVEL SECURITY; políticas SELECT según tu proyecto + INSERT solo super en el SQL anterior.
+    // Notificaciones: audience all|kiosquero|partner|red (SQL supabase-ferriol-notifications-audience.sql). INSERT solo super (supabase-ferriol-notifications-rls.sql).
+    // CREATE TABLE notifications ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now(), message text NOT NULL, audience text NOT NULL DEFAULT 'all' );
+    // La app filtra por destinatario; “no leído” en localStorage hasta un aviso más nuevo (ver getNotifLastRead / setNotifLastRead).
     // Recordatorios de fin de prueba (mensajes por día + ventana): guardá en app_settings una fila key = 'trial_reminder_config', value = JSON, ej. {"windowDays":5,"messages":{"5":"...","4":"..."}}. Placeholders en textos: {dias}, {dias_restantes}, {nombre}, {negocio}.
     // Red de referidos: solo role 'partner' o 'super' tienen código y enlaces (kiosquero no refiere). SQL: supabase-referral-network.sql, supabase-mlm-foundation.sql, supabase-ferriol-payments.sql (cobros + RPC ferriol_verify_payment). Solicitudes de días (socio → empresa): supabase-ferriol-membership-day-requests.sql. Tabla ferriol_partner_provision_requests (SQL supabase-ferriol-partner-provision-requests.sql) puede seguir usándose desde panel fundador o flujos legacy; el alta vía formulario en Más fue retirado (altas por enlace de afiliación). Objeto FerriolMlm en este archivo.
     // Enlaces: ?ref=CÓDIGO&nicho=kiosco (alta negocio) | ?ref=CÓDIGO&nicho=socio (membresía vendedor). Aliases: nicho=vendedor|red|membresia, membresia=1, tipo=...
@@ -3602,6 +3602,21 @@
       if (currentUser.role === 'super' && isSuperSocioLens()) return true;
       return false;
     }
+    /** Si la fila de `notifications` (con audience) corresponde al usuario actual. */
+    function ferriolNotificationMatchesAudience(row) {
+      if (!ferriolNotificationRecipientShell()) return false;
+      var a = String((row && row.audience) || 'all').trim().toLowerCase();
+      if (!a || a === 'all') return true;
+      if (a === 'kiosquero') return ferriolKiosqueroNotifShell();
+      if (a === 'partner') return !!(currentUser && currentUser.role === 'partner');
+      if (a === 'red') {
+        if (!currentUser) return false;
+        if (currentUser.role === 'super' && isSuperSocioLens()) return true;
+        if (currentUser.role === 'partner' && !isPartnerKioscoPreviewMode()) return true;
+        return false;
+      }
+      return true;
+    }
     function ferriolStartNotificationPolling() {
       if (window._ferriolNotifPollInterval) clearInterval(window._ferriolNotifPollInterval);
       window._ferriolNotifPollInterval = setInterval(function () {
@@ -6886,6 +6901,7 @@
       var wasOpen = !dd.classList.contains('hidden');
       dd.classList.add('hidden');
       if (wasOpen) {
+        setNotifLastRead();
         markTrialReminderAcknowledged();
         renderNotificationsMerged();
       }
@@ -11840,7 +11856,7 @@ async function showApp() {
         var key = (currentUser && currentUser.id) ? NOTIF_LAST_READ_KEY + '_' + currentUser.id : NOTIF_LAST_READ_KEY;
         var latest = 0;
         (notificationsCache || []).forEach(function (n) {
-          if (n.created_at) {
+          if (n && n.created_at && !n._trialSynthetic) {
             var t = new Date(n.created_at).getTime();
             if (t > latest) latest = t;
           }
@@ -11856,7 +11872,7 @@ async function showApp() {
       if (trialSynth) rows.unshift(trialSynth);
       var lastRead = getNotifLastRead();
       var unread = rows.filter(function (n) {
-        if (n._trialSynthetic) return true;
+        if (n._trialSynthetic) return false;
         return new Date(n.created_at).getTime() > lastRead;
       });
       var listEl = document.getElementById('notifList');
@@ -11896,9 +11912,11 @@ async function showApp() {
     async function loadNotifications() {
       if (!supabaseClient) return;
       try {
-        var prevIds = new Set((notificationsCache || []).map(function (n) { return n.id; }).filter(Boolean));
-        var res = await supabaseClient.from('notifications').select('id, created_at, message').order('created_at', { ascending: false }).limit(50);
-        var data = res.data || [];
+        var prevFiltered = (notificationsCache || []).filter(ferriolNotificationMatchesAudience);
+        var prevIds = new Set(prevFiltered.map(function (n) { return n.id; }).filter(Boolean));
+        var res = await supabaseClient.from('notifications').select('id, created_at, message, audience').order('created_at', { ascending: false }).limit(80);
+        var raw = res.data || [];
+        var data = raw.filter(ferriolNotificationMatchesAudience).slice(0, 50);
         var newRows = data.filter(function (n) { return n.id && !prevIds.has(n.id); });
         notificationsCache = data;
         if (_ferriolNotifFetchBaselineDone && newRows.length > 0 && ferriolNotificationRecipientShell()) {
@@ -11911,15 +11929,19 @@ async function showApp() {
     var sendNotificationBtnEl = document.getElementById('sendNotificationBtn');
     if (sendNotificationBtnEl) sendNotificationBtnEl.onclick = async function () {
       var textarea = document.getElementById('adminNotificationMessage');
+      var audEl = document.getElementById('adminNotificationAudience');
       var msgEl = document.getElementById('adminNotificationMsg');
       var msg = (textarea && textarea.value) ? textarea.value.trim() : '';
       if (!msg) { if (msgEl) { msgEl.textContent = 'Escribí un mensaje.'; msgEl.classList.remove('hidden'); msgEl.className = 'text-xs mt-2 text-amber-300'; } return; }
       if (!supabaseClient || !isEmpresaLensSuper()) return;
+      var audience = (audEl && audEl.value) ? String(audEl.value).trim().toLowerCase() : 'all';
+      if (['all', 'kiosquero', 'partner', 'red'].indexOf(audience) === -1) audience = 'all';
       try {
-        var err = (await supabaseClient.from('notifications').insert({ message: msg })).error;
+        var err = (await supabaseClient.from('notifications').insert({ message: msg, audience: audience })).error;
         if (err) throw err;
         if (textarea) textarea.value = '';
-        if (msgEl) { msgEl.textContent = 'Enviado: lo verán los kiosqueros y los administradores de red en la campana.'; msgEl.classList.remove('hidden'); msgEl.className = 'text-xs mt-2 text-green-300'; setTimeout(function () { msgEl.classList.add('hidden'); }, 4000); }
+        var destHint = audience === 'all' ? 'todos los destinatarios de la campana' : audience === 'kiosquero' ? 'solo negocios (kiosqueros)' : audience === 'partner' ? 'solo distribuidores (rol partner)' : 'solo la red comercial (socios + fundador en vista socio)';
+        if (msgEl) { msgEl.textContent = 'Enviado: ' + destHint + '. Lo ven en la campana quienes correspondan.'; msgEl.classList.remove('hidden'); msgEl.className = 'text-xs mt-2 text-green-300'; setTimeout(function () { msgEl.classList.add('hidden'); }, 5000); }
       } catch (e) {
         if (msgEl) { msgEl.textContent = 'Error: ' + (e.message || 'Creá la tabla notifications en Supabase (ver comentarios en el código).'); msgEl.classList.remove('hidden'); msgEl.className = 'text-xs mt-2 text-red-300'; }
       }
