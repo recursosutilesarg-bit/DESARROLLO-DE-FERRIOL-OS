@@ -35,7 +35,74 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-  <link rel="stylesheet" href="kiosco.css?v=20260505_sistema_native_js">
+  <link rel="stylesheet" href="kiosco.css?v=20260505_sistema_head_inline">
+  <script>
+    (function () {
+      var VALID = { flujo: 1, dinero: 1, estructura: 1, notas: 1 };
+      var _last = { id: '', t: 0 };
+
+      function dataTab(el) {
+        if (!el || !el.getAttribute) return '';
+        return String(el.getAttribute('data-sistema-tab') || '').trim();
+      }
+
+      function apply(tabId) {
+        if (!tabId || !VALID[tabId]) return;
+        var now = Date.now();
+        if (tabId === _last.id && now - _last.t < 100) return;
+        _last = { id: tabId, t: now };
+
+        var wrap = document.getElementById('super-section-sistema');
+        var bar = document.getElementById('sistemaMlmTabBar');
+        if (!wrap || !bar) return;
+
+        bar.querySelectorAll('button[data-sistema-tab]').forEach(function (btn) {
+          var active = dataTab(btn) === tabId;
+          btn.style.setProperty('border', active ? '1px solid rgba(34,197,94,0.55)' : '1px solid transparent');
+          btn.style.setProperty('background', active ? 'rgba(34,197,94,0.22)' : 'transparent');
+          btn.style.setProperty('color', active ? '#ffffff' : 'rgba(255,255,255,0.55)');
+        });
+
+        wrap.querySelectorAll('.mlm-board[data-sistema-tab]').forEach(function (el) {
+          var k = dataTab(el);
+          if (k === tabId) {
+            el.classList.remove('hidden');
+            el.style.removeProperty('display');
+          } else {
+            el.classList.add('hidden');
+            el.style.setProperty('display', 'none', 'important');
+          }
+        });
+
+        try {
+          window._ferriolSistemaMlmActiveTab = tabId;
+        } catch (_) {}
+
+        try {
+          if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
+        } catch (_) {}
+      }
+
+      function api(tabId) {
+        apply(String(tabId || '').trim());
+      }
+      api._ferriolSistemaMlmInline = true;
+      try {
+        window._ferriolSistemaSwitchTab = api;
+      } catch (_) {}
+
+      function boot() {
+        try {
+          apply('flujo');
+        } catch (_) {}
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
+      } else {
+        boot();
+      }
+    })();
+  </script>
 </head>
 <body class="relative">
   <!-- Banner instalar como app (PWA) — visible al abrir el link -->
@@ -1482,10 +1549,10 @@
 
           <!-- ── TABS: Flujograma / Estructura / Dinero / Notas ── -->
           <div id="sistemaMlmTabBar" class="ferriol-sistema-mlm-tab-bar sticky top-0 z-[100] flex gap-1 p-1 rounded-xl bg-black/45 backdrop-blur-md border border-white/10 mb-5 flex-wrap" role="tablist" aria-label="Secciones del tablero">
-            <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-[#22c55e]/50 bg-[#22c55e]/20 text-white" data-sistema-tab="flujo">Proceso de venta</button>
-            <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-sistema-tab="dinero">Dinero</button>
-            <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-sistema-tab="estructura">Estructura MLM</button>
-            <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-sistema-tab="notas"><i data-lucide="notebook-pen" class="w-3 h-3 inline -mt-0.5 mr-0.5"></i> Notas</button>
+            <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-[#22c55e]/50 bg-[#22c55e]/20 text-white" data-sistema-tab="flujo" onclick="try{window._ferriolSistemaSwitchTab('flujo')}catch(e){}">Proceso de venta</button>
+            <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-sistema-tab="dinero" onclick="try{window._ferriolSistemaSwitchTab('dinero')}catch(e){}">Dinero</button>
+            <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-sistema-tab="estructura" onclick="try{window._ferriolSistemaSwitchTab('estructura')}catch(e){}">Estructura MLM</button>
+            <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-sistema-tab="notas" onclick="try{window._ferriolSistemaSwitchTab('notas')}catch(e){}"><i data-lucide="notebook-pen" class="w-3 h-3 inline -mt-0.5 mr-0.5"></i> Notas</button>
           </div>
 
           <!-- ══ TAB: FLUJOGRAMA DE PROCESO DE VENTA ═══════════ -->
@@ -2108,7 +2175,6 @@
           </details>
 
         </div><!-- /super-section-sistema -->
-        <script src="kiosco-sistema-mlm-tabs.js?v=20260505_native"></script>
 
         <!-- Sección Cobros (solo super): transferencias + verificar → mlm_ledger -->
         <!-- Sin super-only en el contenedor: si no, applyAppShell oculta la sección para socios y pisa display:block de switchSuperSection -->
@@ -3247,7 +3313,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260505_sistema_native_js"></script>
+  <script defer src="kiosco-app.js?v=20260505_sistema_head_inline"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>

@@ -113,7 +113,9 @@ DECLARE
   v_role text;
   r ferriol_partner_provision_requests%ROWTYPE;
   v_hours int;
+  v_kit_hours int;
   v_grace_end timestamptz;
+  v_kit_until timestamptz;
 BEGIN
   IF p_profile_id IS NULL OR auth.uid() IS DISTINCT FROM p_profile_id THEN
     RETURN jsonb_build_object('ok', false, 'error', 'Sesión inválida.');
@@ -154,6 +156,17 @@ BEGIN
   END IF;
   v_grace_end := now() + make_interval(hours => v_hours);
 
+  v_kit_hours := NULL;
+  BEGIN
+    SELECT trim(value)::int INTO v_kit_hours FROM app_settings WHERE key = 'partner_kit_review_hours' LIMIT 1;
+  EXCEPTION WHEN OTHERS THEN
+    v_kit_hours := NULL;
+  END;
+  IF v_kit_hours IS NULL OR v_kit_hours < 1 OR v_kit_hours > 168 THEN
+    v_kit_hours := v_hours;
+  END IF;
+  v_kit_until := now() + make_interval(hours => v_kit_hours);
+
   UPDATE ferriol_partner_provision_requests
   SET registered_user_id = p_profile_id
   WHERE id = r.id;
@@ -161,6 +174,7 @@ BEGIN
   UPDATE profiles SET
     partner_license_pending = true,
     trial_ends_at = v_grace_end,
+    partner_kit_review_until = v_kit_until,
     active = true
   WHERE id = p_profile_id;
 
@@ -220,7 +234,8 @@ BEGIN
     IF r.registered_user_id IS NOT NULL THEN
       UPDATE profiles
       SET active = false,
-          partner_license_pending = false
+          partner_license_pending = false,
+          partner_kit_review_until = NULL
       WHERE id = r.registered_user_id;
     END IF;
     UPDATE ferriol_partner_provision_requests
@@ -270,6 +285,7 @@ BEGIN
     UPDATE profiles SET
       trial_ends_at = trial_end,
       partner_license_pending = false,
+      partner_kit_review_until = NULL,
       active = true,
       kiosco_name = COALESCE(NULLIF(trim(r.display_name), ''), kiosco_name),
       phone = COALESCE(NULLIF(trim(r.phone), ''), phone)
@@ -406,7 +422,7 @@ BEGIN
   trial_end := now() + (td || ' days')::interval;
 
   IF NOT EXISTS (SELECT 1 FROM profiles WHERE id = p_new_profile_id) THEN
-    INSERT INTO profiles (id, email, role, active, sponsor_id, trial_ends_at, kiosco_name, phone, partner_license_pending)
+    INSERT INTO profiles (id, email, role, active, sponsor_id, trial_ends_at, kiosco_name, phone, partner_license_pending, partner_kit_review_until)
     VALUES (
       p_new_profile_id,
       r.target_email,
@@ -416,7 +432,8 @@ BEGIN
       trial_end,
       NULLIF(trim(r.display_name), ''),
       NULLIF(trim(r.phone), ''),
-      false
+      false,
+      NULL
     );
   ELSE
     IF v_email IS NULL OR lower(trim(v_email)) IS DISTINCT FROM r.target_email THEN
@@ -429,6 +446,7 @@ BEGIN
       phone = COALESCE(NULLIF(trim(r.phone), ''), phone),
       active = true,
       partner_license_pending = false,
+      partner_kit_review_until = NULL,
       trial_ends_at = trial_end
     WHERE id = p_new_profile_id;
   END IF;

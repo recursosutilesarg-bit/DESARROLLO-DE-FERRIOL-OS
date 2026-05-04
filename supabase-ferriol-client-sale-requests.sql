@@ -110,6 +110,10 @@ DECLARE
   v_pay_id uuid;
   v_res jsonb;
   v_msg text;
+  v_payer_role text;
+  lic_days int;
+  trial_end timestamptz;
+  v_existing_trial timestamptz;
 BEGIN
   SELECT role INTO v_role FROM public.profiles WHERE id = auth.uid() LIMIT 1;
   IF v_role IS DISTINCT FROM 'super' THEN
@@ -137,6 +141,13 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'error', 'No hay perfil con el email ' || r.client_email || '. El cliente debe registrarse primero (mismo email).');
   END IF;
 
+  -- Lista Afiliados / chips del socio usan profiles.sponsor_id en la línea “negocio”.
+  -- Al aprobar la venta que cargó este partner, el comercio (kiosquero) queda referido por él (corrige alta sin ref o sponsor viejo).
+  UPDATE public.profiles p
+  SET sponsor_id = r.partner_id
+  WHERE p.id = v_payer
+    AND p.role = 'kiosquero';
+
   v_amt := COALESCE(p_amount_override, r.amount_ars);
   IF v_amt IS NULL OR v_amt <= 0 THEN
     RETURN jsonb_build_object('ok', false, 'error', 'Monto inválido.');
@@ -161,6 +172,38 @@ BEGIN
   UPDATE public.ferriol_client_sale_requests
   SET status = 'approved', reviewed_by = auth.uid(), reviewed_at = now(), ferriol_payment_id = v_pay_id
   WHERE id = p_request_id;
+
+  SELECT role INTO v_payer_role FROM public.profiles WHERE id = v_payer LIMIT 1;
+  IF v_payer_role = 'partner' AND r.payment_type = 'kit_inicial' THEN
+    lic_days := NULL;
+    BEGIN
+      SELECT trim(value)::int INTO lic_days FROM public.app_settings WHERE key = 'partner_distribution_license_days' LIMIT 1;
+    EXCEPTION WHEN OTHERS THEN
+      lic_days := NULL;
+    END;
+    IF lic_days IS NULL OR lic_days < 1 OR lic_days > 3650 THEN
+      BEGIN
+        SELECT trim(value)::int INTO lic_days FROM public.app_settings WHERE key = 'trial_duration_days' LIMIT 1;
+      EXCEPTION WHEN OTHERS THEN
+        lic_days := NULL;
+      END;
+    END IF;
+    IF lic_days IS NULL OR lic_days < 1 OR lic_days > 3650 THEN
+      lic_days := 30;
+    END IF;
+    SELECT trial_ends_at INTO v_existing_trial FROM public.profiles WHERE id = v_payer LIMIT 1;
+    IF v_existing_trial IS NOT NULL AND v_existing_trial > now() THEN
+      trial_end := v_existing_trial + (lic_days || ' days')::interval;
+    ELSE
+      trial_end := now() + (lic_days || ' days')::interval;
+    END IF;
+    UPDATE public.profiles
+    SET trial_ends_at = trial_end,
+        partner_kit_review_until = NULL,
+        partner_license_pending = false,
+        active = true
+    WHERE id = v_payer AND role = 'partner';
+  END IF;
 
   RETURN jsonb_build_object('ok', true, 'payment_id', v_pay_id, 'request_id', p_request_id);
 EXCEPTION WHEN OTHERS THEN

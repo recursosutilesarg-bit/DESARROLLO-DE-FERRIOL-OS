@@ -120,11 +120,14 @@ DECLARE
   r public.ferriol_kiosquero_partner_upgrade_requests%ROWTYPE;
   lic_days int;
   trial_end timestamptz;
+  v_existing_trial timestamptz;
   attempts int := 0;
   new_code text;
   ok_code boolean := false;
   v_sponsor uuid;
   v_psid uuid;
+  v_kit_hours int;
+  v_kit_until timestamptz;
 BEGIN
   SELECT role INTO v_actor_role FROM public.profiles WHERE id = auth.uid();
   IF v_actor_role IS DISTINCT FROM 'super' THEN
@@ -149,8 +152,8 @@ BEGIN
     RETURN jsonb_build_object('ok', true, 'action', 'rejected');
   END IF;
 
-  SELECT role, sponsor_id, partner_sponsor_id
-  INTO v_tgt_role, v_sponsor, v_psid
+  SELECT role, sponsor_id, partner_sponsor_id, trial_ends_at
+  INTO v_tgt_role, v_sponsor, v_psid, v_existing_trial
   FROM public.profiles WHERE id = r.profile_id;
   IF NOT FOUND OR v_tgt_role IS DISTINCT FROM 'kiosquero' THEN
     RETURN jsonb_build_object('ok', false, 'error', 'El usuario ya no es kiosquero o el perfil no existe.');
@@ -173,7 +176,29 @@ BEGIN
     lic_days := 30;
   END IF;
 
-  trial_end := now() + (lic_days || ' days')::interval;
+  IF v_existing_trial IS NOT NULL AND v_existing_trial > now() THEN
+    trial_end := v_existing_trial + (lic_days || ' days')::interval;
+  ELSE
+    trial_end := now() + (lic_days || ' days')::interval;
+  END IF;
+
+  v_kit_hours := NULL;
+  BEGIN
+    SELECT trim(value)::int INTO v_kit_hours FROM public.app_settings WHERE key = 'partner_kit_review_hours' LIMIT 1;
+  EXCEPTION WHEN OTHERS THEN
+    v_kit_hours := NULL;
+  END;
+  IF v_kit_hours IS NULL OR v_kit_hours < 1 OR v_kit_hours > 168 THEN
+    BEGIN
+      SELECT trim(value)::int INTO v_kit_hours FROM public.app_settings WHERE key = 'partner_pending_grace_hours' LIMIT 1;
+    EXCEPTION WHEN OTHERS THEN
+      v_kit_hours := NULL;
+    END;
+  END IF;
+  IF v_kit_hours IS NULL OR v_kit_hours < 1 OR v_kit_hours > 168 THEN
+    v_kit_hours := 24;
+  END IF;
+  v_kit_until := now() + make_interval(hours => v_kit_hours);
 
   -- sponsor_id = línea negocio (sin tocar); partner_sponsor_id = línea kit o fallback al mismo referidor negocio
   UPDATE public.profiles SET
@@ -181,6 +206,7 @@ BEGIN
     partner_sponsor_id = COALESCE(r.partner_kit_sponsor_id, v_psid, v_sponsor),
     trial_ends_at = trial_end,
     partner_license_pending = false,
+    partner_kit_review_until = v_kit_until,
     active = true
   WHERE id = r.profile_id;
 
