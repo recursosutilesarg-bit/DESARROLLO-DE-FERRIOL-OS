@@ -41,6 +41,22 @@ body {
   touch-action: manipulation;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Kiosco/táctil: no mostrar caret al tocar títulos y etiquetas (solo en inputs) */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input,
+textarea,
+select,
+[contenteditable='true'] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+#termsContent {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 body::before {
@@ -2742,8 +2758,8 @@ select.ferriol-sponsor-select:-moz-focusring {
   padding: 0.15rem 0.25rem;
   outline: none;
   cursor: default;
-  user-select: text;
-  -webkit-user-select: text;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .flujo-desc {
@@ -2754,8 +2770,8 @@ select.ferriol-sponsor-select:-moz-focusring {
   padding: 0.15rem 0.25rem;
   outline: none;
   cursor: default;
-  user-select: text;
-  -webkit-user-select: text;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* Result grid (step 9) */
