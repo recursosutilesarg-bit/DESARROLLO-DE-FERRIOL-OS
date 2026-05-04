@@ -1617,10 +1617,6 @@
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
     function ferriolPrefillClientSaleFromRejectedCsr(row) {
-      switchSuperSection('mas');
-      setTimeout(function () {
-        try { superMasScrollTo('superMasBlockAdmin'); } catch (_) {}
-      }, 120);
       var nm = document.getElementById('clientSaleClientName');
       var em = document.getElementById('clientSaleClientEmail');
       var pt = document.getElementById('clientSalePaymentType');
@@ -1644,10 +1640,6 @@
       openClientSaleRequestModal();
     }
     function ferriolPrefillClientSaleFromRejectedPayment(row) {
-      switchSuperSection('mas');
-      setTimeout(function () {
-        try { superMasScrollTo('superMasBlockAdmin'); } catch (_) {}
-      }, 120);
       var nm = document.getElementById('clientSaleClientName');
       var em = document.getElementById('clientSaleClientEmail');
       var pt = document.getElementById('clientSalePaymentType');
@@ -2462,16 +2454,27 @@
 
     function ferriolSolicBadgeSet(el, n) {
       if (!el) return;
-      var v = typeof n === 'number' ? n : parseInt(String(n || ''), 10);
-      if (!isFinite(v) || v < 0) v = 0;
-      if (v <= 0) {
-        el.textContent = '';
-        el.classList.add('hidden');
-        el.setAttribute('aria-hidden', 'true');
-        return;
-      }
+      var raw =
+        typeof n === 'number'
+          ? n
+          : parseInt(String(n == null ? '' : n).replace(/\D/g, ''), 10);
+      var v = raw;
+      if (!isFinite(v) || v < 0 || v !== Math.floor(v)) v = 0;
+      el.textContent = '';
+      el.classList.add('hidden');
+      el.style.setProperty('display', 'none', 'important');
+      el.style.setProperty('visibility', 'hidden', 'important');
+      el.style.setProperty('pointer-events', 'none', 'important');
+      el.setAttribute('aria-hidden', 'true');
+      if (v <= 0) return;
       el.textContent = v > 99 ? '99+' : String(v);
       el.classList.remove('hidden');
+      el.style.removeProperty('visibility');
+      el.style.removeProperty('pointer-events');
+      el.style.removeProperty('display');
+      el.style.setProperty('display', 'inline-flex', 'important');
+      el.style.alignItems = 'center';
+      el.style.justifyContent = 'center';
       el.setAttribute('aria-hidden', 'false');
     }
 
@@ -2502,8 +2505,14 @@
     async function ferriolSolicBadgeCount(rowsPromise) {
       try {
         var r = await rowsPromise;
-        if (r.error || typeof r.count !== 'number') return 0;
-        return r.count;
+        if (r.error) return 0;
+        var c = r.count;
+        if (typeof c === 'number' && isFinite(c) && c >= 0) return Math.floor(c);
+        if (c != null && c !== '') {
+          var p = parseInt(String(c), 10);
+          if (isFinite(p) && p >= 0) return Math.floor(p);
+        }
+        return 0;
       } catch (_) {
         return 0;
       }
@@ -5144,22 +5153,20 @@
       return false;
     }
 
-    /** Fundador + vista socio (Administración) + partner: una entrada “Ajustes” en el menú del avatar. */
+    /** Ajustes por rol en menú de perfil (botones separados por pantalla). */
     function syncAccountMenuAdminTools() {
-      var masBtn = document.getElementById('accountMenuBtnNetworkMas');
-      var icon = document.getElementById('accountMenuNetworkMasIcon');
-      var subEl = document.getElementById('accountMenuNetworkMasSub');
+      var wrap = document.getElementById('accountMenuAjustesWrap');
+      var empresaWrap = document.getElementById('accountMenuEmpresaAjustesBtns');
+      var redWrap = document.getElementById('accountMenuRedAjustesBtns');
       var show = ferriolAccountMenuNetworkMasEligible();
-      if (masBtn) masBtn.classList.toggle('hidden', !show);
-      if (show && icon && subEl) {
+      if (wrap) wrap.classList.toggle('hidden', !show);
+      if (empresaWrap) empresaWrap.classList.add('hidden');
+      if (redWrap) redWrap.classList.add('hidden');
+      if (show && currentUser) {
         if (currentUser.role === 'super' && isEmpresaLensSuper()) {
-          icon.classList.remove('text-emerald-600');
-          icon.classList.add('text-violet-600');
-          subEl.textContent = 'Hub empresa: sistema, exportaciones, avisos globales…';
+          if (empresaWrap) empresaWrap.classList.remove('hidden');
         } else {
-          icon.classList.remove('text-violet-600');
-          icon.classList.add('text-emerald-600');
-          subEl.textContent = 'Retiros, texto para transferencias, exportar…';
+          if (redWrap) redWrap.classList.remove('hidden');
         }
       }
       var navMas = document.getElementById('navSuperBottomMasBtn');
@@ -6392,7 +6399,10 @@
         if (!allowPc) sn = 'ingresos';
       }
       state.superSection = sn;
-      var reqSuper = state.superSection === 'sistema';
+      var reqSuper = state.superSection === 'sistema'
+        || state.superSection === 'aviso-global'
+        || state.superSection === 'admin-sql'
+        || state.superSection === 'export-directorio';
       if (reqSuper && currentUser && (currentUser.role !== 'super' || !isEmpresaLensSuper())) {
         state.superSection = 'ingresos';
       }
@@ -6409,6 +6419,7 @@
       }
       var navHighlight = state.superSection;
       if (navHighlight === 'ajustes') navHighlight = 'mas';
+      if (navHighlight === 'aviso-global' || navHighlight === 'admin-sql' || navHighlight === 'export-directorio') navHighlight = 'mas';
       if (navHighlight === 'partner-comprobantes') {
         navHighlight = state._returnSuperSectionFromComprobantes || 'ingresos';
         if (navHighlight === 'partner-comprobantes') navHighlight = 'ingresos';
@@ -6433,7 +6444,7 @@
       if (state.superSection === 'pagos-pendientes' && isEmpresaLensSuper()) {
         void loadFounderPagosPendientesSection();
       }
-      if (state.superSection === 'mas') {
+      if (state.superSection === 'mas' || state.superSection === 'aviso-global' || state.superSection === 'admin-sql' || state.superSection === 'export-directorio') {
         void loadSuperMasBankingSection();
       }
       lucide.createIcons();
@@ -6443,16 +6454,6 @@
           try { window._ferriolSistemaSwitchTab(reopen); } catch (_) {}
         });
       }
-    }
-    function superMasScrollTo(elId) {
-      var el = document.getElementById(elId);
-      if (!el) return;
-      try {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } catch (_) {
-        el.scrollIntoView(true);
-      }
-      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
     var btnSuperMasGoSolicitudesVentas = document.getElementById('btnSuperMasGoSolicitudesVentas');
     if (btnSuperMasGoSolicitudesVentas) {
@@ -6464,9 +6465,17 @@
     var btnSuperMasOpenAjustes = document.getElementById('btnSuperMasOpenAjustes');
     if (btnSuperMasOpenAjustes) btnSuperMasOpenAjustes.addEventListener('click', function () { switchSuperSection('ajustes'); });
     var btnSuperMasScrollAviso = document.getElementById('btnSuperMasScrollAviso');
-    if (btnSuperMasScrollAviso) btnSuperMasScrollAviso.addEventListener('click', function () { superMasScrollTo('superMasBlockAviso'); });
+    if (btnSuperMasScrollAviso) btnSuperMasScrollAviso.addEventListener('click', function () { switchSuperSection('aviso-global'); });
     var btnSuperMasScrollAdmin = document.getElementById('btnSuperMasScrollAdmin');
-    if (btnSuperMasScrollAdmin) btnSuperMasScrollAdmin.addEventListener('click', function () { superMasScrollTo('superMasBlockAdmin'); });
+    if (btnSuperMasScrollAdmin) btnSuperMasScrollAdmin.addEventListener('click', function () { switchSuperSection('admin-sql'); });
+    var btnSuperMasOpenExportDirectorio = document.getElementById('btnSuperMasOpenExportDirectorio');
+    if (btnSuperMasOpenExportDirectorio) btnSuperMasOpenExportDirectorio.addEventListener('click', function () { switchSuperSection('export-directorio'); });
+    var btnSuperAvisoGlobalVolverMas = document.getElementById('btnSuperAvisoGlobalVolverMas');
+    if (btnSuperAvisoGlobalVolverMas) btnSuperAvisoGlobalVolverMas.addEventListener('click', function () { switchSuperSection('mas'); });
+    var btnSuperExportDirVolverMas = document.getElementById('btnSuperExportDirVolverMas');
+    if (btnSuperExportDirVolverMas) btnSuperExportDirVolverMas.addEventListener('click', function () { switchSuperSection('mas'); });
+    var btnSuperAdminSqlVolverMas = document.getElementById('btnSuperAdminSqlVolverMas');
+    if (btnSuperAdminSqlVolverMas) btnSuperAdminSqlVolverMas.addEventListener('click', function () { switchSuperSection('mas'); });
     var btnSuperAjustesVolverMas = document.getElementById('btnSuperAjustesVolverMas');
     if (btnSuperAjustesVolverMas) btnSuperAjustesVolverMas.addEventListener('click', function () { switchSuperSection('mas'); });
     function openPartnerTransferInfoModal() {
@@ -6621,12 +6630,71 @@
         openAccountProfileModal('bank');
       });
     }
-    var accountMenuBtnNetworkMas = document.getElementById('accountMenuBtnNetworkMas');
-    if (accountMenuBtnNetworkMas) {
-      accountMenuBtnNetworkMas.addEventListener('click', function () {
-        if (!ferriolAccountMenuNetworkMasEligible()) return;
+    var accountMenuBtnEmpAjustesSistema = document.getElementById('accountMenuBtnEmpAjustesSistema');
+    if (accountMenuBtnEmpAjustesSistema) {
+      accountMenuBtnEmpAjustesSistema.addEventListener('click', function () {
+        if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper()) return;
         closeAccountMenuDrawer(true);
-        state.superSection = 'mas';
+        state.superSection = 'ajustes';
+        goToPanel('super');
+      });
+    }
+    var accountMenuBtnEmpVentasComprobante = document.getElementById('accountMenuBtnEmpVentasComprobante');
+    if (accountMenuBtnEmpVentasComprobante) {
+      accountMenuBtnEmpVentasComprobante.addEventListener('click', function () {
+        if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper()) return;
+        closeAccountMenuDrawer(true);
+        try { sessionStorage.setItem('ferriol_founder_solic_tab', 'ventas'); } catch (_) {}
+        state.superSection = 'solicitudes';
+        goToPanel('super');
+      });
+    }
+    var accountMenuBtnEmpAvisoGlobal = document.getElementById('accountMenuBtnEmpAvisoGlobal');
+    if (accountMenuBtnEmpAvisoGlobal) {
+      accountMenuBtnEmpAvisoGlobal.addEventListener('click', function () {
+        if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper()) return;
+        closeAccountMenuDrawer(true);
+        state.superSection = 'aviso-global';
+        goToPanel('super');
+      });
+    }
+    var accountMenuBtnEmpExportDirectorio = document.getElementById('accountMenuBtnEmpExportDirectorio');
+    if (accountMenuBtnEmpExportDirectorio) {
+      accountMenuBtnEmpExportDirectorio.addEventListener('click', function () {
+        if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper()) return;
+        closeAccountMenuDrawer(true);
+        state.superSection = 'export-directorio';
+        goToPanel('super');
+      });
+    }
+    var accountMenuBtnEmpAdminSql = document.getElementById('accountMenuBtnEmpAdminSql');
+    if (accountMenuBtnEmpAdminSql) {
+      accountMenuBtnEmpAdminSql.addEventListener('click', function () {
+        if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper()) return;
+        closeAccountMenuDrawer(true);
+        state.superSection = 'admin-sql';
+        goToPanel('super');
+      });
+    }
+    var accountMenuBtnRedSolicitudes = document.getElementById('accountMenuBtnRedSolicitudes');
+    if (accountMenuBtnRedSolicitudes) {
+      accountMenuBtnRedSolicitudes.addEventListener('click', function () {
+        if (!currentUser) return;
+        var ok = (currentUser.role === 'partner') || isSuperSocioLens();
+        if (!ok || isPartnerKioscoPreviewMode()) return;
+        closeAccountMenuDrawer(true);
+        state.superSection = 'solicitudes';
+        goToPanel('super');
+      });
+    }
+    var accountMenuBtnRedComprobantes = document.getElementById('accountMenuBtnRedComprobantes');
+    if (accountMenuBtnRedComprobantes) {
+      accountMenuBtnRedComprobantes.addEventListener('click', function () {
+        if (!currentUser) return;
+        var ok = (currentUser.role === 'partner') || isSuperSocioLens();
+        if (!ok || isPartnerKioscoPreviewMode()) return;
+        closeAccountMenuDrawer(true);
+        state.superSection = 'partner-comprobantes';
         goToPanel('super');
       });
     }
@@ -11460,11 +11528,7 @@ async function showApp() {
     if (ingresosRechazadasModalNewSale) {
       ingresosRechazadasModalNewSale.addEventListener('click', function () {
         closeIngresosRechazadasModal();
-        switchSuperSection('mas');
-        setTimeout(function () {
-          try { superMasScrollTo('superMasBlockAdmin'); } catch (_) {}
-          openClientSaleRequestModal();
-        }, 120);
+        openClientSaleRequestModal();
       });
     }
     document.getElementById('saveAdminContact').onclick = async () => {
@@ -11887,7 +11951,7 @@ async function showApp() {
       lucide.createIcons();
     };
 
-    var btnExportDir = document.getElementById('btnExportDirectorioCSV');
+    var btnExportDir = document.getElementById('btnSuperExportDirectorioRun');
     if (btnExportDir) btnExportDir.onclick = function () { exportSuperDirectorioCSV(); };
     var ferriolPayTypeEl = document.getElementById('ferriolNewPayType');
     if (ferriolPayTypeEl) {
