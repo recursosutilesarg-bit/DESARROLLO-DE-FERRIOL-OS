@@ -6194,8 +6194,6 @@
       try {
         if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
       } catch (_) {}
-      var clientSaleWrap = document.querySelector('.ferriol-partner-client-sale-wrap');
-      if (clientSaleWrap) clientSaleWrap.classList.toggle('hidden', !(isPartnerLens() && !isEmpresaLensSuper() && !isPartnerKioscoPreviewMode()));
       var showPartnerProofUi = isPartnerLens() && !isEmpresaLensSuper() && !isPartnerKioscoPreviewMode();
       document.querySelectorAll('.ferriol-partner-kiosk-proof-btn-wrap').forEach(function (w) {
         w.classList.toggle('hidden', !showPartnerProofUi);
@@ -6402,8 +6400,6 @@
       var needsEmpresaLens =
         state.superSection === 'sistema' ||
         state.superSection === 'aviso-global' ||
-        state.superSection === 'admin-sql' ||
-        state.superSection === 'export-directorio' ||
         state.superSection === 'ajustes' ||
         (typeof state.superSection === 'string' && state.superSection.indexOf('ajustes-') === 0);
       if (needsEmpresaLens && currentUser && (currentUser.role !== 'super' || !isEmpresaLensSuper())) {
@@ -6422,7 +6418,7 @@
       }
       var navHighlight = state.superSection;
       if (navHighlight === 'ajustes' || (typeof navHighlight === 'string' && navHighlight.indexOf('ajustes-') === 0)) navHighlight = 'mas';
-      if (navHighlight === 'aviso-global' || navHighlight === 'admin-sql' || navHighlight === 'export-directorio') navHighlight = 'mas';
+      if (navHighlight === 'aviso-global') navHighlight = 'mas';
       if (navHighlight === 'partner-comprobantes') {
         navHighlight = state._returnSuperSectionFromComprobantes || 'ingresos';
         if (navHighlight === 'partner-comprobantes') navHighlight = 'ingresos';
@@ -6447,7 +6443,7 @@
       if (state.superSection === 'pagos-pendientes' && isEmpresaLensSuper()) {
         void loadFounderPagosPendientesSection();
       }
-      if (state.superSection === 'mas' || state.superSection === 'aviso-global' || state.superSection === 'admin-sql' || state.superSection === 'export-directorio') {
+      if (state.superSection === 'mas' || state.superSection === 'aviso-global') {
         void loadSuperMasBankingSection();
       }
       lucide.createIcons();
@@ -6464,27 +6460,12 @@
         } catch (_) {}
       }
     }
-    var btnSuperMasGoSolicitudesVentas = document.getElementById('btnSuperMasGoSolicitudesVentas');
-    if (btnSuperMasGoSolicitudesVentas) {
-      btnSuperMasGoSolicitudesVentas.addEventListener('click', function () {
-        try { sessionStorage.setItem('ferriol_founder_solic_tab', 'ventas'); } catch (_) {}
-        switchSuperSection('solicitudes');
-      });
-    }
     var btnSuperMasOpenAjustes = document.getElementById('btnSuperMasOpenAjustes');
     if (btnSuperMasOpenAjustes) btnSuperMasOpenAjustes.addEventListener('click', function () { switchSuperSection('ajustes'); });
     var btnSuperMasScrollAviso = document.getElementById('btnSuperMasScrollAviso');
     if (btnSuperMasScrollAviso) btnSuperMasScrollAviso.addEventListener('click', function () { switchSuperSection('aviso-global'); });
-    var btnSuperMasScrollAdmin = document.getElementById('btnSuperMasScrollAdmin');
-    if (btnSuperMasScrollAdmin) btnSuperMasScrollAdmin.addEventListener('click', function () { switchSuperSection('admin-sql'); });
-    var btnSuperMasOpenExportDirectorio = document.getElementById('btnSuperMasOpenExportDirectorio');
-    if (btnSuperMasOpenExportDirectorio) btnSuperMasOpenExportDirectorio.addEventListener('click', function () { switchSuperSection('export-directorio'); });
     var btnSuperAvisoGlobalVolverMas = document.getElementById('btnSuperAvisoGlobalVolverMas');
     if (btnSuperAvisoGlobalVolverMas) btnSuperAvisoGlobalVolverMas.addEventListener('click', function () { switchSuperSection('mas'); });
-    var btnSuperExportDirVolverMas = document.getElementById('btnSuperExportDirVolverMas');
-    if (btnSuperExportDirVolverMas) btnSuperExportDirVolverMas.addEventListener('click', function () { switchSuperSection('mas'); });
-    var btnSuperAdminSqlVolverMas = document.getElementById('btnSuperAdminSqlVolverMas');
-    if (btnSuperAdminSqlVolverMas) btnSuperAdminSqlVolverMas.addEventListener('click', function () { switchSuperSection('mas'); });
     var btnSuperAjustesVolverMas = document.getElementById('btnSuperAjustesVolverMas');
     if (btnSuperAjustesVolverMas) btnSuperAjustesVolverMas.addEventListener('click', function () { switchSuperSection('mas'); });
     function openPartnerTransferInfoModal() {
@@ -6648,40 +6629,12 @@
         goToPanel('super');
       });
     }
-    var accountMenuBtnEmpVentasComprobante = document.getElementById('accountMenuBtnEmpVentasComprobante');
-    if (accountMenuBtnEmpVentasComprobante) {
-      accountMenuBtnEmpVentasComprobante.addEventListener('click', function () {
-        if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper()) return;
-        closeAccountMenuDrawer(true);
-        try { sessionStorage.setItem('ferriol_founder_solic_tab', 'ventas'); } catch (_) {}
-        state.superSection = 'solicitudes';
-        goToPanel('super');
-      });
-    }
     var accountMenuBtnEmpAvisoGlobal = document.getElementById('accountMenuBtnEmpAvisoGlobal');
     if (accountMenuBtnEmpAvisoGlobal) {
       accountMenuBtnEmpAvisoGlobal.addEventListener('click', function () {
         if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper()) return;
         closeAccountMenuDrawer(true);
         state.superSection = 'aviso-global';
-        goToPanel('super');
-      });
-    }
-    var accountMenuBtnEmpExportDirectorio = document.getElementById('accountMenuBtnEmpExportDirectorio');
-    if (accountMenuBtnEmpExportDirectorio) {
-      accountMenuBtnEmpExportDirectorio.addEventListener('click', function () {
-        if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper()) return;
-        closeAccountMenuDrawer(true);
-        state.superSection = 'export-directorio';
-        goToPanel('super');
-      });
-    }
-    var accountMenuBtnEmpAdminSql = document.getElementById('accountMenuBtnEmpAdminSql');
-    if (accountMenuBtnEmpAdminSql) {
-      accountMenuBtnEmpAdminSql.addEventListener('click', function () {
-        if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper()) return;
-        closeAccountMenuDrawer(true);
-        state.superSection = 'admin-sql';
         goToPanel('super');
       });
     }
@@ -11743,37 +11696,6 @@ async function showApp() {
       if (i1) { i1.addEventListener('input', function () { upd('adminPartnerPctIntro', 'adminCompanyPctIntroLabel'); }); i1.addEventListener('change', function () { upd('adminPartnerPctIntro', 'adminCompanyPctIntroLabel'); }); }
       if (i2) { i2.addEventListener('input', function () { upd('adminPartnerPctNormal', 'adminCompanyPctNormalLabel'); }); i2.addEventListener('change', function () { upd('adminPartnerPctNormal', 'adminCompanyPctNormalLabel'); }); }
     })();
-    async function exportSuperDirectorioCSV() {
-      if (!isEmpresaLensSuper() || !supabaseClient) return;
-      try {
-        var res = await supabaseClient.from('profiles').select('id, email, kiosco_name, role, active, referral_code, sponsor_id, trial_ends_at').order('email', { ascending: true });
-        if (res.error) throw res.error;
-        var rows = res.data || [];
-        var byId = {};
-        rows.forEach(function (r) { if (r && r.id) byId[r.id] = r; });
-        var header = 'id;email;kiosco_nombre;rol;activo;codigo_referido;sponsor_id;sponsor_email;sponsor_kiosco;vence_prueba';
-        var body = rows.map(function (r) {
-          var sp = r.sponsor_id ? byId[r.sponsor_id] : null;
-          return [
-            r.id,
-            r.email,
-            r.kiosco_name,
-            r.role,
-            r.active ? 'si' : 'no',
-            r.referral_code || '',
-            r.sponsor_id || '',
-            sp ? (sp.email || '') : '',
-            sp ? (sp.kiosco_name || '') : '',
-            r.trial_ends_at || ''
-          ].map(function (cell) { return escapeCSV(cell == null ? '' : String(cell)); }).join(';');
-        });
-        var csv = header + '\r\n' + body.join('\r\n');
-        downloadCSV('ferriol-directorio-' + new Date().toISOString().slice(0, 10) + '.csv', csv);
-      } catch (e) {
-        alert('No se pudo exportar el directorio: ' + (e.message || e));
-      }
-      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
-    }
     async function exportAllUsersBackup() {
       if (!isEmpresaLensSuper() || !supabaseClient) return;
       var msgEl = document.getElementById('adminBackupAllMsg');
@@ -12004,8 +11926,6 @@ async function showApp() {
       lucide.createIcons();
     };
 
-    var btnExportDir = document.getElementById('btnSuperExportDirectorioRun');
-    if (btnExportDir) btnExportDir.onclick = function () { exportSuperDirectorioCSV(); };
     var ferriolPayTypeEl = document.getElementById('ferriolNewPayType');
     if (ferriolPayTypeEl) {
       ferriolPayTypeEl.addEventListener('change', ferriolSyncNewPaymentFormDefaults);
@@ -12696,9 +12616,6 @@ async function showApp() {
         });
       }
     })();
-    var btnOpenClientSale = document.getElementById('btnOpenClientSaleRequestModal');
-    if (btnOpenClientSale) btnOpenClientSale.onclick = function () { openClientSaleRequestModal(); };
-
     var clientSaleClose = document.getElementById('clientSaleRequestModalClose');
     if (clientSaleClose) clientSaleClose.onclick = closeClientSaleRequestModal;
     var clientSaleOv = document.getElementById('clientSaleRequestModalOverlay');

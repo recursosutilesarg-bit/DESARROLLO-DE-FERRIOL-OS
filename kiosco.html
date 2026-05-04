@@ -1444,12 +1444,6 @@
                   <span id="partnerProofInboxBtnBadgeIngresos" class="absolute -top-1.5 -right-1.5 min-w-[1.125rem] h-[18px] px-1 rounded-full bg-teal-500 text-white text-[11px] font-bold flex items-center justify-center leading-none hidden">0</span>
                 </button>
               </div>
-              <div class="ferriol-partner-client-sale-wrap hidden min-w-0">
-                <button type="button" id="btnOpenClientSaleRequestModal" title="Cargar venta con comprobante: datos del cliente, monto e imagen. La empresa revisa en Solicitudes y acredita tu comisión si aprueba." class="glass inline-flex max-w-full items-center justify-center gap-2 rounded-xl border border-emerald-400/40 bg-emerald-500/[0.1] px-3 py-2.5 text-sm font-semibold text-white transition-all hover:border-emerald-400/60 active:scale-[0.98] touch-target">
-                  <i data-lucide="receipt" class="h-4 w-4 shrink-0 text-emerald-200"></i>
-                  <span>Cargar venta</span>
-                </button>
-              </div>
             </div>
           </div>
           <div id="ingresosKpiPartnerRow" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
@@ -2554,42 +2548,13 @@
           </button>
           <p id="adminNotificationMsg" class="text-xs mt-2 text-green-300 hidden"></p>
         </div>
-        <!-- Exportar directorio CSV (pantalla dedicada) -->
-        <div id="super-section-export-directorio" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
-          <button type="button" id="btnSuperExportDirVolverMas" class="mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
-            <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
-            Volver a opciones principales
-          </button>
-          <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
-            <i data-lucide="file-spreadsheet" class="w-5 h-5 text-[#86efac]"></i>
-            Exportar directorio (CSV)
-          </h2>
-          <p class="text-xs text-white/50 mb-4">Descargá un listado de perfiles (email, rol, referidos, vencimiento de prueba, etc.) para análisis externo. Solo fundador en vista <strong class="text-white/70">Empresa</strong>.</p>
-          <button type="button" id="btnSuperExportDirectorioRun" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold flex items-center justify-center gap-2 touch-target w-full sm:w-auto">
-            <i data-lucide="download" class="w-4 h-4"></i> Descargar CSV ahora
-          </button>
-        </div>
-        <!-- Promover administrador global (SQL) -->
-        <div id="super-section-admin-sql" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
-          <button type="button" id="btnSuperAdminSqlVolverMas" class="mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
-            <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
-            Volver a opciones principales
-          </button>
-          <h2 class="font-bold text-xl mb-2 flex items-center gap-2 text-white">
-            <i data-lucide="user-cog" class="w-5 h-5 text-[#86efac]"></i>
-            Otro administrador global
-          </h2>
-          <p class="text-xs text-white/55 mb-3">Las altas de negocio (kiosco) las piden los <strong class="text-white/70">socios / partners</strong> desde su cuenta (no desde acá). En <strong class="text-white/70">Solicitudes</strong> vos aprobás o gestionás lo pendiente para la empresa. Usá SQL solo para promover a <strong class="text-white/70">super</strong> cuando haga falta.</p>
-          <p class="text-xs text-white/50 mb-2">Supabase → SQL Editor (cambiá el email):</p>
-          <pre class="text-xs bg-black/30 rounded-lg p-3 overflow-x-auto text-[#86efac]" id="sqlAddAdmin">UPDATE profiles SET role = 'super' WHERE id = (SELECT id FROM auth.users WHERE email = 'tu-email@ejemplo.com');</pre>
-        </div>
         <!-- Sección hub (pestaña Ajustes; id mas por compatibilidad con switchSuperSection) -->
         <div id="super-section-mas" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
             <i data-lucide="settings" class="w-5 h-5 text-[#86efac]"></i>
             Ajustes
           </h2>
-          <p class="text-xs text-white/50 mb-4"><strong class="text-white/70">Menú del perfil (tuerca):</strong> cada opción de <strong class="text-white/75">Ajustes</strong> abre su pantalla. Fundador en vista empresa: sistema, ventas con comprobante, aviso global, exportar CSV y SQL desde el menú o desde los accesos de abajo. <strong class="text-white/65">Socio / administración:</strong> <strong class="text-white/65">Billetera y solicitudes</strong> o <strong class="text-white/65">Comprobantes</strong> en el mismo menú. Para <strong class="text-white/65">cargar una venta con comprobante</strong>, <strong class="text-white/65">Ingresos → Cargar venta</strong>. Enlaces para referir: <strong class="text-white/65">Afiliados</strong>. Datos bancarios propios: menú del perfil → <strong class="text-white/65">Mis datos bancarios</strong>.</p>
+          <p class="text-xs text-white/50 mb-4"><strong class="text-white/70">Menú del perfil (tuerca):</strong> cada opción de <strong class="text-white/75">Ajustes</strong> abre su pantalla. Fundador en vista empresa: <strong class="text-white/65">Ajustes del sistema</strong> y <strong class="text-white/65">Aviso global</strong> desde el menú o desde los accesos de abajo. Las ventas con comprobante de socios se gestionan en <strong class="text-white/65">Solicitudes</strong>. <strong class="text-white/65">Socio / administración:</strong> <strong class="text-white/65">Billetera y solicitudes</strong> o <strong class="text-white/65">Comprobantes</strong> en el mismo menú. Enlaces para referir: <strong class="text-white/65">Afiliados</strong>. Datos bancarios propios: menú del perfil → <strong class="text-white/65">Mis datos bancarios</strong>.</p>
           <div class="super-only super-main-only mb-2">
             <p class="text-[10px] font-semibold uppercase tracking-wider text-[#86efac]/55">Fundador · accesos rápidos</p>
           </div>
@@ -2601,45 +2566,17 @@
               <span class="font-semibold text-base text-white">Ajustes del sistema</span>
               <span class="text-xs text-white/55">WhatsApp empresa, datos de transferencia, período de prueba, comisiones, precios y <strong class="text-sky-200/95">link Mercado Pago</strong>. Respaldo masivo.</span>
             </button>
-            <button type="button" id="btnSuperMasGoSolicitudesVentas" class="glass rounded-2xl p-5 border border-emerald-500/45 bg-emerald-500/[0.12] flex flex-col sm:flex-row items-start sm:items-center gap-3 text-left w-full transition-all hover:border-emerald-400/65 active:scale-[0.98] touch-target sm:col-span-2">
-              <div class="w-12 h-12 rounded-xl bg-emerald-500/25 flex items-center justify-center shrink-0">
-                <i data-lucide="clipboard-check" class="w-6 h-6 text-emerald-200"></i>
-              </div>
-              <div class="min-w-0 flex-1">
-                <span class="font-semibold text-base text-white block">Ventas con comprobante (socios)</span>
-                <span class="text-xs text-white/55 mt-0.5 block">Abre la pestaña <strong class="text-white/70">Solicitudes</strong> en el listado donde cada socio adjunta la venta para aprobar y acreditar comisiones.</span>
-              </div>
-            </button>
           </div>
           <div class="super-only super-main-only mb-2 mt-2">
             <p class="text-[10px] font-semibold uppercase tracking-wider text-white/40">Comunicación y datos</p>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 super-only super-main-only">
-            <button type="button" id="btnSuperMasScrollAviso" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-amber-400/45 active:scale-[0.98] touch-target">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 super-only super-main-only">
+            <button type="button" id="btnSuperMasScrollAviso" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-amber-400/45 active:scale-[0.98] touch-target sm:col-span-2">
               <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
                 <i data-lucide="megaphone" class="w-6 h-6 text-amber-200"></i>
               </div>
               <span class="font-semibold text-base text-white">Aviso global</span>
               <span class="text-xs text-white/55">Mensaje a kiosqueros y administradores (campana).</span>
-            </button>
-            <button type="button" id="btnSuperMasOpenExportDirectorio" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
-              <div class="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                <i data-lucide="file-spreadsheet" class="w-6 h-6 text-[#86efac]"></i>
-              </div>
-              <span class="font-semibold text-base text-white">Exportar directorio (CSV)</span>
-              <span class="text-xs text-white/55">Perfiles para análisis externo.</span>
-            </button>
-          </div>
-          <div class="super-only super-main-only mb-2">
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-violet-300/45">Avanzado</p>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 super-only super-main-only">
-            <button type="button" id="btnSuperMasScrollAdmin" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-violet-400/45 active:scale-[0.98] touch-target sm:col-span-2">
-              <div class="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center shrink-0">
-                <i data-lucide="terminal" class="w-6 h-6 text-violet-200"></i>
-              </div>
-              <span class="font-semibold text-base text-white">Promover administrador (SQL)</span>
-              <span class="text-xs text-white/55">Rol <strong class="text-white/65">super</strong> en Supabase solo para casos excepcionales.</span>
             </button>
           </div>
         </div>
@@ -3299,32 +3236,11 @@
                 <span class="block text-[11px] text-gray-500 font-normal mt-0.5 leading-snug">Contactos, transferencia empresa, Mercado Pago, precios, respaldo…</span>
               </span>
             </button>
-            <button type="button" id="accountMenuBtnEmpVentasComprobante" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors">
-              <i data-lucide="clipboard-check" class="w-[1.125rem] h-[1.125rem] text-emerald-600 shrink-0 stroke-[1.75]"></i>
-              <span class="flex-1 min-w-0 text-left">
-                <span class="block leading-snug">Ventas con comprobante</span>
-                <span class="block text-[11px] text-gray-500 font-normal mt-0.5 leading-snug">Cola en Solicitudes · socios</span>
-              </span>
-            </button>
             <button type="button" id="accountMenuBtnEmpAvisoGlobal" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors">
               <i data-lucide="megaphone" class="w-[1.125rem] h-[1.125rem] text-amber-600 shrink-0 stroke-[1.75]"></i>
               <span class="flex-1 min-w-0 text-left">
                 <span class="block leading-snug">Aviso global</span>
                 <span class="block text-[11px] text-gray-500 font-normal mt-0.5 leading-snug">Mensaje en la campana para todos</span>
-              </span>
-            </button>
-            <button type="button" id="accountMenuBtnEmpExportDirectorio" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors">
-              <i data-lucide="file-spreadsheet" class="w-[1.125rem] h-[1.125rem] text-gray-600 shrink-0 stroke-[1.75]"></i>
-              <span class="flex-1 min-w-0 text-left">
-                <span class="block leading-snug">Exportar directorio (CSV)</span>
-                <span class="block text-[11px] text-gray-500 font-normal mt-0.5 leading-snug">Perfiles para análisis externo</span>
-              </span>
-            </button>
-            <button type="button" id="accountMenuBtnEmpAdminSql" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors">
-              <i data-lucide="terminal" class="w-[1.125rem] h-[1.125rem] text-violet-600 shrink-0 stroke-[1.75]"></i>
-              <span class="flex-1 min-w-0 text-left">
-                <span class="block leading-snug">Promover administrador (SQL)</span>
-                <span class="block text-[11px] text-gray-500 font-normal mt-0.5 leading-snug">Rol super en Supabase</span>
               </span>
             </button>
           </div>
@@ -3481,7 +3397,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260505_login_client_sale_close"></script>
+  <script defer src="kiosco-app.js?v=20260505_profile_menu_trim"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>
