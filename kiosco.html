@@ -3011,15 +3011,18 @@
   </div>
 
   <!-- Modal agregar/editar producto -->
-  <div id="productModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/50" id="modalOverlay"></div>
-    <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md scale-in">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="font-bold text-lg" id="productModalTitle">Nuevo producto</h3>
-        <button type="button" id="productModalBack" class="btn-neomorphic rounded-xl p-2 touch-target" title="Atrás (cancelar)"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
+  <div id="productModal" class="fixed inset-0 z-[70] hidden flex-col sm:items-center sm:justify-center sm:p-4">
+    <div class="absolute inset-0 bg-black/65 backdrop-blur-sm" id="modalOverlay"></div>
+    <div class="relative z-[1] flex flex-col w-full h-full min-h-0 max-h-[100dvh] sm:h-auto sm:max-h-[94vh] sm:max-w-2xl sm:rounded-2xl glass-strong border-0 sm:border border-white/15 shadow-2xl overflow-hidden scale-in">
+      <div class="flex items-center justify-between gap-3 px-4 sm:px-6 border-b border-white/10" style="padding-top: max(0.75rem, env(safe-area-inset-top, 0)); padding-bottom: 0.75rem;">
+        <button type="button" id="productModalBack" class="btn-neomorphic rounded-xl p-2 touch-target shrink-0" title="Atrás (cancelar)">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </button>
+        <h3 class="font-bold text-base sm:text-lg flex-1 text-center pr-8" id="productModalTitle">Nuevo producto</h3>
       </div>
       <input type="hidden" id="prodEditCodigo" value="">
-      <div class="space-y-4">
+      <div class="flex-1 overflow-y-auto px-4 sm:px-6 pb-4 sm:pb-6" style="padding-bottom: max(1rem, env(safe-area-inset-bottom, 0));">
+      <div class="space-y-4 pt-4">
         <input type="text" id="prodNombre" placeholder="Nombre" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
         <div class="flex gap-2">
           <input type="text" id="prodCodigo" placeholder="Código" class="flex-1 glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
@@ -3067,7 +3070,7 @@
           <button id="saveProduct" class="flex-1 btn-glow rounded-xl py-3 font-semibold">Guardar</button>
           <button type="button" id="deleteProductInModal" class="rounded-xl py-3 px-4 bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 font-medium hidden" title="Eliminar producto">Eliminar</button>
         </div>
-      </div>
+      </div></div>
     </div>
   </div>
 
