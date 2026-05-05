@@ -4645,11 +4645,6 @@
       document.getElementById('cobroRapidoModal').classList.add('hidden');
       document.getElementById('cobroRapidoModal').classList.remove('flex');
     }
-    var _cobroRapidoQrLockedTotal = 0;
-    function getCobroRapidoQrAlias() {
-      var parsed = ferriolParsePartnerBankingInfo(currentUser && currentUser.partnerTransferInfo ? currentUser.partnerTransferInfo : '');
-      return (parsed.alias || '').trim();
-    }
     function getCobroRapidoCurrentTotal() {
       if (state.cobroRapidoItems && state.cobroRapidoItems.length > 0) {
         return state.cobroRapidoItems.reduce(function (s, it) {
@@ -4658,51 +4653,6 @@
       }
       var montoEl = document.getElementById('cobroRapidoMonto');
       return parseInt(((montoEl && montoEl.value) || '').replace(/\D/g, ''), 10) || 0;
-    }
-    function closeCobroRapidoQrModal() {
-      var m = document.getElementById('cobroRapidoQrModal');
-      if (!m) return;
-      _cobroRapidoQrLockedTotal = 0;
-      m.classList.add('hidden');
-      m.classList.remove('flex');
-    }
-    function renderCobroRapidoQrModal() {
-      var amount = _cobroRapidoQrLockedTotal > 0 ? _cobroRapidoQrLockedTotal : getCobroRapidoCurrentTotal();
-      var amountEl = document.getElementById('cobroRapidoQrAmount');
-      if (amountEl) amountEl.textContent = '$' + amount.toLocaleString('es-AR');
-      var alias = getCobroRapidoQrAlias();
-      var imgWrap = document.getElementById('cobroRapidoQrImageWrap');
-      var img = document.getElementById('cobroRapidoQrImage');
-      var hint = document.getElementById('cobroRapidoQrHint');
-      var aliasView = document.getElementById('cobroRapidoQrAliasView');
-      if (aliasView) aliasView.value = alias || 'Sin alias cargado';
-      var montoView = document.getElementById('cobroRapidoQrMontoView');
-      if (montoView) montoView.value = '$' + amount.toLocaleString('es-AR');
-      if (!img || !imgWrap) return;
-      if (!alias) {
-        imgWrap.classList.add('hidden');
-        if (hint) hint.textContent = 'Cargá tu alias en Perfil -> Mis datos bancarios para generar el QR.';
-        return;
-      }
-      imgWrap.classList.remove('hidden');
-      var qrPayload = 'TRANSFERENCIA\nALIAS:' + alias + '\nMONTO:' + String(amount) + '\nMONEDA:ARS\nCONCEPTO:FERRIOL COBRO RAPIDO';
-      img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=' + encodeURIComponent(qrPayload);
-      if (hint) hint.textContent = 'Escaneá este QR para abrir transferencia con alias y monto.';
-    }
-    function openCobroRapidoQrModal() {
-      var amount = getCobroRapidoCurrentTotal();
-      if (amount <= 0) { alert('Agregá al menos un producto o monto antes de cobrar por QR.'); return; }
-      if (!getCobroRapidoQrAlias()) {
-        alert('Primero cargá tu alias en Perfil -> Mis datos bancarios.');
-      }
-      _cobroRapidoQrLockedTotal = amount;
-      renderCobroRapidoQrModal();
-      var m = document.getElementById('cobroRapidoQrModal');
-      if (m) {
-        m.classList.remove('hidden');
-        m.classList.add('flex');
-      }
-      try { if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
     async function completeQuickSale(method, clientName, whatsapp) {
       try { window._ferriolCobroRapidoPickMode = false; } catch (_) {}
@@ -7256,10 +7206,6 @@
       btn.onclick = function () {
         var method = btn.dataset.quickPayment;
         _selectedLibretaClienteForPayment = null;
-        if (method === 'qr') {
-          openCobroRapidoQrModal();
-          return;
-        }
         if (method === 'fiado') {
           openFiadoTipoModal(function (subMethod) {
             completeQuickSale(subMethod, '', '').catch(function (err) {
@@ -7273,36 +7219,6 @@
         });
       };
     });
-    (function initCobroRapidoQrModal() {
-      var closeBtn = document.getElementById('cobroRapidoQrClose');
-      var overlay = document.getElementById('cobroRapidoQrOverlay');
-      var copyAliasBtn = document.getElementById('cobroRapidoQrCopyAliasBtn');
-      var copyMontoBtn = document.getElementById('cobroRapidoQrCopyMontoBtn');
-      var paidBtn = document.getElementById('cobroRapidoQrPaidBtn');
-      if (closeBtn) closeBtn.onclick = closeCobroRapidoQrModal;
-      if (overlay) overlay.onclick = closeCobroRapidoQrModal;
-      if (copyAliasBtn) copyAliasBtn.onclick = function () {
-        var alias = getCobroRapidoQrAlias();
-        if (!alias) { alert('No hay alias cargado.'); return; }
-        copyTextToClipboard(alias, 'Alias copiado.');
-      };
-      if (copyMontoBtn) copyMontoBtn.onclick = function () {
-        var amount = _cobroRapidoQrLockedTotal > 0 ? _cobroRapidoQrLockedTotal : getCobroRapidoCurrentTotal();
-        if (!amount || amount <= 0) { alert('No hay monto para copiar.'); return; }
-        copyTextToClipboard(String(amount), 'Monto copiado.');
-      };
-      if (paidBtn) paidBtn.onclick = function () {
-        var currentAmount = getCobroRapidoCurrentTotal();
-        if (_cobroRapidoQrLockedTotal > 0 && currentAmount !== _cobroRapidoQrLockedTotal) {
-          alert('El total cambió desde que abriste el QR. Cerrá y volvé a abrir QR para cobrar el monto correcto.');
-          return;
-        }
-        closeCobroRapidoQrModal();
-        completeQuickSale('transferencia', '', '').catch(function (err) {
-          console.warn('Cobro rápido QR:', err && err.message ? err.message : err);
-        });
-      };
-    })();
 
     function showScanToast(msg, isError) {
       const el = document.getElementById('scanToast');

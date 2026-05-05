@@ -2984,42 +2984,12 @@
           <i data-lucide="smartphone" class="w-5 h-5 text-[#86efac] shrink-0"></i>
           <span class="font-medium text-xs">Transf.</span>
         </button>
-        <button type="button" data-quick-payment="qr" class="quick-payment-option glass rounded-lg py-2.5 px-2 flex flex-row items-center justify-center gap-2 border border-white/10 hover:border-[#22c55e]/45 touch-target transition-all active:scale-[0.98]">
-          <i data-lucide="qr-code" class="w-5 h-5 text-[#86efac] shrink-0"></i>
-          <span class="font-medium text-xs">QR</span>
-        </button>
         <button type="button" data-quick-payment="fiado" class="quick-payment-option glass rounded-lg py-2.5 px-2 flex flex-row items-center justify-center gap-2 border border-white/10 hover:border-[#22c55e]/45 touch-target transition-all active:scale-[0.98]">
           <i data-lucide="user-check" class="w-5 h-5 text-[#86efac] shrink-0"></i>
           <span class="font-medium text-xs">Fiado</span>
         </button>
       </div>
       <button type="button" id="closeCobroRapido" class="w-full btn-neomorphic rounded-xl py-2 text-sm touch-target">Cancelar</button>
-    </div>
-  </div>
-
-  <!-- Modal: cobrar con QR en cobro rápido -->
-  <div id="cobroRapidoQrModal" class="fixed inset-0 z-[75] hidden items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/60" id="cobroRapidoQrOverlay"></div>
-    <div class="relative glass-strong rounded-2xl p-4 w-full max-w-sm scale-in">
-      <div class="flex items-center justify-between mb-2">
-        <h3 class="font-semibold text-base flex items-center gap-2"><i data-lucide="qr-code" class="w-4 h-4 text-[#86efac]"></i> Cobrar con QR</h3>
-        <button type="button" id="cobroRapidoQrClose" class="btn-neomorphic rounded-xl p-2 touch-target" aria-label="Cerrar"><i data-lucide="x" class="w-4 h-4"></i></button>
-      </div>
-      <p class="text-xs text-white/65 text-center mb-2">Total a cobrar</p>
-      <p id="cobroRapidoQrAmount" class="text-center text-xl font-bold text-[#86efac] mb-3">$0</p>
-      <div id="cobroRapidoQrImageWrap" class="rounded-xl bg-white/95 p-3 mb-2">
-        <img id="cobroRapidoQrImage" src="" alt="QR de cobro" class="w-56 h-56 mx-auto object-contain rounded-lg">
-      </div>
-      <p id="cobroRapidoQrHint" class="text-[11px] text-white/55 text-center mb-3">Escaneá este QR para abrir transferencia con alias y monto.</p>
-      <label class="block text-xs text-white/55 mb-1" for="cobroRapidoQrAliasView">Alias de cobro</label>
-      <input type="text" id="cobroRapidoQrAliasView" readonly class="w-full glass rounded-xl px-3 py-2 border border-white/20 text-white/90 text-sm mb-2 bg-white/5">
-      <label class="block text-xs text-white/55 mb-1" for="cobroRapidoQrMontoView">Monto</label>
-      <input type="text" id="cobroRapidoQrMontoView" readonly class="w-full glass rounded-xl px-3 py-2 border border-white/20 text-white/90 text-sm mb-2 bg-white/5">
-      <div class="grid grid-cols-2 gap-2 mb-2">
-        <button type="button" id="cobroRapidoQrCopyAliasBtn" class="btn-neomorphic rounded-xl py-2 text-sm touch-target">Copiar alias</button>
-        <button type="button" id="cobroRapidoQrCopyMontoBtn" class="btn-neomorphic rounded-xl py-2 text-sm touch-target">Copiar monto</button>
-      </div>
-      <button type="button" id="cobroRapidoQrPaidBtn" class="w-full btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target">Ya cobré, cerrar venta</button>
     </div>
   </div>
 
