@@ -4194,6 +4194,24 @@
         history.replaceState(n, '', location.href);
       }
     }
+    var _fiadoTipoModalCallback = null;
+    function openFiadoTipoModal(callback) {
+      _fiadoTipoModalCallback = typeof callback === 'function' ? callback : null;
+      var m = document.getElementById('fiadoTipoModal');
+      if (m) {
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+      }
+      try { if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    function closeFiadoTipoModal() {
+      var m = document.getElementById('fiadoTipoModal');
+      if (m) {
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+      }
+      _fiadoTipoModalCallback = null;
+    }
     async function completeSaleWithMethod(method, clientName, whatsapp) {
       const total = state.cart.reduce((a, i) => a + i.precio * i.cant, 0);
       const items = state.cart.map(i => ({ nombre: i.nombre, codigo: i.codigo, precio: i.precio, cant: i.cant, costo: i.costo != null ? i.costo : 0 }));
@@ -4580,13 +4598,17 @@
       document.querySelectorAll('.quick-payment-option').forEach(function (el) { el.classList.remove('ring-2', 'ring-[#dc2626]'); });
       var lastMethod = '';
       try { lastMethod = localStorage.getItem(LAST_QUICK_PAYMENT_KEY) || ''; } catch (_) {}
-      if (lastMethod) document.querySelectorAll('.quick-payment-option').forEach(function (el) { if (el.dataset.quickPayment === lastMethod) el.classList.add('ring-2', 'ring-[#dc2626]'); });
+      if (lastMethod) {
+        document.querySelectorAll('.quick-payment-option').forEach(function (el) {
+          var qp = el.dataset.quickPayment;
+          if (qp === 'fiado' && (lastMethod === 'fiado' || lastMethod === 'transferencia_pendiente')) {
+            el.classList.add('ring-2', 'ring-[#dc2626]');
+          } else if (qp === lastMethod) {
+            el.classList.add('ring-2', 'ring-[#dc2626]');
+          }
+        });
+      }
       updateCobroRapidoLista();
-      var crSearch = document.getElementById('cobroRapidoStockSearch');
-      if (crSearch) crSearch.value = '';
-      ferriolRenderCobroRapidoStockList();
-      var crDet = document.querySelector('#cobroRapidoModal details');
-      if (crDet) crDet.removeAttribute('open');
       document.getElementById('cobroRapidoModal').classList.remove('hidden');
       document.getElementById('cobroRapidoModal').classList.add('flex');
       if (!state._restoringFromHistory) pushHistoryExtra({ modal: 'cobroRapido' });
@@ -5055,6 +5077,7 @@
       document.getElementById('ventasCobradasModal') && (function () { var m = document.getElementById('ventasCobradasModal'); m.classList.add('hidden'); })();
       document.getElementById('transaccionesModal') && (function () { var m = document.getElementById('transaccionesModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
       document.getElementById('paymentModal') && (function () { var m = document.getElementById('paymentModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
+      document.getElementById('fiadoTipoModal') && (function () { closeFiadoTipoModal(); })();
       document.getElementById('cobroRapidoModal') && (function () { var m = document.getElementById('cobroRapidoModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
       document.getElementById('renovarModal') && (function () { var m = document.getElementById('renovarModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
       document.getElementById('detalleVentaModal') && (function () { var m = document.getElementById('detalleVentaModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
@@ -7237,6 +7260,14 @@
           openCobroRapidoQrModal();
           return;
         }
+        if (method === 'fiado') {
+          openFiadoTipoModal(function (subMethod) {
+            completeQuickSale(subMethod, '', '').catch(function (err) {
+              console.warn('Cobro rápido:', err && err.message ? err.message : err);
+            });
+          });
+          return;
+        }
         completeQuickSale(method, '', '').catch(function (err) {
           console.warn('Cobro rápido:', err && err.message ? err.message : err);
         });
@@ -7658,10 +7689,34 @@
       btn.onclick = () => {
         const method = btn.dataset.payment;
         _selectedLibretaClienteForPayment = null;
-        completeSaleWithMethod(method, '', '');
+        if (method === 'fiado') {
+          openFiadoTipoModal(function (subMethod) {
+            completeSaleWithMethod(subMethod, '', '');
+          });
+        } else {
+          completeSaleWithMethod(method, '', '');
+        }
         if (document.getElementById('cartClientName')) document.getElementById('cartClientName').value = '';
       };
     });
+    (function initFiadoTipoModal() {
+      var ov = document.getElementById('fiadoTipoModalOverlay');
+      var cancel = document.getElementById('fiadoTipoModalCancel');
+      var bFiado = document.getElementById('fiadoTipoOpcFiado');
+      var bTp = document.getElementById('fiadoTipoOpcTransfPend');
+      if (ov) ov.onclick = closeFiadoTipoModal;
+      if (cancel) cancel.onclick = closeFiadoTipoModal;
+      if (bFiado) bFiado.onclick = function () {
+        var cb = _fiadoTipoModalCallback;
+        closeFiadoTipoModal();
+        if (cb) cb('fiado');
+      };
+      if (bTp) bTp.onclick = function () {
+        var cb = _fiadoTipoModalCallback;
+        closeFiadoTipoModal();
+        if (cb) cb('transferencia_pendiente');
+      };
+    })();
 
     // Manual add (usa misma búsqueda que escáner para códigos con/sin ceros)
     const doManualAdd = () => {
@@ -8266,8 +8321,14 @@
       var monto = Number(item.monto || 0);
       var pagadoStyle = item.pagado ? 'opacity-40' : '';
       var coment = item.comentario ? '<i data-lucide="message-circle" class="w-3 h-3 inline-block ml-1 opacity-50"></i>' : '';
+      var tipoChip = '';
+      if (!item.pagado && item.tipo === 'transferencia_pendiente') {
+        tipoChip = '<span class="text-[9px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-orange-500/25 text-orange-200 shrink-0">Transf. pend.</span>';
+      } else if (!item.pagado && item.tipo === 'fiado') {
+        tipoChip = '<span class="text-[9px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-100/90 shrink-0">Fiado</span>';
+      }
       return '<div class="libreta-detalle-row ' + pagadoStyle + '" onclick="window._abrirItemDetalle(\'' + item.id + '\')">' +
-        '<span class="libreta-detalle-desc' + (item.pagado ? ' line-through opacity-50' : '') + '">' + desc + coment + '</span>' +
+        '<span class="libreta-detalle-desc flex flex-wrap items-center gap-1.5 min-w-0' + (item.pagado ? ' line-through opacity-50' : '') + '">' + desc + coment + tipoChip + '</span>' +
         '<div class="flex items-center gap-2 shrink-0">' +
         '<span class="libreta-detalle-monto ' + (item.pagado ? 'text-green-400' : 'text-[#4ade80]') + '">$' + Math.round(monto).toLocaleString('es-AR') + '</span>' +
         (!item.pagado ? '<button onclick="event.stopPropagation();window._eliminarItemLibreta(\'' + item.id + '\')" class="libreta-detalle-del touch-target"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' : '') +
@@ -8653,7 +8714,8 @@
         ticketEl.innerHTML = items.map(function (item) {
           var desc = (item.descripcion || '').replace(/</g, '&lt;');
           var m = Math.round(Number(item.monto || 0)).toLocaleString('es-AR');
-          return '<div class="libreta-cuenta-line flex justify-between gap-3 px-4 py-3 border-b border-white/08"><span class="text-white/90 min-w-0 flex-1 truncate">' + desc + '</span><span class="font-bold text-[#4ade80] shrink-0">$' + m + '</span></div>';
+          var tipoTag = item.tipo === 'transferencia_pendiente' ? ' <span class="text-orange-300/90 text-[10px]">(Transf. pend.)</span>' : '';
+          return '<div class="libreta-cuenta-line flex justify-between gap-3 px-4 py-3 border-b border-white/08"><span class="text-white/90 min-w-0 flex-1">' + desc + tipoTag + '</span><span class="font-bold text-[#4ade80] shrink-0">$' + m + '</span></div>';
         }).join('') + '<div class="flex justify-between items-baseline px-4 pt-4 pb-2"><span class="text-white/60 text-sm">Total adeudado</span><span class="font-bold text-xl text-amber-400">$' + Math.round(total).toLocaleString('es-AR') + '</span></div>';
       }
       if (sinTel) {
@@ -8841,6 +8903,13 @@
     // ── Prompt post-pago fiado ──────────────────────────────────
     window._mostrarFiadoPrompt = async function (itemsVenta, totalVenta, metodo) {
       _libretalDesdePago = { items: itemsVenta, total: totalVenta, tipo: metodo };
+      var tipoNota = document.getElementById('libretalPromptTipoNota');
+      if (tipoNota) {
+        tipoNota.textContent = metodo === 'transferencia_pendiente'
+          ? 'Se registrará como transferencia pendiente (esperando acreditación).'
+          : 'Se registrará como fiado en cuenta.';
+        tipoNota.classList.remove('hidden');
+      }
       var listEl = document.getElementById('libretalPromptClientesList');
       var nuevoFormEl = document.getElementById('libretalPromptNuevoForm');
       if (nuevoFormEl) nuevoFormEl.classList.add('hidden');
@@ -8870,6 +8939,8 @@
     };
 
     window._cerrarFiadoPrompt = function () {
+      var tipoNota = document.getElementById('libretalPromptTipoNota');
+      if (tipoNota) { tipoNota.textContent = ''; tipoNota.classList.add('hidden'); }
       var p = document.getElementById('libretalFiadoPrompt');
       if (p) { p.classList.add('hidden'); p.style.display = ''; }
       if (!state._restoringFromHistory && history.state && history.state.overlay === 'libretalFiadoPrompt') {

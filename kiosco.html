@@ -1031,6 +1031,7 @@
         <div class="flex-1">
           <h3 class="font-bold text-lg leading-tight">¿A quién fue el fiado?</h3>
           <p class="text-sm text-white/50">Seleccioná un cliente de la libreta</p>
+          <p id="libretalPromptTipoNota" class="hidden text-[11px] text-amber-200/90 mt-1.5 leading-snug"></p>
         </div>
         <button onclick="window._omitirFiadoPrompt()" class="w-9 h-9 rounded-xl glass flex items-center justify-center touch-target shrink-0">
           <i data-lucide="x" class="w-4 h-4 text-white/60"></i>
@@ -2904,14 +2905,30 @@
         <button data-payment="fiado" class="payment-option glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#22c55e]/50 active:scale-[0.98] touch-target transition-all">
           <i data-lucide="user-check" class="w-8 h-8 text-[#86efac]"></i>
           <span class="font-medium text-sm">Fiado</span>
-        </button>
-        <button data-payment="transferencia_pendiente" class="payment-option col-span-2 glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#f59e0b]/50 active:scale-[0.98] touch-target transition-all">
-          <i data-lucide="clock" class="w-8 h-8 text-[#fbbf24]"></i>
-          <span class="font-medium text-sm">Transferir pendiente</span>
-          <span class="text-xs text-white/50">Cobra después por transferencia</span>
+          <span class="text-[11px] text-white/45 text-center leading-tight">Cuenta / transferencia pendiente</span>
         </button>
       </div>
       <button id="closePaymentModal" class="w-full mt-4 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Modal: tipo de fiado (fiado vs transferencia pendiente) -->
+  <div id="fiadoTipoModal" class="fixed inset-0 z-[78] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/65 backdrop-blur-sm" id="fiadoTipoModalOverlay"></div>
+    <div class="relative glass-strong rounded-2xl p-5 w-full max-w-sm scale-in">
+      <h3 class="font-bold text-lg mb-1 text-center">Fiado en libreta</h3>
+      <p class="text-xs text-white/55 text-center mb-4">Elegí cómo queda registrado en la cuenta del cliente</p>
+      <div class="space-y-2">
+        <button type="button" id="fiadoTipoOpcFiado" class="w-full btn-neomorphic rounded-xl py-3 text-sm font-medium touch-target flex items-center justify-center gap-2">
+          <i data-lucide="user-check" class="w-4 h-4 text-[#86efac]"></i>
+          Fiado en cuenta
+        </button>
+        <button type="button" id="fiadoTipoOpcTransfPend" class="w-full glass rounded-xl py-3 text-sm font-medium touch-target flex flex-col items-center gap-0.5 border border-orange-400/35 hover:border-orange-400/55">
+          <span class="flex items-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-amber-300"></i> Transferencia pendiente</span>
+          <span class="text-[11px] text-white/45 font-normal">Esperando que acredite la transferencia</span>
+        </button>
+      </div>
+      <button type="button" id="fiadoTipoModalCancel" class="w-full mt-3 btn-neomorphic rounded-xl py-2 text-sm touch-target">Cancelar</button>
     </div>
   </div>
 
@@ -2974,10 +2991,6 @@
         <button type="button" data-quick-payment="fiado" class="quick-payment-option glass rounded-lg py-2.5 px-2 flex flex-row items-center justify-center gap-2 border border-white/10 hover:border-[#22c55e]/45 touch-target transition-all active:scale-[0.98]">
           <i data-lucide="user-check" class="w-5 h-5 text-[#86efac] shrink-0"></i>
           <span class="font-medium text-xs">Fiado</span>
-        </button>
-        <button type="button" data-quick-payment="transferencia_pendiente" class="quick-payment-option col-span-2 glass rounded-lg py-2 px-2 flex flex-row items-center justify-center gap-2 border border-white/10 hover:border-[#f59e0b]/45 touch-target transition-all active:scale-[0.98]">
-          <i data-lucide="clock" class="w-5 h-5 text-[#fbbf24] shrink-0"></i>
-          <span class="font-medium text-xs">Transf. pendiente</span>
         </button>
       </div>
       <button type="button" id="closeCobroRapido" class="w-full btn-neomorphic rounded-xl py-2 text-sm touch-target">Cancelar</button>
