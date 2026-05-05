@@ -553,9 +553,14 @@
           <i data-lucide="package-search" class="w-4 h-4"></i>
           Productos
         </span>
-        <button id="addProduct" class="btn-glow rounded-xl px-3 py-2 flex items-center gap-1.5 text-sm font-semibold touch-target">
-          <i data-lucide="plus" class="w-4 h-4"></i> Nuevo
-        </button>
+        <div class="flex items-center gap-2">
+          <button id="inventoryPickScannerBtn" type="button" class="hidden btn-neomorphic rounded-xl px-3 py-2 flex items-center gap-1.5 text-sm font-semibold touch-target">
+            <i data-lucide="scan" class="w-4 h-4"></i> Escanear
+          </button>
+          <button id="addProduct" class="btn-glow rounded-xl px-3 py-2 flex items-center gap-1.5 text-sm font-semibold touch-target">
+            <i data-lucide="plus" class="w-4 h-4"></i> Nuevo
+          </button>
+        </div>
       </div>
       <div class="inv-searchbar">
         <input type="text" id="searchInventory" placeholder="Buscar producto..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/15 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base" autocomplete="off">
@@ -2916,17 +2921,6 @@
     <div class="relative glass-strong rounded-2xl p-4 w-full max-w-sm scale-in max-h-[92vh] overflow-y-auto">
       <h3 class="font-bold text-base sm:text-lg mb-0.5 text-center">Cobro rápido</h3>
       <p class="text-xs text-white/50 text-center mb-3">Desde stock o monto manual → Agregar → Forma de pago</p>
-      <details id="cobroRapidoStockDetails" class="mb-2 rounded-xl border border-white/12 bg-black/20 group">
-        <summary class="text-xs font-medium text-[#86efac]/90 cursor-pointer list-none flex items-center justify-between gap-2 px-3 py-2.5 touch-target [&::-webkit-details-marker]:hidden">
-          <span class="flex items-center gap-2"><i data-lucide="package" class="w-4 h-4 shrink-0"></i> Desde inventario (stock)</span>
-          <i data-lucide="chevron-down" class="w-4 h-4 shrink-0 transition-transform group-open:rotate-180 text-white/50"></i>
-        </summary>
-        <div class="px-3 pb-3 pt-0 border-t border-white/10">
-          <input type="search" id="cobroRapidoStockSearch" autocomplete="off" placeholder="Buscar producto…" class="w-full glass rounded-lg px-3 py-2 border border-white/20 text-white placeholder-white/40 text-sm mb-2 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
-          <div id="cobroRapidoStockList" class="max-h-[11rem] overflow-y-auto space-y-1 text-left"></div>
-          <p id="cobroRapidoStockEmpty" class="text-[11px] text-white/40 py-1 hidden">Sin coincidencias o sin stock.</p>
-        </div>
-      </details>
       <div id="cobroRapidoOtroWrap" class="mb-2">
         <input type="text" id="cobroRapidoOtroNombre" placeholder="Nombre (opcional)" class="w-full glass rounded-xl px-3 py-2 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
       </div>

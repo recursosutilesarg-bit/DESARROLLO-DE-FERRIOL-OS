@@ -4544,11 +4544,13 @@
       if (!m) return;
       m.classList.add('hidden');
       m.classList.remove('flex');
+      syncInventoryPickScannerBtn();
     }
     /** Tras elegir cantidad desde inventario o escáner: volver al panel principal y mostrar de nuevo el cobro rápido. */
     function resumeCobroRapidoAfterPick() {
       if (!window._ferriolCobroRapidoPickMode) return;
       window._ferriolCobroRapidoPickMode = false;
+      syncInventoryPickScannerBtn();
       goToPanel('dashboard');
       var m = document.getElementById('cobroRapidoModal');
       if (m) {
@@ -4559,8 +4561,15 @@
       ferriolRenderCobroRapidoStockList();
       try { if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
+    function syncInventoryPickScannerBtn() {
+      var btn = document.getElementById('inventoryPickScannerBtn');
+      if (!btn) return;
+      var show = !!window._ferriolCobroRapidoPickMode && state.currentPanel === 'inventory';
+      btn.classList.toggle('hidden', !show);
+    }
     function openCobroRapidoModal() {
       try { window._ferriolCobroRapidoPickMode = false; } catch (_) {}
+      syncInventoryPickScannerBtn();
       state.cobroRapidoItems = [];
       _selectedLibretaClienteForPayment = null;
       document.getElementById('cobroRapidoMonto').value = '';
@@ -4605,6 +4614,7 @@
     }
     function closeCobroRapidoModal() {
       try { window._ferriolCobroRapidoPickMode = false; } catch (_) {}
+      syncInventoryPickScannerBtn();
       if (!state._restoringFromHistory && history.state && history.state.modal === 'cobroRapido') {
         var n = Object.assign({}, history.state);
         delete n.modal;
@@ -6448,6 +6458,7 @@
       }
       if (name !== 'scanner') window._scanForProductCode = false;
       state.currentPanel = name;
+      syncInventoryPickScannerBtn();
       document.body.setAttribute('data-panel', name);
       const navKey = (name === 'config' || name === 'historial' || name === 'clientes' || name === 'plan') ? 'mas' : name;
       var kNav = document.getElementById('navKiosquero');
@@ -7200,6 +7211,11 @@
       window._ferriolCobroRapidoPickMode = true;
       pauseCobroRapidoModalVisual();
       goToPanel('inventory');
+    };
+    var inventoryPickScannerBtn = document.getElementById('inventoryPickScannerBtn');
+    if (inventoryPickScannerBtn) inventoryPickScannerBtn.onclick = function () {
+      if (!window._ferriolCobroRapidoPickMode) return;
+      goToPanel('scanner');
     };
     (function initCobroRapidoStockPicker() {
       var list = document.getElementById('cobroRapidoStockList');
