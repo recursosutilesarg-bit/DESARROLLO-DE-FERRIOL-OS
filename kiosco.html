@@ -2975,6 +2975,10 @@
           <i data-lucide="smartphone" class="w-5 h-5 text-[#86efac] shrink-0"></i>
           <span class="font-medium text-xs">Transf.</span>
         </button>
+        <button type="button" data-quick-payment="qr" class="quick-payment-option glass rounded-lg py-2.5 px-2 flex flex-row items-center justify-center gap-2 border border-white/10 hover:border-[#22c55e]/45 touch-target transition-all active:scale-[0.98]">
+          <i data-lucide="qr-code" class="w-5 h-5 text-[#86efac] shrink-0"></i>
+          <span class="font-medium text-xs">QR</span>
+        </button>
         <button type="button" data-quick-payment="fiado" class="quick-payment-option glass rounded-lg py-2.5 px-2 flex flex-row items-center justify-center gap-2 border border-white/10 hover:border-[#22c55e]/45 touch-target transition-all active:scale-[0.98]">
           <i data-lucide="user-check" class="w-5 h-5 text-[#86efac] shrink-0"></i>
           <span class="font-medium text-xs">Fiado</span>
@@ -2985,6 +2989,30 @@
         </button>
       </div>
       <button type="button" id="closeCobroRapido" class="w-full btn-neomorphic rounded-xl py-2 text-sm touch-target">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Modal: cobrar con QR en cobro rápido -->
+  <div id="cobroRapidoQrModal" class="fixed inset-0 z-[75] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60" id="cobroRapidoQrOverlay"></div>
+    <div class="relative glass-strong rounded-2xl p-4 w-full max-w-sm scale-in">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-semibold text-base flex items-center gap-2"><i data-lucide="qr-code" class="w-4 h-4 text-[#86efac]"></i> Cobrar con QR</h3>
+        <button type="button" id="cobroRapidoQrClose" class="btn-neomorphic rounded-xl p-2 touch-target" aria-label="Cerrar"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <p class="text-xs text-white/65 text-center mb-2">Total a cobrar</p>
+      <p id="cobroRapidoQrAmount" class="text-center text-xl font-bold text-[#86efac] mb-3">$0</p>
+      <div id="cobroRapidoQrImageWrap" class="rounded-xl bg-white/95 p-3 mb-2">
+        <img id="cobroRapidoQrImage" src="" alt="QR de cobro" class="w-56 h-56 mx-auto object-contain rounded-lg">
+      </div>
+      <p id="cobroRapidoQrHint" class="text-[11px] text-white/55 text-center mb-3">Escaneá este QR para pagar.</p>
+      <label class="block text-xs text-white/55 mb-1" for="cobroRapidoQrLinkInput">Link de cobro QR</label>
+      <input type="url" id="cobroRapidoQrLinkInput" placeholder="https://..." class="w-full glass rounded-xl px-3 py-2 border border-white/20 text-white placeholder-white/45 text-sm mb-2">
+      <div class="grid grid-cols-2 gap-2 mb-2">
+        <button type="button" id="cobroRapidoQrSaveLinkBtn" class="btn-neomorphic rounded-xl py-2 text-sm touch-target">Guardar link</button>
+        <a id="cobroRapidoQrOpenLinkBtn" href="#" target="_blank" rel="noopener" class="btn-neomorphic rounded-xl py-2 text-sm text-center touch-target">Abrir link</a>
+      </div>
+      <button type="button" id="cobroRapidoQrPaidBtn" class="w-full btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target">Ya cobré, cerrar venta</button>
     </div>
   </div>
 
@@ -3382,7 +3410,7 @@
         </div>
         <div id="accountProfileBankWrap" class="hidden mb-4 scroll-mt-4 space-y-3 rounded-xl border border-amber-400/25 bg-amber-500/[0.06] p-3 sm:p-4">
           <h4 class="text-sm font-semibold text-amber-100/95 flex items-center gap-2"><i data-lucide="landmark" class="w-4 h-4 shrink-0"></i> Mis datos bancarios</h4>
-          <p class="text-[11px] text-amber-200/85 leading-snug">Para retiros de comisiones y acuerdos de red. El <strong class="text-white/80">titular</strong> debe coincidir con tu identidad en la cuenta. No cargues claves ni tokens.</p>
+          <p class="text-[11px] text-amber-200/85 leading-snug">Para cobrar por QR/transferencia y para retiros o acuerdos de red. El <strong class="text-white/80">titular</strong> debe coincidir con tu identidad en la cuenta. No cargues claves ni tokens.</p>
           <label class="block text-xs text-white/55 mb-1" for="accountProfileBankTitular">Titular de la cuenta <span class="text-amber-200/80">*</span></label>
           <input type="text" id="accountProfileBankTitular" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm" placeholder="Como figura en el banco" autocomplete="name">
           <label class="block text-xs text-white/55 mb-1" for="accountProfileBankBanco">Banco o entidad <span class="text-amber-200/80">*</span></label>
@@ -3399,6 +3427,10 @@
             </div>
           </div>
           <p class="text-[10px] text-white/40">Guardá con el botón al pie del panel.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button type="button" id="accountProfileBankCopyBtn" class="btn-neomorphic rounded-xl py-2 text-sm touch-target">Copiar datos</button>
+            <button type="button" id="accountProfileBankWhatsappBtn" class="btn-neomorphic rounded-xl py-2 text-sm touch-target">Enviar por WhatsApp</button>
+          </div>
         </div>
         <button type="button" id="accountProfileSaveBtn" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target mb-2">Guardar cambios</button>
       </div>

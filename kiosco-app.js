@@ -4613,6 +4613,68 @@
       document.getElementById('cobroRapidoModal').classList.add('hidden');
       document.getElementById('cobroRapidoModal').classList.remove('flex');
     }
+    var COBRO_RAPIDO_QR_LINK_KEY = 'ferriol_cobro_rapido_qr_link';
+    var _cobroRapidoQrLockedTotal = 0;
+    function getCobroRapidoCurrentTotal() {
+      if (state.cobroRapidoItems && state.cobroRapidoItems.length > 0) {
+        return state.cobroRapidoItems.reduce(function (s, it) {
+          return s + (Number(it.precio) || 0) * (Math.max(1, Number(it.cant) || 1));
+        }, 0);
+      }
+      var montoEl = document.getElementById('cobroRapidoMonto');
+      return parseInt(((montoEl && montoEl.value) || '').replace(/\D/g, ''), 10) || 0;
+    }
+    function closeCobroRapidoQrModal() {
+      var m = document.getElementById('cobroRapidoQrModal');
+      if (!m) return;
+      _cobroRapidoQrLockedTotal = 0;
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+    function renderCobroRapidoQrModal() {
+      var amount = _cobroRapidoQrLockedTotal > 0 ? _cobroRapidoQrLockedTotal : getCobroRapidoCurrentTotal();
+      var amountEl = document.getElementById('cobroRapidoQrAmount');
+      if (amountEl) amountEl.textContent = '$' + amount.toLocaleString('es-AR');
+      var input = document.getElementById('cobroRapidoQrLinkInput');
+      var link = (input && input.value ? String(input.value) : '').trim();
+      var imgWrap = document.getElementById('cobroRapidoQrImageWrap');
+      var img = document.getElementById('cobroRapidoQrImage');
+      var hint = document.getElementById('cobroRapidoQrHint');
+      var openBtn = document.getElementById('cobroRapidoQrOpenLinkBtn');
+      if (openBtn) {
+        openBtn.href = link || '#';
+        openBtn.classList.toggle('opacity-40', !link);
+        openBtn.classList.toggle('pointer-events-none', !link);
+      }
+      if (!img || !imgWrap) return;
+      if (!link) {
+        imgWrap.classList.add('hidden');
+        if (hint) hint.textContent = 'Pegá y guardá tu link de cobro para mostrar el QR.';
+        return;
+      }
+      imgWrap.classList.remove('hidden');
+      var qrPayload = link + (link.indexOf('?') >= 0 ? '&' : '?') + 'amount=' + encodeURIComponent(String(amount));
+      img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=' + encodeURIComponent(qrPayload);
+      if (hint) hint.textContent = 'Escaneá este QR para pagar.';
+    }
+    function openCobroRapidoQrModal() {
+      var amount = getCobroRapidoCurrentTotal();
+      if (amount <= 0) { alert('Agregá al menos un producto o monto antes de cobrar por QR.'); return; }
+      _cobroRapidoQrLockedTotal = amount;
+      var input = document.getElementById('cobroRapidoQrLinkInput');
+      if (input) {
+        var saved = '';
+        try { saved = localStorage.getItem(COBRO_RAPIDO_QR_LINK_KEY) || ''; } catch (_) {}
+        input.value = saved;
+      }
+      renderCobroRapidoQrModal();
+      var m = document.getElementById('cobroRapidoQrModal');
+      if (m) {
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+      }
+      try { if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
     async function completeQuickSale(method, clientName, whatsapp) {
       try { window._ferriolCobroRapidoPickMode = false; } catch (_) {}
       var items;
@@ -5236,7 +5298,7 @@
     function syncAccountMenuDrawerShell() {
       var bankBtn = document.getElementById('accountMenuBtnBank');
       if (!bankBtn) return;
-      var show = !!(currentUser && isNetworkAdminRole(currentUser.role) && !isAnyKioscoPreviewMode());
+      var show = !!(currentUser && (currentUser.role === 'kiosquero' || isNetworkAdminRole(currentUser.role)));
       bankBtn.classList.toggle('hidden', !show);
     }
     /** Carga ferriol_support_phone y muestra/oculta el botón Ayuda en el menú del avatar. */
@@ -6111,6 +6173,14 @@
       if (fields.alias) lines.push('Alias: ' + String(fields.alias).trim());
       return lines.join('\n');
     }
+    function ferriolBuildAccountBankingInfoFromForm() {
+      return ferriolBuildPartnerBankingInfo({
+        titular: (document.getElementById('accountProfileBankTitular') && document.getElementById('accountProfileBankTitular').value || '').trim(),
+        banco: (document.getElementById('accountProfileBankBanco') && document.getElementById('accountProfileBankBanco').value || '').trim(),
+        cbu: (document.getElementById('accountProfileBankCbu') && document.getElementById('accountProfileBankCbu').value || '').replace(/\s/g, ''),
+        alias: (document.getElementById('accountProfileBankAlias') && document.getElementById('accountProfileBankAlias').value || '').trim()
+      });
+    }
     function ferriolFillAccountProfileBankForm(parsed) {
       var set = function (id, v) {
         var el = document.getElementById(id);
@@ -6130,7 +6200,7 @@
       }
       var mode = 'personal';
       if (modeOpt === 'bank' || modeOpt === true) mode = 'bank';
-      var showBank = isNetworkAdminRole(currentUser.role) && !isAnyKioscoPreviewMode();
+      var showBank = currentUser.role === 'kiosquero' || isNetworkAdminRole(currentUser.role);
       if (mode === 'bank' && !showBank) mode = 'personal';
       _accountProfileModalMode = mode;
 
@@ -6744,9 +6814,30 @@
     var accountMenuBtnBank = document.getElementById('accountMenuBtnBank');
     if (accountMenuBtnBank) {
       accountMenuBtnBank.addEventListener('click', function () {
-        if (!currentUser || !isNetworkAdminRole(currentUser.role) || isAnyKioscoPreviewMode()) return;
+        if (!currentUser || !(currentUser.role === 'kiosquero' || isNetworkAdminRole(currentUser.role))) return;
         closeAccountMenuDrawer(true);
         openAccountProfileModal('bank');
+      });
+    }
+    var accountProfileBankCopyBtn = document.getElementById('accountProfileBankCopyBtn');
+    if (accountProfileBankCopyBtn) {
+      accountProfileBankCopyBtn.addEventListener('click', function () {
+        var txt = ferriolBuildAccountBankingInfoFromForm();
+        if (!txt.trim()) { alert('Completá tus datos bancarios primero.'); return; }
+        copyTextToClipboard(txt, 'Datos bancarios copiados.');
+      });
+    }
+    var accountProfileBankWhatsappBtn = document.getElementById('accountProfileBankWhatsappBtn');
+    if (accountProfileBankWhatsappBtn) {
+      accountProfileBankWhatsappBtn.addEventListener('click', function () {
+        var txt = ferriolBuildAccountBankingInfoFromForm();
+        if (!txt.trim()) { alert('Completá tus datos bancarios primero.'); return; }
+        var msg = 'Te comparto mis datos bancarios para transferencia:\n\n' + txt;
+        var waDigits = (currentUser && currentUser.phone ? String(currentUser.phone) : '').replace(/\D/g, '');
+        try {
+          if (waDigits.length >= 8) window.open('https://wa.me/' + waDigits + '?text=' + encodeURIComponent(msg), '_blank', 'noopener,noreferrer');
+          else window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank', 'noopener,noreferrer');
+        } catch (_) {}
       });
     }
     var accountMenuBtnEmpAjustesSistema = document.getElementById('accountMenuBtnEmpAjustesSistema');
@@ -6841,7 +6932,7 @@
         if (msg) { msg.classList.add('hidden'); msg.textContent = ''; }
 
         if (_accountProfileModalMode === 'bank') {
-          var showBankOnly = isNetworkAdminRole(currentUser.role) && !isAnyKioscoPreviewMode();
+          var showBankOnly = currentUser.role === 'kiosquero' || isNetworkAdminRole(currentUser.role);
           if (!showBankOnly) return;
           var bankTitB = (document.getElementById('accountProfileBankTitular') && document.getElementById('accountProfileBankTitular').value || '').trim();
           var bankBcoB = (document.getElementById('accountProfileBankBanco') && document.getElementById('accountProfileBankBanco').value || '').trim();
@@ -7129,11 +7220,43 @@
       btn.onclick = function () {
         var method = btn.dataset.quickPayment;
         _selectedLibretaClienteForPayment = null;
+        if (method === 'qr') {
+          openCobroRapidoQrModal();
+          return;
+        }
         completeQuickSale(method, '', '').catch(function (err) {
           console.warn('Cobro rápido:', err && err.message ? err.message : err);
         });
       };
     });
+    (function initCobroRapidoQrModal() {
+      var closeBtn = document.getElementById('cobroRapidoQrClose');
+      var overlay = document.getElementById('cobroRapidoQrOverlay');
+      var saveBtn = document.getElementById('cobroRapidoQrSaveLinkBtn');
+      var input = document.getElementById('cobroRapidoQrLinkInput');
+      var paidBtn = document.getElementById('cobroRapidoQrPaidBtn');
+      if (closeBtn) closeBtn.onclick = closeCobroRapidoQrModal;
+      if (overlay) overlay.onclick = closeCobroRapidoQrModal;
+      if (input) input.addEventListener('input', renderCobroRapidoQrModal);
+      if (saveBtn) saveBtn.onclick = function () {
+        var link = (input && input.value ? String(input.value) : '').trim();
+        if (!link) { alert('Pegá un link de cobro primero.'); return; }
+        try { new URL(link); } catch (_) { alert('Ingresá un link válido (https://...).'); return; }
+        try { localStorage.setItem(COBRO_RAPIDO_QR_LINK_KEY, link); } catch (_) {}
+        renderCobroRapidoQrModal();
+      };
+      if (paidBtn) paidBtn.onclick = function () {
+        var currentAmount = getCobroRapidoCurrentTotal();
+        if (_cobroRapidoQrLockedTotal > 0 && currentAmount !== _cobroRapidoQrLockedTotal) {
+          alert('El total cambió desde que abriste el QR. Cerrá y volvé a abrir QR para cobrar el monto correcto.');
+          return;
+        }
+        closeCobroRapidoQrModal();
+        completeQuickSale('transferencia', '', '').catch(function (err) {
+          console.warn('Cobro rápido QR:', err && err.message ? err.message : err);
+        });
+      };
+    })();
 
     function showScanToast(msg, isError) {
       const el = document.getElementById('scanToast');
