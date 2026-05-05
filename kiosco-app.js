@@ -6213,7 +6213,12 @@
         el.style.display = asKiosquero ? '' : 'none';
       });
       var navK = document.getElementById('navKiosquero');
-      if (navK) navK.classList.toggle('hidden', !asKiosquero);
+      var lockCobroRapidoPickNav = !!window._ferriolCobroRapidoPickMode && (state.currentPanel === 'inventory' || state.currentPanel === 'scanner');
+      if (navK) {
+        var hideKNav = !asKiosquero || lockCobroRapidoPickNav;
+        navK.classList.toggle('hidden', hideKNav);
+        navK.style.display = hideKNav ? 'none' : '';
+      }
       document.querySelectorAll('.super-only').forEach(function (el) {
         if (!isNetworkAdmin) {
           el.style.display = 'none';
@@ -7107,12 +7112,6 @@
       window._ferriolCobroRapidoPickMode = true;
       pauseCobroRapidoModalVisual();
       goToPanel('inventory');
-    };
-    var cobroRapidoIrScannerBtn = document.getElementById('cobroRapidoIrScannerBtn');
-    if (cobroRapidoIrScannerBtn) cobroRapidoIrScannerBtn.onclick = function () {
-      window._ferriolCobroRapidoPickMode = true;
-      pauseCobroRapidoModalVisual();
-      goToPanel('scanner');
     };
     (function initCobroRapidoStockPicker() {
       var list = document.getElementById('cobroRapidoStockList');
