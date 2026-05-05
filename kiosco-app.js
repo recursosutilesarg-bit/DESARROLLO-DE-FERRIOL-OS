@@ -4612,7 +4612,6 @@
       document.getElementById('cobroRapidoModal').classList.remove('hidden');
       document.getElementById('cobroRapidoModal').classList.add('flex');
       if (!state._restoringFromHistory) pushHistoryExtra({ modal: 'cobroRapido' });
-      setTimeout(function () { document.getElementById('cobroRapidoMonto').focus(); }, 100);
       lucide.createIcons();
     }
     function getCobroRapidoProductoNombre() {
