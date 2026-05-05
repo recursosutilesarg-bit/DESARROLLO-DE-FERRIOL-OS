@@ -4019,12 +4019,14 @@
 
     function closeAddToCartQtyModal() {
       state._pendingAddToCartCodigo = null;
+      state._addQtyTarget = null;
       var m = document.getElementById('addToCartQtyModal');
       if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
     }
 
-    function openAddToCartQtyModal(codigo) {
+    function openAddToCartQtyModal(codigo, opts) {
       if (!codigo) return;
+      var target = (opts && opts.target === 'cobroRapido') ? 'cobroRapido' : 'cart';
       const d = getData();
       const p = (d.products || {})[codigo];
       if (!p) return;
@@ -4035,11 +4037,15 @@
       }
       const existing = state.cart.find(i => i.codigo === codigo);
       const inCart = existing ? existing.cant : 0;
-      const maxAdd = stockAvail - inCart;
+      const inCobro = target === 'cobroRapido' ? cobroRapidoQtyInList(codigo) : 0;
+      const maxAdd = stockAvail - inCart - inCobro;
       if (maxAdd <= 0) {
-        if (typeof showScanToast === 'function') showScanToast('No hay unidades disponibles (ya están en el carrito).', true);
+        if (typeof showScanToast === 'function') {
+          showScanToast(target === 'cobroRapido' ? 'No hay unidades libres (revisá stock, carrito o lo ya sumado al cobro rápido).' : 'No hay unidades disponibles (ya están en el carrito).', true);
+        }
         return;
       }
+      state._addQtyTarget = target;
       state._pendingAddToCartCodigo = codigo;
       var titleEl = document.getElementById('addToCartQtyTitle');
       var subEl = document.getElementById('addToCartQtySubtitle');
@@ -4047,14 +4053,19 @@
       var hint = document.getElementById('addToCartQtyHint');
       if (titleEl) titleEl.textContent = p.nombre || 'Producto';
       if (subEl) {
-        subEl.textContent = '$' + (p.precio ?? 0).toLocaleString('es-AR') + ' · Stock: ' + stockAvail + (inCart ? ' · Ya en carrito: ' + inCart : '');
+        var base = '$' + (p.precio ?? 0).toLocaleString('es-AR') + ' · Stock: ' + stockAvail;
+        if (target === 'cobroRapido') {
+          subEl.textContent = base + ' · En cobro rápido: ' + inCobro + (inCart ? ' · En carrito: ' + inCart : '');
+        } else {
+          subEl.textContent = base + (inCart ? ' · Ya en carrito: ' + inCart : '');
+        }
       }
       if (inp) {
         inp.value = '1';
         inp.min = '1';
         inp.max = String(maxAdd);
       }
-      if (hint) hint.textContent = 'Podés agregar hasta ' + maxAdd + ' u. en este paso.';
+      if (hint) hint.textContent = target === 'cobroRapido' ? ('Podés sumar hasta ' + maxAdd + ' u. a esta venta rápida.') : ('Podés agregar hasta ' + maxAdd + ' u. en este paso.');
       var m = document.getElementById('addToCartQtyModal');
       if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
@@ -4443,6 +4454,52 @@
       });
     }
 
+    function cobroRapidoQtyInList(codigo) {
+      if (!codigo) return 0;
+      return (state.cobroRapidoItems || []).reduce(function (s, it) {
+        if (it && it.codigo === codigo) return s + (Math.max(1, Number(it.cant) || 1));
+        return s;
+      }, 0);
+    }
+    function ferriolEscapeHtmlAttr(s) {
+      return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function ferriolRenderCobroRapidoStockList() {
+      var listEl = document.getElementById('cobroRapidoStockList');
+      var emptyEl = document.getElementById('cobroRapidoStockEmpty');
+      if (!listEl) return;
+      var q = '';
+      var inp = document.getElementById('cobroRapidoStockSearch');
+      if (inp) q = String(inp.value || '').trim().toLowerCase();
+      var d = getData();
+      var entries = Object.keys(d.products || {}).map(function (k) {
+        var p = d.products[k];
+        return { codigo: k, nombre: (p && p.nombre) || k, precio: Number(p && p.precio) || 0, stock: Math.max(0, Number(p && p.stock) || 0) };
+      });
+      entries = entries.filter(function (p) { return p.stock > 0; });
+      if (q) {
+        entries = entries.filter(function (p) {
+          return (p.nombre || '').toLowerCase().indexOf(q) >= 0 || String(p.codigo).toLowerCase().indexOf(q) >= 0;
+        });
+      }
+      entries.sort(function (a, b) { return (a.nombre || '').localeCompare(b.nombre || '', 'es', { sensitivity: 'base' }); });
+      entries = entries.slice(0, 80);
+      if (entries.length === 0) {
+        listEl.innerHTML = '';
+        if (emptyEl) emptyEl.classList.remove('hidden');
+        try { if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+        return;
+      }
+      if (emptyEl) emptyEl.classList.add('hidden');
+      listEl.innerHTML = entries.map(function (p) {
+        var safeName = (p.nombre || '').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+        var cEsc = ferriolEscapeHtmlAttr(p.codigo);
+        return '<button type="button" class="cobro-rapido-stock-pick w-full text-left flex items-center justify-between gap-2 py-2 px-2.5 rounded-lg bg-white/5 border border-white/10 hover:border-[#22c55e]/45 hover:bg-[#22c55e]/10 touch-target text-xs text-white" data-cobro-rapido-codigo="' + cEsc + '">' +
+          '<span class="truncate flex-1">' + safeName + '</span>' +
+          '<span class="shrink-0 text-white/60 tabular-nums">' + p.stock + ' u. · $' + p.precio.toLocaleString('es-AR') + '</span></button>';
+      }).join('');
+      try { if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
     function updateCobroRapidoLista() {
       var listEl = document.getElementById('cobroRapidoLista');
       var emptyEl = document.getElementById('cobroRapidoListaEmpty');
@@ -4456,11 +4513,18 @@
         return;
       }
       if (emptyEl) emptyEl.classList.add('hidden');
-      var total = items.reduce(function (s, it) { return s + (it.precio || 0); }, 0);
+      var total = items.reduce(function (s, it) {
+        var cant = Math.max(1, Number(it.cant) || 1);
+        var unit = Number(it.precio) || 0;
+        return s + unit * cant;
+      }, 0);
       listEl.innerHTML = items.map(function (it, i) {
         var nombre = (it.nombre || 'Item').replace(/</g, '&lt;').replace(/"/g, '&quot;');
-        var precio = it.precio || 0;
-        return '<div class="flex items-center justify-between gap-1.5 py-1 px-2 rounded-lg bg-white/10"><span class="text-xs text-white truncate flex-1">' + nombre + ' <span class="text-white/60">$' + precio + '</span></span><button type="button" class="cobro-rapido-quitar shrink-0 p-1 rounded text-red-300 hover:bg-red-500/20 touch-target text-sm" data-index="' + i + '" aria-label="Quitar">×</button></div>';
+        var cant = Math.max(1, Number(it.cant) || 1);
+        var unit = Number(it.precio) || 0;
+        var lineTot = unit * cant;
+        var qtyHtml = cant > 1 ? ' <span class="text-white/55">×' + cant + '</span>' : '';
+        return '<div class="flex items-center justify-between gap-1.5 py-1 px-2 rounded-lg bg-white/10"><span class="text-xs text-white truncate flex-1">' + nombre + qtyHtml + ' <span class="text-white/60">$' + lineTot.toLocaleString('es-AR') + '</span></span><button type="button" class="cobro-rapido-quitar shrink-0 p-1 rounded text-red-300 hover:bg-red-500/20 touch-target text-sm" data-index="' + i + '" aria-label="Quitar">×</button></div>';
       }).join('');
       if (totalEl) { totalEl.classList.remove('hidden'); totalEl.textContent = 'Total: $' + total; }
       listEl.querySelectorAll('.cobro-rapido-quitar').forEach(function (btn) {
@@ -4486,6 +4550,9 @@
       try { lastMethod = localStorage.getItem(LAST_QUICK_PAYMENT_KEY) || ''; } catch (_) {}
       if (lastMethod) document.querySelectorAll('.quick-payment-option').forEach(function (el) { if (el.dataset.quickPayment === lastMethod) el.classList.add('ring-2', 'ring-[#dc2626]'); });
       updateCobroRapidoLista();
+      var crSearch = document.getElementById('cobroRapidoStockSearch');
+      if (crSearch) crSearch.value = '';
+      ferriolRenderCobroRapidoStockList();
       var crDet = document.querySelector('#cobroRapidoModal details');
       if (crDet) crDet.removeAttribute('open');
       document.getElementById('cobroRapidoModal').classList.remove('hidden');
@@ -4526,15 +4593,23 @@
       var items;
       var total;
       if (state.cobroRapidoItems && state.cobroRapidoItems.length > 0) {
-        items = state.cobroRapidoItems.map(function (it) {
+        items = state.cobroRapidoItems.map(function (it, idx) {
+          var cant = Math.max(1, Number(it.cant) || 1);
+          var codigo = it.codigo;
+          if (codigo && String(codigo).indexOf('_rapida_') !== 0) {
+            var pr = Number(it.precio) || 0;
+            var co = it.costo != null ? Number(it.costo) : 0;
+            if (!Number.isFinite(co) || co < 0) co = 0;
+            return { nombre: it.nombre || 'Producto', codigo: codigo, precio: pr, cant: cant, costo: co };
+          }
           var nombre = it.nombre || 'Venta rápida';
-          var codigoRapida = '_rapida_' + (nombre.replace(/\s+/g, '_').toLowerCase().replace(/[^a-z0-9_]/g, '') || 'venta') + '_' + Date.now();
+          var codigoRapida = '_rapida_' + (nombre.replace(/\s+/g, '_').toLowerCase().replace(/[^a-z0-9_]/g, '') || 'venta') + '_' + Date.now() + '_' + idx;
           var pr = Number(it.precio) || 0;
           var co = it.costo != null ? Number(it.costo) : 0;
           if (!Number.isFinite(co) || co < 0) co = 0;
-          return { nombre: nombre, codigo: codigoRapida, precio: pr, cant: 1, costo: co };
+          return { nombre: nombre, codigo: codigoRapida, precio: pr, cant: cant, costo: co };
         });
-        total = items.reduce(function (s, it) { return s + (Number(it.precio) || 0); }, 0);
+        total = items.reduce(function (s, it) { return s + (Number(it.precio) || 0) * (Math.max(1, Number(it.cant) || 1)); }, 0);
       } else {
         var montoEl = document.getElementById('cobroRapidoMonto');
         var amount = parseInt((montoEl.value || '').replace(/\D/g, ''), 10) || 0;
@@ -4587,12 +4662,21 @@
       }
       d.transacciones = (d.transacciones || 0) + 1;
       d.lastCierreDate = new Date().toISOString().slice(0, 10);
+      (items || []).forEach(function (it) {
+        var c = it.codigo;
+        if (!c || String(c).indexOf('_rapida_') === 0) return;
+        if (d.products[c]) {
+          var q = Math.max(1, Number(it.cant) || 1);
+          d.products[c].stock = Math.max(0, (Number(d.products[c].stock) || 0) - q);
+        }
+      });
       setData(d);
       try {
         await updateDashboard();
       } catch (e) {
         console.warn('No se pudo refrescar el panel tras cobro rápido:', e && e.message ? e.message : e);
       }
+      try { renderInventory(); } catch (e2) { console.warn('renderInventory tras cobro rápido:', e2 && e2.message); }
       state.cobroRapidoItems = [];
       try { localStorage.setItem(LAST_QUICK_PAYMENT_KEY, method); } catch (_) {}
       closeCobroRapidoModal();
@@ -6949,7 +7033,27 @@
         var c = state._pendingAddToCartCodigo;
         if (!c) { closeAddToCartQtyModal(); return; }
         var q = parseInt(inp && inp.value, 10) || 1;
-        addToCart(c, q);
+        var target = state._addQtyTarget || 'cart';
+        if (target === 'cobroRapido') {
+          var dPick = getData();
+          var pPick = (dPick.products || {})[c];
+          if (pPick) {
+            var precioU = Number(pPick.precio) || 0;
+            var costoU = pPick.costo != null ? Number(pPick.costo) : 0;
+            if (!Number.isFinite(costoU) || costoU < 0) costoU = 0;
+            state.cobroRapidoItems = state.cobroRapidoItems || [];
+            var idxM = state.cobroRapidoItems.findIndex(function (it) { return it.codigo === c; });
+            if (idxM >= 0) {
+              state.cobroRapidoItems[idxM].cant = (Math.max(1, Number(state.cobroRapidoItems[idxM].cant) || 1)) + q;
+            } else {
+              state.cobroRapidoItems.push({ nombre: pPick.nombre || c, codigo: c, precio: precioU, costo: costoU, cant: q });
+            }
+            updateCobroRapidoLista();
+            ferriolRenderCobroRapidoStockList();
+          }
+        } else {
+          addToCart(c, q);
+        }
         closeAddToCartQtyModal();
       };
       if (inp) inp.addEventListener('keydown', function (e) {
@@ -6967,10 +7071,22 @@
       var margen = getCobroRapidoProductoMargen();
       var costo = costoDesdeMargen(amount, margen);
       state.cobroRapidoItems = state.cobroRapidoItems || [];
-      state.cobroRapidoItems.push({ nombre: productName, precio: amount, costo: costo });
+      state.cobroRapidoItems.push({ nombre: productName, precio: amount, costo: costo, cant: 1 });
       document.getElementById('cobroRapidoMonto').value = '';
       updateCobroRapidoLista();
     };
+    (function initCobroRapidoStockPicker() {
+      var list = document.getElementById('cobroRapidoStockList');
+      var search = document.getElementById('cobroRapidoStockSearch');
+      if (!list || !search) return;
+      list.addEventListener('click', function (e) {
+        var btn = e.target.closest('.cobro-rapido-stock-pick');
+        if (!btn) return;
+        var codigo = btn.getAttribute('data-cobro-rapido-codigo');
+        if (codigo) openAddToCartQtyModal(codigo, { target: 'cobroRapido' });
+      });
+      search.addEventListener('input', function () { ferriolRenderCobroRapidoStockList(); });
+    })();
     document.querySelectorAll('.quick-payment-option').forEach(function (btn) {
       btn.onclick = function () {
         var method = btn.dataset.quickPayment;
