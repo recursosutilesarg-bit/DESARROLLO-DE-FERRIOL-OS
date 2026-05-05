@@ -4136,29 +4136,29 @@
         itemsEl.innerHTML = state.cart.map((item, idx) => {
           var nm = (item.nombre || '').replace(/</g, '&lt;');
           var sub = (item.precio * item.cant).toLocaleString('es-AR');
-          var unit = (item.precio != null ? Number(item.precio) : 0).toLocaleString('es-AR');
           return `
-          <div class="flex items-center gap-2 sm:gap-3 glass rounded-xl p-3">
+          <div class="glass rounded-xl p-3">
+            <div class="flex items-center gap-2 sm:gap-3">
             <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#dc2626]/30 flex items-center justify-center shrink-0">
               <i data-lucide="package" class="w-4 h-4 sm:w-5 sm:h-5 text-[#f87171]"></i>
             </div>
             <div class="flex-1 min-w-0">
               <p class="font-medium truncate">${nm}</p>
-              <p class="text-sm text-white/60">$${unit} c/u</p>
-            </div>
-            <div class="flex items-center gap-0.5 shrink-0">
-              <button type="button" class="cart-qty-btn w-9 h-9 flex items-center justify-center rounded-lg border border-white/20 text-white/90 hover:bg-white/10 touch-target" data-idx="${idx}" data-delta="-1" aria-label="Quitar una unidad">
-                <i data-lucide="minus" class="w-4 h-4"></i>
-              </button>
-              <span class="min-w-[2rem] text-center text-sm font-semibold tabular-nums text-white/95">${item.cant}</span>
-              <button type="button" class="cart-qty-btn w-9 h-9 flex items-center justify-center rounded-lg border border-white/20 text-white/90 hover:bg-white/10 touch-target" data-idx="${idx}" data-delta="1" aria-label="Agregar una unidad">
-                <i data-lucide="plus" class="w-4 h-4"></i>
-              </button>
             </div>
             <p class="font-semibold text-sm sm:text-base shrink-0 min-w-[4.5rem] text-right">$${sub}</p>
             <button type="button" class="remove-cart text-red-400/90 p-2 touch-target rounded-lg hover:bg-red-500/20 shrink-0" data-idx="${idx}" aria-label="Quitar del carrito">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
+            </div>
+            <div class="mt-2 flex items-center justify-end gap-1.5">
+              <button type="button" class="cart-qty-btn w-7 h-7 flex items-center justify-center rounded-md border border-white/20 text-white/90 hover:bg-white/10" data-idx="${idx}" data-delta="-1" aria-label="Quitar una unidad">
+                <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+              </button>
+              <span class="min-w-[2rem] text-center text-sm font-semibold tabular-nums text-white/95">${item.cant}</span>
+              <button type="button" class="cart-qty-btn w-7 h-7 flex items-center justify-center rounded-md border border-white/20 text-white/90 hover:bg-white/10" data-idx="${idx}" data-delta="1" aria-label="Agregar una unidad">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
           </div>`;
         }).join('');
         lucide.createIcons();
