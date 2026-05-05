@@ -2947,9 +2947,20 @@
         <p id="cobroRapidoListaEmpty" class="text-[11px] text-white/40 py-1">Sin ítems aún.</p>
         <p id="cobroRapidoTotal" class="text-right text-sm font-bold text-[#86efac] mt-1 hidden">Total: $0</p>
       </div>
-      <button type="button" id="cobroRapidoAgregarBtn" class="w-full btn-neomorphic rounded-xl py-2 text-sm font-medium flex items-center justify-center gap-2 touch-target mb-3">
+      <button type="button" id="cobroRapidoAgregarBtn" class="w-full btn-neomorphic rounded-xl py-2 text-sm font-medium flex items-center justify-center gap-2 touch-target mb-2">
         <i data-lucide="plus" class="w-4 h-4"></i> Agregar
       </button>
+      <div class="grid grid-cols-2 gap-2 mb-2">
+        <button type="button" id="cobroRapidoIrProductosBtn" class="w-full glass rounded-xl py-2.5 px-2 text-xs font-medium flex flex-col items-center justify-center gap-1 border border-white/15 hover:border-[#22c55e]/50 hover:bg-[#22c55e]/08 touch-target active:scale-[0.98] text-white">
+          <i data-lucide="layout-grid" class="w-4 h-4 text-[#86efac] shrink-0"></i>
+          <span class="leading-tight text-center">Agregar<br class="sm:hidden"> producto</span>
+        </button>
+        <button type="button" id="cobroRapidoIrScannerBtn" class="w-full glass rounded-xl py-2.5 px-2 text-xs font-medium flex flex-col items-center justify-center gap-1 border border-white/15 hover:border-[#22c55e]/50 hover:bg-[#22c55e]/08 touch-target active:scale-[0.98] text-white">
+          <i data-lucide="scan-line" class="w-4 h-4 text-[#86efac] shrink-0"></i>
+          <span>Escanear</span>
+        </button>
+      </div>
+      <p class="text-[10px] text-white/40 text-center mb-3">Abrís Productos o el escáner; al confirmar cantidad volvés acá con el ítem sumado.</p>
       <input type="hidden" id="cobroRapidoCliente" value="">
       <input type="hidden" id="cobroRapidoWhatsapp" value="">
       <p id="cobroRapidoWhatsappErr" class="hidden"></p>
@@ -3415,7 +3426,7 @@
     </div>
   </div>
 
-  <script defer src="kiosco-app.js?v=20260505_cobro_rapido_stock"></script>
+  <script defer src="kiosco-app.js?v=20260505_cobro_rapido_pick_btns"></script>
   <script defer src="kiosco-pwa.js?v=20260426ptr_stack_v2"></script>
 </body>
 </html>

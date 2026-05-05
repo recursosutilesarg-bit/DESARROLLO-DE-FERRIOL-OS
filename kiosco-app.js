@@ -4026,6 +4026,7 @@
 
     function openAddToCartQtyModal(codigo, opts) {
       if (!codigo) return;
+      if (!opts && window._ferriolCobroRapidoPickMode) opts = { target: 'cobroRapido' };
       var target = (opts && opts.target === 'cobroRapido') ? 'cobroRapido' : 'cart';
       const d = getData();
       const p = (d.products || {})[codigo];
@@ -4537,7 +4538,29 @@
       lucide.createIcons();
     }
     window._abrirCobroRapido = function () { openCobroRapidoModal(); };
+    /** Oculta el modal sin borrar ítems (al ir a Productos / Escáner desde cobro rápido). */
+    function pauseCobroRapidoModalVisual() {
+      var m = document.getElementById('cobroRapidoModal');
+      if (!m) return;
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+    /** Tras elegir cantidad desde inventario o escáner: volver al panel principal y mostrar de nuevo el cobro rápido. */
+    function resumeCobroRapidoAfterPick() {
+      if (!window._ferriolCobroRapidoPickMode) return;
+      window._ferriolCobroRapidoPickMode = false;
+      goToPanel('dashboard');
+      var m = document.getElementById('cobroRapidoModal');
+      if (m) {
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+      }
+      updateCobroRapidoLista();
+      ferriolRenderCobroRapidoStockList();
+      try { if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
     function openCobroRapidoModal() {
+      try { window._ferriolCobroRapidoPickMode = false; } catch (_) {}
       state.cobroRapidoItems = [];
       _selectedLibretaClienteForPayment = null;
       document.getElementById('cobroRapidoMonto').value = '';
@@ -4581,6 +4604,7 @@
       return Number.isFinite(c) && c >= 0 ? c : 0;
     }
     function closeCobroRapidoModal() {
+      try { window._ferriolCobroRapidoPickMode = false; } catch (_) {}
       if (!state._restoringFromHistory && history.state && history.state.modal === 'cobroRapido') {
         var n = Object.assign({}, history.state);
         delete n.modal;
@@ -4590,6 +4614,7 @@
       document.getElementById('cobroRapidoModal').classList.remove('flex');
     }
     async function completeQuickSale(method, clientName, whatsapp) {
+      try { window._ferriolCobroRapidoPickMode = false; } catch (_) {}
       var items;
       var total;
       if (state.cobroRapidoItems && state.cobroRapidoItems.length > 0) {
@@ -7051,10 +7076,12 @@
             updateCobroRapidoLista();
             ferriolRenderCobroRapidoStockList();
           }
+          closeAddToCartQtyModal();
+          if (window._ferriolCobroRapidoPickMode) resumeCobroRapidoAfterPick();
         } else {
           addToCart(c, q);
+          closeAddToCartQtyModal();
         }
-        closeAddToCartQtyModal();
       };
       if (inp) inp.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') { e.preventDefault(); if (confirmBtn) confirmBtn.click(); }
@@ -7074,6 +7101,18 @@
       state.cobroRapidoItems.push({ nombre: productName, precio: amount, costo: costo, cant: 1 });
       document.getElementById('cobroRapidoMonto').value = '';
       updateCobroRapidoLista();
+    };
+    var cobroRapidoIrProductosBtn = document.getElementById('cobroRapidoIrProductosBtn');
+    if (cobroRapidoIrProductosBtn) cobroRapidoIrProductosBtn.onclick = function () {
+      window._ferriolCobroRapidoPickMode = true;
+      pauseCobroRapidoModalVisual();
+      goToPanel('inventory');
+    };
+    var cobroRapidoIrScannerBtn = document.getElementById('cobroRapidoIrScannerBtn');
+    if (cobroRapidoIrScannerBtn) cobroRapidoIrScannerBtn.onclick = function () {
+      window._ferriolCobroRapidoPickMode = true;
+      pauseCobroRapidoModalVisual();
+      goToPanel('scanner');
     };
     (function initCobroRapidoStockPicker() {
       var list = document.getElementById('cobroRapidoStockList');
@@ -7553,6 +7592,14 @@
       }
       const data = getData();
       const found = findProductByCode(data.products, norm);
+      if (window._ferriolCobroRapidoPickMode && found && found.product.stock > 0) {
+        lastScannedCode = norm;
+        lastScanTime = now;
+        openAddToCartQtyModal(found.codigo, { target: 'cobroRapido' });
+        playBeep();
+        showScanToast(found.product.nombre + ' — elegí cantidad', false);
+        return;
+      }
       if (found && found.product.stock > 0) {
         lastScannedCode = norm;
         lastScanTime = now;
