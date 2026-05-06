@@ -4413,7 +4413,88 @@
         } catch (_) {}
       }
       renderFrequentProducts();
+      await renderEstadoCuentaNegocioDia(m);
       await loadKioscoLicensePaymentInfo();
+    }
+    async function renderEstadoCuentaNegocioDia(metricasDia) {
+      var ingresosEl = document.getElementById('estadoCuentaIngresos');
+      if (!ingresosEl) return;
+      var gastosFijosEl = document.getElementById('estadoCuentaGastosFijos');
+      var proveedoresEl = document.getElementById('estadoCuentaProveedores');
+      var costosEl = document.getElementById('estadoCuentaCostos');
+      var resultadoEl = document.getElementById('estadoCuentaResultado');
+      var etiquetaEl = document.getElementById('estadoCuentaEtiqueta');
+      var breakEvenEl = document.getElementById('estadoCuentaBreakEven');
+      var percentEl = document.getElementById('estadoCuentaPercent');
+      var progressEl = document.getElementById('estadoCuentaProgress');
+      var notaEl = document.getElementById('estadoCuentaNota');
+      var ingresos = Number(metricasDia && metricasDia.total) || 0;
+      var gastosFijos = 0;
+      var proveedores = 0;
+      var costos = 0;
+      if (supabaseClient && currentUser && currentUser.id) {
+        try {
+          var hoy = ferriolTodayYmdLocal();
+          var gres = await supabaseClient
+            .from('gastos')
+            .select('tipo, descripcion, monto')
+            .eq('user_id', currentUser.id)
+            .eq('fecha', hoy);
+          if (!gres.error && Array.isArray(gres.data)) {
+            gres.data.forEach(function (g) {
+              var monto = Number(g.monto) || 0;
+              var tipo = String(g.tipo || '').toLowerCase();
+              var desc = String(g.descripcion || '').toLowerCase();
+              var esImpuesto = tipo === 'impuesto' || desc.indexOf('impuesto') !== -1 || desc.indexOf('iva') !== -1 || desc.indexOf('ingresos brutos') !== -1 || desc.indexOf('afip') !== -1 || desc.indexOf('tribut') !== -1;
+              if (esImpuesto) {
+                gastosFijos += monto;
+              } else if (tipo === 'proveedor') {
+                proveedores += monto;
+              } else {
+                gastosFijos += monto;
+              }
+            });
+          }
+        } catch (_) {}
+      }
+      var hoyYmd = ferriolTodayYmdLocal();
+      (state.transaccionesList || []).forEach(function (t) {
+        var method = String(t.method || '');
+        if (method === 'fiado' || method === 'transferencia_pendiente') return;
+        if (ferriolYmdFromDate(t.fechaHora) !== hoyYmd) return;
+        (t.items || []).forEach(function (i) {
+          var c = Number(i.costo);
+          var q = Number(i.cant) || 0;
+          if (Number.isFinite(c) && q > 0) costos += (c * q);
+        });
+      });
+      if ((!costos || costos < 0) && metricasDia && Number.isFinite(metricasDia.ganancia)) {
+        var fallbackCost = ingresos - Number(metricasDia.ganancia);
+        if (Number.isFinite(fallbackCost) && fallbackCost > 0) costos = fallbackCost;
+      }
+      var egresosTotales = gastosFijos + proveedores + costos;
+      var neto = ingresos - egresosTotales;
+      var cubiertoPct = egresosTotales > 0 ? (ingresos / egresosTotales) * 100 : (ingresos > 0 ? 100 : 0);
+      if (!isFinite(cubiertoPct) || cubiertoPct < 0) cubiertoPct = 0;
+      var cappedPct = Math.max(0, Math.min(100, cubiertoPct));
+      var faltante = Math.max(0, egresosTotales - ingresos);
+      var estado = neto > 0 ? 'En profit' : (neto < 0 ? 'En pérdida' : 'En equilibrio');
+      ingresosEl.textContent = '$' + Math.round(ingresos).toLocaleString('es-AR');
+      if (gastosFijosEl) gastosFijosEl.textContent = '$' + Math.round(gastosFijos).toLocaleString('es-AR');
+      if (proveedoresEl) proveedoresEl.textContent = '$' + Math.round(proveedores).toLocaleString('es-AR');
+      if (costosEl) costosEl.textContent = '$' + Math.round(costos).toLocaleString('es-AR');
+      if (resultadoEl) {
+        resultadoEl.textContent = (neto >= 0 ? '+' : '−') + '$' + Math.abs(Math.round(neto)).toLocaleString('es-AR');
+        resultadoEl.className = 'text-xl sm:text-2xl font-bold mt-1 ' + (neto > 0 ? 'text-[#86efac]' : (neto < 0 ? 'text-red-300' : 'text-amber-300'));
+      }
+      if (etiquetaEl) etiquetaEl.textContent = estado + ' · Ingresos - (gastos fijos + proveedores + costos)';
+      if (breakEvenEl) {
+        breakEvenEl.textContent = (faltante > 0 ? 'Faltan ' : 'Cubierto ') + '$' + Math.round(faltante > 0 ? faltante : egresosTotales).toLocaleString('es-AR');
+        breakEvenEl.className = 'text-sm font-semibold ' + (faltante > 0 ? 'text-amber-300' : 'text-[#86efac]');
+      }
+      if (percentEl) percentEl.textContent = Math.round(cubiertoPct) + '%';
+      if (progressEl) progressEl.style.width = cappedPct.toFixed(1) + '%';
+      if (notaEl) notaEl.textContent = 'Orden contable del día: gastos fijos (incluye impuestos) + proveedores + costos de productos vendidos contra ingresos cobrados.';
     }
     function openDetalleVentaModal(v) {
       var content = document.getElementById('detalleVentaModalContent');
