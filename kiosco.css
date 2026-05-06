@@ -144,6 +144,10 @@ body::before {
   padding: 0.75rem max(1rem, env(safe-area-inset-left, 0px)) max(1.25rem, env(safe-area-inset-bottom, 0px))
     max(1rem, env(safe-area-inset-right, 0px));
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  /* Ocupa el alto útil del panel: el bloque de acciones queda pegado abajo */
+  min-height: 100%;
 }
 
 .ferriol-scanner-head {
@@ -308,25 +312,33 @@ body::before {
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  margin-top: 1.1rem;
+  margin-top: auto;
+  padding-top: 0.75rem;
   width: 100%;
+  flex-shrink: 0;
 }
 
-/* Botón principal: grande, circular, bajo la vista — alcance del pulgar con una mano */
+/* Botón principal: abajo, centrado, círculo perfecto (misma medida en ambos ejes) */
 .ferriol-scanner-hold-btn {
-  --ferriol-scan-btn-size: min(8.75rem, 72vw);
+  --ferriol-scan-btn-size: min(8.25rem, min(72vw, 56dvh));
+  box-sizing: border-box;
   width: var(--ferriol-scan-btn-size);
   height: var(--ferriol-scan-btn-size);
   min-width: var(--ferriol-scan-btn-size);
+  max-width: var(--ferriol-scan-btn-size);
   min-height: var(--ferriol-scan-btn-size);
+  max-height: var(--ferriol-scan-btn-size);
   padding: 0;
-  margin-inline: auto;
+  margin: 0 auto;
+  flex-shrink: 0;
+  align-self: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
-  border-radius: 50%;
+  gap: 0.4rem;
+  border-radius: 9999px;
+  overflow: hidden;
   border: 2px solid rgba(34, 211, 238, 0.42);
   background: radial-gradient(
       circle at 35% 28%,
