@@ -604,38 +604,38 @@
       </div>
     </section>
 
-    <!-- Escáner Inteligente -->
-    <section id="panel-scanner" class="panel hidden outline-none" tabindex="-1" aria-label="Escáner de códigos">
-      <div class="glass rounded-2xl p-6 slide-up">
-        <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
-          <i data-lucide="scan-line" class="w-5 h-5 text-[#86efac]"></i>
-          Escáner de códigos
-        </h2>
-        <div class="relative aspect-square max-w-sm mx-auto rounded-2xl overflow-hidden border-2 border-[#22c55e]/50 pulse-glow bg-black/40">
-          <video id="scannerVideo" class="w-full h-full object-cover" playsinline muted></video>
+    <!-- Escáner (vista óptica minimal) -->
+    <section id="panel-scanner" class="panel ferriol-scanner-panel hidden outline-none" tabindex="-1" aria-label="Escáner de códigos">
+      <div class="ferriol-scanner-shell slide-up">
+        <header class="ferriol-scanner-head">
+          <span class="ferriol-scanner-live-dot" aria-hidden="true"></span>
+          <span class="ferriol-scanner-head-label">Óptico</span>
+        </header>
+
+        <div class="ferriol-scanner-viewport relative aspect-square max-w-sm mx-auto overflow-hidden">
+          <video id="scannerVideo" class="ferriol-scanner-video w-full h-full object-cover" playsinline muted></video>
           <canvas id="scannerCanvas" class="hidden"></canvas>
-          <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div class="w-[85%] h-[85%] border-2 border-dashed border-[#dc2626] rounded-xl relative overflow-hidden">
-              <div class="laser-line absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#dc2626] to-transparent"></div>
-              <div class="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 scan-corner"></div>
-              <div class="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 scan-corner"></div>
-              <div class="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 scan-corner"></div>
-              <div class="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 scan-corner"></div>
+          <div class="ferriol-scanner-vignette pointer-events-none absolute inset-0" aria-hidden="true"></div>
+          <div class="ferriol-scanner-hud pointer-events-none absolute inset-0 flex items-center justify-center">
+            <div class="ferriol-scanner-frame">
+              <span class="ferriol-scanner-corner ferriol-scanner-corner--tl"></span>
+              <span class="ferriol-scanner-corner ferriol-scanner-corner--tr"></span>
+              <span class="ferriol-scanner-corner ferriol-scanner-corner--bl"></span>
+              <span class="ferriol-scanner-corner ferriol-scanner-corner--br"></span>
+              <div class="ferriol-scanner-beam"></div>
             </div>
           </div>
         </div>
-        <div class="mt-4 flex flex-col sm:flex-row gap-3">
-          <button id="scanHoldBtn" class="flex-1 btn-glow rounded-xl py-3 font-semibold flex items-center justify-center gap-2 transition-transform active:scale-95 touch-target select-none">
-            <i data-lucide="scan" class="w-5 h-5"></i> Mantener presionado para escanear
+
+        <div class="ferriol-scanner-controls">
+          <button id="scanHoldBtn" type="button" class="ferriol-scanner-hold-btn touch-target select-none" aria-label="Mantener presionado para escanear con la cámara">
+            <i data-lucide="scan-line" class="ferriol-scanner-hold-icon"></i>
           </button>
-          <div class="flex gap-2">
-            <input type="text" id="manualCode" placeholder="Código manual" class="flex-1 glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base" inputmode="numeric">
-            <button id="manualAdd" class="btn-neomorphic rounded-xl px-4 py-3 transition-transform active:scale-95 touch-target">
-              <i data-lucide="plus" class="w-5 h-5"></i>
-            </button>
-          </div>
+          <input type="text" id="manualCode" placeholder="Código" class="ferriol-scanner-input" inputmode="numeric" autocomplete="off" aria-label="Ingresar código manualmente">
+          <button id="manualAdd" type="button" class="ferriol-scanner-add-btn touch-target" aria-label="Agregar código">
+            <i data-lucide="plus" class="w-5 h-5"></i>
+          </button>
         </div>
-        <p class="text-xs text-white/45 mt-3 leading-snug">Lector USB (modo teclado): conectalo, abrí esta pantalla y escaneá; suele mandar <strong class="text-white/70">Enter</strong> o <strong class="text-white/70">Tab</strong> al final. Si el lector no manda salto de línea, configurá un sufijo en el manual del equipo.</p>
       </div>
     </section>
 

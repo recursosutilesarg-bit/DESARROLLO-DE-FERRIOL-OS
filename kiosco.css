@@ -135,6 +135,264 @@ body::before {
   border-color: var(--violet-electric);
 }
 
+/* ── Panel escáner móvil: HUD minimal / futurista ── */
+
+.ferriol-scanner-shell {
+  width: 100%;
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: 0.75rem max(1rem, env(safe-area-inset-left, 0px)) max(1.25rem, env(safe-area-inset-bottom, 0px))
+    max(1rem, env(safe-area-inset-right, 0px));
+  box-sizing: border-box;
+}
+
+.ferriol-scanner-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+
+.ferriol-scanner-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22d3ee;
+  box-shadow:
+    0 0 10px rgba(34, 211, 238, 0.95),
+    0 0 22px rgba(34, 211, 238, 0.35);
+  animation: ferriol-scanner-live-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes ferriol-scanner-live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+}
+
+.ferriol-scanner-head-label {
+  font-family: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, monospace;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: rgba(165, 243, 252, 0.72);
+}
+
+.ferriol-scanner-viewport {
+  border-radius: 0.65rem;
+  background: #030712;
+  border: 1px solid rgba(34, 211, 238, 0.22);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 0 40px rgba(34, 211, 238, 0.06),
+    0 12px 48px rgba(0, 0, 0, 0.45);
+}
+
+.ferriol-scanner-video {
+  opacity: 0.92;
+}
+
+.ferriol-scanner-vignette {
+  background: radial-gradient(ellipse 72% 72% at 50% 50%, transparent 45%, rgba(3, 7, 18, 0.55) 100%);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.ferriol-scanner-hud {
+  padding: 4%;
+}
+
+.ferriol-scanner-frame {
+  position: relative;
+  width: 82%;
+  height: 82%;
+  max-width: 100%;
+  max-height: 100%;
+  container-type: size;
+}
+
+.ferriol-scanner-corner {
+  position: absolute;
+  width: 1.35rem;
+  height: 1.35rem;
+  pointer-events: none;
+}
+
+.ferriol-scanner-corner--tl {
+  top: 0;
+  left: 0;
+  border-top: 2px solid rgba(34, 211, 238, 0.88);
+  border-left: 2px solid rgba(34, 211, 238, 0.88);
+  border-top-left-radius: 2px;
+}
+
+.ferriol-scanner-corner--tr {
+  top: 0;
+  right: 0;
+  border-top: 2px solid rgba(34, 211, 238, 0.88);
+  border-right: 2px solid rgba(34, 211, 238, 0.88);
+  border-top-right-radius: 2px;
+}
+
+.ferriol-scanner-corner--bl {
+  bottom: 0;
+  left: 0;
+  border-bottom: 2px solid rgba(34, 211, 238, 0.88);
+  border-left: 2px solid rgba(34, 211, 238, 0.88);
+  border-bottom-left-radius: 2px;
+}
+
+.ferriol-scanner-corner--br {
+  bottom: 0;
+  right: 0;
+  border-bottom: 2px solid rgba(34, 211, 238, 0.88);
+  border-right: 2px solid rgba(34, 211, 238, 0.88);
+  border-bottom-right-radius: 2px;
+}
+
+.ferriol-scanner-beam {
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(34, 211, 238, 0.15) 25%,
+    rgba(165, 243, 252, 0.95) 50%,
+    rgba(34, 211, 238, 0.15) 75%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 12px rgba(34, 211, 238, 0.65),
+    0 0 28px rgba(34, 211, 238, 0.25);
+  animation: ferriol-scanner-beam-sweep 2.1s linear infinite;
+}
+
+@keyframes ferriol-scanner-beam-sweep {
+  0% {
+    transform: translateY(0);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(calc(100cqh - 2px));
+    opacity: 1;
+  }
+}
+
+/* Fallback si el navegador no soporta cqh en keyframes */
+@supports not (height: 100cqh) {
+  @keyframes ferriol-scanner-beam-sweep {
+    0% {
+      transform: translateY(0);
+      opacity: 0.85;
+    }
+    100% {
+      transform: translateY(14rem);
+      opacity: 1;
+    }
+  }
+}
+
+.ferriol-scanner-controls {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: stretch;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.ferriol-scanner-hold-btn {
+  width: 3.25rem;
+  min-width: 3.25rem;
+  height: 3.25rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(34, 211, 238, 0.35);
+  background: linear-gradient(155deg, rgba(34, 211, 238, 0.12), rgba(3, 7, 18, 0.92));
+  color: rgba(165, 243, 252, 0.98);
+  box-shadow:
+    0 0 24px rgba(34, 211, 238, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition:
+    transform 0.15s var(--ease-out),
+    box-shadow 0.2s,
+    border-color 0.2s;
+}
+
+.ferriol-scanner-hold-btn:active {
+  transform: scale(0.94);
+  box-shadow:
+    0 0 18px rgba(34, 211, 238, 0.35),
+    inset 0 0 20px rgba(34, 211, 238, 0.08);
+}
+
+.ferriol-scanner-hold-icon {
+  width: 1.35rem !important;
+  height: 1.35rem !important;
+}
+
+.ferriol-scanner-input {
+  min-width: 0;
+  border-radius: 0.55rem;
+  padding: 0 0.85rem;
+  font-family: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, monospace;
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  color: rgba(236, 254, 255, 0.95);
+  background: rgba(3, 7, 18, 0.65);
+  border: 1px solid rgba(34, 211, 238, 0.18);
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.ferriol-scanner-input::placeholder {
+  color: rgba(148, 163, 184, 0.45);
+  letter-spacing: 0.12em;
+}
+
+.ferriol-scanner-input:focus {
+  border-color: rgba(34, 211, 238, 0.45);
+  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.15);
+}
+
+.ferriol-scanner-add-btn {
+  width: 3.25rem;
+  min-width: 3.25rem;
+  height: 3.25rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.55);
+  color: rgba(226, 232, 240, 0.92);
+  transition:
+    transform 0.15s var(--ease-out),
+    border-color 0.2s,
+    background 0.2s;
+}
+
+.ferriol-scanner-add-btn:active {
+  transform: scale(0.94);
+  border-color: rgba(34, 211, 238, 0.35);
+}
+
 .pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
 }
@@ -1517,7 +1775,7 @@ body[data-panel="inventory"] #panel-inventory {
   .inv-item-stock { font-size: 0.85rem; min-width: 4rem; }
 
   /* Contenedor principal de cada panel: ancho completo (sin tarjeta; ver reglas globales de glass) */
-  #panel-scanner > .glass,
+  #panel-scanner > .ferriol-scanner-shell,
   #panel-caja    > .glass,
   #panel-mas     > .glass,
   #panel-historial > .glass,
