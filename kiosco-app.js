@@ -4478,7 +4478,7 @@
       if (!isFinite(cubiertoPct) || cubiertoPct < 0) cubiertoPct = 0;
       var cappedPct = Math.max(0, Math.min(100, cubiertoPct));
       var faltante = Math.max(0, egresosTotales - ingresos);
-      var estado = neto > 0 ? 'En profit' : (neto < 0 ? 'En pérdida' : 'En equilibrio');
+      var estado = neto > 0 ? 'Profit' : (neto < 0 ? 'Pérdida' : 'Equilibrio');
       ingresosEl.textContent = '$' + Math.round(ingresos).toLocaleString('es-AR');
       if (gastosFijosEl) gastosFijosEl.textContent = '$' + Math.round(gastosFijos).toLocaleString('es-AR');
       if (proveedoresEl) proveedoresEl.textContent = '$' + Math.round(proveedores).toLocaleString('es-AR');
@@ -4487,14 +4487,14 @@
         resultadoEl.textContent = (neto >= 0 ? '+' : '−') + '$' + Math.abs(Math.round(neto)).toLocaleString('es-AR');
         resultadoEl.className = 'text-xl sm:text-2xl font-bold mt-1 ' + (neto > 0 ? 'text-[#86efac]' : (neto < 0 ? 'text-red-300' : 'text-amber-300'));
       }
-      if (etiquetaEl) etiquetaEl.textContent = estado + ' · Ingresos - (gastos fijos + proveedores + costos)';
+      if (etiquetaEl) etiquetaEl.textContent = estado;
       if (breakEvenEl) {
         breakEvenEl.textContent = (faltante > 0 ? 'Faltan ' : 'Cubierto ') + '$' + Math.round(faltante > 0 ? faltante : egresosTotales).toLocaleString('es-AR');
         breakEvenEl.className = 'text-sm font-semibold ' + (faltante > 0 ? 'text-amber-300' : 'text-[#86efac]');
       }
       if (percentEl) percentEl.textContent = Math.round(cubiertoPct) + '%';
       if (progressEl) progressEl.style.width = cappedPct.toFixed(1) + '%';
-      if (notaEl) notaEl.textContent = 'Orden contable del día: gastos fijos (incluye impuestos) + proveedores + costos de productos vendidos contra ingresos cobrados.';
+      if (notaEl) notaEl.textContent = '';
     }
     function openDetalleVentaModal(v) {
       var content = document.getElementById('detalleVentaModalContent');
