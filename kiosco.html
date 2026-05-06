@@ -498,58 +498,81 @@
           </div>
           <div class="flex flex-col gap-1">
             <p id="estadoCuentaTitulo" class="text-xs text-white/60">Estado de cuenta · Hoy</p>
-            <div class="flex items-baseline justify-between gap-2">
+            <p class="text-[10px] text-white/45">Te queda (ganancia neta)</p>
+            <div class="flex items-baseline justify-between gap-2 flex-wrap">
               <p id="estadoCuentaResultado" class="text-lg sm:text-2xl font-bold text-[#86efac] tabular-nums">$0</p>
               <p id="estadoCuentaEtiqueta" class="text-[11px] font-medium text-white/55 shrink-0"></p>
             </div>
           </div>
           <div id="estadoCuentaCompare" class="mt-3 rounded-xl bg-black/25 border border-white/10 p-2.5 space-y-3">
-            <p class="text-[10px] text-white/45 uppercase tracking-wide">Ingresos vs egresos</p>
+            <p class="text-[10px] text-white/45 uppercase tracking-wide">De dónde sale cada número</p>
             <div>
-              <div class="flex justify-between items-center gap-2 mb-1">
-                <span class="text-[11px] font-semibold text-emerald-400">Ingresos cobrados</span>
-                <span id="estadoCuentaIngresosBarLabel" class="text-[11px] tabular-nums text-white/90 font-semibold">$0</span>
+              <div class="flex justify-between items-center gap-2 mb-0.5">
+                <span class="text-[11px] font-semibold text-emerald-400 leading-tight">1 · Facturación <span class="text-[9px] font-normal text-white/45">(cobrado)</span></span>
+                <span id="estadoCuentaIngresosBarLabel" class="text-[11px] tabular-nums text-white/90 font-semibold shrink-0">$0</span>
               </div>
               <div class="h-3.5 rounded-lg bg-white/10 overflow-hidden">
                 <div id="estadoCuentaBarIngresos" class="h-full rounded-lg bg-emerald-500 transition-all duration-300 min-w-0" style="width:0%"></div>
               </div>
             </div>
             <div>
-              <div class="flex justify-between items-center gap-2 mb-1">
-                <span class="text-[11px] font-semibold text-red-300">Egresos totales</span>
-                <span id="estadoCuentaEgresosBarLabel" class="text-[11px] tabular-nums text-white/90 font-semibold">$0</span>
+              <div class="flex justify-between items-center gap-2 mb-0.5">
+                <span class="text-[11px] font-semibold text-orange-300 leading-tight">2 · Mercadería <span class="text-[9px] font-normal text-white/45">(costo de lo vendido)</span></span>
+                <span id="estadoCuentaMercaderiaBarLabel" class="text-[11px] tabular-nums text-white/90 font-semibold shrink-0">$0</span>
+              </div>
+              <div class="h-3.5 rounded-lg bg-white/10 overflow-hidden">
+                <div id="estadoCuentaBarMercaderia" class="h-full rounded-lg bg-orange-500 transition-all duration-300 min-w-0" style="width:0%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between items-center gap-2 mb-0.5">
+                <span class="text-[11px] font-semibold text-amber-200 leading-tight">3 · Gastos <span class="text-[9px] font-normal text-white/45">(fijos + compras registradas)</span></span>
+                <span id="estadoCuentaGastosBarLabel" class="text-[11px] tabular-nums text-white/90 font-semibold shrink-0">$0</span>
               </div>
               <div class="h-3.5 rounded-lg bg-white/10 overflow-hidden relative">
-                <div id="estadoCuentaBarEgresosWrap" class="absolute left-0 top-0 bottom-0 flex rounded-lg overflow-hidden transition-all duration-300 min-w-0" style="width:0%">
+                <div id="estadoCuentaBarGastosWrap" class="absolute left-0 top-0 bottom-0 flex rounded-lg overflow-hidden transition-all duration-300 min-w-0" style="width:0%">
                   <div id="estadoCuentaBarSegFijos" class="h-full bg-amber-500 shrink-0" style="width:0%"></div>
-                  <div id="estadoCuentaBarSegProv" class="h-full bg-red-500 shrink-0" style="width:0%"></div>
-                  <div id="estadoCuentaBarSegCostos" class="h-full bg-orange-500 shrink-0 rounded-r-lg" style="width:0%"></div>
+                  <div id="estadoCuentaBarSegProv" class="h-full bg-red-500 shrink-0 rounded-r-lg" style="width:0%"></div>
                 </div>
               </div>
               <div class="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5 text-[9px] text-white/50">
                 <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-amber-500 shrink-0"></span>Fijos</span>
-                <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-red-500 shrink-0"></span>Prov.</span>
-                <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-orange-500 shrink-0"></span>Costos</span>
+                <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-red-500 shrink-0"></span>Compras prov.</span>
               </div>
             </div>
+            <div>
+              <div class="flex justify-between items-center gap-2 mb-0.5">
+                <span class="text-[11px] font-semibold text-cyan-300 leading-tight">4 · Ganancia <span class="text-[9px] font-normal text-white/45">(lo que te queda)</span></span>
+                <span id="estadoCuentaGananciaBarLabel" class="text-[11px] tabular-nums text-white/90 font-semibold shrink-0">$0</span>
+              </div>
+              <div class="h-3.5 rounded-lg bg-white/10 overflow-hidden">
+                <div id="estadoCuentaBarGanancia" class="h-full rounded-lg bg-cyan-400 transition-all duration-300 min-w-0" style="width:0%"></div>
+              </div>
+            </div>
+            <p id="estadoCuentaFormulaLine" class="text-[11px] text-center leading-snug px-1 text-white/65 font-medium"></p>
+            <p id="estadoCuentaMargenLine" class="text-[10px] text-center text-white/45 px-1"></p>
             <p id="estadoCuentaGapLine" class="text-[11px] text-center leading-snug px-1"></p>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 mt-2.5 text-[11px] sm:text-xs">
+            <div class="rounded-xl bg-emerald-500/10 border border-emerald-400/20 px-2 py-1.5">
+              <p class="text-white/55">Facturación</p>
+              <p id="estadoCuentaIngresos" class="font-semibold text-emerald-300">$0</p>
+            </div>
+            <div class="rounded-xl bg-orange-500/10 border border-orange-400/20 px-2 py-1.5">
+              <p class="text-white/55">Mercadería vendida</p>
+              <p id="estadoCuentaMercaderia" class="font-semibold text-orange-300">$0</p>
+            </div>
             <div class="rounded-xl bg-amber-500/10 border border-amber-400/20 px-2 py-1.5">
-              <p class="text-white/55">Fijos</p>
+              <p class="text-white/55">Gastos fijos</p>
               <p id="estadoCuentaGastosFijos" class="font-semibold text-amber-300">$0</p>
             </div>
             <div class="rounded-xl bg-red-500/10 border border-red-400/20 px-2 py-1.5">
-              <p class="text-white/55">Proveedores</p>
+              <p class="text-white/55">Compras proveedores</p>
               <p id="estadoCuentaProveedores" class="font-semibold text-red-300">$0</p>
             </div>
-            <div class="rounded-xl bg-orange-500/10 border border-orange-400/20 px-2 py-1.5">
-              <p class="text-white/55">Costos</p>
-              <p id="estadoCuentaCostos" class="font-semibold text-orange-300">$0</p>
-            </div>
-            <div class="rounded-xl bg-emerald-500/10 border border-emerald-400/20 px-2 py-1.5">
-              <p class="text-white/55">Ingresos</p>
-              <p id="estadoCuentaIngresos" class="font-semibold text-emerald-300">$0</p>
+            <div class="rounded-xl bg-cyan-500/15 border border-cyan-400/30 px-2 py-1.5 col-span-2 sm:col-span-4">
+              <p class="text-white/55">Ganancia neta · Margen sobre facturación</p>
+              <p class="flex flex-wrap items-baseline gap-x-2 gap-y-0"><span id="estadoCuentaGananciaResumen" class="font-semibold text-cyan-200 tabular-nums">$0</span><span id="estadoCuentaMargenPct" class="text-[10px] text-white/50 tabular-nums"></span></p>
             </div>
           </div>
           <p id="estadoCuentaNota" class="hidden"></p>

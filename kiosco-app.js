@@ -4743,24 +4743,31 @@
       if (!ingresosEl) return;
       var gastosFijosEl = document.getElementById('estadoCuentaGastosFijos');
       var proveedoresEl = document.getElementById('estadoCuentaProveedores');
-      var costosEl = document.getElementById('estadoCuentaCostos');
+      var mercaderiaEl = document.getElementById('estadoCuentaMercaderia');
       var resultadoEl = document.getElementById('estadoCuentaResultado');
       var etiquetaEl = document.getElementById('estadoCuentaEtiqueta');
       var notaEl = document.getElementById('estadoCuentaNota');
       var tituloEl = document.getElementById('estadoCuentaTitulo');
       var barIngresosEl = document.getElementById('estadoCuentaBarIngresos');
-      var barEgresosWrapEl = document.getElementById('estadoCuentaBarEgresosWrap');
+      var barMercaderiaEl = document.getElementById('estadoCuentaBarMercaderia');
+      var barGastosWrapEl = document.getElementById('estadoCuentaBarGastosWrap');
       var barSegFijos = document.getElementById('estadoCuentaBarSegFijos');
       var barSegProv = document.getElementById('estadoCuentaBarSegProv');
-      var barSegCostos = document.getElementById('estadoCuentaBarSegCostos');
+      var barGananciaEl = document.getElementById('estadoCuentaBarGanancia');
       var labelIngBar = document.getElementById('estadoCuentaIngresosBarLabel');
-      var labelEgrBar = document.getElementById('estadoCuentaEgresosBarLabel');
+      var labelMercBar = document.getElementById('estadoCuentaMercaderiaBarLabel');
+      var labelGastosBar = document.getElementById('estadoCuentaGastosBarLabel');
+      var labelGanBar = document.getElementById('estadoCuentaGananciaBarLabel');
+      var formulaLineEl = document.getElementById('estadoCuentaFormulaLine');
+      var margenLineEl = document.getElementById('estadoCuentaMargenLine');
       var gapLineEl = document.getElementById('estadoCuentaGapLine');
+      var gananciaResumenEl = document.getElementById('estadoCuentaGananciaResumen');
+      var margenPctEl = document.getElementById('estadoCuentaMargenPct');
       var range = getEstadoCuentaRange();
       var ingresos = 0;
       var gastosFijos = 0;
       var proveedores = 0;
-      var costos = 0;
+      var mercaderiaVendida = 0;
       if (supabaseClient && currentUser && currentUser.id) {
         try {
           var vres = await supabaseClient
@@ -4777,7 +4784,7 @@
               (v.items || []).forEach(function (i) {
                 var c = Number(i.costo);
                 var q = Number(i.cant) || 0;
-                if (Number.isFinite(c) && q > 0) costos += (c * q);
+                if (Number.isFinite(c) && q > 0) mercaderiaVendida += (c * q);
               });
             });
           }
@@ -4807,60 +4814,79 @@
       } else if (_estadoCuentaFilter === 'hoy') {
         ingresos = Number(metricasDia && metricasDia.total) || 0;
       }
-      if ((!costos || costos < 0) && _estadoCuentaFilter === 'hoy' && metricasDia && Number.isFinite(metricasDia.ganancia)) {
+      if ((!mercaderiaVendida || mercaderiaVendida < 0) && _estadoCuentaFilter === 'hoy' && metricasDia && Number.isFinite(metricasDia.ganancia)) {
         var fallbackCost = ingresos - Number(metricasDia.ganancia);
-        if (Number.isFinite(fallbackCost) && fallbackCost > 0) costos = fallbackCost;
+        if (Number.isFinite(fallbackCost) && fallbackCost > 0) mercaderiaVendida = fallbackCost;
       }
-      var egresosTotales = gastosFijos + proveedores + costos;
-      var neto = ingresos - egresosTotales;
-      var faltante = Math.max(0, egresosTotales - ingresos);
-      var sobra = Math.max(0, ingresos - egresosTotales);
-      var estado = neto > 0 ? 'Profit' : (neto < 0 ? 'Pérdida' : 'Equilibrio');
+      var gastosTotales = gastosFijos + proveedores;
+      var gananciaNeta = ingresos - mercaderiaVendida - gastosTotales;
+      var gananciaBruta = ingresos - mercaderiaVendida;
+      var margenPctVal = ingresos > 0 ? (gananciaNeta / ingresos) * 100 : null;
+      var estado = gananciaNeta > 0 ? 'Te sobra' : (gananciaNeta < 0 ? 'En rojo' : 'Justo');
       var fmtMoney = function (n) { return '$' + Math.round(n).toLocaleString('es-AR'); };
-      var maxScale = Math.max(ingresos, egresosTotales, 1);
+      var maxScale = Math.max(ingresos, mercaderiaVendida, gastosTotales, Math.abs(gananciaNeta), 1);
       var pctIng = maxScale > 0 ? (ingresos / maxScale) * 100 : 0;
-      var pctEgrTotal = maxScale > 0 ? (egresosTotales / maxScale) * 100 : 0;
+      var pctMerc = maxScale > 0 ? (mercaderiaVendida / maxScale) * 100 : 0;
+      var pctGastosTot = maxScale > 0 ? (gastosTotales / maxScale) * 100 : 0;
+      var pctGan = maxScale > 0 ? (Math.abs(gananciaNeta) / maxScale) * 100 : 0;
       ingresosEl.textContent = fmtMoney(ingresos);
       if (gastosFijosEl) gastosFijosEl.textContent = fmtMoney(gastosFijos);
       if (proveedoresEl) proveedoresEl.textContent = fmtMoney(proveedores);
-      if (costosEl) costosEl.textContent = fmtMoney(costos);
+      if (mercaderiaEl) mercaderiaEl.textContent = fmtMoney(mercaderiaVendida);
       if (labelIngBar) labelIngBar.textContent = fmtMoney(ingresos);
-      if (labelEgrBar) labelEgrBar.textContent = fmtMoney(egresosTotales);
+      if (labelMercBar) labelMercBar.textContent = fmtMoney(mercaderiaVendida);
+      if (labelGastosBar) labelGastosBar.textContent = fmtMoney(gastosTotales);
+      if (labelGanBar) labelGanBar.textContent = (gananciaNeta >= 0 ? '+' : '−') + '$' + Math.abs(Math.round(gananciaNeta)).toLocaleString('es-AR');
+      if (gananciaResumenEl) {
+        gananciaResumenEl.textContent = (gananciaNeta >= 0 ? '+' : '−') + '$' + Math.abs(Math.round(gananciaNeta)).toLocaleString('es-AR');
+        gananciaResumenEl.className = 'font-semibold tabular-nums ' + (gananciaNeta >= 0 ? 'text-cyan-200' : 'text-red-300');
+      }
+      if (margenPctEl) margenPctEl.textContent = margenPctVal != null && Number.isFinite(margenPctVal) ? ' · ' + Math.round(margenPctVal) + '% sobre facturación' : '';
       if (barIngresosEl) barIngresosEl.style.width = Math.min(100, Math.max(0, pctIng)).toFixed(1) + '%';
-      if (barEgresosWrapEl) barEgresosWrapEl.style.width = Math.min(100, Math.max(0, pctEgrTotal)).toFixed(1) + '%';
-      if (egresosTotales > 0 && barSegFijos && barSegProv && barSegCostos) {
-        var wf = (gastosFijos / egresosTotales) * 100;
-        var wp = (proveedores / egresosTotales) * 100;
-        var wc = (costos / egresosTotales) * 100;
-        barSegFijos.style.width = wf.toFixed(2) + '%';
-        barSegProv.style.width = wp.toFixed(2) + '%';
-        barSegCostos.style.width = wc.toFixed(2) + '%';
+      if (barMercaderiaEl) barMercaderiaEl.style.width = Math.min(100, Math.max(0, pctMerc)).toFixed(1) + '%';
+      if (barGastosWrapEl) barGastosWrapEl.style.width = Math.min(100, Math.max(0, pctGastosTot)).toFixed(1) + '%';
+      if (barGananciaEl) {
+        barGananciaEl.style.width = Math.min(100, Math.max(0, pctGan)).toFixed(1) + '%';
+        barGananciaEl.className = 'h-full rounded-lg transition-all duration-300 min-w-0 ' + (gananciaNeta >= 0 ? 'bg-cyan-400' : 'bg-red-400');
+      }
+      if (gastosTotales > 0 && barSegFijos && barSegProv) {
+        barSegFijos.style.width = ((gastosFijos / gastosTotales) * 100).toFixed(2) + '%';
+        barSegProv.style.width = ((proveedores / gastosTotales) * 100).toFixed(2) + '%';
       } else {
         if (barSegFijos) barSegFijos.style.width = '0%';
         if (barSegProv) barSegProv.style.width = '0%';
-        if (barSegCostos) barSegCostos.style.width = '0%';
+      }
+      if (formulaLineEl) {
+        formulaLineEl.textContent = fmtMoney(ingresos) + ' − ' + fmtMoney(mercaderiaVendida) + ' − ' + fmtMoney(gastosTotales) + ' = ' + ((gananciaNeta >= 0 ? '+' : '−') + '$' + Math.abs(Math.round(gananciaNeta)).toLocaleString('es-AR'));
+        formulaLineEl.className = 'text-[11px] text-center leading-snug px-1 text-white/75 font-medium';
+      }
+      if (margenLineEl) {
+        if (ingresos > 0 && margenPctVal != null && Number.isFinite(margenPctVal)) {
+          margenLineEl.textContent = 'Rentabilidad: por cada $100 cobrados, te quedan unos $' + Math.round(margenPctVal) + ' después de mercadería y gastos.';
+          margenLineEl.className = 'text-[10px] text-center text-white/45 px-1 leading-snug';
+        } else {
+          margenLineEl.textContent = '';
+        }
       }
       if (resultadoEl) {
-        resultadoEl.textContent = (neto >= 0 ? '+' : '−') + '$' + Math.abs(Math.round(neto)).toLocaleString('es-AR');
-        resultadoEl.className = 'text-lg sm:text-2xl font-bold tabular-nums ' + (neto > 0 ? 'text-[#86efac]' : (neto < 0 ? 'text-red-300' : 'text-amber-300'));
+        resultadoEl.textContent = (gananciaNeta >= 0 ? '+' : '−') + '$' + Math.abs(Math.round(gananciaNeta)).toLocaleString('es-AR');
+        resultadoEl.className = 'text-lg sm:text-2xl font-bold tabular-nums ' + (gananciaNeta > 0 ? 'text-[#86efac]' : (gananciaNeta < 0 ? 'text-red-300' : 'text-amber-300'));
       }
       if (etiquetaEl) {
-        etiquetaEl.textContent = estado;
-        etiquetaEl.className = 'text-[11px] font-medium shrink-0 ' + (neto > 0 ? 'text-emerald-400/90' : (neto < 0 ? 'text-red-300/90' : 'text-amber-300/90'));
+        etiquetaEl.textContent = estado + (gananciaBruta < 0 && ingresos > 0 ? ' · revisá costos' : '');
+        etiquetaEl.className = 'text-[11px] font-medium shrink-0 ' + (gananciaNeta > 0 ? 'text-emerald-400/90' : (gananciaNeta < 0 ? 'text-red-300/90' : 'text-amber-300/90'));
       }
       if (gapLineEl) {
-        if (ingresos <= 0 && egresosTotales <= 0) {
-          gapLineEl.textContent = 'Sin ingresos ni egresos en este período.';
+        var todoCero = ingresos <= 0 && mercaderiaVendida <= 0 && gastosTotales <= 0;
+        if (todoCero) {
+          gapLineEl.textContent = 'Sin movimiento en este período.';
           gapLineEl.className = 'text-[11px] text-center leading-snug px-1 text-white/45';
-        } else if (faltante > 0) {
-          gapLineEl.textContent = 'Te faltan ' + fmtMoney(faltante) + ' de ingresos para cubrir todos los egresos.';
-          gapLineEl.className = 'text-[11px] text-center leading-snug px-1 text-amber-200/95 font-medium';
-        } else if (sobra > 0) {
-          gapLineEl.textContent = 'Los ingresos cubren egresos · te sobran ' + fmtMoney(sobra) + '.';
-          gapLineEl.className = 'text-[11px] text-center leading-snug px-1 text-emerald-300/95 font-medium';
+        } else if (gananciaNeta >= 0) {
+          gapLineEl.textContent = 'La mercadería vendida es inversión ya consumida en esas ventas; los gastos son cuenta y compras; lo verde arriba es lo que te queda.';
+          gapLineEl.className = 'text-[11px] text-center leading-snug px-1 text-emerald-200/80';
         } else {
-          gapLineEl.textContent = 'Ingresos y egresos están en equilibrio.';
-          gapLineEl.className = 'text-[11px] text-center leading-snug px-1 text-white/60';
+          gapLineEl.textContent = 'Este período mercadería más gastos fueron más que lo cobrado. Subí ventas o revisá precios y gastos.';
+          gapLineEl.className = 'text-[11px] text-center leading-snug px-1 text-amber-200/90';
         }
       }
       if (notaEl) notaEl.textContent = '';
