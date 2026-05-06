@@ -7313,14 +7313,42 @@
       if (!state._restoringFromHistory) pushHistoryExtra({ modal: 'transacciones' });
       lucide.createIcons();
     }
-    function openVentasCobradasModal() {
+    var _ventasCobradasFilter = 'hoy';
+    var _ventasCobradasFechaYmd = '';
+    function matchVentasCobradasFilter(fechaHora) {
+      var ymd = ferriolYmdFromDate(fechaHora);
+      var today = ferriolTodayYmdLocal();
+      if (_ventasCobradasFilter === 'hoy') return ymd === today;
+      if (_ventasCobradasFilter === 'ayer') {
+        var d = new Date();
+        d.setDate(d.getDate() - 1);
+        return ymd === ferriolYmdFromDate(d);
+      }
+      if (_ventasCobradasFilter === 'fecha') return !!_ventasCobradasFechaYmd && ymd === _ventasCobradasFechaYmd;
+      return ymd === today;
+    }
+    function applyVentasCobradasFilterUi() {
+      var wrap = document.getElementById('ventasCobradasFechaWrap');
+      var input = document.getElementById('ventasCobradasFechaInput');
+      if (input && _ventasCobradasFilter === 'fecha') {
+        if (!_ventasCobradasFechaYmd) _ventasCobradasFechaYmd = ferriolTodayYmdLocal();
+        input.value = _ventasCobradasFechaYmd;
+      }
+      if (wrap) wrap.classList.toggle('hidden', _ventasCobradasFilter !== 'fecha');
+      document.querySelectorAll('.ventas-cobradas-filter-btn').forEach(function (btn) {
+        var active = btn.dataset.filter === _ventasCobradasFilter;
+        btn.className = 'ventas-cobradas-filter-btn px-3 py-1.5 rounded-xl text-xs font-medium border touch-target transition-all ' + (active ? 'bg-[#22c55e]/30 border-[#22c55e]/50 text-[#bbf7d0]' : 'border-white/20 bg-white/5 text-white/80');
+      });
+    }
+    function renderVentasCobradasModal() {
       const raw = state.transaccionesList || [];
-      const cobradas = raw.filter(function (t) {
+      const filteredRaw = raw.filter(function (t) { return matchVentasCobradasFilter(t.fechaHora); });
+      const cobradas = filteredRaw.filter(function (t) {
         return t.method !== 'fiado' && t.method !== 'transferencia_pendiente';
       });
       var fiadoHoy = 0;
       var pendHoy = 0;
-      raw.forEach(function (t) {
+      filteredRaw.forEach(function (t) {
         var tot = Number(t.total) || 0;
         if (t.method === 'fiado') fiadoHoy += tot;
         else if (t.method === 'transferencia_pendiente') pendHoy += tot;
@@ -7330,7 +7358,8 @@
       const footEl = document.getElementById('ventasCobradasFooter');
       if (listEl) {
         if (cobradas.length === 0) {
-          listEl.innerHTML = '<div class="ventas-dia-empty">Aún no hay ventas del día (caja) en este dispositivo.</div>';
+          var filtroLabel = _ventasCobradasFilter === 'ayer' ? 'ayer' : (_ventasCobradasFilter === 'fecha' ? 'la fecha elegida' : 'hoy');
+          listEl.innerHTML = '<div class="ventas-dia-empty">No hay ventas de caja para ' + filtroLabel + ' en este dispositivo.</div>';
         } else {
           const fmt = (s) => s ? new Date(s).toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' }) : '';
           listEl.innerHTML = cobradas.slice().reverse().map(function (t) {
@@ -7354,20 +7383,46 @@
         var parts = [];
         if (fiadoHoy > 0) {
           parts.push('<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-xl bg-amber-500/15 border border-amber-400/30 px-3 py-2">' +
-            '<span class="text-amber-100/90">Fiado en cuenta hoy: <strong>$' + fiadoHoy.toLocaleString('es-AR') + '</strong></span>' +
+            '<span class="text-amber-100/90">Fiado en cuenta: <strong>$' + fiadoHoy.toLocaleString('es-AR') + '</strong></span>' +
             '<button type="button" class="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-500/30 text-amber-100 border border-amber-400/40 touch-target" onclick="document.getElementById(\'closeVentasCobradas\').click();window._goToCajaLibreta && window._goToCajaLibreta();">Ver libreta</button></div>');
         }
         if (pendHoy > 0) {
           parts.push('<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-xl bg-orange-500/15 border border-orange-400/30 px-3 py-2">' +
-            '<span class="text-orange-100/90">Transf. pendiente hoy: <strong>$' + pendHoy.toLocaleString('es-AR') + '</strong></span>' +
+            '<span class="text-orange-100/90">Transf. pendiente: <strong>$' + pendHoy.toLocaleString('es-AR') + '</strong></span>' +
             '<button type="button" class="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg bg-orange-500/30 text-orange-100 border border-orange-400/40 touch-target" onclick="document.getElementById(\'closeVentasCobradas\').click();window._goToCajaLibreta && window._goToCajaLibreta();">Ver libreta</button></div>');
         }
         if (parts.length === 0) {
-          footEl.innerHTML = '<p class="text-white/40 text-center py-1">Sin fiado ni transf. pendiente registrados hoy.</p>';
+          footEl.innerHTML = '<p class="text-white/40 text-center py-1">Sin fiado ni transf. pendiente en este filtro.</p>';
         } else {
           footEl.innerHTML = parts.join('');
         }
       }
+    }
+    function openVentasCobradasModal() {
+      var filters = document.getElementById('ventasCobradasFilters');
+      var dateInput = document.getElementById('ventasCobradasFechaInput');
+      if (filters && !filters.dataset.bound) {
+        filters.dataset.bound = '1';
+        filters.querySelectorAll('.ventas-cobradas-filter-btn').forEach(function (btn) {
+          btn.onclick = function () {
+            _ventasCobradasFilter = btn.dataset.filter || 'hoy';
+            if (_ventasCobradasFilter === 'fecha' && !_ventasCobradasFechaYmd) _ventasCobradasFechaYmd = ferriolTodayYmdLocal();
+            applyVentasCobradasFilterUi();
+            renderVentasCobradasModal();
+          };
+        });
+      }
+      if (dateInput && !dateInput.dataset.bound) {
+        dateInput.dataset.bound = '1';
+        dateInput.onchange = function () {
+          _ventasCobradasFechaYmd = (dateInput.value || '').trim();
+          if (_ventasCobradasFilter !== 'fecha') _ventasCobradasFilter = 'fecha';
+          applyVentasCobradasFilterUi();
+          renderVentasCobradasModal();
+        };
+      }
+      applyVentasCobradasFilterUi();
+      renderVentasCobradasModal();
       var modal = document.getElementById('ventasCobradasModal');
       if (modal) modal.classList.remove('hidden');
       if (!state._restoringFromHistory) pushHistoryExtra({ modal: 'ventasCobradas' });

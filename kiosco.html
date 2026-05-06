@@ -3102,6 +3102,16 @@
         </button>
       </header>
       <p class="ventas-dia-hint">Efectivo, tarjeta, transferencia y cobro de libreta. Fiado y transf. pendiente: libreta.</p>
+      <div class="px-3 pb-2 space-y-2">
+        <div id="ventasCobradasFilters" class="flex items-center gap-2 overflow-x-auto">
+          <button type="button" class="ventas-cobradas-filter-btn px-3 py-1.5 rounded-xl text-xs font-medium border border-white/20 bg-white/5 touch-target" data-filter="hoy">Hoy</button>
+          <button type="button" class="ventas-cobradas-filter-btn px-3 py-1.5 rounded-xl text-xs font-medium border border-white/20 bg-white/5 touch-target" data-filter="ayer">Ayer</button>
+          <button type="button" class="ventas-cobradas-filter-btn px-3 py-1.5 rounded-xl text-xs font-medium border border-white/20 bg-white/5 touch-target" data-filter="fecha">Por fecha</button>
+        </div>
+        <div id="ventasCobradasFechaWrap" class="hidden">
+          <input type="date" id="ventasCobradasFechaInput" class="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e]/40" />
+        </div>
+      </div>
       <div id="ventasCobradasList" class="ventas-dia-list flex-1 min-h-0"></div>
       <div id="ventasCobradasFooter" class="ventas-dia-footer space-y-2"></div>
     </div>
