@@ -376,6 +376,17 @@ body::before {
   line-height: 1.1;
 }
 
+.ferriol-scanner-hold-hint {
+  margin: -0.35rem 0 0;
+  padding: 0 0.75rem;
+  max-width: 18rem;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  color: rgba(165, 243, 252, 0.62);
+}
+
 .ferriol-scanner-manual-row {
   display: flex;
   align-items: stretch;
