@@ -4413,10 +4413,89 @@
         } catch (_) {}
       }
       renderFrequentProducts();
-      await renderEstadoCuentaNegocioDia(m);
+      await renderEstadoCuentaNegocio(m);
       await loadKioscoLicensePaymentInfo();
     }
-    async function renderEstadoCuentaNegocioDia(metricasDia) {
+    var _estadoCuentaFilter = 'hoy';
+    var _estadoCuentaFechaYmd = '';
+    function getEstadoCuentaRange() {
+      var now = new Date();
+      var start = new Date(now);
+      var end = new Date(now);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+      if (_estadoCuentaFilter === 'ayer') {
+        start.setDate(start.getDate() - 1);
+        end.setDate(end.getDate() - 1);
+      } else if (_estadoCuentaFilter === '7dias') {
+        start.setDate(start.getDate() - 6);
+      } else if (_estadoCuentaFilter === '14dias') {
+        start.setDate(start.getDate() - 13);
+      } else if (_estadoCuentaFilter === 'mes') {
+        start.setDate(1);
+      } else if (_estadoCuentaFilter === 'fecha') {
+        var ymd = _estadoCuentaFechaYmd || ferriolTodayYmdLocal();
+        start = new Date(ymd + 'T00:00:00');
+        end = new Date(ymd + 'T23:59:59.999');
+      }
+      return {
+        startISO: start.toISOString(),
+        endISO: end.toISOString(),
+        startYmd: ferriolYmdFromDate(start),
+        endYmd: ferriolYmdFromDate(end)
+      };
+    }
+    function getEstadoCuentaFilterLabel() {
+      if (_estadoCuentaFilter === 'ayer') return 'Ayer';
+      if (_estadoCuentaFilter === '7dias') return '7 días';
+      if (_estadoCuentaFilter === '14dias') return '14 días';
+      if (_estadoCuentaFilter === 'mes') return 'Mes';
+      if (_estadoCuentaFilter === 'fecha') {
+        var ymd = _estadoCuentaFechaYmd || ferriolTodayYmdLocal();
+        var d = new Date(ymd + 'T00:00:00');
+        return isNaN(d.getTime()) ? 'Fecha' : d.toLocaleDateString('es-AR');
+      }
+      return 'Hoy';
+    }
+    function setupEstadoCuentaFiltros() {
+      var filters = document.getElementById('estadoCuentaFiltros');
+      var dateWrap = document.getElementById('estadoCuentaFechaWrap');
+      var dateInput = document.getElementById('estadoCuentaFechaInput');
+      if (!filters) return;
+      if (!filters.dataset.bound) {
+        filters.dataset.bound = '1';
+        filters.querySelectorAll('.estado-cuenta-filter-btn').forEach(function (btn) {
+          btn.onclick = function () {
+            _estadoCuentaFilter = btn.dataset.filter || 'hoy';
+            if (_estadoCuentaFilter === 'fecha' && !_estadoCuentaFechaYmd) _estadoCuentaFechaYmd = ferriolTodayYmdLocal();
+            if (dateInput && _estadoCuentaFilter === 'fecha') dateInput.value = _estadoCuentaFechaYmd;
+            if (dateWrap) dateWrap.classList.toggle('hidden', _estadoCuentaFilter !== 'fecha');
+            applyEstadoCuentaFilterUi();
+            renderEstadoCuentaNegocio();
+          };
+        });
+      }
+      if (dateInput && !dateInput.dataset.bound) {
+        dateInput.dataset.bound = '1';
+        dateInput.onchange = function () {
+          _estadoCuentaFechaYmd = String(dateInput.value || '').trim();
+          _estadoCuentaFilter = 'fecha';
+          if (dateWrap) dateWrap.classList.remove('hidden');
+          applyEstadoCuentaFilterUi();
+          renderEstadoCuentaNegocio();
+        };
+      }
+      if (dateWrap) dateWrap.classList.toggle('hidden', _estadoCuentaFilter !== 'fecha');
+      applyEstadoCuentaFilterUi();
+    }
+    function applyEstadoCuentaFilterUi() {
+      document.querySelectorAll('.estado-cuenta-filter-btn').forEach(function (btn) {
+        var active = btn.dataset.filter === _estadoCuentaFilter;
+        btn.className = 'estado-cuenta-filter-btn px-2.5 py-1 rounded-lg text-[11px] border touch-target transition-all ' + (active ? 'bg-[#22c55e]/30 border-[#22c55e]/50 text-[#bbf7d0]' : 'border-white/20 bg-white/5 text-white/80');
+      });
+    }
+    async function renderEstadoCuentaNegocio(metricasDia) {
+      setupEstadoCuentaFiltros();
       var ingresosEl = document.getElementById('estadoCuentaIngresos');
       if (!ingresosEl) return;
       var gastosFijosEl = document.getElementById('estadoCuentaGastosFijos');
@@ -4424,22 +4503,47 @@
       var costosEl = document.getElementById('estadoCuentaCostos');
       var resultadoEl = document.getElementById('estadoCuentaResultado');
       var etiquetaEl = document.getElementById('estadoCuentaEtiqueta');
-      var breakEvenEl = document.getElementById('estadoCuentaBreakEven');
-      var percentEl = document.getElementById('estadoCuentaPercent');
-      var progressEl = document.getElementById('estadoCuentaProgress');
       var notaEl = document.getElementById('estadoCuentaNota');
-      var ingresos = Number(metricasDia && metricasDia.total) || 0;
+      var tituloEl = document.getElementById('estadoCuentaTitulo');
+      var barIngresosEl = document.getElementById('estadoCuentaBarIngresos');
+      var barEgresosWrapEl = document.getElementById('estadoCuentaBarEgresosWrap');
+      var barSegFijos = document.getElementById('estadoCuentaBarSegFijos');
+      var barSegProv = document.getElementById('estadoCuentaBarSegProv');
+      var barSegCostos = document.getElementById('estadoCuentaBarSegCostos');
+      var labelIngBar = document.getElementById('estadoCuentaIngresosBarLabel');
+      var labelEgrBar = document.getElementById('estadoCuentaEgresosBarLabel');
+      var gapLineEl = document.getElementById('estadoCuentaGapLine');
+      var range = getEstadoCuentaRange();
+      var ingresos = 0;
       var gastosFijos = 0;
       var proveedores = 0;
       var costos = 0;
       if (supabaseClient && currentUser && currentUser.id) {
         try {
-          var hoy = ferriolTodayYmdLocal();
+          var vres = await supabaseClient
+            .from('ventas')
+            .select('metodo_pago, total, items')
+            .eq('user_id', currentUser.id)
+            .gte('fecha_hora', range.startISO)
+            .lte('fecha_hora', range.endISO);
+          if (!vres.error && Array.isArray(vres.data)) {
+            vres.data.forEach(function (v) {
+              var method = String(v.metodo_pago || '');
+              if (method === 'fiado' || method === 'transferencia_pendiente') return;
+              ingresos += Number(v.total) || 0;
+              (v.items || []).forEach(function (i) {
+                var c = Number(i.costo);
+                var q = Number(i.cant) || 0;
+                if (Number.isFinite(c) && q > 0) costos += (c * q);
+              });
+            });
+          }
           var gres = await supabaseClient
             .from('gastos')
             .select('tipo, descripcion, monto')
             .eq('user_id', currentUser.id)
-            .eq('fecha', hoy);
+            .gte('fecha', range.startYmd)
+            .lte('fecha', range.endYmd);
           if (!gres.error && Array.isArray(gres.data)) {
             gres.data.forEach(function (g) {
               var monto = Number(g.monto) || 0;
@@ -4456,45 +4560,67 @@
             });
           }
         } catch (_) {}
+      } else if (_estadoCuentaFilter === 'hoy') {
+        ingresos = Number(metricasDia && metricasDia.total) || 0;
       }
-      var hoyYmd = ferriolTodayYmdLocal();
-      (state.transaccionesList || []).forEach(function (t) {
-        var method = String(t.method || '');
-        if (method === 'fiado' || method === 'transferencia_pendiente') return;
-        if (ferriolYmdFromDate(t.fechaHora) !== hoyYmd) return;
-        (t.items || []).forEach(function (i) {
-          var c = Number(i.costo);
-          var q = Number(i.cant) || 0;
-          if (Number.isFinite(c) && q > 0) costos += (c * q);
-        });
-      });
-      if ((!costos || costos < 0) && metricasDia && Number.isFinite(metricasDia.ganancia)) {
+      if ((!costos || costos < 0) && _estadoCuentaFilter === 'hoy' && metricasDia && Number.isFinite(metricasDia.ganancia)) {
         var fallbackCost = ingresos - Number(metricasDia.ganancia);
         if (Number.isFinite(fallbackCost) && fallbackCost > 0) costos = fallbackCost;
       }
       var egresosTotales = gastosFijos + proveedores + costos;
       var neto = ingresos - egresosTotales;
-      var cubiertoPct = egresosTotales > 0 ? (ingresos / egresosTotales) * 100 : (ingresos > 0 ? 100 : 0);
-      if (!isFinite(cubiertoPct) || cubiertoPct < 0) cubiertoPct = 0;
-      var cappedPct = Math.max(0, Math.min(100, cubiertoPct));
       var faltante = Math.max(0, egresosTotales - ingresos);
+      var sobra = Math.max(0, ingresos - egresosTotales);
       var estado = neto > 0 ? 'Profit' : (neto < 0 ? 'Pérdida' : 'Equilibrio');
-      ingresosEl.textContent = '$' + Math.round(ingresos).toLocaleString('es-AR');
-      if (gastosFijosEl) gastosFijosEl.textContent = '$' + Math.round(gastosFijos).toLocaleString('es-AR');
-      if (proveedoresEl) proveedoresEl.textContent = '$' + Math.round(proveedores).toLocaleString('es-AR');
-      if (costosEl) costosEl.textContent = '$' + Math.round(costos).toLocaleString('es-AR');
+      var fmtMoney = function (n) { return '$' + Math.round(n).toLocaleString('es-AR'); };
+      var maxScale = Math.max(ingresos, egresosTotales, 1);
+      var pctIng = maxScale > 0 ? (ingresos / maxScale) * 100 : 0;
+      var pctEgrTotal = maxScale > 0 ? (egresosTotales / maxScale) * 100 : 0;
+      ingresosEl.textContent = fmtMoney(ingresos);
+      if (gastosFijosEl) gastosFijosEl.textContent = fmtMoney(gastosFijos);
+      if (proveedoresEl) proveedoresEl.textContent = fmtMoney(proveedores);
+      if (costosEl) costosEl.textContent = fmtMoney(costos);
+      if (labelIngBar) labelIngBar.textContent = fmtMoney(ingresos);
+      if (labelEgrBar) labelEgrBar.textContent = fmtMoney(egresosTotales);
+      if (barIngresosEl) barIngresosEl.style.width = Math.min(100, Math.max(0, pctIng)).toFixed(1) + '%';
+      if (barEgresosWrapEl) barEgresosWrapEl.style.width = Math.min(100, Math.max(0, pctEgrTotal)).toFixed(1) + '%';
+      if (egresosTotales > 0 && barSegFijos && barSegProv && barSegCostos) {
+        var wf = (gastosFijos / egresosTotales) * 100;
+        var wp = (proveedores / egresosTotales) * 100;
+        var wc = (costos / egresosTotales) * 100;
+        barSegFijos.style.width = wf.toFixed(2) + '%';
+        barSegProv.style.width = wp.toFixed(2) + '%';
+        barSegCostos.style.width = wc.toFixed(2) + '%';
+      } else {
+        if (barSegFijos) barSegFijos.style.width = '0%';
+        if (barSegProv) barSegProv.style.width = '0%';
+        if (barSegCostos) barSegCostos.style.width = '0%';
+      }
       if (resultadoEl) {
         resultadoEl.textContent = (neto >= 0 ? '+' : '−') + '$' + Math.abs(Math.round(neto)).toLocaleString('es-AR');
-        resultadoEl.className = 'text-xl sm:text-2xl font-bold mt-1 ' + (neto > 0 ? 'text-[#86efac]' : (neto < 0 ? 'text-red-300' : 'text-amber-300'));
+        resultadoEl.className = 'text-lg sm:text-2xl font-bold tabular-nums ' + (neto > 0 ? 'text-[#86efac]' : (neto < 0 ? 'text-red-300' : 'text-amber-300'));
       }
-      if (etiquetaEl) etiquetaEl.textContent = estado;
-      if (breakEvenEl) {
-        breakEvenEl.textContent = (faltante > 0 ? 'Faltan ' : 'Cubierto ') + '$' + Math.round(faltante > 0 ? faltante : egresosTotales).toLocaleString('es-AR');
-        breakEvenEl.className = 'text-sm font-semibold ' + (faltante > 0 ? 'text-amber-300' : 'text-[#86efac]');
+      if (etiquetaEl) {
+        etiquetaEl.textContent = estado;
+        etiquetaEl.className = 'text-[11px] font-medium shrink-0 ' + (neto > 0 ? 'text-emerald-400/90' : (neto < 0 ? 'text-red-300/90' : 'text-amber-300/90'));
       }
-      if (percentEl) percentEl.textContent = Math.round(cubiertoPct) + '%';
-      if (progressEl) progressEl.style.width = cappedPct.toFixed(1) + '%';
+      if (gapLineEl) {
+        if (ingresos <= 0 && egresosTotales <= 0) {
+          gapLineEl.textContent = 'Sin ingresos ni egresos en este período.';
+          gapLineEl.className = 'text-[11px] text-center leading-snug px-1 text-white/45';
+        } else if (faltante > 0) {
+          gapLineEl.textContent = 'Te faltan ' + fmtMoney(faltante) + ' de ingresos para cubrir todos los egresos.';
+          gapLineEl.className = 'text-[11px] text-center leading-snug px-1 text-amber-200/95 font-medium';
+        } else if (sobra > 0) {
+          gapLineEl.textContent = 'Los ingresos cubren egresos · te sobran ' + fmtMoney(sobra) + '.';
+          gapLineEl.className = 'text-[11px] text-center leading-snug px-1 text-emerald-300/95 font-medium';
+        } else {
+          gapLineEl.textContent = 'Ingresos y egresos están en equilibrio.';
+          gapLineEl.className = 'text-[11px] text-center leading-snug px-1 text-white/60';
+        }
+      }
       if (notaEl) notaEl.textContent = '';
+      if (tituloEl) tituloEl.textContent = 'Estado de cuenta · ' + getEstadoCuentaFilterLabel();
     }
     function openDetalleVentaModal(v) {
       var content = document.getElementById('detalleVentaModalContent');
