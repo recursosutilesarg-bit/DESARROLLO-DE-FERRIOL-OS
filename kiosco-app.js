@@ -3751,6 +3751,132 @@
       var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
       return isNaN(d.getTime()) ? null : d;
     }
+    function ferriolOverlapDaysYmd(rangeStart, rangeEnd, segStart, segEnd) {
+      var s = rangeStart > segStart ? rangeStart : segStart;
+      var e = rangeEnd < segEnd ? rangeEnd : segEnd;
+      if (!s || !e || s > e) return 0;
+      var d0 = ferriolParseYmdLocal(s);
+      var d1 = ferriolParseYmdLocal(e);
+      if (!d0 || !d1) return 0;
+      return Math.round((d1.getTime() - d0.getTime()) / 86400000) + 1;
+    }
+    function ferriolNextDayYmd(ymd) {
+      var d = ferriolParseYmdLocal(ymd);
+      if (!d) return ymd;
+      d.setDate(d.getDate() + 1);
+      return ferriolYmdFromDate(d);
+    }
+    function ferriolDaysInMonthYmd(ymd) {
+      var d = ferriolParseYmdLocal(ymd);
+      if (!d) return 30;
+      return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+    }
+    function ferriolMonthBoundsForYmd(ymd) {
+      var d = ferriolParseYmdLocal(ymd);
+      if (!d) return { startYmd: ymd, endYmd: ymd };
+      var y = d.getFullYear(), mo = d.getMonth();
+      var first = new Date(y, mo, 1);
+      var last = new Date(y, mo + 1, 0);
+      return { startYmd: ferriolYmdFromDate(first), endYmd: ferriolYmdFromDate(last) };
+    }
+    function ferriolQuincenaBoundsForYmd(ymd) {
+      var d = ferriolParseYmdLocal(ymd);
+      if (!d) return { startYmd: ymd, endYmd: ymd };
+      var y = d.getFullYear(), mo = d.getMonth(), day = d.getDate();
+      var dim = new Date(y, mo + 1, 0).getDate();
+      if (day <= 15) {
+        return { startYmd: ferriolYmdFromDate(new Date(y, mo, 1)), endYmd: ferriolYmdFromDate(new Date(y, mo, 15)) };
+      }
+      return { startYmd: ferriolYmdFromDate(new Date(y, mo, 16)), endYmd: ferriolYmdFromDate(new Date(y, mo, dim)) };
+    }
+    function ferriolAllocMontoMensualEnRango(montoMensual, vigDesde, vigHasta, rs, re) {
+      if (!rs || !re || montoMensual <= 0) return 0;
+      var vd = vigDesde || rs;
+      if (vd > re) return 0;
+      if (vigHasta && vigHasta < rs) return 0;
+      var anchor = rs > vd ? rs : vd;
+      var anchorD = ferriolParseYmdLocal(anchor);
+      if (!anchorD) return 0;
+      var cur = new Date(anchorD.getFullYear(), anchorD.getMonth(), 1);
+      var total = 0;
+      var guard = 0;
+      while (guard++ < 120) {
+        var mb = ferriolMonthBoundsForYmd(ferriolYmdFromDate(cur));
+        if (mb.startYmd > re) break;
+        var segStart = mb.startYmd > vd ? mb.startYmd : vd;
+        segStart = segStart > rs ? segStart : rs;
+        var segEnd = mb.endYmd;
+        if (vigHasta && vigHasta < segEnd) segEnd = vigHasta;
+        if (segEnd > re) segEnd = re;
+        var overlap = ferriolOverlapDaysYmd(rs, re, segStart, segEnd);
+        if (overlap > 0) {
+          var dim = ferriolDaysInMonthYmd(mb.startYmd);
+          if (dim > 0) total += (montoMensual / dim) * overlap;
+        }
+        cur = new Date(cur.getFullYear(), cur.getMonth() + 1, 1);
+        if (ferriolYmdFromDate(cur) > re) break;
+        if (vigHasta && ferriolYmdFromDate(cur) > vigHasta) break;
+      }
+      return total;
+    }
+    function ferriolAllocMontoQuincenalEnRango(montoQuincena, vigDesde, vigHasta, rs, re) {
+      if (!rs || !re || montoQuincena <= 0 || !vigDesde) return 0;
+      if (vigDesde > re) return 0;
+      if (vigHasta && vigHasta < rs) return 0;
+      var cursor = rs > vigDesde ? rs : vigDesde;
+      var total = 0;
+      var guard = 0;
+      while (guard++ < 400) {
+        if (cursor > re) break;
+        if (vigHasta && cursor > vigHasta) break;
+        var q = ferriolQuincenaBoundsForYmd(cursor);
+        var segStart = q.startYmd > vigDesde ? q.startYmd : vigDesde;
+        segStart = segStart > rs ? segStart : rs;
+        var segEnd = q.endYmd;
+        if (vigHasta && vigHasta < segEnd) segEnd = vigHasta;
+        if (segEnd > re) segEnd = re;
+        var overlap = ferriolOverlapDaysYmd(rs, re, segStart, segEnd);
+        if (overlap > 0) {
+          var dimQ = ferriolOverlapDaysYmd(q.startYmd, q.endYmd, q.startYmd, q.endYmd);
+          if (dimQ > 0) total += (montoQuincena / dimQ) * overlap;
+        }
+        cursor = ferriolNextDayYmd(q.endYmd);
+      }
+      return total;
+    }
+    function ferriolAllocMontoDiarioRecurrenteEnRango(montoPorDia, vigDesde, vigHasta, rs, re) {
+      var vd = vigDesde || rs;
+      var effStart = rs > vd ? rs : vd;
+      var effEnd = re;
+      if (vigHasta && vigHasta < effEnd) effEnd = vigHasta;
+      var overlap = ferriolOverlapDaysYmd(rs, re, effStart, effEnd);
+      return (Number(montoPorDia) || 0) * overlap;
+    }
+    /** Reparto temporal del gasto en el rango [rs,re] inclusive (fechas locales YYYY-MM-DD). */
+    function ferriolAllocGastoEnRango(row, rs, re) {
+      var tipoRow = String(row.tipo || '');
+      var per = String(row.periodicidad || 'puntual').toLowerCase().trim();
+      if (tipoRow === 'proveedor') per = 'puntual';
+      var monto = Number(row.monto) || 0;
+      var fecha = String(row.fecha || '').slice(0, 10);
+      var vigDesde = String(row.vigencia_desde || '').slice(0, 10);
+      if (!vigDesde || vigDesde.length !== 10) vigDesde = fecha;
+      var vigHasta = row.vigencia_hasta ? String(row.vigencia_hasta).slice(0, 10) : null;
+      if (vigHasta && vigHasta.length !== 10) vigHasta = null;
+      if (!fecha || fecha.length !== 10) fecha = vigDesde;
+      if (!rs || !re || rs > re) return 0;
+      if (per === 'puntual' || per === '') {
+        if (fecha >= rs && fecha <= re) return monto;
+        return 0;
+      }
+      if (vigHasta && vigHasta < rs) return 0;
+      if (vigDesde > re) return 0;
+      if (per === 'diario') return ferriolAllocMontoDiarioRecurrenteEnRango(monto, vigDesde, vigHasta, rs, re);
+      if (per === 'mensual') return ferriolAllocMontoMensualEnRango(monto, vigDesde, vigHasta, rs, re);
+      if (per === 'quincenal') return ferriolAllocMontoQuincenalEnRango(monto, vigDesde, vigHasta, rs, re);
+      if (fecha >= rs && fecha <= re) return monto;
+      return 0;
+    }
     /** Días hasta la fecha calendaria (hora local): 0 = hoy coincide con vencimiento; negativo = ya pasó. */
     function ferriolDaysUntilExpiryYmd(ymd) {
       var target = ferriolParseYmdLocal(ymd);
@@ -4540,22 +4666,23 @@
           }
           var gres = await supabaseClient
             .from('gastos')
-            .select('tipo, descripcion, monto')
+            .select('tipo, descripcion, monto, fecha, periodicidad, vigencia_desde, vigencia_hasta')
             .eq('user_id', currentUser.id)
-            .gte('fecha', range.startYmd)
-            .lte('fecha', range.endYmd);
+            .order('created_at', { ascending: false })
+            .limit(500);
           if (!gres.error && Array.isArray(gres.data)) {
             gres.data.forEach(function (g) {
-              var monto = Number(g.monto) || 0;
+              var alloc = ferriolAllocGastoEnRango(g, range.startYmd, range.endYmd);
+              if (alloc <= 0) return;
               var tipo = String(g.tipo || '').toLowerCase();
               var desc = String(g.descripcion || '').toLowerCase();
               var esImpuesto = tipo === 'impuesto' || desc.indexOf('impuesto') !== -1 || desc.indexOf('iva') !== -1 || desc.indexOf('ingresos brutos') !== -1 || desc.indexOf('afip') !== -1 || desc.indexOf('tribut') !== -1;
               if (esImpuesto) {
-                gastosFijos += monto;
+                gastosFijos += alloc;
               } else if (tipo === 'proveedor') {
-                proveedores += monto;
+                proveedores += alloc;
               } else {
-                gastosFijos += monto;
+                gastosFijos += alloc;
               }
             });
           }
@@ -8260,10 +8387,11 @@
       var gastosF = 0;
       var gastosP = 0;
       try {
-        var gres = await supabaseClient.from('gastos').select('tipo, monto').eq('user_id', uid).gte('fecha', mb.startDate).lte('fecha', mb.endDate);
+        var gres = await supabaseClient.from('gastos').select('tipo, monto, fecha, descripcion, periodicidad, vigencia_desde, vigencia_hasta').eq('user_id', uid).order('created_at', { ascending: false }).limit(600);
         if (!gres.error && Array.isArray(gres.data)) {
           gres.data.forEach(function (r) {
-            var mo = Number(r.monto) || 0;
+            var mo = ferriolAllocGastoEnRango(r, mb.startDate, mb.endDate);
+            if (mo <= 0) return;
             if (r.tipo === 'proveedor') gastosP += mo;
             else if (r.tipo === 'gasto_fijo') gastosF += mo;
             else gastosP += mo;
@@ -8344,6 +8472,18 @@
     // ============================================================
     // GASTOS Y PROVEEDORES
     // ============================================================
+    function ferriolSyncGastoPeriodicidadInlineUi() {
+      var sel = document.getElementById('gastoPeriodicidadInline');
+      var wrap = document.getElementById('gastoVigenciaHastaWrap');
+      if (!sel || !wrap) return;
+      wrap.classList.toggle('hidden', sel.value === 'puntual');
+    }
+    (function ferriolBindGastoPeriodicidadOnce() {
+      var sel = document.getElementById('gastoPeriodicidadInline');
+      if (!sel || sel.dataset.ferriolBound) return;
+      sel.dataset.ferriolBound = '1';
+      sel.addEventListener('change', ferriolSyncGastoPeriodicidadInlineUi);
+    })();
     var _gastosFiltro = { proveedor: 'hoy', gasto_fijo: 'hoy' };
 
     function _fechaDesde(filtro) {
@@ -8358,12 +8498,24 @@
       if (!supabaseClient || !currentUser?.id) return [];
       try {
         var desde = _fechaDesde(_gastosFiltro[tipo]);
+        var hasta = ferriolTodayYmdLocal();
         var res = await supabaseClient.from('gastos')
-          .select('id, tipo, descripcion, monto, fecha, created_at')
-          .eq('user_id', currentUser.id).eq('tipo', tipo).gte('fecha', desde)
-          .order('fecha', { ascending: false }).order('created_at', { ascending: false });
+          .select('id, tipo, descripcion, monto, fecha, periodicidad, vigencia_desde, vigencia_hasta, created_at')
+          .eq('user_id', currentUser.id).eq('tipo', tipo)
+          .order('created_at', { ascending: false }).limit(400);
         if (res.error) throw res.error;
-        return res.data || [];
+        var rows = res.data || [];
+        return rows
+          .map(function (r) {
+            return Object.assign({}, r, { _allocPeriodo: ferriolAllocGastoEnRango(r, desde, hasta) });
+          })
+          .filter(function (r) { return r._allocPeriodo > 0; })
+          .sort(function (a, b) {
+            var fa = String(a.fecha || '').slice(0, 10);
+            var fb = String(b.fecha || '').slice(0, 10);
+            if (fb !== fa) return fb.localeCompare(fa);
+            return (b.created_at || '').localeCompare(a.created_at || '');
+          });
       } catch (e) { return []; }
     }
 
@@ -8382,17 +8534,23 @@
         if (resumenEl) resumenEl.classList.add('hidden');
         lucide.createIcons(); return;
       }
-      var total = rows.reduce(function (s, r) { return s + Number(r.monto || 0); }, 0);
+      var total = rows.reduce(function (s, r) { return s + Number(r._allocPeriodo != null ? r._allocPeriodo : r.monto || 0); }, 0);
       if (totalEl) totalEl.textContent = '$' + Math.round(total).toLocaleString('es-AR');
       if (resumenEl) resumenEl.classList.remove('hidden');
       listEl.innerHTML = rows.map(function (r) {
         var desc = r.descripcion || '';
         var fecha = (r.fecha || '').toString().slice(0, 10);
-        var monto = Number(r.monto || 0);
+        var monto = Number(r._allocPeriodo != null ? r._allocPeriodo : r.monto || 0);
+        var per = String(r.periodicidad || 'puntual').toLowerCase();
+        var chipPer = '';
+        if (tipo === 'gasto_fijo' && per && per !== 'puntual') {
+          var plab = { mensual: 'Mes', quincenal: 'Quinc.', diario: 'Día' }[per] || per;
+          chipPer = '<span class="text-[9px] font-semibold px-1.5 py-0.5 rounded-md bg-white/15 text-white/80 shrink-0">' + plab + '</span>';
+        }
         var icono = tipo === 'proveedor' ? 'truck' : 'receipt';
         return '<div class="gasto-item glass rounded-xl px-4 py-3 border border-white/10 flex items-center gap-3">' +
           '<i data-lucide="' + icono + '" class="w-4 h-4 text-[#86efac] shrink-0"></i>' +
-          '<div class="flex-1 min-w-0"><p class="font-medium text-sm truncate">' + desc.replace(/</g,'&lt;') + '</p>' +
+          '<div class="flex-1 min-w-0"><p class="font-medium text-sm truncate flex flex-wrap items-center gap-1.5">' + desc.replace(/</g,'&lt;') + chipPer + '</p>' +
           '<p class="text-xs text-white/50">' + fecha + '</p></div>' +
           '<div class="flex items-center gap-2 shrink-0">' +
           '<span class="font-bold text-sm text-red-300">−$' + Math.round(monto).toLocaleString('es-AR') + '</span>' +
@@ -8435,7 +8593,10 @@
         var d = document.getElementById('gastoDescInline'); if (d) d.value = '';
         var m = document.getElementById('gastoMontoInline'); if (m) m.value = '';
         var f = document.getElementById('gastoFechaInline'); if (f) f.value = hoy;
+        var per = document.getElementById('gastoPeriodicidadInline'); if (per) per.value = 'puntual';
+        var vh = document.getElementById('gastoVigenciaHastaInline'); if (vh) vh.value = '';
         var e = document.getElementById('gastoErrInline'); if (e) e.classList.add('hidden');
+        ferriolSyncGastoPeriodicidadInlineUi();
       }
     }
 
@@ -8464,8 +8625,26 @@
       if (!fecha) { if (errEl) { errEl.textContent = 'Seleccioná una fecha.'; errEl.classList.remove('hidden'); } return; }
       if (!supabaseClient || !currentUser?.id) { if (errEl) { errEl.textContent = 'Sin conexión a Supabase.'; errEl.classList.remove('hidden'); } return; }
       try {
-        var res = await supabaseClient.from('gastos').insert({ user_id: currentUser.id, tipo: tipo, descripcion: descripcionFinal, monto: monto, fecha: fecha });
-        if (res.error) throw res.error;
+        var insertPayload = { user_id: currentUser.id, tipo: tipo, descripcion: descripcionFinal, monto: monto, fecha: fecha };
+        if (tipo === 'gasto_fijo') {
+          var perSel = document.getElementById('gastoPeriodicidadInline');
+          var periodicidad = perSel && perSel.value ? String(perSel.value) : 'puntual';
+          if (periodicidad !== 'mensual' && periodicidad !== 'quincenal' && periodicidad !== 'diario') periodicidad = 'puntual';
+          insertPayload.periodicidad = periodicidad;
+          insertPayload.vigencia_desde = fecha;
+          var hastaInp = document.getElementById('gastoVigenciaHastaInline');
+          var hastaVal = hastaInp && hastaInp.value ? String(hastaInp.value).trim() : '';
+          if (periodicidad !== 'puntual' && hastaVal && hastaVal >= fecha) insertPayload.vigencia_hasta = hastaVal;
+          else insertPayload.vigencia_hasta = null;
+        }
+        var res = await supabaseClient.from('gastos').insert(insertPayload);
+        if (res.error) {
+          var em = (res.error.message || '') + ' ' + (res.error.details || '');
+          if (em.indexOf('periodicidad') !== -1 || em.indexOf('vigencia_') !== -1 || res.error.code === 'PGRST204') {
+            throw new Error('En Supabase ejecutá supabase-gastos-periodicidad.sql');
+          }
+          throw res.error;
+        }
         _resetFormInline(tipo);
         renderGastos(tipo);
         renderResumenMensualCaja();
