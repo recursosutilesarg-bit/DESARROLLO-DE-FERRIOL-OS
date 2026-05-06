@@ -3789,6 +3789,30 @@
       }
       return { startYmd: ferriolYmdFromDate(new Date(y, mo, 16)), endYmd: ferriolYmdFromDate(new Date(y, mo, dim)) };
     }
+    /** Semana calendario: lunes a domingo (hora local). */
+    function ferriolWeekBoundsForYmd(ymd) {
+      var d = ferriolParseYmdLocal(ymd);
+      if (!d) return { startYmd: ymd, endYmd: ymd };
+      var day = d.getDay();
+      var deltaMon = day === 0 ? -6 : 1 - day;
+      var mon = new Date(d.getFullYear(), d.getMonth(), d.getDate() + deltaMon);
+      var sun = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6);
+      return { startYmd: ferriolYmdFromDate(mon), endYmd: ferriolYmdFromDate(sun) };
+    }
+    function ferriolQuarterBoundsForYmd(ymd) {
+      var d = ferriolParseYmdLocal(ymd);
+      if (!d) return { startYmd: ymd, endYmd: ymd };
+      var y = d.getFullYear(), m = d.getMonth();
+      var qStartMonth = Math.floor(m / 3) * 3;
+      var start = new Date(y, qStartMonth, 1);
+      var end = new Date(y, qStartMonth + 3, 0);
+      return { startYmd: ferriolYmdFromDate(start), endYmd: ferriolYmdFromDate(end) };
+    }
+    function ferriolDaysInCalendarYear(y) {
+      var yi = Number(y);
+      if (!Number.isFinite(yi)) return 365;
+      return ((yi % 4 === 0 && yi % 100 !== 0) || yi % 400 === 0) ? 366 : 365;
+    }
     function ferriolAllocMontoMensualEnRango(montoMensual, vigDesde, vigHasta, rs, re) {
       if (!rs || !re || montoMensual <= 0) return 0;
       var vd = vigDesde || rs;
@@ -3844,6 +3868,96 @@
       }
       return total;
     }
+    function ferriolAllocMontoSemanalEnRango(montoSemana, vigDesde, vigHasta, rs, re) {
+      if (!rs || !re || montoSemana <= 0 || !vigDesde) return 0;
+      if (vigDesde > re) return 0;
+      if (vigHasta && vigHasta < rs) return 0;
+      var cursor = rs > vigDesde ? rs : vigDesde;
+      var total = 0;
+      var guard = 0;
+      while (guard++ < 520) {
+        if (cursor > re) break;
+        if (vigHasta && cursor > vigHasta) break;
+        var w = ferriolWeekBoundsForYmd(cursor);
+        var segStart = w.startYmd > vigDesde ? w.startYmd : vigDesde;
+        segStart = segStart > rs ? segStart : rs;
+        var segEnd = w.endYmd;
+        if (vigHasta && vigHasta < segEnd) segEnd = vigHasta;
+        if (segEnd > re) segEnd = re;
+        var overlap = ferriolOverlapDaysYmd(rs, re, segStart, segEnd);
+        if (overlap > 0) {
+          var dimW = ferriolOverlapDaysYmd(w.startYmd, w.endYmd, w.startYmd, w.endYmd);
+          if (dimW > 0) total += (montoSemana / dimW) * overlap;
+        }
+        cursor = ferriolNextDayYmd(w.endYmd);
+      }
+      return total;
+    }
+    function ferriolAllocMontoTrimestralEnRango(montoTrimestre, vigDesde, vigHasta, rs, re) {
+      if (!rs || !re || montoTrimestre <= 0) return 0;
+      var vd = vigDesde || rs;
+      if (vd > re) return 0;
+      if (vigHasta && vigHasta < rs) return 0;
+      var anchor = rs > vd ? rs : vd;
+      var qb = ferriolQuarterBoundsForYmd(anchor);
+      var cur = ferriolParseYmdLocal(qb.startYmd);
+      if (!cur) return 0;
+      var total = 0;
+      var guard = 0;
+      while (guard++ < 40) {
+        var mb = ferriolQuarterBoundsForYmd(ferriolYmdFromDate(cur));
+        if (mb.startYmd > re) break;
+        var segStart = mb.startYmd > vd ? mb.startYmd : vd;
+        segStart = segStart > rs ? segStart : rs;
+        var segEnd = mb.endYmd;
+        if (vigHasta && vigHasta < segEnd) segEnd = vigHasta;
+        if (segEnd > re) segEnd = re;
+        var overlap = ferriolOverlapDaysYmd(rs, re, segStart, segEnd);
+        if (overlap > 0) {
+          var dim = ferriolOverlapDaysYmd(mb.startYmd, mb.endYmd, mb.startYmd, mb.endYmd);
+          if (dim > 0) total += (montoTrimestre / dim) * overlap;
+        }
+        var next = ferriolParseYmdLocal(mb.endYmd);
+        if (!next) break;
+        next.setDate(next.getDate() + 1);
+        cur = next;
+        if (ferriolYmdFromDate(cur) > re) break;
+        if (vigHasta && ferriolYmdFromDate(cur) > vigHasta) break;
+      }
+      return total;
+    }
+    function ferriolAllocMontoAnualEnRango(montoAnual, vigDesde, vigHasta, rs, re) {
+      if (!rs || !re || montoAnual <= 0) return 0;
+      var vd = vigDesde || rs;
+      if (vd > re) return 0;
+      if (vigHasta && vigHasta < rs) return 0;
+      var anchor = rs > vd ? rs : vd;
+      var anchorD = ferriolParseYmdLocal(anchor);
+      if (!anchorD) return 0;
+      var y = anchorD.getFullYear();
+      var total = 0;
+      var guard = 0;
+      while (guard++ < 50) {
+        var start = new Date(y, 0, 1);
+        var end = new Date(y, 11, 31);
+        var mb = { startYmd: ferriolYmdFromDate(start), endYmd: ferriolYmdFromDate(end) };
+        if (mb.startYmd > re) break;
+        var segStart = mb.startYmd > vd ? mb.startYmd : vd;
+        segStart = segStart > rs ? segStart : rs;
+        var segEnd = mb.endYmd;
+        if (vigHasta && vigHasta < segEnd) segEnd = vigHasta;
+        if (segEnd > re) segEnd = re;
+        var overlap = ferriolOverlapDaysYmd(rs, re, segStart, segEnd);
+        if (overlap > 0) {
+          var dim = ferriolDaysInCalendarYear(y);
+          if (dim > 0) total += (montoAnual / dim) * overlap;
+        }
+        y += 1;
+        if (ferriolYmdFromDate(new Date(y, 0, 1)) > re) break;
+        if (vigHasta && ferriolYmdFromDate(new Date(y, 0, 1)) > vigHasta) break;
+      }
+      return total;
+    }
     function ferriolAllocMontoDiarioRecurrenteEnRango(montoPorDia, vigDesde, vigHasta, rs, re) {
       var vd = vigDesde || rs;
       var effStart = rs > vd ? rs : vd;
@@ -3872,8 +3986,11 @@
       if (vigHasta && vigHasta < rs) return 0;
       if (vigDesde > re) return 0;
       if (per === 'diario') return ferriolAllocMontoDiarioRecurrenteEnRango(monto, vigDesde, vigHasta, rs, re);
+      if (per === 'semanal') return ferriolAllocMontoSemanalEnRango(monto, vigDesde, vigHasta, rs, re);
       if (per === 'mensual') return ferriolAllocMontoMensualEnRango(monto, vigDesde, vigHasta, rs, re);
       if (per === 'quincenal') return ferriolAllocMontoQuincenalEnRango(monto, vigDesde, vigHasta, rs, re);
+      if (per === 'trimestral') return ferriolAllocMontoTrimestralEnRango(monto, vigDesde, vigHasta, rs, re);
+      if (per === 'anual') return ferriolAllocMontoAnualEnRango(monto, vigDesde, vigHasta, rs, re);
       if (fecha >= rs && fecha <= re) return monto;
       return 0;
     }
@@ -8473,10 +8590,8 @@
     // GASTOS Y PROVEEDORES
     // ============================================================
     function ferriolSyncGastoPeriodicidadInlineUi() {
-      var sel = document.getElementById('gastoPeriodicidadInline');
       var wrap = document.getElementById('gastoVigenciaHastaWrap');
-      if (!sel || !wrap) return;
-      wrap.classList.toggle('hidden', sel.value === 'puntual');
+      if (wrap) wrap.classList.remove('hidden');
     }
     (function ferriolBindGastoPeriodicidadOnce() {
       var sel = document.getElementById('gastoPeriodicidadInline');
@@ -8543,8 +8658,8 @@
         var monto = Number(r._allocPeriodo != null ? r._allocPeriodo : r.monto || 0);
         var per = String(r.periodicidad || 'puntual').toLowerCase();
         var chipPer = '';
-        if (tipo === 'gasto_fijo' && per && per !== 'puntual') {
-          var plab = { mensual: 'Mes', quincenal: 'Quinc.', diario: 'Día' }[per] || per;
+        if (tipo === 'gasto_fijo') {
+          var plab = { diario: 'Día', semanal: 'Sem.', quincenal: 'Quinc.', mensual: 'Mes', trimestral: 'Trim.', anual: 'Año', puntual: '1×' }[per] || per;
           chipPer = '<span class="text-[9px] font-semibold px-1.5 py-0.5 rounded-md bg-white/15 text-white/80 shrink-0">' + plab + '</span>';
         }
         var icono = tipo === 'proveedor' ? 'truck' : 'receipt';
@@ -8593,7 +8708,7 @@
         var d = document.getElementById('gastoDescInline'); if (d) d.value = '';
         var m = document.getElementById('gastoMontoInline'); if (m) m.value = '';
         var f = document.getElementById('gastoFechaInline'); if (f) f.value = hoy;
-        var per = document.getElementById('gastoPeriodicidadInline'); if (per) per.value = 'puntual';
+        var per = document.getElementById('gastoPeriodicidadInline'); if (per) per.value = 'diario';
         var vh = document.getElementById('gastoVigenciaHastaInline'); if (vh) vh.value = '';
         var e = document.getElementById('gastoErrInline'); if (e) e.classList.add('hidden');
         ferriolSyncGastoPeriodicidadInlineUi();
@@ -8628,14 +8743,14 @@
         var insertPayload = { user_id: currentUser.id, tipo: tipo, descripcion: descripcionFinal, monto: monto, fecha: fecha };
         if (tipo === 'gasto_fijo') {
           var perSel = document.getElementById('gastoPeriodicidadInline');
-          var periodicidad = perSel && perSel.value ? String(perSel.value) : 'puntual';
-          if (periodicidad !== 'mensual' && periodicidad !== 'quincenal' && periodicidad !== 'diario') periodicidad = 'puntual';
+          var periodicidad = perSel && perSel.value ? String(perSel.value).toLowerCase().trim() : 'diario';
+          var _perOk = { diario: 1, semanal: 1, quincenal: 1, mensual: 1, trimestral: 1, anual: 1 };
+          if (!_perOk[periodicidad]) periodicidad = 'diario';
           insertPayload.periodicidad = periodicidad;
           insertPayload.vigencia_desde = fecha;
           var hastaInp = document.getElementById('gastoVigenciaHastaInline');
           var hastaVal = hastaInp && hastaInp.value ? String(hastaInp.value).trim() : '';
-          if (periodicidad !== 'puntual' && hastaVal && hastaVal >= fecha) insertPayload.vigencia_hasta = hastaVal;
-          else insertPayload.vigencia_hasta = null;
+          insertPayload.vigencia_hasta = hastaVal && hastaVal >= fecha ? hastaVal : null;
         }
         var res = await supabaseClient.from('gastos').insert(insertPayload);
         if (res.error) {

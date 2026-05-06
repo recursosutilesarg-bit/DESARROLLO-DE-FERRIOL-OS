@@ -856,10 +856,12 @@
               <div>
                 <label class="block text-xs text-white/60 mb-1">Periodicidad</label>
                 <select id="gastoPeriodicidadInline" class="ferriol-native-select w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
-                  <option value="puntual">Una vez (todo ese día)</option>
-                  <option value="diario">Cada día vigente</option>
-                  <option value="quincenal">Quincena (monto / días de la quincena)</option>
-                  <option value="mensual">Mes (monto / días del mes)</option>
+                  <option value="diario">Diario</option>
+                  <option value="semanal">Semanal</option>
+                  <option value="quincenal">Quincenal</option>
+                  <option value="mensual">Mensual</option>
+                  <option value="trimestral">Trimestral</option>
+                  <option value="anual">Anual</option>
                 </select>
               </div>
               <div class="flex gap-3">
@@ -872,7 +874,7 @@
                   <input type="date" id="gastoFechaInline" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
                 </div>
               </div>
-              <div id="gastoVigenciaHastaWrap" class="hidden">
+              <div id="gastoVigenciaHastaWrap">
                 <label class="block text-xs text-white/60 mb-1">Hasta (opcional)</label>
                 <input type="date" id="gastoVigenciaHastaInline" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
               </div>
