@@ -3230,6 +3230,18 @@
     const STORAGE_KEY_PREFIX = 'ferriol_data_';
     const LAST_QUICK_PAYMENT_KEY = 'ferriol_last_quick_payment';
     function getStorageKey() { return currentUser?.id ? STORAGE_KEY_PREFIX + currentUser.id : null; }
+    /** YYYY-MM-DD en calendario local (mismo criterio que historial / día operativo). */
+    function ferriolYmdFromDate(dt) {
+      var d = dt instanceof Date ? dt : new Date(dt);
+      if (isNaN(d.getTime())) d = new Date();
+      var y = d.getFullYear();
+      var mo = String(d.getMonth() + 1).padStart(2, '0');
+      var da = String(d.getDate()).padStart(2, '0');
+      return y + '-' + mo + '-' + da;
+    }
+    function ferriolTodayYmdLocal() {
+      return ferriolYmdFromDate(new Date());
+    }
     function loadFromLocalStorage() {
       const key = getStorageKey();
       if (!key) return null;
@@ -3290,7 +3302,7 @@
             deudores: _dataCache.deudores || [],
             lastCierreDate: (prevLocal && prevLocal.lastCierreDate) ? prevLocal.lastCierreDate : (_dataCache.lastCierreDate || null)
           };
-          var _hoyStr = new Date().toISOString().slice(0, 10);
+          var _hoyStr = ferriolTodayYmdLocal();
           if (prevLocal && prevLocal.lastCierreDate === _hoyStr && prevLocal.ventas && prevLocal.ventas.cobro_libreta) {
             _dataCache.ventas.cobro_libreta = Number(prevLocal.ventas.cobro_libreta) || 0;
           }
@@ -3307,7 +3319,7 @@
         _dataCache.transacciones = local.transacciones || 0;
         _dataCache.deudores = local.deudores || [];
         _dataCache.lastCierreDate = local.lastCierreDate || null;
-        var today = new Date().toISOString().slice(0, 10);
+        var today = ferriolTodayYmdLocal();
         if (local.transaccionesList && Array.isArray(local.transaccionesList) && local.lastCierreDate === today && state) state.transaccionesList = local.transaccionesList;
       } else {
         restoreTodayFromLocalStorage();
@@ -3317,8 +3329,12 @@
     function restoreTodayFromLocalStorage() {
       var local = loadFromLocalStorage();
       if (!local) return;
-      var today = new Date().toISOString().slice(0, 10);
-      if (local.lastCierreDate !== today) return;
+      var today = ferriolTodayYmdLocal();
+      var last = local.lastCierreDate;
+      var sameDay = last === today;
+      var utcAheadBug = last && typeof last === 'string' && last > today;
+      if (!sameDay && !utcAheadBug) return;
+      if (utcAheadBug && !sameDay) _dataCache.lastCierreDate = today;
       if (local.ventas && typeof local.ventas === 'object') _dataCache.ventas = local.ventas;
       if (local.transacciones !== undefined) _dataCache.transacciones = local.transacciones;
       if (state && local.transaccionesList && Array.isArray(local.transaccionesList)) state.transaccionesList = local.transaccionesList;
@@ -3411,9 +3427,14 @@
     }
 
     function checkMidnightReset() {
-      var today = new Date().toISOString().slice(0, 10);
+      var today = ferriolTodayYmdLocal();
       var last = _dataCache.lastCierreDate;
       if (last && last !== today) {
+        if (typeof last === 'string' && last > today) {
+          _dataCache.lastCierreDate = today;
+          saveToLocalStorage();
+          return;
+        }
         _dataCache.ventas = { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 };
         _dataCache.transacciones = 0;
         state.transaccionesList = [];
@@ -4250,7 +4271,7 @@
         if (d.products[item.codigo]) d.products[item.codigo].stock -= item.cant;
       });
       state.cart = [];
-      d.lastCierreDate = new Date().toISOString().slice(0, 10);
+      d.lastCierreDate = ferriolTodayYmdLocal();
       setData(d);
       updateCartUI();
       updateDashboard();
@@ -4726,7 +4747,7 @@
         d.ventas[method] = (d.ventas[method] || 0) + total;
       }
       d.transacciones = (d.transacciones || 0) + 1;
-      d.lastCierreDate = new Date().toISOString().slice(0, 10);
+      d.lastCierreDate = ferriolTodayYmdLocal();
       (items || []).forEach(function (it) {
         var c = it.codigo;
         if (!c || String(c).indexOf('_rapida_') === 0) return;
@@ -8039,14 +8060,14 @@
       var m = await getMetricasDelDia();
       if (supabaseClient && currentUser?.id) {
         try {
-          var hoy = new Date().toISOString().slice(0, 10);
+          var hoy = ferriolTodayYmdLocal();
           await supabaseClient.from('cierres_caja').insert({ user_id: currentUser.id, fecha: hoy, fecha_cierre: new Date().toISOString(), total_facturado: m.total, ganancia: Math.round(m.ganancia) });
         } catch (_) {}
       }
       var d = getData();
       d.ventas = { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 };
       d.transacciones = 0;
-      d.lastCierreDate = new Date().toISOString().slice(0, 10);
+      d.lastCierreDate = ferriolTodayYmdLocal();
       state.transaccionesList = [];
       Object.keys(d.products || {}).forEach(function (codigo) {
         var p = d.products[codigo];
@@ -8065,10 +8086,10 @@
 
     function _fechaDesde(filtro) {
       var hoy = new Date();
-      if (filtro === 'hoy') return hoy.toISOString().slice(0, 10);
-      if (filtro === 'semana') { var d = new Date(hoy); d.setDate(hoy.getDate() - 6); return d.toISOString().slice(0, 10); }
-      if (filtro === 'mes') { var d = new Date(hoy); d.setDate(1); return d.toISOString().slice(0, 10); }
-      return hoy.toISOString().slice(0, 10);
+      if (filtro === 'hoy') return ferriolTodayYmdLocal();
+      if (filtro === 'semana') { var d = new Date(hoy); d.setDate(hoy.getDate() - 6); return ferriolYmdFromDate(d); }
+      if (filtro === 'mes') { var d = new Date(hoy); d.setDate(1); return ferriolYmdFromDate(d); }
+      return ferriolTodayYmdLocal();
     }
 
     async function loadGastos(tipo) {
@@ -8141,7 +8162,7 @@
     };
 
     function _resetFormInline(tipo) {
-      var hoy = new Date().toISOString().slice(0, 10);
+      var hoy = ferriolTodayYmdLocal();
       if (tipo === 'proveedor') {
         var n = document.getElementById('provNombre'); if (n) n.value = '';
         var d = document.getElementById('provDescripcion'); if (d) d.value = '';
@@ -8735,7 +8756,7 @@
         dCobro.ventas = dCobro.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 };
         dCobro.ventas.cobro_libreta = (dCobro.ventas.cobro_libreta || 0) + total;
         dCobro.transacciones = (dCobro.transacciones || 0) + 1;
-        dCobro.lastCierreDate = new Date().toISOString().slice(0, 10);
+        dCobro.lastCierreDate = ferriolTodayYmdLocal();
         setData(dCobro);
         try { await updateDashboard(); } catch (_) {}
         _libretalCuentaUltimoMonto = total;
