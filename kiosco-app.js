@@ -18,7 +18,7 @@
     // Recordatorios de fin de prueba (mensajes por día + ventana): guardá en app_settings una fila key = 'trial_reminder_config', value = JSON, ej. {"windowDays":5,"messages":{"5":"...","4":"..."}}. Placeholders en textos: {dias}, {dias_restantes}, {nombre}, {negocio}.
     // Red de referidos: solo role 'partner' o 'super' tienen código y enlaces (kiosquero no refiere). SQL: supabase-referral-network.sql, supabase-mlm-foundation.sql, supabase-ferriol-payments.sql (cobros + RPC ferriol_verify_payment). Solicitudes de días (socio → empresa): supabase-ferriol-membership-day-requests.sql. Tabla ferriol_partner_provision_requests (SQL supabase-ferriol-partner-provision-requests.sql) puede seguir usándose desde panel fundador o flujos legacy; el alta vía formulario en Más fue retirado (altas por enlace de afiliación). Objeto FerriolMlm en este archivo.
     // Enlaces: ?ref=CÓDIGO&nicho=kiosco (alta negocio) | ?ref=CÓDIGO&nicho=socio (membresía vendedor). Aliases: nicho=vendedor|red|membresia, membresia=1, tipo=...
-    // Historial de cierres de caja (facturación y ganancia por día):
+    // Historial de cierres de caja (facturación y ganancia por día); arqueo opcional: supabase-cierres-caja-arqueo.sql
     // CREATE TABLE cierres_caja ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE, fecha date NOT NULL, fecha_cierre timestamptz NOT NULL DEFAULT now(), total_facturado numeric NOT NULL DEFAULT 0, ganancia numeric NOT NULL DEFAULT 0, created_at timestamptz DEFAULT now() );
     // ALTER TABLE cierres_caja ENABLE ROW LEVEL SECURITY; CREATE POLICY "cierres_caja_policy" ON cierres_caja FOR ALL USING (auth.uid() = user_id);
     // Para que el admin pueda EXPORTAR e IMPORTAR copia de todos los usuarios, agregá estas políticas (super puede leer, insertar y borrar):
@@ -4610,9 +4610,54 @@
       }, 0);
       return { total, efectivo: ventas.efectivo || 0, tarjeta: ventas.tarjeta || 0, transferencia: ventas.transferencia || 0, fiado, transferencia_pendiente: transfPend, cobro_libreta: cobroLibretaL, ganancia, count: d.transacciones || 0 };
     }
+
+    /** Parse monto desde input (ej. 45800 o 45.800 o 45.800,50 AR). */
+    function ferriolParseMontoLocal(raw) {
+      if (raw == null) return null;
+      var s = String(raw).trim().replace(/\s/g, '');
+      if (s === '') return null;
+      s = s.replace(/\./g, '').replace(',', '.');
+      var n = Number(s);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function ferriolRefreshCierreArqueoDiff() {
+      var wrap = document.getElementById('cierreArqueoDifWrap');
+      var difEl = document.getElementById('cierreArqueoDif');
+      var inp = document.getElementById('cierreEfectivoContado');
+      var omitir = document.getElementById('cierreOmitirArqueo');
+      if (!wrap || !difEl) return;
+      var esperado = Number(window._ferriolCierreEfectivoEsperado);
+      if (!Number.isFinite(esperado)) esperado = 0;
+      if (omitir && omitir.checked) {
+        wrap.classList.add('hidden');
+        return;
+      }
+      var contado = inp ? ferriolParseMontoLocal(inp.value) : null;
+      if (contado === null) {
+        wrap.classList.add('hidden');
+        return;
+      }
+      var dif = Math.round((contado - esperado) * 100) / 100;
+      wrap.classList.remove('hidden');
+      var sign = dif > 0 ? '+' : (dif < 0 ? '−' : '');
+      var abs = Math.abs(dif);
+      difEl.textContent = sign + '$' + abs.toLocaleString('es-AR');
+      difEl.className = 'font-semibold shrink-0 ' + (dif === 0 ? 'text-[#86efac]' : dif > 0 ? 'text-amber-300' : 'text-red-300');
+    }
+
+    function ferriolSyncCierreArqueoEsperado(m) {
+      if (!m) return;
+      window._ferriolCierreEfectivoEsperado = Number(m.efectivo) || 0;
+      var esp = document.getElementById('cierreEfectivoEsperado');
+      if (esp) esp.textContent = '$' + window._ferriolCierreEfectivoEsperado.toLocaleString('es-AR');
+      ferriolRefreshCierreArqueoDiff();
+    }
+
     async function updateDashboard() {
       checkMidnightReset();
       var m = await getMetricasDelDia();
+      ferriolSyncCierreArqueoEsperado(m);
       document.getElementById('metricVentas').textContent = '$' + m.total.toLocaleString('es-AR');
       document.getElementById('metricTrans').textContent = '$' + Math.round(m.ganancia).toLocaleString('es-AR');
       document.getElementById('cajaEfectivo').textContent = '$' + m.efectivo.toLocaleString('es-AR');
@@ -8417,6 +8462,20 @@
       const t = document.getElementById('ticketContent');
       t.classList.remove('hidden');
       document.getElementById('ticketFecha').textContent = new Date().toLocaleString('es-AR');
+      var omitirTk = document.getElementById('cierreOmitirArqueo');
+      var contadoTk = ferriolParseMontoLocal((document.getElementById('cierreEfectivoContado') || {}).value);
+      var omitArqueo = !!(omitirTk && omitirTk.checked);
+      var arqueoHtml = '';
+      var arqueoTxt = '';
+      if (!omitArqueo && contadoTk !== null && Number.isFinite(contadoTk)) {
+        var espTk = Number(mT.efectivo) || 0;
+        var difTk = Math.round((contadoTk - espTk) * 100) / 100;
+        arqueoHtml = `<p class="border-t border-gray-300 pt-2 mt-2 font-semibold">Arqueo efectivo</p><p>Según sistema: $${espTk.toLocaleString('es-AR')}</p><p>Contado: $${contadoTk.toLocaleString('es-AR')}</p><p>Diferencia: ${difTk >= 0 ? '+' : '−'}$${Math.abs(difTk).toLocaleString('es-AR')}</p>`;
+        arqueoTxt = `\n--- Arqueo ---\nSegún sistema: $${espTk.toLocaleString('es-AR')}\nContado: $${contadoTk.toLocaleString('es-AR')}\nDiferencia: ${difTk >= 0 ? '+' : '−'}$${Math.abs(difTk).toLocaleString('es-AR')}\n`;
+      } else if (omitArqueo) {
+        arqueoHtml = '<p class="text-gray-500 text-xs mt-2">Arqueo: sin conteo físico</p>';
+        arqueoTxt = '\nArqueo: sin conteo físico\n';
+      }
       document.getElementById('ticketBody').innerHTML = `
         <p>Efectivo: $${(mT.efectivo || 0).toLocaleString('es-AR')}</p>
         <p>Tarjeta: $${(mT.tarjeta || 0).toLocaleString('es-AR')}</p>
@@ -8426,9 +8485,10 @@
         <p class="text-white/60 text-sm">Transf. pendiente: $${transfPend.toLocaleString('es-AR')}</p>
         <p>Cant. movimientos: ${d.transacciones || 0}</p>
         <p class="text-green-400">Ganancia del día (precio − costo): $${utilidadDiaTicket.toLocaleString('es-AR')}</p>
+        ${arqueoHtml}
       `;
       document.getElementById('ticketTotal').textContent = `Ingresos de caja: $${totalIngresos.toLocaleString('es-AR')}`;
-      const texto = `FERRIOL OS - Cierre de Caja\n${new Date().toLocaleString('es-AR')}\n\nEfectivo: $${(mT.efectivo || 0).toLocaleString('es-AR')}\nTarjeta: $${(mT.tarjeta || 0).toLocaleString('es-AR')}\nTransferencia: $${(mT.transferencia || 0).toLocaleString('es-AR')}\nCobro libreta: $${cobroLib.toLocaleString('es-AR')}\n— Fiado (cuenta): $${fiado.toLocaleString('es-AR')}\n— Transf. pendiente: $${transfPend.toLocaleString('es-AR')}\nCant. movimientos: ${d.transacciones || 0}\nGanancia del día (precio − costo): $${utilidadDiaTicket.toLocaleString('es-AR')}\n\nIngresos de caja: $${totalIngresos.toLocaleString('es-AR')}`;
+      const texto = `FERRIOL OS - Cierre de Caja\n${new Date().toLocaleString('es-AR')}\n\nEfectivo: $${(mT.efectivo || 0).toLocaleString('es-AR')}\nTarjeta: $${(mT.tarjeta || 0).toLocaleString('es-AR')}\nTransferencia: $${(mT.transferencia || 0).toLocaleString('es-AR')}\nCobro libreta: $${cobroLib.toLocaleString('es-AR')}\n— Fiado (cuenta): $${fiado.toLocaleString('es-AR')}\n— Transf. pendiente: $${transfPend.toLocaleString('es-AR')}\nCant. movimientos: ${d.transacciones || 0}\nGanancia del día (precio − costo): $${utilidadDiaTicket.toLocaleString('es-AR')}${arqueoTxt}\nIngresos de caja: $${totalIngresos.toLocaleString('es-AR')}`;
       if (navigator.share) {
         try {
           await navigator.share({
@@ -8570,7 +8630,7 @@
         return;
       }
       try {
-        var res = await supabaseClient.from('cierres_caja').select('id, fecha, fecha_cierre, total_facturado, ganancia').eq('user_id', currentUser.id).order('fecha_cierre', { ascending: false }).limit(50);
+        var res = await supabaseClient.from('cierres_caja').select('id, fecha, fecha_cierre, total_facturado, ganancia, efectivo_contado, efectivo_diferencia, arqueo_omitido').eq('user_id', currentUser.id).order('fecha_cierre', { ascending: false }).limit(50);
         if (res.error) throw res.error;
         var rows = res.data || [];
         if (rows.length === 0) {
@@ -8580,23 +8640,121 @@
             var fecha = (r.fecha || r.fecha_cierre || '').toString().slice(0, 10);
             var total = Number(r.total_facturado || 0);
             var gan = Number(r.ganancia || 0);
-            return '<div class="glass rounded-xl p-3 border border-white/10 flex justify-between items-center gap-2"><div><span class="text-white/70">' + fecha + '</span></div><div class="text-right"><span class="font-semibold text-[#f87171]">$' + total.toLocaleString('es-AR') + '</span><span class="text-green-400/90 text-xs ml-2">$' + Math.round(gan).toLocaleString('es-AR') + ' gan.</span></div></div>';
+            var sub = '';
+            if (r.arqueo_omitido === true) sub = '<p class="text-[10px] text-white/40 mt-1">Arqueo omitido</p>';
+            else if (r.efectivo_diferencia != null && Number.isFinite(Number(r.efectivo_diferencia))) {
+              var dd = Number(r.efectivo_diferencia);
+              var cls = dd === 0 ? 'text-[#86efac]/90' : dd > 0 ? 'text-amber-300/90' : 'text-red-300/90';
+              sub = '<p class="text-[10px] ' + cls + ' mt-1">Efectivo Δ $' + dd.toLocaleString('es-AR') + '</p>';
+            }
+            return '<div class="glass rounded-xl p-3 border border-white/10 flex justify-between items-start gap-2"><div class="min-w-0"><span class="text-white/70">' + fecha + '</span>' + sub + '</div><div class="text-right shrink-0"><span class="font-semibold text-[#86efac]">$' + total.toLocaleString('es-AR') + '</span><span class="text-green-400/90 text-xs ml-2 block sm:inline">$' + Math.round(gan).toLocaleString('es-AR') + ' gan.</span></div></div>';
           }).join('');
         }
       } catch (e) {
-        listEl.innerHTML = '<p class="text-white/50 text-center py-4">Creá la tabla cierres_caja en Supabase (ver comentarios en el código).</p>';
+        try {
+          var res2 = await supabaseClient.from('cierres_caja').select('id, fecha, fecha_cierre, total_facturado, ganancia').eq('user_id', currentUser.id).order('fecha_cierre', { ascending: false }).limit(50);
+          if (res2.error) throw res2.error;
+          var rows2 = res2.data || [];
+          if (rows2.length === 0) {
+            listEl.innerHTML = '<p class="text-white/50 text-center py-4">Aún no hay cierres guardados.</p>';
+          } else {
+            listEl.innerHTML = rows2.map(function (r) {
+              var fecha = (r.fecha || r.fecha_cierre || '').toString().slice(0, 10);
+              var total = Number(r.total_facturado || 0);
+              var gan = Number(r.ganancia || 0);
+              return '<div class="glass rounded-xl p-3 border border-white/10 flex justify-between items-center gap-2"><div><span class="text-white/70">' + fecha + '</span></div><div class="text-right"><span class="font-semibold text-[#86efac]">$' + total.toLocaleString('es-AR') + '</span><span class="text-green-400/90 text-xs ml-2">$' + Math.round(gan).toLocaleString('es-AR') + ' gan.</span></div></div>';
+            }).join('');
+          }
+        } catch (e2) {
+          listEl.innerHTML = '<p class="text-white/50 text-center py-4">Creá la tabla cierres_caja en Supabase (ver comentarios en el código).</p>';
+        }
       }
       lucide.createIcons();
     }
-    document.getElementById('cerrarCaja').onclick = async () => {
-      if (!confirm('¿Reiniciar caja? Se mantendrá el inventario y los productos vendidos volverán a cero para el nuevo día.')) return;
-      var m = await getMetricasDelDia();
-      if (supabaseClient && currentUser?.id) {
-        try {
-          var hoy = ferriolTodayYmdLocal();
-          await supabaseClient.from('cierres_caja').insert({ user_id: currentUser.id, fecha: hoy, fecha_cierre: new Date().toISOString(), total_facturado: m.total, ganancia: Math.round(m.ganancia) });
-        } catch (_) {}
+
+    async function ferriolInsertCierreCajaSupabase(m, arqueo) {
+      if (!supabaseClient || !currentUser?.id) return;
+      var hoy = ferriolTodayYmdLocal();
+      var iso = new Date().toISOString();
+      var base = { user_id: currentUser.id, fecha: hoy, fecha_cierre: iso, total_facturado: m.total, ganancia: Math.round(m.ganancia) };
+      var ext = Object.assign({}, base, {
+        efectivo_registrado: Number(m.efectivo) || 0,
+        tarjeta_total: Number(m.tarjeta) || 0,
+        transferencia_total: Number(m.transferencia) || 0,
+        cobro_libreta_total: Number(m.cobro_libreta) || 0,
+        transacciones_count: Number(m.count) || 0,
+        efectivo_contado: arqueo.contado,
+        efectivo_diferencia: arqueo.diferencia,
+        arqueo_omitido: !!arqueo.omitido,
+        notas_cierre: arqueo.notas ? String(arqueo.notas).trim().slice(0, 500) : null
+      });
+      try {
+        var ins = await supabaseClient.from('cierres_caja').insert(ext);
+        if (!ins.error) return;
+      } catch (_) {}
+      try {
+        await supabaseClient.from('cierres_caja').insert(base);
+      } catch (_) {}
+    }
+
+    (function ferriolBindCierreArqueoOnce() {
+      var contado = document.getElementById('cierreEfectivoContado');
+      var omitir = document.getElementById('cierreOmitirArqueo');
+      if (!contado || contado.dataset.ferriolBound) return;
+      contado.dataset.ferriolBound = '1';
+      contado.addEventListener('input', ferriolRefreshCierreArqueoDiff);
+      contado.addEventListener('change', ferriolRefreshCierreArqueoDiff);
+      if (omitir) {
+        omitir.addEventListener('change', function () {
+          contado.disabled = !!omitir.checked;
+          if (omitir.checked) contado.value = '';
+          ferriolRefreshCierreArqueoDiff();
+        });
       }
+    })();
+
+    document.getElementById('cerrarCaja').onclick = async () => {
+      var m = await getMetricasDelDia();
+      var esperado = Number(m.efectivo) || 0;
+      var omitirEl = document.getElementById('cierreOmitirArqueo');
+      var omitir = !!(omitirEl && omitirEl.checked);
+      var contadoInp = document.getElementById('cierreEfectivoContado');
+      var contadoNum = omitir ? null : ferriolParseMontoLocal(contadoInp ? contadoInp.value : '');
+      var notasEl = document.getElementById('cierreObsNotas');
+      var notas = notasEl ? String(notasEl.value || '').trim() : '';
+
+      var lines = [];
+      lines.push('Cierre de caja — confirmación');
+      lines.push('');
+      lines.push('Total cobrado del día: $' + (Number(m.total) || 0).toLocaleString('es-AR'));
+      lines.push('Efectivo registrado (sistema): $' + esperado.toLocaleString('es-AR'));
+      if (omitir) {
+        lines.push('Arqueo: sin conteo físico');
+      } else if (contadoNum !== null && Number.isFinite(contadoNum)) {
+        lines.push('Efectivo contado: $' + contadoNum.toLocaleString('es-AR'));
+        var di = Math.round((contadoNum - esperado) * 100) / 100;
+        lines.push('Diferencia efectivo: ' + (di >= 0 ? '+' : '−') + '$' + Math.abs(di).toLocaleString('es-AR'));
+      } else if (esperado > 0) {
+        lines.push('⚠ No cargaste el efectivo contado.');
+      }
+      if (notas) lines.push('Notas: ' + notas.slice(0, 200));
+      lines.push('');
+      lines.push('Se reinician totales del día; el inventario se mantiene.');
+      lines.push('¿Cerrar caja ahora?');
+
+      if (!confirm(lines.join('\n'))) return;
+
+      var diferencia = null;
+      if (!omitir && contadoNum !== null && Number.isFinite(contadoNum)) {
+        diferencia = Math.round((contadoNum - esperado) * 100) / 100;
+      }
+      await ferriolInsertCierreCajaSupabase(m, {
+        omitido: omitir,
+        contado: omitir ? null : contadoNum,
+        diferencia: omitir ? null : diferencia,
+        notas: notas || null
+      });
+
       var d = getData();
       d.ventas = { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 };
       d.transacciones = 0;
@@ -8607,9 +8765,17 @@
         if (p) p.stockInicial = p.stock;
       });
       setData(d);
+      if (omitirEl) omitirEl.checked = false;
+      if (notasEl) notasEl.value = '';
+      if (contadoInp) {
+        contadoInp.disabled = false;
+        contadoInp.value = '';
+      }
+      ferriolRefreshCierreArqueoDiff();
       updateDashboard();
       renderCierresCajaHistorial();
       renderResumenMensualCaja();
+      if (typeof showScanToast === 'function') showScanToast('Caja cerrada', false);
     };
 
     // ============================================================
@@ -8716,6 +8882,7 @@
       if (tab === 'cierre') {
         renderCierresCajaHistorial();
         renderResumenMensualCaja();
+        getMetricasDelDia().then(ferriolSyncCierreArqueoEsperado).catch(function () {});
       }
       if (tab === 'proveedores') { _resetFormInline('proveedor'); renderGastos('proveedor'); }
       if (tab === 'gastos') { _resetFormInline('gasto_fijo'); renderGastos('gasto_fijo'); }

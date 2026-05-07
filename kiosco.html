@@ -719,7 +719,7 @@
               <i data-lucide="banknote" class="w-5 h-5 text-[#86efac]"></i>
               Cierre de caja
             </h2>
-            <p class="text-sm text-white/70 mb-4">Al cerrar caja se guarda el resumen del día y se reinician los totales para el día siguiente. El <strong class="text-white/90">total</strong> es dinero que entró (efectivo, tarjeta, transferencia y cobros de libreta); el fiado en cuenta no suma hasta que cobrás en la libreta.</p>
+            <p class="text-xs text-white/50 mb-4 leading-relaxed">Cierra el turno como en un local: revisás medios de cobro, <strong class="text-white/75">arqueás el efectivo</strong> y registrás el cierre. El total incluye efectivo, tarjeta, transferencia y cobros de libreta (fiado en cuenta no suma hasta cobrarlo).</p>
             <div id="cajaSummary" class="space-y-4 mb-6">
               <div class="flex justify-between py-3 border-b border-white/10">
                 <span>Efectivo</span><span id="cajaEfectivo" class="font-bold">$0</span>
@@ -750,6 +750,31 @@
                 <span id="cajaTotal" class="font-bold text-[#86efac] text-xl">$0</span>
               </div>
             </div>
+
+            <div id="cierreArqueoCard" class="rounded-2xl p-4 mb-6 border border-cyan-500/28 bg-gradient-to-b from-cyan-950/35 to-transparent">
+              <h3 class="font-semibold text-sm text-white/90 mb-2 flex items-center gap-2">
+                <i data-lucide="scale" class="w-4 h-4 text-cyan-300 shrink-0"></i>
+                Arqueo de efectivo
+              </h3>
+              <p class="text-[11px] text-white/45 mb-3 leading-snug">Contá lo que hay en la gaveta y comparalo con lo que dice el sistema por ventas en efectivo.</p>
+              <div class="flex justify-between items-center gap-2 py-2.5 text-sm border-b border-white/10">
+                <span class="text-white/65">Efectivo según sistema</span>
+                <span id="cierreEfectivoEsperado" class="font-semibold text-[#86efac] shrink-0">$0</span>
+              </div>
+              <label class="block mt-3 text-[11px] text-white/55 mb-1.5" for="cierreEfectivoContado">Efectivo contado en gaveta</label>
+              <input type="text" id="cierreEfectivoContado" inputmode="decimal" autocomplete="off" enterkeyhint="done" class="w-full rounded-xl px-3 py-3 bg-black/35 border border-white/15 text-white placeholder-white/35 text-base focus:outline-none focus:ring-2 focus:ring-cyan-500/35" placeholder="Ej: 45800 o dejar vacío">
+              <div id="cierreArqueoDifWrap" class="hidden mt-2 flex justify-between items-center gap-2 text-sm py-2 rounded-lg px-2.5 bg-black/30 border border-white/08">
+                <span class="text-white/60">Diferencia</span>
+                <span id="cierreArqueoDif" class="font-semibold shrink-0"></span>
+              </div>
+              <label class="flex items-center gap-2.5 mt-3 text-xs text-white/65 cursor-pointer touch-target py-1">
+                <input type="checkbox" id="cierreOmitirArqueo" class="rounded border-white/25 bg-black/40 text-cyan-500 focus:ring-cyan-500/40 w-4 h-4 shrink-0">
+                Cierro sin conteo físico
+              </label>
+              <label class="block mt-3 text-[11px] text-white/55 mb-1.5" for="cierreObsNotas">Notas del cierre (opcional)</label>
+              <textarea id="cierreObsNotas" rows="2" maxlength="500" class="w-full rounded-xl px-3 py-2 bg-black/35 border border-white/15 text-white placeholder-white/35 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/35 resize-none" placeholder="Ej.: vuelto en monedas, cambio prestado…"></textarea>
+            </div>
+
             <div id="cajaMesResumenCard" class="glass rounded-2xl p-5 mb-6 border border-[#22c55e]/20">
               <h3 class="font-semibold text-sm text-white/85 mb-0.5 flex items-center gap-2">
                 <i data-lucide="calendar-range" class="w-4 h-4 text-[#86efac]"></i>
