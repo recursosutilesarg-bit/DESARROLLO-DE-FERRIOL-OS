@@ -1325,36 +1325,24 @@
       </div>
     </div>
 
-    <!-- Más — Historial, Configuración, Clientes + Herramientas -->
+    <!-- Más — Configuración + Herramientas -->
     <section id="panel-mas" class="panel hidden">
       <div class="glass rounded-2xl p-6 slide-up">
         <div id="masMainHub">
+        <div id="masMainHubPrimary">
         <h2 class="mas-hub-title font-bold text-xl mb-4 flex items-center gap-2">
           <i data-lucide="menu" class="w-5 h-5 text-[#ffffff]"></i>
           Más opciones
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button data-nav="historial" class="glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#ffffff]/50 active:scale-[0.98] touch-target">
-            <div class="w-14 h-14 rounded-2xl bg-[#ffffff]/30 flex items-center justify-center">
-              <i data-lucide="history" class="w-7 h-7 text-[#ffffff]"></i>
-            </div>
-            <span class="font-semibold text-base">Historial</span>
-            <span class="text-xs text-white/60">Ventas registradas</span>
-          </button>
-          <button type="button" data-nav="config" class="kiosco-mas-config-entry glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#ffffff]/50 active:scale-[0.98] touch-target">
+          <button type="button" data-nav="config" class="kiosco-mas-config-entry glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#ffffff]/50 active:scale-[0.98] touch-target sm:col-span-2">
             <div class="w-14 h-14 rounded-2xl bg-[#ffffff]/30 flex items-center justify-center">
               <i data-lucide="settings" class="w-7 h-7 text-[#ffffff]"></i>
             </div>
             <span class="font-semibold text-base">Configuración</span>
             <span class="text-xs text-white/60">Nombre, mensajes y copia de seguridad</span>
           </button>
-          <button data-nav="clientes" class="glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#ffffff]/50 active:scale-[0.98] touch-target">
-            <div class="w-14 h-14 rounded-2xl bg-[#ffffff]/30 flex items-center justify-center">
-              <i data-lucide="book-user" class="w-7 h-7 text-[#ffffff]"></i>
-            </div>
-            <span class="font-semibold text-base">Clientes</span>
-            <span class="text-xs text-white/60">Lista con teléfono y datos</span>
-          </button>
+        </div>
         </div>
 
         <h3 class="font-semibold text-sm uppercase tracking-wide text-white/55 mt-8 mb-3">Herramientas útiles</h3>

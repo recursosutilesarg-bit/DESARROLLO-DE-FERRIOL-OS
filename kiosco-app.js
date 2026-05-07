@@ -6452,6 +6452,7 @@
     function syncAccountMenuKiosqueroConfigPlacement() {
       var cfgBtn = document.getElementById('accountMenuBtnConfig');
       var masTile = document.querySelector('.kiosco-mas-config-entry');
+      var masPrimary = document.getElementById('masMainHubPrimary');
       var showInProfile =
         !!(
           currentUser &&
@@ -6459,6 +6460,7 @@
         );
       if (cfgBtn) cfgBtn.classList.toggle('hidden', !showInProfile);
       if (masTile) masTile.classList.toggle('hidden', showInProfile);
+      if (masPrimary) masPrimary.classList.toggle('hidden', showInProfile);
     }
 
     /** Panel “Mi plan” (action sheet · opciones sobre el menú cuenta) */
