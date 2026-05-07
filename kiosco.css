@@ -1230,11 +1230,11 @@ textarea:focus-visible {
   position: fixed;
   left: 50%;
   top: max(0.25rem, env(safe-area-inset-top, 0px));
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(-16px);
   z-index: 400;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.12s ease;
+  transition: opacity 0.12s ease, transform 0.14s ease;
 }
 
 #ferriolPullIndicator.ferriol-pull-active {
@@ -1255,14 +1255,27 @@ textarea:focus-visible {
   color: rgba(255, 255, 255, 0.92);
 }
 
-.ferriol-pull-spinner {
+.ferriol-pull-arrow {
   flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(34, 197, 94, 0.32);
-  border-top-color: rgba(34, 197, 94, 0.95);
+  width: 1.05rem;
+  height: 1.05rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  line-height: 1;
+  color: rgba(134, 239, 172, 0.95);
+  border: 2px solid rgba(34, 197, 94, 0.35);
   border-radius: 50%;
-  animation: ferriolPullSpin 0.72s linear infinite;
+  transition: transform 0.1s linear;
+}
+
+#ferriolPullIndicator.ferriol-pull-ready .ferriol-pull-inner {
+  border-color: rgba(74, 222, 128, 0.55);
+}
+
+#ferriolPullIndicator.ferriol-pull-loading .ferriol-pull-arrow {
+  animation: ferriolPullSpin 0.65s linear infinite;
 }
 
 @keyframes ferriolPullSpin {

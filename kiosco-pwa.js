@@ -114,9 +114,10 @@
       }
       if (!allowsPTR()) return;
 
-      var THRESH = 72;
+      var THRESH = 64;
       var SCROLL_EPS = 6;
       var tracking = false;
+      var refreshing = false;
       var startY = 0;
       var startX = 0;
       var lastDy = 0;
@@ -218,7 +219,7 @@
         ind = document.createElement('div');
         ind.id = 'ferriolPullIndicator';
         ind.setAttribute('aria-hidden', 'true');
-        ind.innerHTML = '<div class="ferriol-pull-inner"><span class="ferriol-pull-spinner" aria-hidden="true"></span><span class="ferriol-pull-text">Seguí deslizando…</span></div>';
+        ind.innerHTML = '<div class="ferriol-pull-inner"><span class="ferriol-pull-arrow" aria-hidden="true">↻</span><span class="ferriol-pull-text">Deslizá para recargar</span></div>';
         document.body.appendChild(ind);
         return ind;
       }
@@ -226,6 +227,8 @@
       function hideIndicator() {
         if (!ind) return;
         ind.classList.remove('ferriol-pull-active');
+        ind.classList.remove('ferriol-pull-ready');
+        ind.classList.remove('ferriol-pull-loading');
         ind.style.opacity = '0';
       }
 
@@ -233,10 +236,16 @@
         var el = ensureIndicator();
         var r = Math.min(Math.max(dyPx, 0) / THRESH, 1);
         el.classList.add('ferriol-pull-active');
+        el.classList.toggle('ferriol-pull-ready', r >= 1);
         el.style.opacity = String(Math.min(r * 0.95, 0.95));
+        el.style.transform = 'translateX(-50%) translateY(' + Math.round(-16 + (16 * r)) + 'px)';
+        var arrow = el.querySelector('.ferriol-pull-arrow');
+        if (arrow && !el.classList.contains('ferriol-pull-loading')) {
+          arrow.style.transform = 'rotate(' + Math.round(r * 220) + 'deg)';
+        }
         var tx = el.querySelector('.ferriol-pull-text');
         if (tx) {
-          tx.textContent = r >= 1 ? 'Soltá para actualizar' : 'Seguí deslizando…';
+          tx.textContent = r >= 1 ? 'Soltá para recargar' : 'Deslizá para recargar';
         }
       }
 
@@ -301,6 +310,7 @@
       }, { passive: true });
 
       function finalize(e) {
+        if (refreshing) return;
         var dyEnd = 0;
         var xEnd = 0;
         var yEnd = 0;
@@ -321,11 +331,26 @@
 
         tracking = false;
         lastDy = 0;
-        hideIndicator();
 
         if (go) {
-          window.location.reload();
+          refreshing = true;
+          var el = ensureIndicator();
+          el.classList.add('ferriol-pull-active');
+          el.classList.add('ferriol-pull-loading');
+          el.style.opacity = '0.95';
+          el.style.transform = 'translateX(-50%) translateY(0)';
+          var tx = el.querySelector('.ferriol-pull-text');
+          if (tx) tx.textContent = 'Actualizando…';
+          setTimeout(function () {
+          if (typeof window._ferriolHardReload === 'function') {
+            window._ferriolHardReload();
+          } else {
+            window.location.reload();
+          }
+          }, 120);
+          return;
         }
+        hideIndicator();
       }
 
       document.addEventListener('touchend', finalize, { passive: true });
