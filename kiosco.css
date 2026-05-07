@@ -2368,6 +2368,22 @@ select.ferriol-sponsor-select:-moz-focusring {
   border-bottom: none;
 }
 
+.ferriol-cierre-line-btn {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.12s;
+  border-radius: 0.7rem;
+}
+
+.ferriol-cierre-line-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ferriol-cierre-line-btn:active {
+  transform: scale(0.99);
+}
+
 .ferriol-cierre-line--muted {
   background: rgba(0, 0, 0, 0.08);
   color: rgba(255, 255, 255, 0.65);

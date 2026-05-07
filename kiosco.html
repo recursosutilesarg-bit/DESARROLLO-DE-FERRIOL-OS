@@ -761,11 +761,17 @@
                   <i data-lucide="layers" class="ferriol-cierre-movs-icon" aria-hidden="true"></i>
                   <span><strong id="cajaCierreMovimientos">0</strong> movimientos en este turno</span>
                 </p>
-                <h4 class="ferriol-cierre-subhd">Detalle por medio</h4>
+                <h4 class="ferriol-cierre-subhd">Detalle por medio (tocá para validar)</h4>
                 <div class="ferriol-cierre-medios">
-                  <div class="ferriol-cierre-line"><span>Efectivo</span><span id="cajaEfectivo" class="ferriol-cierre-amt">$0</span></div>
-                  <div class="ferriol-cierre-line"><span>Tarjeta</span><span id="cajaTarjeta" class="ferriol-cierre-amt">$0</span></div>
-                  <div class="ferriol-cierre-line"><span>Transferencia</span><span id="cajaTransf" class="ferriol-cierre-amt">$0</span></div>
+                  <button type="button" class="ferriol-cierre-line ferriol-cierre-line-btn touch-target" data-ci-select="efec">
+                    <span>Efectivo</span><span id="cajaEfectivo" class="ferriol-cierre-amt">$0</span>
+                  </button>
+                  <button type="button" class="ferriol-cierre-line ferriol-cierre-line-btn touch-target" data-ci-select="tarj">
+                    <span>Tarjeta</span><span id="cajaTarjeta" class="ferriol-cierre-amt">$0</span>
+                  </button>
+                  <button type="button" class="ferriol-cierre-line ferriol-cierre-line-btn touch-target" data-ci-select="transf">
+                    <span>Transferencia</span><span id="cajaTransf" class="ferriol-cierre-amt">$0</span>
+                  </button>
                   <div class="ferriol-cierre-line"><span>Cobro libreta</span><span id="cajaCobroLibreta" class="ferriol-cierre-amt">$0</span></div>
                   <div class="ferriol-cierre-line ferriol-cierre-line--muted ferriol-cierre-line--wrap">
                     <span class="flex items-center gap-2 min-w-0">Fiado (cuenta)
