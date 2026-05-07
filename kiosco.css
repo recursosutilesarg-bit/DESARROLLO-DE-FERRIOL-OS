@@ -2394,6 +2394,95 @@ select.ferriol-sponsor-select:-moz-focusring {
   color: rgba(255, 255, 255, 0.28);
 }
 
+/* Cierre interactivo — checklist y denominaciones (touch-first) */
+.ferriol-ci-root .ferriol-ci-field {
+  border-radius: 0.65rem;
+}
+
+.ferriol-ci-choice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.ferriol-ci-choice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 3rem;
+  padding: 0.65rem 0.5rem;
+  border-radius: 0.85rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.25);
+  color: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    transform 0.12s;
+}
+
+.ferriol-ci-choice:active {
+  transform: scale(0.97);
+}
+
+.ferriol-ci-choice--ok.ferriol-ci-choice-active {
+  border-color: rgba(74, 222, 128, 0.65);
+  background: rgba(34, 197, 94, 0.18);
+  color: #bbf7d0;
+}
+
+.ferriol-ci-choice--bad.ferriol-ci-choice-active {
+  border-color: rgba(248, 113, 113, 0.55);
+  background: rgba(239, 68, 68, 0.14);
+  color: #fecaca;
+}
+
+.ferriol-ci-choice:not(.ferriol-ci-choice-active):hover {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.ferriol-ci-choice-ic {
+  width: 1rem !important;
+  height: 1rem !important;
+  flex-shrink: 0;
+}
+
+.ferriol-ci-denom-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ferriol-ci-denom-row {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ferriol-ci-denom-row span {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.ferriol-ci-denom-qty {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.35);
+  color: rgba(254, 252, 232, 0.95);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 .gasto-item {
   transition: opacity 0.15s;
 }

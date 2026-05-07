@@ -19,6 +19,7 @@
     // Red de referidos: solo role 'partner' o 'super' tienen código y enlaces (kiosquero no refiere). SQL: supabase-referral-network.sql, supabase-mlm-foundation.sql, supabase-ferriol-payments.sql (cobros + RPC ferriol_verify_payment). Solicitudes de días (socio → empresa): supabase-ferriol-membership-day-requests.sql. Tabla ferriol_partner_provision_requests (SQL supabase-ferriol-partner-provision-requests.sql) puede seguir usándose desde panel fundador o flujos legacy; el alta vía formulario en Más fue retirado (altas por enlace de afiliación). Objeto FerriolMlm en este archivo.
     // Enlaces: ?ref=CÓDIGO&nicho=kiosco (alta negocio) | ?ref=CÓDIGO&nicho=socio (membresía vendedor). Aliases: nicho=vendedor|red|membresia, membresia=1, tipo=...
     // Historial de cierres de caja (facturación y ganancia por día); arqueo opcional: supabase-cierres-caja-arqueo.sql
+    // Cierre interactivo completo (saldo teórico, checklist, billetes): supabase-cierre-interactivo.sql
     // CREATE TABLE cierres_caja ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE, fecha date NOT NULL, fecha_cierre timestamptz NOT NULL DEFAULT now(), total_facturado numeric NOT NULL DEFAULT 0, ganancia numeric NOT NULL DEFAULT 0, created_at timestamptz DEFAULT now() );
     // ALTER TABLE cierres_caja ENABLE ROW LEVEL SECURITY; CREATE POLICY "cierres_caja_policy" ON cierres_caja FOR ALL USING (auth.uid() = user_id);
     // Para que el admin pueda EXPORTAR e IMPORTAR copia de todos los usuarios, agregá estas políticas (super puede leer, insertar y borrar):
@@ -4621,65 +4622,335 @@
       return Number.isFinite(n) ? n : null;
     }
 
-    function ferriolRefreshCierreArqueoDiff() {
-      var wrap = document.getElementById('cierreArqueoDifWrap');
-      var difEl = document.getElementById('cierreArqueoDif');
-      var inp = document.getElementById('cierreEfectivoContado');
-      var omitir = document.getElementById('cierreOmitirArqueo');
-      if (!wrap || !difEl) {
-        ferriolRefreshCierreEstado();
+    /** Gastos del día operativo (proveedor + fijo prorrateado hoy) para saldo teórico efectivo. Ver supabase-cierre-interactivo.sql */
+    var _cierreInterGastos = { pagosProv: 0, egresosFijos: 0, rowsProv: [] };
+
+    function ferriolCierreInteractivoFondoKey() {
+      try {
+        return currentUser && currentUser.id ? 'ferriol_fondo_apertura_' + currentUser.id : null;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    async function ferriolCierreInteractivoLoadGastosHoy() {
+      _cierreInterGastos = { pagosProv: 0, egresosFijos: 0, rowsProv: [] };
+      var hoy = ferriolTodayYmdLocal();
+      if (!supabaseClient || !currentUser || !currentUser.id) {
+        ferriolCierreInteractivoRenderProvList();
         return;
       }
-      var esperado = Number(window._ferriolCierreEfectivoEsperado);
-      if (!Number.isFinite(esperado)) esperado = 0;
-      if (omitir && omitir.checked) {
-        wrap.classList.add('hidden');
+      try {
+        var res = await supabaseClient
+          .from('gastos')
+          .select('tipo, monto, fecha, descripcion, periodicidad, vigencia_desde, vigencia_hasta')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false })
+          .limit(500);
+        if (!res.error && Array.isArray(res.data)) {
+          res.data.forEach(function (r) {
+            var mo = ferriolAllocGastoEnRango(r, hoy, hoy);
+            if (mo <= 0) return;
+            if (r.tipo === 'proveedor') {
+              _cierreInterGastos.pagosProv += mo;
+              _cierreInterGastos.rowsProv.push({ desc: String(r.descripcion || 'Pago proveedor').slice(0, 120), monto: mo });
+            } else if (r.tipo === 'gasto_fijo') {
+              _cierreInterGastos.egresosFijos += mo;
+            }
+          });
+        }
+      } catch (_) {}
+      ferriolCierreInteractivoRenderProvList();
+    }
+
+    function ferriolCierreInteractivoRenderProvList() {
+      var listEl = document.getElementById('cierreInterProvList');
+      var badge = document.getElementById('cierreInterProvSumBadge');
+      if (badge) badge.textContent = '$' + Math.round(_cierreInterGastos.pagosProv || 0).toLocaleString('es-AR');
+      if (!listEl) return;
+      var rows = _cierreInterGastos.rowsProv || [];
+      if (!rows.length) {
+        listEl.innerHTML = '<p class="text-white/40">Sin pagos a proveedores registrados para hoy.</p>';
         return;
       }
-      var contado = inp ? ferriolParseMontoLocal(inp.value) : null;
-      if (contado === null) {
-        wrap.classList.add('hidden');
-        return;
+      listEl.innerHTML = rows.slice(0, 24).map(function (x) {
+        var esc = String(x.desc || '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+        return '<div class="flex justify-between gap-2 border-b border-white/06 pb-1"><span class="truncate">' + esc + '</span><span class="shrink-0 font-semibold text-white/75 tabular-nums">−$' + Math.round(x.monto).toLocaleString('es-AR') + '</span></div>';
+      }).join('');
+    }
+
+    function ferriolCierreInteractivoSumDenominaciones() {
+      var total = 0;
+      document.querySelectorAll('#cierreInteractivoRoot .ferriol-ci-denom-qty').forEach(function (el) {
+        var q = parseInt(String(el.value || '').trim(), 10);
+        if (!Number.isFinite(q) || q < 0) q = 0;
+        var d = Number(el.getAttribute('data-denom'));
+        if (!Number.isFinite(d)) return;
+        total += q * d;
+      });
+      return Math.round(total * 100) / 100;
+    }
+
+    function ferriolCierreInteractivoGetMedioEstado(medio) {
+      var root = document.getElementById('cierreInteractivoRoot');
+      if (!root) return 'correcto';
+      var active = root.querySelector('.ferriol-ci-choice[data-ci-medio="' + medio + '"].ferriol-ci-choice-active');
+      return active ? (active.getAttribute('data-ci-val') || 'correcto') : 'correcto';
+    }
+
+    function ferriolCierreInteractivoSetMedioEstado(medio, val) {
+      var root = document.getElementById('cierreInteractivoRoot');
+      if (!root) return;
+      root.querySelectorAll('.ferriol-ci-choice[data-ci-medio="' + medio + '"]').forEach(function (btn) {
+        btn.classList.toggle('ferriol-ci-choice-active', btn.getAttribute('data-ci-val') === val);
+      });
+      if (medio === 'tarj') {
+        var w = document.getElementById('cierreInterTarjRealWrap');
+        if (w) w.classList.toggle('hidden', val !== 'incorrecto');
       }
-      var dif = Math.round((contado - esperado) * 100) / 100;
-      wrap.classList.remove('hidden');
-      var sign = dif > 0 ? '+' : (dif < 0 ? '−' : '');
-      var abs = Math.abs(dif);
-      difEl.textContent = sign + '$' + abs.toLocaleString('es-AR');
-      difEl.className = 'font-semibold shrink-0 ' + (dif === 0 ? 'text-[#86efac]' : dif > 0 ? 'text-amber-300' : 'text-red-300');
+      if (medio === 'transf') {
+        var w2 = document.getElementById('cierreInterTransfRealWrap');
+        if (w2) w2.classList.toggle('hidden', val !== 'incorrecto');
+      }
+      if (medio === 'efec') {
+        var den = document.getElementById('cierreInterDenomSection');
+        if (den) {
+          den.querySelectorAll('input').forEach(function (inp) {
+            inp.disabled = val === 'correcto';
+          });
+          den.style.opacity = val === 'correcto' ? '0.55' : '1';
+        }
+        if (val === 'incorrecto') {
+          document.querySelectorAll('#cierreInteractivoRoot .ferriol-ci-denom-qty').forEach(function (el) {
+            el.value = '';
+          });
+          var friClear = document.getElementById('cierreInterEfecReal');
+          if (friClear) friClear.value = '';
+        }
+        ferriolCierreInteractivoApplyEfecCorrectMode(val === 'correcto');
+      }
+      ferriolCierreInteractivoRefreshAuditUi();
       ferriolRefreshCierreEstado();
     }
 
-    /** Banner contextual: orienta al kiosquero antes de cerrar. */
+    function ferriolCierreInteractivoApplyEfecCorrectMode(on) {
+      var esperado = Number(window._ferriolCierreSaldoEsperadoTeorico);
+      if (!Number.isFinite(esperado)) esperado = 0;
+      var fri = document.getElementById('cierreInterEfecReal');
+      if (!fri) return;
+      if (on) {
+        fri.value = String(esperado);
+        fri.readOnly = true;
+      } else {
+        fri.readOnly = false;
+      }
+    }
+
+    function ferriolCierreInteractivoComputeSaldoEsperado(m) {
+      if (!m || !document.getElementById('cierreInterSaldoEsperadoMain')) return 0;
+      var inicial = ferriolParseMontoLocal(document.getElementById('cierreInterSaldoInicial').value);
+      if (inicial === null) inicial = 0;
+      var inclLib = !!document.getElementById('cierreInterInclLibreta').checked;
+      var ventasEfec = Number(m.efectivo) || 0;
+      var lib = inclLib ? (Number(m.cobro_libreta) || 0) : 0;
+      var pp = Number(_cierreInterGastos.pagosProv) || 0;
+      var eg = Number(_cierreInterGastos.egresosFijos) || 0;
+      var esp = inicial + ventasEfec + lib - pp - eg;
+      esp = Math.round(esp * 100) / 100;
+      window._ferriolCierreSaldoEsperadoTeorico = esp;
+      window._ferriolCierreEfectivoEsperado = esp;
+      document.getElementById('cierreInterVentasEfec').textContent = '$' + ventasEfec.toLocaleString('es-AR');
+      var libLn = document.getElementById('cierreInterLineLibreta');
+      var libLbl = document.getElementById('cierreInterLibLabel');
+      if (inclLib) {
+        document.getElementById('cierreInterVentasLib').textContent = '$' + lib.toLocaleString('es-AR');
+        if (libLn) libLn.classList.remove('hidden');
+        if (libLbl) libLbl.textContent = ' + cobros libreta';
+      } else {
+        if (libLn) libLn.classList.add('hidden');
+        if (libLbl) libLbl.textContent = '';
+      }
+      document.getElementById('cierreInterPagosProv').textContent = '$' + Math.round(pp).toLocaleString('es-AR');
+      document.getElementById('cierreInterEgresosFijos').textContent = '$' + Math.round(eg).toLocaleString('es-AR');
+      document.getElementById('cierreInterSaldoEsperadoMain').textContent = '$' + esp.toLocaleString('es-AR');
+      if (ferriolCierreInteractivoGetMedioEstado('efec') === 'correcto') ferriolCierreInteractivoApplyEfecCorrectMode(true);
+      ferriolCierreInteractivoRefreshAuditUi();
+      return esp;
+    }
+
+    function ferriolCierreInteractivoGetEfecRealNum(saldoEsp) {
+      var modo = ferriolCierreInteractivoGetMedioEstado('efec');
+      if (modo === 'correcto') return Math.round(saldoEsp * 100) / 100;
+      var v = ferriolParseMontoLocal(document.getElementById('cierreInterEfecReal').value);
+      if (v === null || !Number.isFinite(v)) return null;
+      return Math.round(v * 100) / 100;
+    }
+
+    function ferriolCierreInteractivoRefreshAuditUi() {
+      var diffEl = document.getElementById('cierreInterAuditDiff');
+      var justWrap = document.getElementById('cierreInterJustifWrap');
+      var esp = Number(window._ferriolCierreSaldoEsperadoTeorico);
+      if (!Number.isFinite(esp)) esp = 0;
+      var real = ferriolCierreInteractivoGetEfecRealNum(esp);
+      if (!diffEl) return;
+      if (real === null) {
+        diffEl.textContent = '—';
+        diffEl.className = 'font-extrabold tabular-nums text-white/45';
+        if (justWrap) justWrap.classList.add('hidden');
+        return;
+      }
+      var diff = Math.round((real - esp) * 100) / 100;
+      var sign = diff > 0 ? '+' : diff < 0 ? '−' : '';
+      diffEl.textContent = sign + '$' + Math.abs(diff).toLocaleString('es-AR');
+      if (diff === 0) {
+        diffEl.className = 'font-extrabold tabular-nums text-[#86efac]';
+        if (justWrap) justWrap.classList.add('hidden');
+      } else {
+        diffEl.className = 'font-extrabold tabular-nums ' + (diff < 0 ? 'text-red-400' : 'text-amber-300');
+        if (justWrap) justWrap.classList.remove('hidden');
+      }
+      var hid = document.getElementById('cierreEfectivoContado');
+      if (hid) hid.value = String(real);
+      var omit = document.getElementById('cierreOmitirArqueo');
+      if (omit) omit.checked = false;
+    }
+
+    function ferriolCierreInteractivoApplyDashboardMetricas(m) {
+      if (!m || !document.getElementById('cierreInterTarjSistema')) return;
+      document.getElementById('cierreInterTarjSistema').textContent = '$' + (Number(m.tarjeta) || 0).toLocaleString('es-AR');
+      document.getElementById('cierreInterTransfSistema').textContent = '$' + (Number(m.transferencia) || 0).toLocaleString('es-AR');
+      ferriolCierreInteractivoComputeSaldoEsperado(m);
+    }
+
+    async function ferriolCierreInteractivoRefreshAll() {
+      ferriolCierreInteractivoPrefillSaldoInicial();
+      await ferriolCierreInteractivoLoadGastosHoy();
+      var m = await getMetricasDelDia();
+      ferriolCierreInteractivoApplyDashboardMetricas(m);
+      ferriolRefreshCierreEstado();
+      try {
+        if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+      } catch (_) {}
+    }
+
+    function ferriolCierreInteractivoPrefillSaldoInicial() {
+      var inp = document.getElementById('cierreInterSaldoInicial');
+      if (!inp || inp.dataset.userTouched === '1') return;
+      var k = ferriolCierreInteractivoFondoKey();
+      try {
+        if (k && localStorage.getItem(k)) inp.value = localStorage.getItem(k);
+      } catch (_) {}
+    }
+
     function ferriolRefreshCierreEstado() {
       var banner = document.getElementById('cierreEstadoBanner');
       var titulo = document.getElementById('cierreEstadoTitulo');
       var texto = document.getElementById('cierreEstadoTexto');
       if (!banner || !titulo || !texto) return;
-      var esperado = Number(window._ferriolCierreEfectivoEsperado);
-      if (!Number.isFinite(esperado)) esperado = 0;
-      var omitirEl = document.getElementById('cierreOmitirArqueo');
-      var omitir = !!(omitirEl && omitirEl.checked);
-      var contado = ferriolParseMontoLocal((document.getElementById('cierreEfectivoContado') || {}).value);
-      var pendienteArqueo = esperado > 0 && !omitir && contado === null;
+      if (!document.getElementById('cierreInteractivoRoot')) {
+        banner.classList.remove('ferriol-cierre-banner--ok', 'ferriol-cierre-banner--warn');
+        banner.classList.add('ferriol-cierre-banner--ok');
+        return;
+      }
+      var esp = Number(window._ferriolCierreSaldoEsperadoTeorico);
+      if (!Number.isFinite(esp)) esp = 0;
+      var efecMode = ferriolCierreInteractivoGetMedioEstado('efec');
+      var real = ferriolCierreInteractivoGetEfecRealNum(esp);
+      var pendiente = efecMode === 'incorrecto' && real === null;
       banner.classList.remove('ferriol-cierre-banner--ok', 'ferriol-cierre-banner--warn');
-      banner.classList.add(pendienteArqueo ? 'ferriol-cierre-banner--warn' : 'ferriol-cierre-banner--ok');
-      if (pendienteArqueo) {
-        titulo.textContent = 'Revisá el efectivo';
-        texto.textContent = 'Hay ventas en efectivo registradas: contá la gaveta o marcá «sin conteo físico» si querés cerrar sin dejar constancia del arqueo.';
+      banner.classList.add(pendiente ? 'ferriol-cierre-banner--warn' : 'ferriol-cierre-banner--ok');
+      if (pendiente) {
+        titulo.textContent = 'Completá el efectivo';
+        texto.textContent = 'Marcaste «Hay diferencia»: cargá billetes o el total real en gaveta.';
+      } else if (real !== null && Math.abs(real - esp) > 0.009 && efecMode === 'incorrecto') {
+        titulo.textContent = 'Hay diferencia';
+        texto.textContent = 'Documentá la causa en justificación antes de confirmar el cierre.';
+        banner.classList.remove('ferriol-cierre-banner--ok');
+        banner.classList.add('ferriol-cierre-banner--warn');
       } else {
         titulo.textContent = 'Listo para cerrar';
-        texto.textContent = 'Generá el comprobante si lo necesitás y confirmá el cierre cuando termines.';
+        texto.textContent = 'Verificá tarjetas y transferencias, fondo del próximo turno y confirmá.';
       }
     }
 
-    function ferriolSyncCierreArqueoEsperado(m) {
-      if (!m) return;
-      window._ferriolCierreEfectivoEsperado = Number(m.efectivo) || 0;
-      var esp = document.getElementById('cierreEfectivoEsperado');
-      if (esp) esp.textContent = '$' + window._ferriolCierreEfectivoEsperado.toLocaleString('es-AR');
-      ferriolRefreshCierreArqueoDiff();
+    function ferriolRefreshCierreArqueoDiff() {
+      ferriolCierreInteractivoRefreshAuditUi();
+      ferriolRefreshCierreEstado();
     }
+
+    function ferriolSyncCierreArqueoEsperado(m) {
+      ferriolCierreInteractivoApplyDashboardMetricas(m);
+    }
+
+    async function ferriolInsertCierreInteractivoSupabase(payload) {
+      if (!supabaseClient || !currentUser || !currentUser.id) return;
+      try {
+        var ins = await supabaseClient.from('cierres_interactivos').insert(Object.assign({ user_id: currentUser.id }, payload));
+        if (ins.error) throw ins.error;
+      } catch (_) {}
+    }
+
+    (function ferriolBindCierreInteractivoOnce() {
+      var root = document.getElementById('cierreInteractivoRoot');
+      if (!root || root.dataset.ferriolCiBound) return;
+      root.dataset.ferriolCiBound = '1';
+      root.addEventListener('click', function (e) {
+        var btn = e.target.closest('.ferriol-ci-choice');
+        if (!btn || !root.contains(btn)) return;
+        var medio = btn.getAttribute('data-ci-medio');
+        var val = btn.getAttribute('data-ci-val');
+        if (!medio || !val) return;
+        ferriolCierreInteractivoSetMedioEstado(medio, val);
+        try {
+          if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        } catch (_) {}
+      });
+      root.querySelectorAll('.ferriol-ci-denom-qty').forEach(function (inp) {
+        inp.addEventListener('input', function () {
+          var sum = ferriolCierreInteractivoSumDenominaciones();
+          var fri = document.getElementById('cierreInterEfecReal');
+          if (fri && ferriolCierreInteractivoGetMedioEstado('efec') === 'incorrecto') fri.value = sum ? String(sum) : '';
+          ferriolCierreInteractivoRefreshAuditUi();
+          ferriolRefreshCierreEstado();
+        });
+      });
+      var fri = document.getElementById('cierreInterEfecReal');
+      if (fri) {
+        fri.addEventListener('input', function () {
+          ferriolCierreInteractivoRefreshAuditUi();
+          ferriolRefreshCierreEstado();
+        });
+      }
+      var si = document.getElementById('cierreInterSaldoInicial');
+      if (si) {
+        si.addEventListener('input', function () {
+          si.dataset.userTouched = '1';
+          getMetricasDelDia().then(function (mm) {
+            ferriolCierreInteractivoComputeSaldoEsperado(mm);
+            ferriolRefreshCierreEstado();
+          });
+        });
+      }
+      ['cierreInterTarjReal', 'cierreInterTransfReal'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.addEventListener('input', ferriolRefreshCierreEstado);
+      });
+      var incl = document.getElementById('cierreInterInclLibreta');
+      if (incl) {
+        incl.addEventListener('change', function () {
+          getMetricasDelDia().then(function (mm) {
+            ferriolCierreInteractivoComputeSaldoEsperado(mm);
+            ferriolRefreshCierreEstado();
+          });
+        });
+      }
+      var bprov = document.getElementById('cierreInterBtnIrProv');
+      if (bprov) {
+        bprov.onclick = function () {
+          if (window._switchCajaTab) window._switchCajaTab('proveedores');
+        };
+      }
+    })();
 
     async function updateDashboard() {
       checkMidnightReset();
@@ -8483,7 +8754,7 @@
     document.getElementById('generateTicket').onclick = async () => {
       const d = getData();
       const mT = await getMetricasDelDia();
-      const v = d.ventas || {};
+      await ferriolCierreInteractivoLoadGastosHoy();
       const totalIngresos = mT.total;
       const cobroLib = mT.cobro_libreta || 0;
       const fiado = mT.fiado || 0;
@@ -8492,20 +8763,12 @@
       const t = document.getElementById('ticketContent');
       t.classList.remove('hidden');
       document.getElementById('ticketFecha').textContent = new Date().toLocaleString('es-AR');
-      var omitirTk = document.getElementById('cierreOmitirArqueo');
-      var contadoTk = ferriolParseMontoLocal((document.getElementById('cierreEfectivoContado') || {}).value);
-      var omitArqueo = !!(omitirTk && omitirTk.checked);
-      var arqueoHtml = '';
-      var arqueoTxt = '';
-      if (!omitArqueo && contadoTk !== null && Number.isFinite(contadoTk)) {
-        var espTk = Number(mT.efectivo) || 0;
-        var difTk = Math.round((contadoTk - espTk) * 100) / 100;
-        arqueoHtml = `<p class="border-t border-gray-300 pt-2 mt-2 font-semibold">Arqueo efectivo</p><p>Según sistema: $${espTk.toLocaleString('es-AR')}</p><p>Contado: $${contadoTk.toLocaleString('es-AR')}</p><p>Diferencia: ${difTk >= 0 ? '+' : '−'}$${Math.abs(difTk).toLocaleString('es-AR')}</p>`;
-        arqueoTxt = `\n--- Arqueo ---\nSegún sistema: $${espTk.toLocaleString('es-AR')}\nContado: $${contadoTk.toLocaleString('es-AR')}\nDiferencia: ${difTk >= 0 ? '+' : '−'}$${Math.abs(difTk).toLocaleString('es-AR')}\n`;
-      } else if (omitArqueo) {
-        arqueoHtml = '<p class="text-gray-500 text-xs mt-2">Arqueo: sin conteo físico</p>';
-        arqueoTxt = '\nArqueo: sin conteo físico\n';
-      }
+      var espTeorTk = ferriolCierreInteractivoComputeSaldoEsperado(mT);
+      var realTk = ferriolCierreInteractivoGetEfecRealNum(espTeorTk);
+      if (realTk === null) realTk = espTeorTk;
+      var difTk = Math.round((realTk - espTeorTk) * 100) / 100;
+      var arqueoHtml = `<p class="border-t border-gray-300 pt-2 mt-2 font-semibold">Saldo teórico efectivo</p><p>Esperado: $${espTeorTk.toLocaleString('es-AR')}</p><p>Real declarado: $${realTk.toLocaleString('es-AR')}</p><p>Diferencia: ${difTk >= 0 ? '+' : '−'}$${Math.abs(difTk).toLocaleString('es-AR')}</p>`;
+      var arqueoTxt = `\n--- Efectivo (teórico vs real) ---\nEsperado: $${espTeorTk.toLocaleString('es-AR')}\nReal: $${realTk.toLocaleString('es-AR')}\nDiferencia: ${difTk >= 0 ? '+' : '−'}$${Math.abs(difTk).toLocaleString('es-AR')}\n`;
       document.getElementById('ticketBody').innerHTML = `
         <p>Efectivo: $${(mT.efectivo || 0).toLocaleString('es-AR')}</p>
         <p>Tarjeta: $${(mT.tarjeta || 0).toLocaleString('es-AR')}</p>
@@ -8727,70 +8990,128 @@
       } catch (_) {}
     }
 
-    (function ferriolBindCierreArqueoOnce() {
-      var contado = document.getElementById('cierreEfectivoContado');
-      var omitir = document.getElementById('cierreOmitirArqueo');
-      if (!contado || contado.dataset.ferriolBound) return;
-      contado.dataset.ferriolBound = '1';
-      contado.addEventListener('input', ferriolRefreshCierreArqueoDiff);
-      contado.addEventListener('change', ferriolRefreshCierreArqueoDiff);
-      if (omitir) {
-        omitir.addEventListener('change', function () {
-          contado.disabled = !!omitir.checked;
-          if (omitir.checked) contado.value = '';
-          ferriolRefreshCierreArqueoDiff();
-          ferriolRefreshCierreEstado();
-        });
-      }
-    })();
+    function ferriolCierreInteractivoCollectDenomObj() {
+      var o = {};
+      document.querySelectorAll('#cierreInteractivoRoot .ferriol-ci-denom-qty').forEach(function (el) {
+        var q = parseInt(String(el.value || '').trim(), 10);
+        var d = el.getAttribute('data-denom');
+        if (!d || !Number.isFinite(q) || q <= 0) return;
+        o[String(d)] = q;
+      });
+      return o;
+    }
 
     document.getElementById('cerrarCaja').onclick = async () => {
       var m = await getMetricasDelDia();
-      var esperado = Number(m.efectivo) || 0;
-      var omitirEl = document.getElementById('cierreOmitirArqueo');
-      var omitir = !!(omitirEl && omitirEl.checked);
-      var contadoInp = document.getElementById('cierreEfectivoContado');
-      var contadoNum = omitir ? null : ferriolParseMontoLocal(contadoInp ? contadoInp.value : '');
+      await ferriolCierreInteractivoLoadGastosHoy();
+      var espTeorico = ferriolCierreInteractivoComputeSaldoEsperado(m);
+      var inicial = ferriolParseMontoLocal(document.getElementById('cierreInterSaldoInicial').value);
+      if (inicial === null) inicial = 0;
+      var inclLib = !!document.getElementById('cierreInterInclLibreta').checked;
+
+      var efecReal = ferriolCierreInteractivoGetEfecRealNum(espTeorico);
+      if (ferriolCierreInteractivoGetMedioEstado('efec') === 'incorrecto' && efecReal === null) {
+        alert('Indicá el efectivo real contado o tocá «Cuadra con lo esperado».');
+        return;
+      }
+      if (efecReal === null) efecReal = espTeorico;
+      var diffEfec = Math.round((efecReal - espTeorico) * 100) / 100;
+      if (Math.abs(diffEfec) > 0.009) {
+        var jus = String((document.getElementById('cierreInterJustif') || {}).value || '').trim();
+        if (!jus) {
+          alert('Hay diferencia entre saldo esperado y efectivo real: cargá una justificación.');
+          return;
+        }
+      }
+
+      var tarjSys = Number(m.tarjeta) || 0;
+      var tarjOk = ferriolCierreInteractivoGetMedioEstado('tarj') === 'correcto';
+      var tarjRealN = tarjOk ? tarjSys : ferriolParseMontoLocal((document.getElementById('cierreInterTarjReal') || {}).value);
+      if (!tarjOk && tarjRealN === null) {
+        alert('Corregí el monto de tarjetas o marcá «Correcto».');
+        return;
+      }
+      if (tarjRealN === null) tarjRealN = tarjSys;
+
+      var transfSys = Number(m.transferencia) || 0;
+      var transfOk = ferriolCierreInteractivoGetMedioEstado('transf') === 'correcto';
+      var transfRealN = transfOk ? transfSys : ferriolParseMontoLocal((document.getElementById('cierreInterTransfReal') || {}).value);
+      if (!transfOk && transfRealN === null) {
+        alert('Corregí el monto de transferencias o marcá «Correcto».');
+        return;
+      }
+      if (transfRealN === null) transfRealN = transfSys;
+
+      var fondoProxRaw = ferriolParseMontoLocal((document.getElementById('cierreInterFondoProx') || {}).value);
+      var fondoProx = fondoProxRaw !== null ? fondoProxRaw : 0;
+
       var notasEl = document.getElementById('cierreObsNotas');
       var notas = notasEl ? String(notasEl.value || '').trim() : '';
+      var justif = String((document.getElementById('cierreInterJustif') || {}).value || '').trim();
 
       var lines = [];
-      lines.push('Cierre de caja — confirmación');
+      lines.push('Confirmar cierre de caja');
       lines.push('');
-      lines.push('Total cobrado del día: $' + (Number(m.total) || 0).toLocaleString('es-AR'));
-      lines.push('Efectivo registrado (sistema): $' + esperado.toLocaleString('es-AR'));
-      var diPrev = null;
-      if (omitir) {
-        lines.push('Arqueo: sin conteo físico');
-      } else if (contadoNum !== null && Number.isFinite(contadoNum)) {
-        lines.push('Efectivo contado: $' + contadoNum.toLocaleString('es-AR'));
-        diPrev = Math.round((contadoNum - esperado) * 100) / 100;
-        lines.push('Diferencia efectivo: ' + (diPrev >= 0 ? '+' : '−') + '$' + Math.abs(diPrev).toLocaleString('es-AR'));
-        var umbral = Math.max(500, esperado * 0.05);
-        if (esperado > 0 && Math.abs(diPrev) > umbral) {
-          lines.push('');
-          lines.push('ATENCIÓN: la diferencia es grande respecto al sistema. Verificá antes de confirmar.');
-        }
-      } else if (esperado > 0) {
-        lines.push('Aviso: no cargaste efectivo contado (podés omitir arqueo con la casilla).');
-      }
-      if (notas) lines.push('Notas: ' + notas.slice(0, 200));
+      lines.push('Saldo esperado efectivo: $' + espTeorico.toLocaleString('es-AR'));
+      lines.push('Efectivo real: $' + efecReal.toLocaleString('es-AR'));
+      lines.push('Diferencia: ' + (diffEfec >= 0 ? '+' : '−') + '$' + Math.abs(diffEfec).toLocaleString('es-AR'));
+      lines.push('Tarjeta: sistema $' + tarjSys.toLocaleString('es-AR') + ' → declarado $' + tarjRealN.toLocaleString('es-AR'));
+      lines.push('Transferencia: sistema $' + transfSys.toLocaleString('es-AR') + ' → declarado $' + transfRealN.toLocaleString('es-AR'));
+      lines.push('Fondo próximo turno: $' + fondoProx.toLocaleString('es-AR'));
       lines.push('');
-      lines.push('Se reinician totales del día; el inventario se mantiene.');
-      lines.push('¿Cerrar caja ahora?');
+      lines.push('Total ingresos día (todos los medios): $' + (Number(m.total) || 0).toLocaleString('es-AR'));
+      lines.push('');
+      lines.push('¿Cerrar y reiniciar el día operativo?');
 
       if (!confirm(lines.join('\n'))) return;
 
-      var diferencia = null;
-      if (!omitir && contadoNum !== null && Number.isFinite(contadoNum)) {
-        diferencia = Math.round((contadoNum - esperado) * 100) / 100;
+      var umbral = Math.max(500, Math.abs(espTeorico) * 0.05);
+      if (Math.abs(diffEfec) > umbral && Math.abs(espTeorico) > 0) {
+        if (!confirm('La diferencia de efectivo es muy grande. ¿Seguro que está bien?')) return;
       }
-      await ferriolInsertCierreCajaSupabase(m, {
-        omitido: omitir,
-        contado: omitir ? null : contadoNum,
-        diferencia: omitir ? null : diferencia,
-        notas: notas || null
+
+      var detalleJson = {
+        denominaciones: ferriolCierreInteractivoCollectDenomObj(),
+        efectivo_estado: ferriolCierreInteractivoGetMedioEstado('efec'),
+        tarjeta_estado: ferriolCierreInteractivoGetMedioEstado('tarj'),
+        transf_estado: ferriolCierreInteractivoGetMedioEstado('transf')
+      };
+
+      await ferriolInsertCierreInteractivoSupabase({
+        fecha_hora: new Date().toISOString(),
+        saldo_inicial: inicial,
+        ventas_efectivo_sistema: Number(m.efectivo) || 0,
+        cobro_libreta_incluido: inclLib,
+        cobro_libreta_monto: inclLib ? (Number(m.cobro_libreta) || 0) : 0,
+        pagos_proveedor_turno: Number(_cierreInterGastos.pagosProv) || 0,
+        egresos_gastos_fijos_turno: Number(_cierreInterGastos.egresosFijos) || 0,
+        saldo_esperado_efectivo: espTeorico,
+        efectivo_estado: ferriolCierreInteractivoGetMedioEstado('efec'),
+        efectivo_real: efecReal,
+        efectivo_diferencia: diffEfec,
+        tarjeta_sistema: tarjSys,
+        tarjeta_ok: tarjOk,
+        tarjeta_real: tarjRealN,
+        transferencia_sistema: transfSys,
+        transferencia_ok: transfOk,
+        transferencia_real: transfRealN,
+        justificacion: justif || null,
+        fondo_siguiente_turno: fondoProx,
+        detalle: detalleJson
       });
+
+      var notasComb = [justif ? 'Justif.: ' + justif : '', notas ? notas : ''].filter(Boolean).join(' | ') || null;
+      await ferriolInsertCierreCajaSupabase(m, {
+        omitido: false,
+        contado: efecReal,
+        diferencia: diffEfec,
+        notas: notasComb
+      });
+
+      try {
+        var fk = ferriolCierreInteractivoFondoKey();
+        if (fk) localStorage.setItem(fk, String(Math.round(fondoProx)));
+      } catch (_) {}
 
       var d = getData();
       d.ventas = { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 };
@@ -8802,16 +9123,46 @@
         if (p) p.stockInicial = p.stock;
       });
       setData(d);
-      if (omitirEl) omitirEl.checked = false;
-      if (notasEl) notasEl.value = '';
-      if (contadoInp) {
-        contadoInp.disabled = false;
-        contadoInp.value = '';
+      await updateDashboard();
+
+      var si = document.getElementById('cierreInterSaldoInicial');
+      if (si) {
+        si.value = '';
+        si.dataset.userTouched = '';
       }
+      document.querySelectorAll('#cierreInteractivoRoot .ferriol-ci-denom-qty').forEach(function (inp) {
+        inp.value = '';
+        inp.disabled = false;
+      });
+      var denSec = document.getElementById('cierreInterDenomSection');
+      if (denSec) denSec.style.opacity = '1';
+      var fri = document.getElementById('cierreInterEfecReal');
+      if (fri) {
+        fri.value = '';
+        fri.readOnly = false;
+      }
+      if (document.getElementById('cierreInterTarjReal')) document.getElementById('cierreInterTarjReal').value = '';
+      if (document.getElementById('cierreInterTransfReal')) document.getElementById('cierreInterTransfReal').value = '';
+      if (document.getElementById('cierreInterJustif')) document.getElementById('cierreInterJustif').value = '';
+      if (document.getElementById('cierreInterFondoProx')) document.getElementById('cierreInterFondoProx').value = '';
+      if (notasEl) notasEl.value = '';
+      var rootCi = document.getElementById('cierreInteractivoRoot');
+      if (rootCi) {
+        ['efec', 'tarj', 'transf'].forEach(function (medio) {
+          rootCi.querySelectorAll('.ferriol-ci-choice[data-ci-medio="' + medio + '"]').forEach(function (b) {
+            b.classList.toggle('ferriol-ci-choice-active', b.getAttribute('data-ci-val') === 'correcto');
+          });
+        });
+        var wT = document.getElementById('cierreInterTarjRealWrap');
+        var wTr = document.getElementById('cierreInterTransfRealWrap');
+        if (wT) wT.classList.add('hidden');
+        if (wTr) wTr.classList.add('hidden');
+      }
+
       ferriolRefreshCierreArqueoDiff();
-      updateDashboard();
       renderCierresCajaHistorial();
       renderResumenMensualCaja();
+      await ferriolCierreInteractivoRefreshAll();
       if (typeof showScanToast === 'function') showScanToast('Caja cerrada', false);
     };
 
@@ -8919,7 +9270,7 @@
       if (tab === 'cierre') {
         renderCierresCajaHistorial();
         renderResumenMensualCaja();
-        getMetricasDelDia().then(ferriolSyncCierreArqueoEsperado).catch(function () {});
+        ferriolCierreInteractivoRefreshAll().catch(function () {});
       }
       if (tab === 'proveedores') { _resetFormInline('proveedor'); renderGastos('proveedor'); }
       if (tab === 'gastos') { _resetFormInline('gasto_fijo'); renderGastos('gasto_fijo'); }
@@ -8993,6 +9344,9 @@
         _resetFormInline(tipo);
         renderGastos(tipo);
         renderResumenMensualCaja();
+        try {
+          ferriolCierreInteractivoRefreshAll().catch(function () {});
+        } catch (_) {}
       } catch (e) {
         if (errEl) { errEl.textContent = 'Error al guardar: ' + (e.message || 'intente de nuevo.'); errEl.classList.remove('hidden'); }
       }
@@ -9014,6 +9368,9 @@
         await supabaseClient.from('gastos').delete().eq('id', id).eq('user_id', currentUser.id);
         renderGastos(tipo);
         renderResumenMensualCaja();
+        try {
+          ferriolCierreInteractivoRefreshAll().catch(function () {});
+        } catch (_) {}
       } catch (_) {}
     };
     // ============================================================
