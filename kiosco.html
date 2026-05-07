@@ -735,7 +735,7 @@
           <div class="ferriol-cierre-shell max-w-none w-full space-y-5 pb-2">
 
 
-            <section class="ferriol-cierre-panel ferriol-cierre-panel--accent" aria-labelledby="cierreLiquidacionHd">
+            <section id="cierreInteractivoRoot" class="ferriol-cierre-panel ferriol-cierre-panel--accent ferriol-ci-root" aria-labelledby="cierreLiquidacionHd">
               <div class="ferriol-cierre-panel-head">
                 <span class="ferriol-cierre-step" aria-hidden="true">1</span>
                 <div>
@@ -761,41 +761,13 @@
                   <i data-lucide="layers" class="ferriol-cierre-movs-icon" aria-hidden="true"></i>
                   <span><strong id="cajaCierreMovimientos">0</strong> movimientos en este turno</span>
                 </p>
-                <h4 class="ferriol-cierre-subhd">Detalle por medio (tocá para validar)</h4>
+                <h4 class="ferriol-cierre-subhd">Detalle por medio</h4>
                 <div class="ferriol-cierre-medios">
-                  <button type="button" class="ferriol-cierre-line ferriol-cierre-line-btn touch-target" data-ci-select="efec">
-                    <span>Efectivo</span><span id="cajaEfectivo" class="ferriol-cierre-amt">$0</span>
-                  </button>
-                  <button type="button" class="ferriol-cierre-line ferriol-cierre-line-btn touch-target" data-ci-select="tarj">
-                    <span>Tarjeta</span><span id="cajaTarjeta" class="ferriol-cierre-amt">$0</span>
-                  </button>
-                  <button type="button" class="ferriol-cierre-line ferriol-cierre-line-btn touch-target" data-ci-select="transf">
-                    <span>Transferencia</span><span id="cajaTransf" class="ferriol-cierre-amt">$0</span>
-                  </button>
-                  <div class="ferriol-cierre-line"><span>Cobro libreta</span><span id="cajaCobroLibreta" class="ferriol-cierre-amt">$0</span></div>
-                  <div class="ferriol-cierre-line ferriol-cierre-line--muted ferriol-cierre-line--wrap">
-                    <span class="flex items-center gap-2 min-w-0">Fiado (cuenta)
-                      <button type="button" onclick="window._goToCajaLibreta && window._goToCajaLibreta()" class="shrink-0 text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-lg bg-amber-500/25 text-amber-200 border border-amber-400/40 touch-target active:scale-95">Libreta</button>
-                    </span>
-                    <span id="cajaFiado" class="ferriol-cierre-amt">$0</span>
-                  </div>
-                  <div class="ferriol-cierre-line ferriol-cierre-line--muted"><span>Transferencia pendiente</span><span id="cajaTransfPend" class="ferriol-cierre-amt">$0</span></div>
-                </div>
-                <p class="ferriol-cierre-footnote">Fiado y pendientes son deuda en cuenta: suman al ingreso cuando los cobrás desde la libreta.</p>
-              </div>
-            </section>
-
-            <section id="cierreInteractivoRoot" class="ferriol-cierre-panel ferriol-cierre-panel--cyan ferriol-ci-root" aria-labelledby="cierreInterHd">
-              <h3 id="cierreInterHd" class="sr-only">Validación de cierre</h3>
-
-              <div class="ferriol-ci-methods">
-                <article class="ferriol-ci-method-card active" data-ci-card="efec">
-                  <button type="button" class="ferriol-ci-method-head touch-target" data-ci-select="efec">
-                    <span class="ferriol-ci-method-title">Efectivo</span>
-                    <span id="cierreInterEfecSistema" class="ferriol-ci-method-sys">$0</span>
-                  </button>
-                  <div class="ferriol-ci-method-body">
-                    <div class="ferriol-ci-actions">
+                  <div class="ferriol-cierre-line ferriol-cierre-line--stack">
+                    <button type="button" class="ferriol-cierre-line ferriol-cierre-line-btn touch-target" data-ci-select="efec">
+                      <span>Efectivo</span><span id="cajaEfectivo" class="ferriol-cierre-amt">$0</span>
+                    </button>
+                    <div class="ferriol-cierre-inline-actions">
                       <button type="button" class="ferriol-ci-action ferriol-ci-action-ok active touch-target" data-ci-medio="efec" data-ci-val="confirmado">Confirmar</button>
                       <button type="button" class="ferriol-ci-action ferriol-ci-action-fix touch-target" data-ci-medio="efec" data-ci-val="corregir">Corregir</button>
                     </div>
@@ -817,59 +789,58 @@
                       <input type="text" id="cierreInterEfecReal" inputmode="decimal" autocomplete="off" class="ferriol-ci-field w-full rounded-xl px-3 py-3 bg-black/40 border border-white/12 text-white text-lg font-bold tabular-nums" placeholder="0">
                     </div>
                   </div>
-                </article>
-
-                <article class="ferriol-ci-method-card" data-ci-card="tarj">
-                  <button type="button" class="ferriol-ci-method-head touch-target" data-ci-select="tarj">
-                    <span class="ferriol-ci-method-title">Tarjetas</span>
-                    <span id="cierreInterTarjSistema" class="ferriol-ci-method-sys">$0</span>
-                  </button>
-                  <div class="ferriol-ci-method-body hidden">
-                    <div class="ferriol-ci-actions">
+                  <div class="ferriol-cierre-line ferriol-cierre-line--stack">
+                    <button type="button" class="ferriol-cierre-line ferriol-cierre-line-btn touch-target" data-ci-select="tarj">
+                      <span>Tarjeta</span><span id="cajaTarjeta" class="ferriol-cierre-amt">$0</span>
+                    </button>
+                    <div class="ferriol-cierre-inline-actions">
                       <button type="button" class="ferriol-ci-action ferriol-ci-action-ok active touch-target" data-ci-medio="tarj" data-ci-val="confirmado">Confirmar</button>
                       <button type="button" class="ferriol-ci-action ferriol-ci-action-fix touch-target" data-ci-medio="tarj" data-ci-val="corregir">Corregir</button>
                     </div>
                     <div id="cierreInterTarjRealWrap" class="hidden mt-2">
-                      <label class="block text-[11px] text-white/55 mb-1">Monto real</label>
-                      <input type="text" id="cierreInterTarjReal" inputmode="decimal" class="ferriol-ci-field w-full rounded-lg px-3 py-2.5 bg-black/35 border border-white/12 text-white" placeholder="0">
+                      <input type="text" id="cierreInterTarjReal" inputmode="decimal" class="ferriol-ci-field w-full rounded-lg px-3 py-2.5 bg-black/35 border border-white/12 text-white" placeholder="Monto real">
                     </div>
                   </div>
-                </article>
-
-                <article class="ferriol-ci-method-card" data-ci-card="transf">
-                  <button type="button" class="ferriol-ci-method-head touch-target" data-ci-select="transf">
-                    <span class="ferriol-ci-method-title">Transferencias</span>
-                    <span id="cierreInterTransfSistema" class="ferriol-ci-method-sys">$0</span>
-                  </button>
-                  <div class="ferriol-ci-method-body hidden">
-                    <div class="ferriol-ci-actions">
+                  <div class="ferriol-cierre-line ferriol-cierre-line--stack">
+                    <button type="button" class="ferriol-cierre-line ferriol-cierre-line-btn touch-target" data-ci-select="transf">
+                      <span>Transferencia</span><span id="cajaTransf" class="ferriol-cierre-amt">$0</span>
+                    </button>
+                    <div class="ferriol-cierre-inline-actions">
                       <button type="button" class="ferriol-ci-action ferriol-ci-action-ok active touch-target" data-ci-medio="transf" data-ci-val="confirmado">Confirmar</button>
                       <button type="button" class="ferriol-ci-action ferriol-ci-action-fix touch-target" data-ci-medio="transf" data-ci-val="corregir">Corregir</button>
                     </div>
                     <div id="cierreInterTransfRealWrap" class="hidden mt-2">
-                      <label class="block text-[11px] text-white/55 mb-1">Monto real</label>
-                      <input type="text" id="cierreInterTransfReal" inputmode="decimal" class="ferriol-ci-field w-full rounded-lg px-3 py-2.5 bg-black/35 border border-white/12 text-white" placeholder="0">
+                      <input type="text" id="cierreInterTransfReal" inputmode="decimal" class="ferriol-ci-field w-full rounded-lg px-3 py-2.5 bg-black/35 border border-white/12 text-white" placeholder="Monto real">
                     </div>
                   </div>
-                </article>
-              </div>
-
-              <div class="rounded-xl border border-amber-500/25 bg-amber-950/20 p-3 mt-4 mb-4">
-                <div class="flex items-start justify-between gap-2 mb-2">
-                  <h4 class="text-sm font-bold text-amber-100">Egresos del día</h4>
-                  <span id="cierreInterEgresosTotal" class="text-xs font-bold text-amber-200 tabular-nums shrink-0">$0</span>
+                  <div class="ferriol-cierre-line"><span>Cobro libreta</span><span id="cajaCobroLibreta" class="ferriol-cierre-amt">$0</span></div>
+                  <div class="ferriol-cierre-line ferriol-cierre-line--muted ferriol-cierre-line--wrap">
+                    <span class="flex items-center gap-2 min-w-0">Fiado (cuenta)
+                      <button type="button" onclick="window._goToCajaLibreta && window._goToCajaLibreta()" class="shrink-0 text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-lg bg-amber-500/25 text-amber-200 border border-amber-400/40 touch-target active:scale-95">Libreta</button>
+                    </span>
+                    <span id="cajaFiado" class="ferriol-cierre-amt">$0</span>
+                  </div>
+                  <div class="ferriol-cierre-line ferriol-cierre-line--muted"><span>Transferencia pendiente</span><span id="cajaTransfPend" class="ferriol-cierre-amt">$0</span></div>
                 </div>
-                <div id="cierreInterEgresosList" class="text-[12px] text-white/60 space-y-1 max-h-28 overflow-y-auto mb-3"></div>
-                <button type="button" id="cierreInterBtnIrProv" class="w-full py-2.5 rounded-xl text-sm font-semibold border border-amber-400/35 bg-amber-500/15 text-amber-100 touch-target active:scale-[0.99]">
-                  Revisar pagos/gastos
-                </button>
-              </div>
-
-              <div id="cierreInterAuditCard" class="rounded-xl border border-white/12 bg-black/30 p-3 mb-3">
-                <p class="text-[11px] text-white/45 uppercase font-semibold mb-2">Resultado final</p>
-                <div class="flex justify-between items-center gap-2 text-base">
-                  <span class="text-white/65">Diferencia total (real − sistema)</span>
-                  <span id="cierreInterAuditDiff" class="font-extrabold tabular-nums text-[#86efac]">$0</span>
+                <span id="cierreInterEfecSistema" class="hidden">$0</span>
+                <span id="cierreInterTarjSistema" class="hidden">$0</span>
+                <span id="cierreInterTransfSistema" class="hidden">$0</span>
+                <div class="rounded-xl border border-amber-500/25 bg-amber-950/20 p-3 mt-4 mb-4">
+                  <div class="flex items-start justify-between gap-2 mb-2">
+                    <h4 class="text-sm font-bold text-amber-100">Egresos del día</h4>
+                    <span id="cierreInterEgresosTotal" class="text-xs font-bold text-amber-200 tabular-nums shrink-0">$0</span>
+                  </div>
+                  <div id="cierreInterEgresosList" class="text-[12px] text-white/60 space-y-1 max-h-28 overflow-y-auto mb-3"></div>
+                  <button type="button" id="cierreInterBtnIrProv" class="w-full py-2.5 rounded-xl text-sm font-semibold border border-amber-400/35 bg-amber-500/15 text-amber-100 touch-target active:scale-[0.99]">
+                    Revisar pagos/gastos
+                  </button>
+                </div>
+                <div id="cierreInterAuditCard" class="rounded-xl border border-white/12 bg-black/30 p-3 mb-3">
+                  <p class="text-[11px] text-white/45 uppercase font-semibold mb-2">Resultado final</p>
+                  <div class="flex justify-between items-center gap-2 text-base">
+                    <span class="text-white/65">Diferencia total (real − sistema)</span>
+                    <span id="cierreInterAuditDiff" class="font-extrabold tabular-nums text-[#86efac]">$0</span>
+                  </div>
                 </div>
               </div>
             </section>

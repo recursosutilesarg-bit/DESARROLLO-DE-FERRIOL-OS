@@ -2368,6 +2368,19 @@ select.ferriol-sponsor-select:-moz-focusring {
   border-bottom: none;
 }
 
+.ferriol-cierre-line--stack {
+  display: block;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 0.55rem;
+}
+
+.ferriol-cierre-inline-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+}
+
 .ferriol-cierre-line-btn {
   width: 100%;
   text-align: left;
