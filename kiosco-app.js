@@ -38,6 +38,37 @@
       ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
       : null;
 
+    function ferriolCleanReloadParamsOnce() {
+      try {
+        var u = new URL(window.location.href);
+        if (!u.searchParams.has('_fr')) return;
+        u.searchParams.delete('_fr');
+        history.replaceState(history.state, '', u.toString());
+      } catch (_) {}
+    }
+    ferriolCleanReloadParamsOnce();
+
+    function ferriolHardReload() {
+      var go = function () {
+        try {
+          var u = new URL(window.location.href);
+          u.searchParams.set('_fr', String(Date.now()));
+          window.location.replace(u.toString());
+        } catch (_) {
+          window.location.reload();
+        }
+      };
+      if (!('serviceWorker' in navigator)) {
+        go();
+        return;
+      }
+      navigator.serviceWorker.getRegistration().then(function (reg) {
+        if (!reg) return null;
+        return reg.update();
+      }).catch(function () {}).finally(go);
+    }
+    window._ferriolHardReload = ferriolHardReload;
+
     (function ferriolCaptureReferralFromUrl() {
       try {
         var p = new URLSearchParams(window.location.search);
@@ -11377,14 +11408,7 @@ async function showApp() {
       document.getElementById('loginPassword').value = '';
     }
     function ferriolReloadAppForUpdate() {
-      var reload = function () { window.location.reload(); };
-      if (!('serviceWorker' in navigator)) {
-        reload();
-        return;
-      }
-      navigator.serviceWorker.getRegistration().then(function (reg) {
-        if (reg) return reg.update();
-      }).catch(function () {}).then(reload, reload);
+      ferriolHardReload();
     }
     var appReloadBtn = document.getElementById('appReloadBtn');
     if (appReloadBtn) appReloadBtn.onclick = function () { ferriolReloadAppForUpdate(); };
