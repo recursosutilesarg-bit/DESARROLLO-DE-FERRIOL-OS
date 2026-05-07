@@ -4852,7 +4852,7 @@
           if (window._switchCajaTab) window._switchCajaTab('proveedores');
         };
       }
-      ferriolCierreInteractivoSetCardSeleccion('efec');
+      ferriolCierreInteractivoSetCardSeleccion('');
       ferriolCierreInteractivoSetMedioEstado('efec', 'confirmado');
       ferriolCierreInteractivoSetMedioEstado('tarj', 'confirmado');
       ferriolCierreInteractivoSetMedioEstado('transf', 'confirmado');
@@ -9366,7 +9366,7 @@
       if (document.getElementById('cierreInterTarjReal')) document.getElementById('cierreInterTarjReal').value = '';
       if (document.getElementById('cierreInterTransfReal')) document.getElementById('cierreInterTransfReal').value = '';
       _cierreInterModo = { efec: 'confirmado', tarj: 'confirmado', transf: 'confirmado' };
-      ferriolCierreInteractivoSetCardSeleccion('efec');
+      ferriolCierreInteractivoSetCardSeleccion('');
       ferriolCierreInteractivoSetMedioEstado('efec', 'confirmado');
       ferriolCierreInteractivoSetMedioEstado('tarj', 'confirmado');
       ferriolCierreInteractivoSetMedioEstado('transf', 'confirmado');
