@@ -4622,16 +4622,10 @@
       return Number.isFinite(n) ? n : null;
     }
 
-    /** Gastos del día operativo (proveedor + fijo prorrateado hoy) para saldo teórico efectivo. Ver supabase-cierre-interactivo.sql */
+    /** Cierre de caja minimalista: método por método + comparativo sistema/real. */
     var _cierreInterGastos = { pagosProv: 0, egresosFijos: 0, rowsProv: [], rowsGastoFijo: [] };
-
-    function ferriolCierreInteractivoFondoKey() {
-      try {
-        return currentUser && currentUser.id ? 'ferriol_fondo_apertura_' + currentUser.id : null;
-      } catch (_) {
-        return null;
-      }
-    }
+    var _cierreInterModo = { efec: 'confirmado', tarj: 'confirmado', transf: 'confirmado' };
+    var _cierreInterMetricas = { efecSistema: 0, tarjSistema: 0, transfSistema: 0 };
 
     async function ferriolCierreInteractivoLoadGastosHoy() {
       _cierreInterGastos = { pagosProv: 0, egresosFijos: 0, rowsProv: [], rowsGastoFijo: [] };
@@ -4665,18 +4659,25 @@
     }
 
     function ferriolCierreInteractivoRenderProvList() {
-      var listEl = document.getElementById('cierreInterProvList');
-      var badge = document.getElementById('cierreInterProvSumBadge');
-      if (badge) badge.textContent = '$' + Math.round(_cierreInterGastos.pagosProv || 0).toLocaleString('es-AR');
+      var listEl = document.getElementById('cierreInterEgresosList');
+      var badge = document.getElementById('cierreInterEgresosTotal');
       if (!listEl) return;
-      var rows = _cierreInterGastos.rowsProv || [];
-      if (!rows.length) {
-        listEl.innerHTML = '<p class="text-white/40">Sin pagos a proveedores registrados para hoy.</p>';
+      var all = [];
+      (_cierreInterGastos.rowsProv || []).forEach(function (x) {
+        all.push({ tipo: 'Proveedor', desc: x.desc, monto: Number(x.monto) || 0 });
+      });
+      (_cierreInterGastos.rowsGastoFijo || []).forEach(function (x) {
+        all.push({ tipo: 'Gasto', desc: x.desc, monto: Number(x.monto) || 0 });
+      });
+      var total = (_cierreInterGastos.pagosProv || 0) + (_cierreInterGastos.egresosFijos || 0);
+      if (badge) badge.textContent = '$' + Math.round(total).toLocaleString('es-AR');
+      if (!all.length) {
+        listEl.innerHTML = '<p class="text-white/40">Sin egresos registrados para hoy.</p>';
         return;
       }
-      listEl.innerHTML = rows.slice(0, 24).map(function (x) {
+      listEl.innerHTML = all.slice(0, 36).map(function (x) {
         var esc = String(x.desc || '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
-        return '<div class="flex justify-between gap-2 border-b border-white/06 pb-1"><span class="truncate">' + esc + '</span><span class="shrink-0 font-semibold text-white/75 tabular-nums">−$' + Math.round(x.monto).toLocaleString('es-AR') + '</span></div>';
+        return '<div class="flex justify-between gap-2 border-b border-white/06 pb-1"><span class="truncate"><span class="text-[10px] text-white/35 uppercase mr-1">' + x.tipo + '</span>' + esc + '</span><span class="shrink-0 font-semibold text-white/75 tabular-nums">−$' + Math.round(x.monto).toLocaleString('es-AR') + '</span></div>';
       }).join('');
     }
 
@@ -4692,139 +4693,79 @@
       return Math.round(total * 100) / 100;
     }
 
-    function ferriolCierreInteractivoGetMedioEstado(medio) {
-      var root = document.getElementById('cierreInteractivoRoot');
-      if (!root) return 'correcto';
-      var active = root.querySelector('.ferriol-ci-choice[data-ci-medio="' + medio + '"].ferriol-ci-choice-active');
-      return active ? (active.getAttribute('data-ci-val') || 'correcto') : 'correcto';
+    function ferriolCierreInteractivoSetCardSeleccion(medio) {
+      document.querySelectorAll('#cierreInteractivoRoot .ferriol-ci-method-card').forEach(function (card) {
+        var isActive = card.getAttribute('data-ci-card') === medio;
+        card.classList.toggle('active', isActive);
+        var body = card.querySelector('.ferriol-ci-method-body');
+        if (body) body.classList.toggle('hidden', !isActive);
+      });
     }
 
     function ferriolCierreInteractivoSetMedioEstado(medio, val) {
-      var root = document.getElementById('cierreInteractivoRoot');
-      if (!root) return;
-      root.querySelectorAll('.ferriol-ci-choice[data-ci-medio="' + medio + '"]').forEach(function (btn) {
-        btn.classList.toggle('ferriol-ci-choice-active', btn.getAttribute('data-ci-val') === val);
+      _cierreInterModo[medio] = val;
+      document.querySelectorAll('#cierreInteractivoRoot .ferriol-ci-action[data-ci-medio="' + medio + '"]').forEach(function (btn) {
+        btn.classList.toggle('active', btn.getAttribute('data-ci-val') === val);
       });
+      if (medio === 'efec') {
+        var efecWrap = document.getElementById('cierreInterEfecRealWrap');
+        var den = document.getElementById('cierreInterDenomSection');
+        if (efecWrap) efecWrap.classList.toggle('hidden', val !== 'corregir');
+        if (den) den.classList.toggle('hidden', val !== 'corregir');
+        if (val === 'confirmado') {
+          var ef = document.getElementById('cierreInterEfecReal');
+          if (ef) ef.value = String(_cierreInterMetricas.efecSistema);
+        }
+      }
       if (medio === 'tarj') {
-        var w = document.getElementById('cierreInterTarjRealWrap');
-        if (w) w.classList.toggle('hidden', val !== 'incorrecto');
+        var tw = document.getElementById('cierreInterTarjRealWrap');
+        if (tw) tw.classList.toggle('hidden', val !== 'corregir');
       }
       if (medio === 'transf') {
-        var w2 = document.getElementById('cierreInterTransfRealWrap');
-        if (w2) w2.classList.toggle('hidden', val !== 'incorrecto');
-      }
-      if (medio === 'efec') {
-        var den = document.getElementById('cierreInterDenomSection');
-        if (den) {
-          den.querySelectorAll('input').forEach(function (inp) {
-            inp.disabled = val === 'correcto';
-          });
-          den.style.opacity = val === 'correcto' ? '0.55' : '1';
-        }
-        if (val === 'incorrecto') {
-          document.querySelectorAll('#cierreInteractivoRoot .ferriol-ci-denom-qty').forEach(function (el) {
-            el.value = '';
-          });
-          var friClear = document.getElementById('cierreInterEfecReal');
-          if (friClear) friClear.value = '';
-        }
-        ferriolCierreInteractivoApplyEfecCorrectMode(val === 'correcto');
+        var trw = document.getElementById('cierreInterTransfRealWrap');
+        if (trw) trw.classList.toggle('hidden', val !== 'corregir');
       }
       ferriolCierreInteractivoRefreshAuditUi();
       ferriolRefreshCierreEstado();
     }
 
-    function ferriolCierreInteractivoApplyEfecCorrectMode(on) {
-      var esperado = Number(window._ferriolCierreSaldoEsperadoTeorico);
-      if (!Number.isFinite(esperado)) esperado = 0;
-      var fri = document.getElementById('cierreInterEfecReal');
-      if (!fri) return;
-      if (on) {
-        fri.value = String(esperado);
-        fri.readOnly = true;
-      } else {
-        fri.readOnly = false;
-      }
-    }
-
-    function ferriolCierreInteractivoComputeSaldoEsperado(m) {
-      if (!m || !document.getElementById('cierreInterSaldoEsperadoMain')) return 0;
-      var inicial = ferriolParseMontoLocal(document.getElementById('cierreInterSaldoInicial').value);
-      if (inicial === null) inicial = 0;
-      var inclLib = !!document.getElementById('cierreInterInclLibreta').checked;
-      var ventasEfec = Number(m.efectivo) || 0;
-      var lib = inclLib ? (Number(m.cobro_libreta) || 0) : 0;
-      var pp = Number(_cierreInterGastos.pagosProv) || 0;
-      var eg = Number(_cierreInterGastos.egresosFijos) || 0;
-      var esp = inicial + ventasEfec + lib - pp - eg;
-      esp = Math.round(esp * 100) / 100;
-      window._ferriolCierreSaldoEsperadoTeorico = esp;
-      window._ferriolCierreEfectivoEsperado = esp;
-      document.getElementById('cierreInterVentasEfec').textContent = '$' + ventasEfec.toLocaleString('es-AR');
-      var libLn = document.getElementById('cierreInterLineLibreta');
-      var libLbl = document.getElementById('cierreInterLibLabel');
-      if (inclLib) {
-        document.getElementById('cierreInterVentasLib').textContent = '$' + lib.toLocaleString('es-AR');
-        if (libLn) libLn.classList.remove('hidden');
-        if (libLbl) libLbl.textContent = ' + cobros libreta';
-      } else {
-        if (libLn) libLn.classList.add('hidden');
-        if (libLbl) libLbl.textContent = '';
-      }
-      document.getElementById('cierreInterPagosProv').textContent = '$' + Math.round(pp).toLocaleString('es-AR');
-      document.getElementById('cierreInterEgresosFijos').textContent = '$' + Math.round(eg).toLocaleString('es-AR');
-      document.getElementById('cierreInterSaldoEsperadoMain').textContent = '$' + esp.toLocaleString('es-AR');
-      if (ferriolCierreInteractivoGetMedioEstado('efec') === 'correcto') ferriolCierreInteractivoApplyEfecCorrectMode(true);
-      ferriolCierreInteractivoRefreshAuditUi();
-      return esp;
-    }
-
-    function ferriolCierreInteractivoGetEfecRealNum(saldoEsp) {
-      var modo = ferriolCierreInteractivoGetMedioEstado('efec');
-      if (modo === 'correcto') return Math.round(saldoEsp * 100) / 100;
-      var v = ferriolParseMontoLocal(document.getElementById('cierreInterEfecReal').value);
-      if (v === null || !Number.isFinite(v)) return null;
-      return Math.round(v * 100) / 100;
-    }
-
     function ferriolCierreInteractivoRefreshAuditUi() {
       var diffEl = document.getElementById('cierreInterAuditDiff');
-      var justWrap = document.getElementById('cierreInterJustifWrap');
-      var esp = Number(window._ferriolCierreSaldoEsperadoTeorico);
-      if (!Number.isFinite(esp)) esp = 0;
-      var real = ferriolCierreInteractivoGetEfecRealNum(esp);
       if (!diffEl) return;
-      if (real === null) {
+      var sysTotal = Number(_cierreInterMetricas.efecSistema || 0) + Number(_cierreInterMetricas.tarjSistema || 0) + Number(_cierreInterMetricas.transfSistema || 0);
+      var efReal = _cierreInterModo.efec === 'confirmado' ? Number(_cierreInterMetricas.efecSistema || 0) : ferriolParseMontoLocal((document.getElementById('cierreInterEfecReal') || {}).value);
+      var tjReal = _cierreInterModo.tarj === 'confirmado' ? Number(_cierreInterMetricas.tarjSistema || 0) : ferriolParseMontoLocal((document.getElementById('cierreInterTarjReal') || {}).value);
+      var tfReal = _cierreInterModo.transf === 'confirmado' ? Number(_cierreInterMetricas.transfSistema || 0) : ferriolParseMontoLocal((document.getElementById('cierreInterTransfReal') || {}).value);
+      if (efReal === null || tjReal === null || tfReal === null) {
         diffEl.textContent = '—';
         diffEl.className = 'font-extrabold tabular-nums text-white/45';
-        if (justWrap) justWrap.classList.add('hidden');
         return;
       }
-      var diff = Math.round((real - esp) * 100) / 100;
+      var realTotal = Number(efReal) + Number(tjReal) + Number(tfReal);
+      var diff = Math.round((realTotal - sysTotal) * 100) / 100;
       var sign = diff > 0 ? '+' : diff < 0 ? '−' : '';
       diffEl.textContent = sign + '$' + Math.abs(diff).toLocaleString('es-AR');
-      if (diff === 0) {
-        diffEl.className = 'font-extrabold tabular-nums text-[#86efac]';
-        if (justWrap) justWrap.classList.add('hidden');
-      } else {
-        diffEl.className = 'font-extrabold tabular-nums ' + (diff < 0 ? 'text-red-400' : 'text-amber-300');
-        if (justWrap) justWrap.classList.remove('hidden');
-      }
-      var hid = document.getElementById('cierreEfectivoContado');
-      if (hid) hid.value = String(real);
-      var omit = document.getElementById('cierreOmitirArqueo');
-      if (omit) omit.checked = false;
+      diffEl.className = 'font-extrabold tabular-nums ' + (diff === 0 ? 'text-[#86efac]' : diff < 0 ? 'text-red-400' : 'text-amber-300');
     }
 
     function ferriolCierreInteractivoApplyDashboardMetricas(m) {
       if (!m || !document.getElementById('cierreInterTarjSistema')) return;
-      document.getElementById('cierreInterTarjSistema').textContent = '$' + (Number(m.tarjeta) || 0).toLocaleString('es-AR');
-      document.getElementById('cierreInterTransfSistema').textContent = '$' + (Number(m.transferencia) || 0).toLocaleString('es-AR');
-      ferriolCierreInteractivoComputeSaldoEsperado(m);
+      var egTotal = (Number(_cierreInterGastos.pagosProv) || 0) + (Number(_cierreInterGastos.egresosFijos) || 0);
+      _cierreInterMetricas.efecSistema = Math.round(((Number(m.efectivo) || 0) + (Number(m.cobro_libreta) || 0) - egTotal) * 100) / 100;
+      _cierreInterMetricas.tarjSistema = Math.round((Number(m.tarjeta) || 0) * 100) / 100;
+      _cierreInterMetricas.transfSistema = Math.round((Number(m.transferencia) || 0) * 100) / 100;
+      var efecSys = document.getElementById('cierreInterEfecSistema');
+      if (efecSys) efecSys.textContent = '$' + _cierreInterMetricas.efecSistema.toLocaleString('es-AR');
+      document.getElementById('cierreInterTarjSistema').textContent = '$' + _cierreInterMetricas.tarjSistema.toLocaleString('es-AR');
+      document.getElementById('cierreInterTransfSistema').textContent = '$' + _cierreInterMetricas.transfSistema.toLocaleString('es-AR');
+      if (_cierreInterModo.efec === 'confirmado') {
+        var efecInp = document.getElementById('cierreInterEfecReal');
+        if (efecInp) efecInp.value = String(_cierreInterMetricas.efecSistema);
+      }
+      ferriolCierreInteractivoRefreshAuditUi();
     }
 
     async function ferriolCierreInteractivoRefreshAll() {
-      ferriolCierreInteractivoPrefillSaldoInicial();
       await ferriolCierreInteractivoLoadGastosHoy();
       var m = await getMetricasDelDia();
       ferriolCierreInteractivoApplyDashboardMetricas(m);
@@ -4834,43 +4775,26 @@
       } catch (_) {}
     }
 
-    function ferriolCierreInteractivoPrefillSaldoInicial() {
-      var inp = document.getElementById('cierreInterSaldoInicial');
-      if (!inp || inp.dataset.userTouched === '1') return;
-      var k = ferriolCierreInteractivoFondoKey();
-      try {
-        if (k && localStorage.getItem(k)) inp.value = localStorage.getItem(k);
-      } catch (_) {}
-    }
-
     function ferriolRefreshCierreEstado() {
       var banner = document.getElementById('cierreEstadoBanner');
       var titulo = document.getElementById('cierreEstadoTitulo');
       var texto = document.getElementById('cierreEstadoTexto');
       if (!banner || !titulo || !texto) return;
-      if (!document.getElementById('cierreInteractivoRoot')) {
-        banner.classList.remove('ferriol-cierre-banner--ok', 'ferriol-cierre-banner--warn');
-        banner.classList.add('ferriol-cierre-banner--ok');
-        return;
-      }
-      var esp = Number(window._ferriolCierreSaldoEsperadoTeorico);
-      if (!Number.isFinite(esp)) esp = 0;
-      var efecMode = ferriolCierreInteractivoGetMedioEstado('efec');
-      var real = ferriolCierreInteractivoGetEfecRealNum(esp);
-      var pendiente = efecMode === 'incorrecto' && real === null;
+      if (!document.getElementById('cierreInteractivoRoot')) return;
+      var diffTxt = (document.getElementById('cierreInterAuditDiff') || {}).textContent || '—';
       banner.classList.remove('ferriol-cierre-banner--ok', 'ferriol-cierre-banner--warn');
-      banner.classList.add(pendiente ? 'ferriol-cierre-banner--warn' : 'ferriol-cierre-banner--ok');
-      if (pendiente) {
-        titulo.textContent = 'Completá el efectivo';
-        texto.textContent = 'Marcaste «Hay diferencia»: cargá billetes o el total real en gaveta.';
-      } else if (real !== null && Math.abs(real - esp) > 0.009 && efecMode === 'incorrecto') {
-        titulo.textContent = 'Hay diferencia';
-        texto.textContent = 'Documentá la causa en justificación antes de confirmar el cierre.';
-        banner.classList.remove('ferriol-cierre-banner--ok');
+      if (diffTxt === '—') {
         banner.classList.add('ferriol-cierre-banner--warn');
+        titulo.textContent = 'Falta completar correcciones';
+        texto.textContent = 'Si elegís "Corregir", cargá el monto real antes de finalizar.';
+      } else if (diffTxt === '$0' || diffTxt === '+$0' || diffTxt === '−$0') {
+        banner.classList.add('ferriol-cierre-banner--ok');
+        titulo.textContent = 'Caja cuadrada';
+        texto.textContent = 'Todo coincide entre sistema y real.';
       } else {
-        titulo.textContent = 'Listo para cerrar';
-        texto.textContent = 'Verificá tarjetas y transferencias, fondo del próximo turno y confirmá.';
+        banner.classList.add('ferriol-cierre-banner--warn');
+        titulo.textContent = 'Hay diferencia registrada';
+        texto.textContent = 'Revisá el comparativo y finalizá el cierre.';
       }
     }
 
@@ -4896,61 +4820,42 @@
       if (!root || root.dataset.ferriolCiBound) return;
       root.dataset.ferriolCiBound = '1';
       root.addEventListener('click', function (e) {
-        var btn = e.target.closest('.ferriol-ci-choice');
-        if (!btn || !root.contains(btn)) return;
-        var medio = btn.getAttribute('data-ci-medio');
-        var val = btn.getAttribute('data-ci-val');
+        var selectBtn = e.target.closest('[data-ci-select]');
+        if (selectBtn && root.contains(selectBtn)) {
+          var cardMedio = selectBtn.getAttribute('data-ci-select');
+          if (cardMedio) ferriolCierreInteractivoSetCardSeleccion(cardMedio);
+          return;
+        }
+        var actionBtn = e.target.closest('.ferriol-ci-action');
+        if (!actionBtn || !root.contains(actionBtn)) return;
+        var medio = actionBtn.getAttribute('data-ci-medio');
+        var val = actionBtn.getAttribute('data-ci-val');
         if (!medio || !val) return;
         ferriolCierreInteractivoSetMedioEstado(medio, val);
-        try {
-          if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
-        } catch (_) {}
       });
       root.querySelectorAll('.ferriol-ci-denom-qty').forEach(function (inp) {
         inp.addEventListener('input', function () {
           var sum = ferriolCierreInteractivoSumDenominaciones();
           var fri = document.getElementById('cierreInterEfecReal');
-          if (fri && ferriolCierreInteractivoGetMedioEstado('efec') === 'incorrecto') fri.value = sum ? String(sum) : '';
+          if (fri && _cierreInterModo.efec === 'corregir') fri.value = sum ? String(sum) : '';
           ferriolCierreInteractivoRefreshAuditUi();
           ferriolRefreshCierreEstado();
         });
       });
-      var fri = document.getElementById('cierreInterEfecReal');
-      if (fri) {
-        fri.addEventListener('input', function () {
-          ferriolCierreInteractivoRefreshAuditUi();
-          ferriolRefreshCierreEstado();
-        });
-      }
-      var si = document.getElementById('cierreInterSaldoInicial');
-      if (si) {
-        si.addEventListener('input', function () {
-          si.dataset.userTouched = '1';
-          getMetricasDelDia().then(function (mm) {
-            ferriolCierreInteractivoComputeSaldoEsperado(mm);
-            ferriolRefreshCierreEstado();
-          });
-        });
-      }
-      ['cierreInterTarjReal', 'cierreInterTransfReal'].forEach(function (id) {
+      ['cierreInterEfecReal', 'cierreInterTarjReal', 'cierreInterTransfReal'].forEach(function (id) {
         var el = document.getElementById(id);
         if (el) el.addEventListener('input', ferriolRefreshCierreEstado);
       });
-      var incl = document.getElementById('cierreInterInclLibreta');
-      if (incl) {
-        incl.addEventListener('change', function () {
-          getMetricasDelDia().then(function (mm) {
-            ferriolCierreInteractivoComputeSaldoEsperado(mm);
-            ferriolRefreshCierreEstado();
-          });
-        });
-      }
       var bprov = document.getElementById('cierreInterBtnIrProv');
       if (bprov) {
         bprov.onclick = function () {
           if (window._switchCajaTab) window._switchCajaTab('proveedores');
         };
       }
+      ferriolCierreInteractivoSetCardSeleccion('efec');
+      ferriolCierreInteractivoSetMedioEstado('efec', 'confirmado');
+      ferriolCierreInteractivoSetMedioEstado('tarj', 'confirmado');
+      ferriolCierreInteractivoSetMedioEstado('transf', 'confirmado');
     })();
 
     async function updateDashboard() {
@@ -8764,12 +8669,15 @@
       const t = document.getElementById('ticketContent');
       t.classList.remove('hidden');
       document.getElementById('ticketFecha').textContent = new Date().toLocaleString('es-AR');
-      var espTeorTk = ferriolCierreInteractivoComputeSaldoEsperado(mT);
-      var realTk = ferriolCierreInteractivoGetEfecRealNum(espTeorTk);
-      if (realTk === null) realTk = espTeorTk;
-      var difTk = Math.round((realTk - espTeorTk) * 100) / 100;
-      var arqueoHtml = `<p class="border-t border-gray-300 pt-2 mt-2 font-semibold">Saldo teórico efectivo</p><p>Esperado: $${espTeorTk.toLocaleString('es-AR')}</p><p>Real declarado: $${realTk.toLocaleString('es-AR')}</p><p>Diferencia: ${difTk >= 0 ? '+' : '−'}$${Math.abs(difTk).toLocaleString('es-AR')}</p>`;
-      var arqueoTxt = `\n--- Efectivo (teórico vs real) ---\nEsperado: $${espTeorTk.toLocaleString('es-AR')}\nReal: $${realTk.toLocaleString('es-AR')}\nDiferencia: ${difTk >= 0 ? '+' : '−'}$${Math.abs(difTk).toLocaleString('es-AR')}\n`;
+      ferriolCierreInteractivoApplyDashboardMetricas(mT);
+      var efecSysTk = Number(_cierreInterMetricas.efecSistema) || 0;
+      var realTk = _cierreInterModo.efec === 'corregir'
+        ? ferriolParseMontoLocal((document.getElementById('cierreInterEfecReal') || {}).value)
+        : efecSysTk;
+      if (realTk === null) realTk = efecSysTk;
+      var difTk = Math.round((realTk - efecSysTk) * 100) / 100;
+      var arqueoHtml = `<p class="border-t border-gray-300 pt-2 mt-2 font-semibold">Efectivo (sistema vs real)</p><p>Sistema: $${efecSysTk.toLocaleString('es-AR')}</p><p>Real declarado: $${realTk.toLocaleString('es-AR')}</p><p>Diferencia: ${difTk >= 0 ? '+' : '−'}$${Math.abs(difTk).toLocaleString('es-AR')}</p>`;
+      var arqueoTxt = `\n--- Efectivo (sistema vs real) ---\nSistema: $${efecSysTk.toLocaleString('es-AR')}\nReal: $${realTk.toLocaleString('es-AR')}\nDiferencia: ${difTk >= 0 ? '+' : '−'}$${Math.abs(difTk).toLocaleString('es-AR')}\n`;
       document.getElementById('ticketBody').innerHTML = `
         <p>Efectivo: $${(mT.efectivo || 0).toLocaleString('es-AR')}</p>
         <p>Tarjeta: $${(mT.tarjeta || 0).toLocaleString('es-AR')}</p>
@@ -9361,71 +9269,37 @@
     document.getElementById('cerrarCaja').onclick = async () => {
       var m = await getMetricasDelDia();
       await ferriolCierreInteractivoLoadGastosHoy();
-      var espTeorico = ferriolCierreInteractivoComputeSaldoEsperado(m);
-      var inicial = ferriolParseMontoLocal(document.getElementById('cierreInterSaldoInicial').value);
-      if (inicial === null) inicial = 0;
-      var inclLib = !!document.getElementById('cierreInterInclLibreta').checked;
+      ferriolCierreInteractivoApplyDashboardMetricas(m);
 
-      var efecReal = ferriolCierreInteractivoGetEfecRealNum(espTeorico);
-      if (ferriolCierreInteractivoGetMedioEstado('efec') === 'incorrecto' && efecReal === null) {
-        alert('Indicá el efectivo real contado o tocá «Cuadra con lo esperado».');
+      var efecSys = Number(_cierreInterMetricas.efecSistema) || 0;
+      var tarjSys = Number(_cierreInterMetricas.tarjSistema) || 0;
+      var transfSys = Number(_cierreInterMetricas.transfSistema) || 0;
+
+      var efecReal = _cierreInterModo.efec === 'confirmado' ? efecSys : ferriolParseMontoLocal((document.getElementById('cierreInterEfecReal') || {}).value);
+      var tarjRealN = _cierreInterModo.tarj === 'confirmado' ? tarjSys : ferriolParseMontoLocal((document.getElementById('cierreInterTarjReal') || {}).value);
+      var transfRealN = _cierreInterModo.transf === 'confirmado' ? transfSys : ferriolParseMontoLocal((document.getElementById('cierreInterTransfReal') || {}).value);
+
+      if (efecReal === null || tarjRealN === null || transfRealN === null) {
+        alert('Completá los montos reales en los métodos que marcaste como "Corregir".');
         return;
       }
-      if (efecReal === null) efecReal = espTeorico;
-      var diffEfec = Math.round((efecReal - espTeorico) * 100) / 100;
-      if (Math.abs(diffEfec) > 0.009) {
-        var jus = String((document.getElementById('cierreInterJustif') || {}).value || '').trim();
-        if (!jus) {
-          alert('Hay diferencia entre saldo esperado y efectivo real: cargá una justificación.');
-          return;
-        }
-      }
 
-      var tarjSys = Number(m.tarjeta) || 0;
-      var tarjOk = ferriolCierreInteractivoGetMedioEstado('tarj') === 'correcto';
-      var tarjRealN = tarjOk ? tarjSys : ferriolParseMontoLocal((document.getElementById('cierreInterTarjReal') || {}).value);
-      if (!tarjOk && tarjRealN === null) {
-        alert('Corregí el monto de tarjetas o marcá «Correcto».');
-        return;
-      }
-      if (tarjRealN === null) tarjRealN = tarjSys;
-
-      var transfSys = Number(m.transferencia) || 0;
-      var transfOk = ferriolCierreInteractivoGetMedioEstado('transf') === 'correcto';
-      var transfRealN = transfOk ? transfSys : ferriolParseMontoLocal((document.getElementById('cierreInterTransfReal') || {}).value);
-      if (!transfOk && transfRealN === null) {
-        alert('Corregí el monto de transferencias o marcá «Correcto».');
-        return;
-      }
-      if (transfRealN === null) transfRealN = transfSys;
-
-      var fondoProxRaw = ferriolParseMontoLocal((document.getElementById('cierreInterFondoProx') || {}).value);
-      var fondoProx = fondoProxRaw !== null ? fondoProxRaw : 0;
-
-      var notasEl = document.getElementById('cierreObsNotas');
-      var notas = notasEl ? String(notasEl.value || '').trim() : '';
-      var justif = String((document.getElementById('cierreInterJustif') || {}).value || '').trim();
+      var totalSys = efecSys + tarjSys + transfSys;
+      var totalReal = Number(efecReal) + Number(tarjRealN) + Number(transfRealN);
+      var diffFinal = Math.round((totalReal - totalSys) * 100) / 100;
+      var diffEfec = Math.round((Number(efecReal) - efecSys) * 100) / 100;
 
       var lines = [];
-      lines.push('Confirmar cierre de caja');
+      lines.push('Finalizar cierre de caja');
       lines.push('');
-      lines.push('Saldo esperado efectivo: $' + espTeorico.toLocaleString('es-AR'));
-      lines.push('Efectivo real: $' + efecReal.toLocaleString('es-AR'));
-      lines.push('Diferencia: ' + (diffEfec >= 0 ? '+' : '−') + '$' + Math.abs(diffEfec).toLocaleString('es-AR'));
-      lines.push('Tarjeta: sistema $' + tarjSys.toLocaleString('es-AR') + ' → declarado $' + tarjRealN.toLocaleString('es-AR'));
-      lines.push('Transferencia: sistema $' + transfSys.toLocaleString('es-AR') + ' → declarado $' + transfRealN.toLocaleString('es-AR'));
-      lines.push('Fondo próximo turno: $' + fondoProx.toLocaleString('es-AR'));
+      lines.push('Efectivo: sistema $' + efecSys.toLocaleString('es-AR') + ' → real $' + Number(efecReal).toLocaleString('es-AR'));
+      lines.push('Tarjetas: sistema $' + tarjSys.toLocaleString('es-AR') + ' → real $' + Number(tarjRealN).toLocaleString('es-AR'));
+      lines.push('Transferencias: sistema $' + transfSys.toLocaleString('es-AR') + ' → real $' + Number(transfRealN).toLocaleString('es-AR'));
       lines.push('');
-      lines.push('Total ingresos día (todos los medios): $' + (Number(m.total) || 0).toLocaleString('es-AR'));
+      lines.push('Diferencia final: ' + (diffFinal >= 0 ? '+' : '−') + '$' + Math.abs(diffFinal).toLocaleString('es-AR'));
       lines.push('');
       lines.push('¿Cerrar y reiniciar el día operativo?');
-
       if (!confirm(lines.join('\n'))) return;
-
-      var umbral = Math.max(500, Math.abs(espTeorico) * 0.05);
-      if (Math.abs(diffEfec) > umbral && Math.abs(espTeorico) > 0) {
-        if (!confirm('La diferencia de efectivo es muy grande. ¿Seguro que está bien?')) return;
-      }
 
       var hoyOp = ferriolTodayYmdLocal();
       var egresosSnap = [];
@@ -9435,57 +9309,43 @@
       (_cierreInterGastos.rowsGastoFijo || []).forEach(function (x) {
         egresosSnap.push({ tipo: 'gasto_fijo', descripcion: x.desc, monto: Number(x.monto) || 0 });
       });
+
       var detalleJson = {
         denominaciones: ferriolCierreInteractivoCollectDenomObj(),
-        efectivo_estado: ferriolCierreInteractivoGetMedioEstado('efec'),
-        tarjeta_estado: ferriolCierreInteractivoGetMedioEstado('tarj'),
-        transf_estado: ferriolCierreInteractivoGetMedioEstado('transf'),
+        modos: { efectivo: _cierreInterModo.efec, tarjetas: _cierreInterModo.tarj, transferencias: _cierreInterModo.transf },
         auditoria: {
           fecha_operativo_local: hoyOp,
           cerrado_por_email: currentUser && currentUser.email ? String(currentUser.email) : null,
           cerrado_por_nombre: currentUser && currentUser.kioscoName ? String(currentUser.kioscoName) : null,
           total_ventas_dia_todos_medios: Number(m.total) || 0,
-          ganancia_dia: Math.round(Number(m.ganancia) || 0),
-          egresos: egresosSnap,
-          notas_usuario: notas ? String(notas).trim().slice(0, 2000) : null
+          egresos: egresosSnap
         }
       };
 
       await ferriolInsertCierreInteractivoSupabase({
         fecha_hora: new Date().toISOString(),
-        saldo_inicial: inicial,
-        ventas_efectivo_sistema: Number(m.efectivo) || 0,
-        cobro_libreta_incluido: inclLib,
-        cobro_libreta_monto: inclLib ? (Number(m.cobro_libreta) || 0) : 0,
+        ventas_efectivo_sistema: efecSys,
         pagos_proveedor_turno: Number(_cierreInterGastos.pagosProv) || 0,
         egresos_gastos_fijos_turno: Number(_cierreInterGastos.egresosFijos) || 0,
-        saldo_esperado_efectivo: espTeorico,
-        efectivo_estado: ferriolCierreInteractivoGetMedioEstado('efec'),
-        efectivo_real: efecReal,
+        saldo_esperado_efectivo: efecSys,
+        efectivo_estado: _cierreInterModo.efec === 'confirmado' ? 'correcto' : 'incorrecto',
+        efectivo_real: Number(efecReal),
         efectivo_diferencia: diffEfec,
         tarjeta_sistema: tarjSys,
-        tarjeta_ok: tarjOk,
-        tarjeta_real: tarjRealN,
+        tarjeta_ok: _cierreInterModo.tarj === 'confirmado',
+        tarjeta_real: Number(tarjRealN),
         transferencia_sistema: transfSys,
-        transferencia_ok: transfOk,
-        transferencia_real: transfRealN,
-        justificacion: justif || null,
-        fondo_siguiente_turno: fondoProx,
+        transferencia_ok: _cierreInterModo.transf === 'confirmado',
+        transferencia_real: Number(transfRealN),
         detalle: detalleJson
       });
 
-      var notasComb = [justif ? 'Justif.: ' + justif : '', notas ? notas : ''].filter(Boolean).join(' | ') || null;
       await ferriolInsertCierreCajaSupabase(m, {
         omitido: false,
-        contado: efecReal,
+        contado: Number(efecReal),
         diferencia: diffEfec,
-        notas: notasComb
+        notas: null
       });
-
-      try {
-        var fk = ferriolCierreInteractivoFondoKey();
-        if (fk) localStorage.setItem(fk, String(Math.round(fondoProx)));
-      } catch (_) {}
 
       var d = getData();
       d.ventas = { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 };
@@ -9499,39 +9359,17 @@
       setData(d);
       await updateDashboard();
 
-      var si = document.getElementById('cierreInterSaldoInicial');
-      if (si) {
-        si.value = '';
-        si.dataset.userTouched = '';
-      }
       document.querySelectorAll('#cierreInteractivoRoot .ferriol-ci-denom-qty').forEach(function (inp) {
         inp.value = '';
-        inp.disabled = false;
       });
-      var denSec = document.getElementById('cierreInterDenomSection');
-      if (denSec) denSec.style.opacity = '1';
-      var fri = document.getElementById('cierreInterEfecReal');
-      if (fri) {
-        fri.value = '';
-        fri.readOnly = false;
-      }
+      if (document.getElementById('cierreInterEfecReal')) document.getElementById('cierreInterEfecReal').value = '';
       if (document.getElementById('cierreInterTarjReal')) document.getElementById('cierreInterTarjReal').value = '';
       if (document.getElementById('cierreInterTransfReal')) document.getElementById('cierreInterTransfReal').value = '';
-      if (document.getElementById('cierreInterJustif')) document.getElementById('cierreInterJustif').value = '';
-      if (document.getElementById('cierreInterFondoProx')) document.getElementById('cierreInterFondoProx').value = '';
-      if (notasEl) notasEl.value = '';
-      var rootCi = document.getElementById('cierreInteractivoRoot');
-      if (rootCi) {
-        ['efec', 'tarj', 'transf'].forEach(function (medio) {
-          rootCi.querySelectorAll('.ferriol-ci-choice[data-ci-medio="' + medio + '"]').forEach(function (b) {
-            b.classList.toggle('ferriol-ci-choice-active', b.getAttribute('data-ci-val') === 'correcto');
-          });
-        });
-        var wT = document.getElementById('cierreInterTarjRealWrap');
-        var wTr = document.getElementById('cierreInterTransfRealWrap');
-        if (wT) wT.classList.add('hidden');
-        if (wTr) wTr.classList.add('hidden');
-      }
+      _cierreInterModo = { efec: 'confirmado', tarj: 'confirmado', transf: 'confirmado' };
+      ferriolCierreInteractivoSetCardSeleccion('efec');
+      ferriolCierreInteractivoSetMedioEstado('efec', 'confirmado');
+      ferriolCierreInteractivoSetMedioEstado('tarj', 'confirmado');
+      ferriolCierreInteractivoSetMedioEstado('transf', 'confirmado');
 
       ferriolRefreshCierreArqueoDiff();
       renderCierresCajaHistorial();

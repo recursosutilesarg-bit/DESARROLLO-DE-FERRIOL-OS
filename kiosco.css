@@ -2399,6 +2399,78 @@ select.ferriol-sponsor-select:-moz-focusring {
   border-radius: 0.65rem;
 }
 
+.ferriol-ci-methods {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.ferriol-ci-method-card {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.24);
+  border-radius: 0.9rem;
+  overflow: hidden;
+}
+
+.ferriol-ci-method-card.active {
+  border-color: rgba(134, 239, 172, 0.4);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.2) inset;
+}
+
+.ferriol-ci-method-head {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 0.9rem;
+  text-align: left;
+}
+
+.ferriol-ci-method-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.ferriol-ci-method-sys {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #bbf7d0;
+  font-variant-numeric: tabular-nums;
+}
+
+.ferriol-ci-method-body {
+  padding: 0 0.9rem 0.85rem;
+}
+
+.ferriol-ci-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+}
+
+.ferriol-ci-action {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.88);
+  border-radius: 0.7rem;
+  padding: 0.58rem 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.ferriol-ci-action.active {
+  background: rgba(34, 197, 94, 0.22);
+  border-color: rgba(34, 197, 94, 0.58);
+  color: #dcfce7;
+}
+
+.ferriol-ci-action-fix.active {
+  background: rgba(251, 191, 36, 0.24);
+  border-color: rgba(251, 191, 36, 0.58);
+  color: #fef3c7;
+}
+
 .ferriol-ci-choice-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
