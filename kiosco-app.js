@@ -4623,7 +4623,7 @@
     }
 
     /** Gastos del día operativo (proveedor + fijo prorrateado hoy) para saldo teórico efectivo. Ver supabase-cierre-interactivo.sql */
-    var _cierreInterGastos = { pagosProv: 0, egresosFijos: 0, rowsProv: [] };
+    var _cierreInterGastos = { pagosProv: 0, egresosFijos: 0, rowsProv: [], rowsGastoFijo: [] };
 
     function ferriolCierreInteractivoFondoKey() {
       try {
@@ -4634,7 +4634,7 @@
     }
 
     async function ferriolCierreInteractivoLoadGastosHoy() {
-      _cierreInterGastos = { pagosProv: 0, egresosFijos: 0, rowsProv: [] };
+      _cierreInterGastos = { pagosProv: 0, egresosFijos: 0, rowsProv: [], rowsGastoFijo: [] };
       var hoy = ferriolTodayYmdLocal();
       if (!supabaseClient || !currentUser || !currentUser.id) {
         ferriolCierreInteractivoRenderProvList();
@@ -4656,6 +4656,7 @@
               _cierreInterGastos.rowsProv.push({ desc: String(r.descripcion || 'Pago proveedor').slice(0, 120), monto: mo });
             } else if (r.tipo === 'gasto_fijo') {
               _cierreInterGastos.egresosFijos += mo;
+              _cierreInterGastos.rowsGastoFijo.push({ desc: String(r.descripcion || 'Gasto fijo').slice(0, 120), monto: mo });
             }
           });
         }
@@ -8914,55 +8915,411 @@
       try { lucide.createIcons(); } catch (_) {}
     }
 
+    var _ferriolHistDetailCache = {};
+
+    function ferriolHistFmtMoney(n) {
+      var x = Number(n);
+      if (!Number.isFinite(x)) return '$0';
+      return '$' + Math.round(x).toLocaleString('es-AR');
+    }
+
+    function ferriolHistFmtFechaHora(iso) {
+      try {
+        var d = new Date(iso);
+        if (Number.isNaN(d.getTime())) return String(iso || '');
+        return d.toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' });
+      } catch (_) {
+        return String(iso || '');
+      }
+    }
+
+    function ferriolHistEsc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function ferriolHistParseDetalle(row) {
+      var d = row && row.detalle;
+      if (d == null) return {};
+      if (typeof d === 'string') {
+        try {
+          return JSON.parse(d);
+        } catch (_) {
+          return {};
+        }
+      }
+      return typeof d === 'object' ? d : {};
+    }
+
+    function ferriolHistCuadroPerfectoInteractivo(r) {
+      var de = Number(r.efectivo_diferencia);
+      if (!Number.isFinite(de) || Math.abs(de) > 0.009) return false;
+      var ts = Number(r.tarjeta_sistema);
+      var tr = Number(r.tarjeta_real);
+      var ss = Number(r.transferencia_sistema);
+      var sr = Number(r.transferencia_real);
+      if (!Number.isFinite(ts) || !Number.isFinite(tr) || Math.abs(ts - tr) > 0.009) return false;
+      if (!Number.isFinite(ss) || !Number.isFinite(sr) || Math.abs(ss - sr) > 0.009) return false;
+      return true;
+    }
+
+    function ferriolHistFiltraLegacySinDuplicado(interRows, legacyRows) {
+      return (legacyRows || []).filter(function (l) {
+        var lt = new Date(l.fecha_cierre || l.fecha || 0).getTime();
+        if (!Number.isFinite(lt)) return true;
+        for (var i = 0; i < (interRows || []).length; i++) {
+          var it = new Date(interRows[i].fecha_hora || 0).getTime();
+          if (Number.isFinite(it) && Math.abs(it - lt) < 180000) return false;
+        }
+        return true;
+      });
+    }
+
+    function ferriolHistCardInteractivoHtml(r) {
+      var perf = ferriolHistCuadroPerfectoInteractivo(r);
+      var diffE = Number(r.efectivo_diferencia);
+      var st = perf ? 'ok' : !Number.isFinite(diffE) ? 'warn' : diffE < -0.009 ? 'bad' : 'warn';
+      var dotTitle = perf ? 'Cuadró' : st === 'bad' ? 'Faltante u observación' : 'Revisar';
+      var fh = ferriolHistFmtFechaHora(r.fecha_hora);
+      var detCard = ferriolHistParseDetalle(r);
+      var ventasNum = null;
+      try {
+        if (detCard.auditoria && detCard.auditoria.total_ventas_dia_todos_medios != null)
+          ventasNum = Number(detCard.auditoria.total_ventas_dia_todos_medios);
+      } catch (_) {}
+      var ventas = ventasNum != null && Number.isFinite(ventasNum) ? ferriolHistFmtMoney(ventasNum) : '—';
+      return (
+        '<div class="ferriol-cierre-hist-card ferriol-cierre-hist-card--interactive glass rounded-xl border flex justify-between items-stretch gap-3 text-left w-full" tabindex="0" role="button" data-cierre-kind="interactivo" data-cierre-id="' +
+        ferriolHistEsc(r.id) +
+        '">' +
+        '<span class="ferriol-cierre-hist-status ferriol-cierre-hist-status--' +
+        st +
+        '" title="' +
+        ferriolHistEsc(dotTitle) +
+        '"></span>' +
+        '<div class="min-w-0 flex-1 py-3 pl-1 pr-2">' +
+        '<p class="text-white/85 font-semibold text-sm leading-tight">' +
+        ferriolHistEsc(fh) +
+        '</p>' +
+        '<p class="text-[11px] text-white/45 mt-1">Cierre auditado · tocá para ver detalle</p>' +
+        '</div>' +
+        '<div class="text-right shrink-0 py-3 pr-3 flex flex-col justify-center">' +
+        '<span class="font-bold text-[#86efac] tabular-nums text-sm">' +
+        ferriolHistEsc(ventas) +
+        '</span>' +
+        '<span class="text-[10px] text-white/40 mt-0.5">ventas día</span>' +
+        '</div>' +
+        '</div>'
+      );
+    }
+
+    function ferriolHistCardLegacyHtml(r) {
+      var dd = r.efectivo_diferencia != null ? Number(r.efectivo_diferencia) : null;
+      var perf = r.arqueo_omitido === true ? false : dd != null && Number.isFinite(dd) && Math.abs(dd) < 0.009;
+      var st = perf ? 'ok' : dd != null && Number.isFinite(dd) && dd < -0.009 ? 'bad' : 'warn';
+      var fecha = (r.fecha || r.fecha_cierre || '').toString().slice(0, 10);
+      var total = ferriolHistFmtMoney(r.total_facturado);
+      return (
+        '<div class="ferriol-cierre-hist-card ferriol-cierre-hist-card--legacy glass rounded-xl border flex justify-between items-stretch gap-3 text-left w-full" tabindex="0" role="button" data-cierre-kind="legacy" data-cierre-id="' +
+        ferriolHistEsc(r.id) +
+        '">' +
+        '<span class="ferriol-cierre-hist-status ferriol-cierre-hist-status--' +
+        st +
+        '" title="Cierre clásico"></span>' +
+        '<div class="min-w-0 flex-1 py-3 pl-1 pr-2">' +
+        '<p class="text-white/85 font-semibold text-sm">' +
+        ferriolHistEsc(fecha) +
+        '</p>' +
+        '<p class="text-[11px] text-white/45 mt-1">Sin detalle interactivo · resumen básico</p>' +
+        '</div>' +
+        '<div class="text-right shrink-0 py-3 pr-3 flex flex-col justify-center">' +
+        '<span class="font-bold text-[#86efac] tabular-nums text-sm">' +
+        ferriolHistEsc(total) +
+        '</span>' +
+        '<span class="text-[10px] text-green-400/80">' +
+        Math.round(Number(r.ganancia) || 0).toLocaleString('es-AR') +
+        ' gan.</span>' +
+        '</div>' +
+        '</div>'
+      );
+    }
+
+    function ferriolHistMedioRow(label, sys, real) {
+      var s = Number(sys);
+      var re = Number(real);
+      var mis = Number.isFinite(s) && Number.isFinite(re) && Math.abs(s - re) > 0.009;
+      return (
+        '<div class="ferriol-cierre-line ' +
+        (mis ? 'border-l-2 border-amber-400/50' : '') +
+        '">' +
+        '<span class="text-white/60">' +
+        ferriolHistEsc(label) +
+        '</span>' +
+        '<span class="ferriol-cierre-amt text-xs text-right">' +
+        '<span class="text-white/45">Sist. ' +
+        ferriolHistEsc(ferriolHistFmtMoney(s)) +
+        '</span>' +
+        '<span class="text-white/25 mx-1">·</span>' +
+        '<span class="text-white/88">Real ' +
+        ferriolHistEsc(ferriolHistFmtMoney(re)) +
+        '</span>' +
+        '</span>' +
+        '</div>'
+      );
+    }
+
+    function ferriolHistFillDetalleModalInteractivo(r) {
+      var det = ferriolHistParseDetalle(r);
+      var aud = det.auditoria && typeof det.auditoria === 'object' ? det.auditoria : {};
+      var egresos = Array.isArray(aud.egresos) ? aud.egresos : [];
+      var diffE = Number(r.efectivo_diferencia);
+      var resultado = '';
+      if (!Number.isFinite(diffE)) resultado = 'Sin registro de diferencia en efectivo.';
+      else if (Math.abs(diffE) < 0.01) resultado = 'Efectivo cuadrado con el saldo esperado.';
+      else if (diffE > 0) resultado = 'Sobró efectivo respecto al esperado: +' + ferriolHistFmtMoney(diffE).replace('$', '');
+      else resultado = 'Faltó efectivo respecto al esperado: −' + ferriolHistFmtMoney(Math.abs(diffE)).replace('$', '');
+
+      var cerrPor = [aud.cerrado_por_nombre, aud.cerrado_por_email].filter(Boolean).join(' · ') || 'Usuario';
+      var egresosHtml = '';
+      if (egresos.length) {
+        egresosHtml = egresos
+          .map(function (e) {
+            var tipo = e.tipo === 'gasto_fijo' ? 'Gasto fijo' : 'Proveedor';
+            return (
+              '<div class="ferriol-cierre-line ferriol-cierre-line--muted">' +
+              '<span class="min-w-0 truncate"><span class="text-white/35 text-[10px] uppercase">' +
+              ferriolHistEsc(tipo) +
+              '</span><br><span class="text-white/78">' +
+              ferriolHistEsc(e.descripcion || '—') +
+              '</span></span>' +
+              '<span class="ferriol-cierre-amt text-red-300/95 shrink-0">' +
+              ferriolHistEsc('−' + ferriolHistFmtMoney(e.monto)) +
+              '</span>' +
+              '</div>'
+            );
+          })
+          .join('');
+      } else {
+        var pp = Number(r.pagos_proveedor_turno) || 0;
+        var gf = Number(r.egresos_gastos_fijos_turno) || 0;
+        egresosHtml =
+          '<p class="text-[11px] text-white/45 mb-2">Este registro no incluye listado guardado (cierre anterior al snapshot). Totales del turno en BD:</p>' +
+          '<div class="ferriol-cierre-line"><span class="text-white/55">Pagos proveedor</span><span class="ferriol-cierre-amt text-red-300/90">' +
+          ferriolHistEsc('−' + ferriolHistFmtMoney(pp)) +
+          '</span></div>' +
+          '<div class="ferriol-cierre-line"><span class="text-white/55">Gastos fijos (prorrateados)</span><span class="ferriol-cierre-amt text-red-300/90">' +
+          ferriolHistEsc('−' + ferriolHistFmtMoney(gf)) +
+          '</span></div>';
+      }
+
+      var justif = String(r.justificacion || '').trim();
+      var notasLib = String(aud.notas_usuario || '').trim();
+      var notasBlock = '';
+      if (justif || notasLib) {
+        notasBlock =
+          '<div class="rounded-xl border border-white/12 bg-black/25 p-3 mt-4">' +
+          '<p class="text-[11px] text-white/45 uppercase font-semibold mb-2">Notas y justificación</p>' +
+          (justif ? '<p class="text-sm text-amber-100/95 whitespace-pre-wrap">' + ferriolHistEsc(justif) + '</p>' : '') +
+          (notasLib ? '<p class="text-sm text-white/75 whitespace-pre-wrap mt-2">' + ferriolHistEsc(notasLib) + '</p>' : '') +
+          '</div>';
+      }
+
+      var perf = ferriolHistCuadroPerfectoInteractivo(r);
+      var badge =
+        '<div class="ferriol-cierre-banner ' +
+        (perf ? 'ferriol-cierre-banner--ok' : Number.isFinite(diffE) && diffE < -0.009 ? 'ferriol-cierre-banner--warn' : 'ferriol-cierre-banner--warn') +
+        ' mb-4">' +
+        '<span class="ferriol-cierre-banner-dot"></span>' +
+        '<div><p class="ferriol-cierre-banner-title">' +
+        (perf ? 'Cuadratura perfecta' : Number.isFinite(diffE) && diffE < -0.009 ? 'Faltante registrado' : 'Hubo diferencias o correcciones') +
+        '</p><p class="ferriol-cierre-banner-text">' +
+        ferriolHistEsc(resultado) +
+        '</p></div></div>';
+
+      return (
+        badge +
+        '<div class="rounded-xl border border-white/10 bg-black/20 p-3 mb-4">' +
+        '<p class="text-[11px] text-white/45 uppercase font-semibold mb-2">Resumen</p>' +
+        '<p class="text-sm text-white/88"><strong class="text-white">Fecha y hora:</strong> ' +
+        ferriolHistEsc(ferriolHistFmtFechaHora(r.fecha_hora)) +
+        '</p>' +
+        '<p class="text-sm text-white/88 mt-1"><strong class="text-white">Cerrado por:</strong> ' +
+        ferriolHistEsc(cerrPor) +
+        '</p>' +
+        '<p class="text-sm text-white/88 mt-1"><strong class="text-white">Día operativo:</strong> ' +
+        ferriolHistEsc(aud.fecha_operativo_local || '—') +
+        '</p>' +
+        '<p class="text-sm text-white/88 mt-1"><strong class="text-white">Ventas del día (todos los medios):</strong> ' +
+        ferriolHistEsc(ferriolHistFmtMoney(aud.total_ventas_dia_todos_medios)) +
+        '</p>' +
+        '<p class="text-sm text-white/88 mt-1"><strong class="text-white">Ganancia (aprox.):</strong> ' +
+        ferriolHistEsc(ferriolHistFmtMoney(aud.ganancia_dia)) +
+        '</p>' +
+        '</div>' +
+        '<div class="rounded-xl border border-white/10 bg-black/20 p-3 mb-4">' +
+        '<p class="text-[11px] text-white/45 uppercase font-semibold mb-2">Desglose por medio</p>' +
+        '<div class="ferriol-cierre-medios">' +
+        ferriolHistMedioRow('Efectivo (esperado vs contado)', r.saldo_esperado_efectivo, r.efectivo_real) +
+        ferriolHistMedioRow('Tarjetas', r.tarjeta_sistema, r.tarjeta_real) +
+        ferriolHistMedioRow('Transferencias', r.transferencia_sistema, r.transferencia_real) +
+        '</div>' +
+        '<p class="text-[10px] text-white/38 mt-2">Fondo próximo turno: ' +
+        ferriolHistEsc(ferriolHistFmtMoney(r.fondo_siguiente_turno)) +
+        '</p>' +
+        '</div>' +
+        '<div class="rounded-xl border border-white/10 bg-black/20 p-3">' +
+        '<p class="text-[11px] text-white/45 uppercase font-semibold mb-2">Egresos confirmados en este cierre</p>' +
+        '<div class="ferriol-cierre-medios">' +
+        egresosHtml +
+        '</div></div>' +
+        notasBlock
+      );
+    }
+
+    function ferriolHistFillDetalleModalLegacy(r) {
+      var fecha = ferriolHistFmtFechaHora(r.fecha_cierre || r.fecha);
+      var dd = r.efectivo_diferencia != null ? Number(r.efectivo_diferencia) : null;
+      var sub = '';
+      if (r.arqueo_omitido === true) sub = 'Arqueo omitido en ese momento.';
+      else if (dd != null && Number.isFinite(dd)) sub = 'Diferencia efectivo (contado − esperado): ' + ferriolHistFmtMoney(dd);
+      return (
+        '<div class="ferriol-cierre-banner ferriol-cierre-banner--warn mb-4">' +
+        '<span class="ferriol-cierre-banner-dot"></span>' +
+        '<div><p class="ferriol-cierre-banner-title">Cierre clásico</p>' +
+        '<p class="ferriol-cierre-banner-text">Registro guardado antes del módulo interactivo. Solo hay totales y arqueo básico.</p></div></div>' +
+        '<div class="rounded-xl border border-white/10 bg-black/20 p-3 space-y-2 text-sm text-white/85">' +
+        '<p><strong class="text-white">Fecha:</strong> ' +
+        ferriolHistEsc(fecha) +
+        '</p>' +
+        '<p><strong class="text-white">Total facturado:</strong> ' +
+        ferriolHistEsc(ferriolHistFmtMoney(r.total_facturado)) +
+        '</p>' +
+        '<p><strong class="text-white">Ganancia:</strong> ' +
+        ferriolHistEsc(ferriolHistFmtMoney(r.ganancia)) +
+        '</p>' +
+        '<p><strong class="text-white">Efectivo contado:</strong> ' +
+        ferriolHistEsc(r.efectivo_contado != null ? ferriolHistFmtMoney(r.efectivo_contado) : '—') +
+        '</p>' +
+        '<p><strong class="text-white">Arqueo:</strong> ' +
+        ferriolHistEsc(sub || '—') +
+        '</p>' +
+        (r.notas_cierre ? '<p class="text-white/75 whitespace-pre-wrap pt-2 border-t border-white/08"><strong class="text-white">Notas:</strong><br>' + ferriolHistEsc(r.notas_cierre) + '</p>' : '') +
+        '</div>'
+      );
+    }
+
+    function ferriolOpenCierreHistDetalleModal(kind, id) {
+      var modal = document.getElementById('cierreHistDetalleModal');
+      var body = document.getElementById('cierreHistDetalleBody');
+      if (!modal || !body) return;
+      var key = kind + ':' + id;
+      var item = _ferriolHistDetailCache[key];
+      if (!item) return;
+      body.innerHTML = kind === 'interactivo' ? ferriolHistFillDetalleModalInteractivo(item.row) : ferriolHistFillDetalleModalLegacy(item.row);
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      try {
+        lucide.createIcons();
+      } catch (_) {}
+    }
+
+    function ferriolCloseCierreHistDetalleModal() {
+      var modal = document.getElementById('cierreHistDetalleModal');
+      if (!modal) return;
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    (function ferriolBindCierreHistorialUiOnce() {
+      var listEl = document.getElementById('cierresCajaList');
+      var modal = document.getElementById('cierreHistDetalleModal');
+      if (!listEl || listEl.dataset.ferriolHistBound) return;
+      listEl.dataset.ferriolHistBound = '1';
+      listEl.addEventListener('click', function (e) {
+        var card = e.target.closest('.ferriol-cierre-hist-card');
+        if (!card || !listEl.contains(card)) return;
+        var kind = card.getAttribute('data-cierre-kind');
+        var id = card.getAttribute('data-cierre-id');
+        if (!kind || !id) return;
+        ferriolOpenCierreHistDetalleModal(kind, id);
+      });
+      listEl.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        var card = e.target.closest('.ferriol-cierre-hist-card');
+        if (!card || !listEl.contains(card)) return;
+        e.preventDefault();
+        var kind = card.getAttribute('data-cierre-kind');
+        var id = card.getAttribute('data-cierre-id');
+        if (kind && id) ferriolOpenCierreHistDetalleModal(kind, id);
+      });
+      if (modal && !modal.dataset.ferriolHistBound) {
+        modal.dataset.ferriolHistBound = '1';
+        var ov = document.getElementById('cierreHistDetalleOverlay');
+        var cl = document.getElementById('cierreHistDetalleClose');
+        if (ov) ov.addEventListener('click', ferriolCloseCierreHistDetalleModal);
+        if (cl) cl.addEventListener('click', ferriolCloseCierreHistDetalleModal);
+        document.addEventListener('keydown', function (ev) {
+          if (ev.key === 'Escape' && modal && !modal.classList.contains('hidden')) ferriolCloseCierreHistDetalleModal();
+        });
+      }
+    })();
+
     async function renderCierresCajaHistorial() {
       var listEl = document.getElementById('cierresCajaList');
       if (!listEl) return;
+      _ferriolHistDetailCache = {};
       if (!supabaseClient || !currentUser?.id) {
         listEl.innerHTML = '<p class="text-white/50 text-center py-4">Configurá Supabase para ver el historial.</p>';
-        lucide.createIcons();
+        try {
+          lucide.createIcons();
+        } catch (_) {}
         return;
       }
+      listEl.innerHTML = '<p class="text-white/50 text-center py-4">Cargando historial…</p>';
+      var interRows = [];
+      var legacyRows = [];
       try {
-        var res = await supabaseClient.from('cierres_caja').select('id, fecha, fecha_cierre, total_facturado, ganancia, efectivo_contado, efectivo_diferencia, arqueo_omitido').eq('user_id', currentUser.id).order('fecha_cierre', { ascending: false }).limit(50);
-        if (res.error) throw res.error;
-        var rows = res.data || [];
-        if (rows.length === 0) {
-          listEl.innerHTML = '<p class="text-white/50 text-center py-4">Aún no hay cierres guardados.</p>';
-        } else {
-          listEl.innerHTML = rows.map(function (r) {
-            var fecha = (r.fecha || r.fecha_cierre || '').toString().slice(0, 10);
-            var total = Number(r.total_facturado || 0);
-            var gan = Number(r.ganancia || 0);
-            var sub = '';
-            if (r.arqueo_omitido === true) sub = '<p class="text-[10px] text-white/40 mt-1">Arqueo omitido</p>';
-            else if (r.efectivo_diferencia != null && Number.isFinite(Number(r.efectivo_diferencia))) {
-              var dd = Number(r.efectivo_diferencia);
-              var cls = dd === 0 ? 'text-[#86efac]/90' : dd > 0 ? 'text-amber-300/90' : 'text-red-300/90';
-              sub = '<p class="text-[10px] ' + cls + ' mt-1">Efectivo Δ $' + dd.toLocaleString('es-AR') + '</p>';
-            }
-            return '<div class="glass rounded-xl p-3 border border-white/10 flex justify-between items-start gap-2"><div class="min-w-0"><span class="text-white/70">' + fecha + '</span>' + sub + '</div><div class="text-right shrink-0"><span class="font-semibold text-[#86efac]">$' + total.toLocaleString('es-AR') + '</span><span class="text-green-400/90 text-xs ml-2 block sm:inline">$' + Math.round(gan).toLocaleString('es-AR') + ' gan.</span></div></div>';
-          }).join('');
-        }
-      } catch (e) {
-        try {
-          var res2 = await supabaseClient.from('cierres_caja').select('id, fecha, fecha_cierre, total_facturado, ganancia').eq('user_id', currentUser.id).order('fecha_cierre', { ascending: false }).limit(50);
-          if (res2.error) throw res2.error;
-          var rows2 = res2.data || [];
-          if (rows2.length === 0) {
-            listEl.innerHTML = '<p class="text-white/50 text-center py-4">Aún no hay cierres guardados.</p>';
-          } else {
-            listEl.innerHTML = rows2.map(function (r) {
-              var fecha = (r.fecha || r.fecha_cierre || '').toString().slice(0, 10);
-              var total = Number(r.total_facturado || 0);
-              var gan = Number(r.ganancia || 0);
-              return '<div class="glass rounded-xl p-3 border border-white/10 flex justify-between items-center gap-2"><div><span class="text-white/70">' + fecha + '</span></div><div class="text-right"><span class="font-semibold text-[#86efac]">$' + total.toLocaleString('es-AR') + '</span><span class="text-green-400/90 text-xs ml-2">$' + Math.round(gan).toLocaleString('es-AR') + ' gan.</span></div></div>';
-            }).join('');
-          }
-        } catch (e2) {
-          listEl.innerHTML = '<p class="text-white/50 text-center py-4">Creá la tabla cierres_caja en Supabase (ver comentarios en el código).</p>';
-        }
+        var resI = await supabaseClient.from('cierres_interactivos').select('*').eq('user_id', currentUser.id).order('fecha_hora', { ascending: false }).limit(50);
+        if (!resI.error && Array.isArray(resI.data)) interRows = resI.data;
+      } catch (_) {}
+      try {
+        var sel = 'id, fecha, fecha_cierre, total_facturado, ganancia, efectivo_contado, efectivo_diferencia, arqueo_omitido, notas_cierre';
+        var resL = await supabaseClient.from('cierres_caja').select(sel).eq('user_id', currentUser.id).order('fecha_cierre', { ascending: false }).limit(50);
+        if (!resL.error && Array.isArray(resL.data)) legacyRows = resL.data;
+      } catch (_) {
+        legacyRows = [];
       }
-      lucide.createIcons();
+      legacyRows = ferriolHistFiltraLegacySinDuplicado(interRows, legacyRows);
+      var merged = [];
+      interRows.forEach(function (r) {
+        merged.push({ kind: 'interactivo', t: new Date(r.fecha_hora || 0).getTime(), row: r });
+      });
+      legacyRows.forEach(function (r) {
+        merged.push({ kind: 'legacy', t: new Date(r.fecha_cierre || r.fecha || 0).getTime(), row: r });
+      });
+      merged.sort(function (a, b) {
+        return (Number.isFinite(b.t) ? b.t : 0) - (Number.isFinite(a.t) ? a.t : 0);
+      });
+      merged = merged.slice(0, 50);
+      if (merged.length === 0) {
+        listEl.innerHTML = '<p class="text-white/50 text-center py-4">Aún no hay cierres guardados.</p>';
+      } else {
+        merged.forEach(function (item) {
+          var key = item.kind + ':' + item.row.id;
+          _ferriolHistDetailCache[key] = item;
+        });
+        listEl.innerHTML = merged
+          .map(function (item) {
+            return item.kind === 'interactivo' ? ferriolHistCardInteractivoHtml(item.row) : ferriolHistCardLegacyHtml(item.row);
+          })
+          .join('');
+      }
+      try {
+        lucide.createIcons();
+      } catch (_) {}
     }
 
     async function ferriolInsertCierreCajaSupabase(m, arqueo) {
@@ -9070,11 +9427,28 @@
         if (!confirm('La diferencia de efectivo es muy grande. ¿Seguro que está bien?')) return;
       }
 
+      var hoyOp = ferriolTodayYmdLocal();
+      var egresosSnap = [];
+      (_cierreInterGastos.rowsProv || []).forEach(function (x) {
+        egresosSnap.push({ tipo: 'proveedor', descripcion: x.desc, monto: Number(x.monto) || 0 });
+      });
+      (_cierreInterGastos.rowsGastoFijo || []).forEach(function (x) {
+        egresosSnap.push({ tipo: 'gasto_fijo', descripcion: x.desc, monto: Number(x.monto) || 0 });
+      });
       var detalleJson = {
         denominaciones: ferriolCierreInteractivoCollectDenomObj(),
         efectivo_estado: ferriolCierreInteractivoGetMedioEstado('efec'),
         tarjeta_estado: ferriolCierreInteractivoGetMedioEstado('tarj'),
-        transf_estado: ferriolCierreInteractivoGetMedioEstado('transf')
+        transf_estado: ferriolCierreInteractivoGetMedioEstado('transf'),
+        auditoria: {
+          fecha_operativo_local: hoyOp,
+          cerrado_por_email: currentUser && currentUser.email ? String(currentUser.email) : null,
+          cerrado_por_nombre: currentUser && currentUser.kioscoName ? String(currentUser.kioscoName) : null,
+          total_ventas_dia_todos_medios: Number(m.total) || 0,
+          ganancia_dia: Math.round(Number(m.ganancia) || 0),
+          egresos: egresosSnap,
+          notas_usuario: notas ? String(notas).trim().slice(0, 2000) : null
+        }
       };
 
       await ferriolInsertCierreInteractivoSupabase({

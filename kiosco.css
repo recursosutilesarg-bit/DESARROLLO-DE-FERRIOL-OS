@@ -2483,6 +2483,53 @@ select.ferriol-sponsor-select:-moz-focusring {
   font-variant-numeric: tabular-nums;
 }
 
+/* Historial de cierres — tarjetas clickeables y estado visual */
+.ferriol-cierre-hist-card {
+  cursor: pointer;
+  border-color: rgba(255, 255, 255, 0.1);
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    transform 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ferriol-cierre-hist-card:hover {
+  border-color: rgba(134, 239, 172, 0.35);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.ferriol-cierre-hist-card:active {
+  transform: scale(0.992);
+}
+
+.ferriol-cierre-hist-card:focus-visible {
+  outline: 2px solid rgba(134, 239, 172, 0.55);
+  outline-offset: 2px;
+}
+
+.ferriol-cierre-hist-status {
+  width: 6px;
+  align-self: stretch;
+  border-radius: 0.65rem 0 0 0.65rem;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.ferriol-cierre-hist-status--ok {
+  background: linear-gradient(180deg, #4ade80, #22c55e);
+  box-shadow: 0 0 14px rgba(74, 222, 128, 0.28);
+}
+
+.ferriol-cierre-hist-status--bad {
+  background: linear-gradient(180deg, #f87171, #dc2626);
+  box-shadow: 0 0 14px rgba(248, 113, 113, 0.28);
+}
+
+.ferriol-cierre-hist-status--warn {
+  background: linear-gradient(180deg, #fbbf24, #ca8a04);
+}
+
 .gasto-item {
   transition: opacity 0.15s;
 }
