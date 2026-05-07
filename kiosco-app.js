@@ -4725,8 +4725,24 @@
         var trw = document.getElementById('cierreInterTransfRealWrap');
         if (trw) trw.classList.toggle('hidden', val !== 'corregir');
       }
+      ferriolCierreInteractivoRenderVs();
       ferriolCierreInteractivoRefreshAuditUi();
       ferriolRefreshCierreEstado();
+    }
+
+    function ferriolCierreInteractivoRenderVs() {
+      var efSys = Number(_cierreInterMetricas.efecSistema || 0);
+      var tjSys = Number(_cierreInterMetricas.tarjSistema || 0);
+      var tfSys = Number(_cierreInterMetricas.transfSistema || 0);
+      var efReal = _cierreInterModo.efec === 'confirmado' ? efSys : ferriolParseMontoLocal((document.getElementById('cierreInterEfecReal') || {}).value);
+      var tjReal = _cierreInterModo.tarj === 'confirmado' ? tjSys : ferriolParseMontoLocal((document.getElementById('cierreInterTarjReal') || {}).value);
+      var tfReal = _cierreInterModo.transf === 'confirmado' ? tfSys : ferriolParseMontoLocal((document.getElementById('cierreInterTransfReal') || {}).value);
+      var efEl = document.getElementById('cierreInterVsEfec');
+      var tjEl = document.getElementById('cierreInterVsTarj');
+      var tfEl = document.getElementById('cierreInterVsTransf');
+      if (efEl) efEl.textContent = 'Sistema $' + efSys.toLocaleString('es-AR') + ' vs Real ' + (efReal === null ? '—' : ('$' + Number(efReal).toLocaleString('es-AR')));
+      if (tjEl) tjEl.textContent = 'Sistema $' + tjSys.toLocaleString('es-AR') + ' vs Real ' + (tjReal === null ? '—' : ('$' + Number(tjReal).toLocaleString('es-AR')));
+      if (tfEl) tfEl.textContent = 'Sistema $' + tfSys.toLocaleString('es-AR') + ' vs Real ' + (tfReal === null ? '—' : ('$' + Number(tfReal).toLocaleString('es-AR')));
     }
 
     function ferriolCierreInteractivoRefreshAuditUi() {
@@ -4762,6 +4778,7 @@
         var efecInp = document.getElementById('cierreInterEfecReal');
         if (efecInp) efecInp.value = String(_cierreInterMetricas.efecSistema);
       }
+      ferriolCierreInteractivoRenderVs();
       ferriolCierreInteractivoRefreshAuditUi();
     }
 
@@ -4844,7 +4861,10 @@
       });
       ['cierreInterEfecReal', 'cierreInterTarjReal', 'cierreInterTransfReal'].forEach(function (id) {
         var el = document.getElementById(id);
-        if (el) el.addEventListener('input', ferriolRefreshCierreEstado);
+        if (el) el.addEventListener('input', function () {
+          ferriolCierreInteractivoRenderVs();
+          ferriolRefreshCierreEstado();
+        });
       });
       var bprov = document.getElementById('cierreInterBtnIrProv');
       if (bprov) {
