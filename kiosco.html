@@ -732,27 +732,8 @@
           </button>
         </div>
         <div class="p-4 ferriol-cierre-page">
-          <div class="ferriol-cierre-shell max-w-lg mx-auto w-full space-y-5 pb-2">
-            <header class="ferriol-cierre-hero">
-              <div class="ferriol-cierre-hero-brand">
-                <span class="ferriol-cierre-badge">Turno</span>
-                <h2 class="ferriol-cierre-title">Cierre de caja</h2>
-                <p class="ferriol-cierre-lead">Sirve para <strong>cerrar el día con números claros</strong>, detectar diferencias en efectivo y arrancar mañana sin mezclar ventas de ayer.</p>
-              </div>
-              <ul class="ferriol-cierre-value-list" aria-label="Qué resolvés con el cierre">
-                <li><span class="ferriol-cierre-value-ic" aria-hidden="true"><i data-lucide="shield-check" class="w-4 h-4"></i></span><span><strong>Auditoría rápida:</strong> ves si la gaveta coincide con lo cargado.</span></li>
-                <li><span class="ferriol-cierre-value-ic" aria-hidden="true"><i data-lucide="file-check-2" class="w-4 h-4"></i></span><span><strong>Comprobante:</strong> podés mandarte el resumen por WhatsApp o guardarlo.</span></li>
-                <li><span class="ferriol-cierre-value-ic" aria-hidden="true"><i data-lucide="sunrise" class="w-4 h-4"></i></span><span><strong>Nuevo día:</strong> los totales del día se reinician; el stock queda como está.</span></li>
-              </ul>
-            </header>
+          <div class="ferriol-cierre-shell max-w-none w-full space-y-5 pb-2">
 
-            <div id="cierreEstadoBanner" class="ferriol-cierre-banner ferriol-cierre-banner--ok" role="status" aria-live="polite">
-              <span class="ferriol-cierre-banner-dot" aria-hidden="true"></span>
-              <div class="ferriol-cierre-banner-body">
-                <strong id="cierreEstadoTitulo" class="ferriol-cierre-banner-title">Listo para cerrar</strong>
-                <p id="cierreEstadoTexto" class="ferriol-cierre-banner-text">Generá el comprobante y cerrá cuando termines.</p>
-              </div>
-            </div>
 
             <section class="ferriol-cierre-panel ferriol-cierre-panel--accent" aria-labelledby="cierreLiquidacionHd">
               <div class="ferriol-cierre-panel-head">
@@ -799,13 +780,7 @@
             </section>
 
             <section id="cierreInteractivoRoot" class="ferriol-cierre-panel ferriol-cierre-panel--cyan ferriol-ci-root" aria-labelledby="cierreInterHd">
-              <div class="ferriol-cierre-panel-head">
-                <span class="ferriol-cierre-step" aria-hidden="true">2</span>
-                <div>
-                  <h3 id="cierreInterHd" class="ferriol-cierre-panel-title">Validación rápida</h3>
-                  <p class="ferriol-cierre-panel-sub">Tocá cada método y elegí confirmar o corregir</p>
-                </div>
-              </div>
+              <h3 id="cierreInterHd" class="sr-only">Validación de cierre</h3>
 
               <div class="ferriol-ci-methods">
                 <article class="ferriol-ci-method-card active" data-ci-card="efec">
@@ -926,7 +901,6 @@
             </div>
 
             <div class="ferriol-cierre-actions space-y-3">
-              <p class="text-[11px] text-white/45 text-center leading-snug px-1">Primero generá el comprobante si querés archivo o WhatsApp; después confirmá el cierre del día.</p>
               <button type="button" id="generateTicket" class="w-full rounded-xl py-3.5 font-semibold flex items-center justify-center gap-2 border border-white/20 bg-white/06 text-white hover:bg-white/10 transition-colors touch-target active:scale-[0.99]">
                 <i data-lucide="share-2" class="w-5 h-5 shrink-0"></i>
                 Generar comprobante / compartir
@@ -940,7 +914,7 @@
             <section class="ferriol-cierre-panel ferriol-cierre-panel--ghost border-t border-white/10 pt-5 mt-1">
               <h3 class="font-semibold mb-3 flex items-center gap-2 text-sm text-white/80">
                 <i data-lucide="history" class="w-4 h-4 text-[#86efac]"></i>
-                Historial de cierres (tocá un registro para auditoría)
+                Historial de cierres
               </h3>
               <div id="cierresCajaList" class="space-y-2 max-h-[40vh] overflow-y-auto text-sm">
                 <p class="text-white/50 text-center py-4">Cargando...</p>
