@@ -1506,6 +1506,7 @@
         <div id="configSubHub" class="space-y-3">
           <button type="button" data-config-open="negocio" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Nombre del negocio</span></button>
           <button type="button" data-config-open="whatsapp" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Mensaje de cobro por WhatsApp</span></button>
+          <button type="button" data-config-open="vencimiento-productos" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Aviso «VENCE PRONTO» (inventario)</span><span class="block text-xs text-white/50 font-normal mt-0.5">Cuántos días antes del vencimiento del lote mostrar la alerta en rojo</span></button>
           <button type="button" data-config-open="sonido" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Sonido de notificaciones</span></button>
           <button type="button" data-config-open="respaldo" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Copia de seguridad y CSV</span></button>
         </div>
@@ -1521,6 +1522,15 @@
           <button type="button" data-config-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target">Volver</button>
           <label class="block text-sm text-white/70 mb-2">Mensaje de cobro por WhatsApp (usá <code class="text-[#86efac]">{cliente}</code> y <code class="text-[#86efac]">{monto}</code>)</label>
           <textarea id="configWhatsappMsg" rows="5" placeholder="Hola {cliente}, tenés un saldo de ${monto}..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] resize-y"></textarea>
+          <button data-config-save class="btn-glow rounded-xl py-3 px-6 font-semibold">Guardar</button>
+        </div>
+
+        <div class="config-subview hidden space-y-4" data-config-sub="vencimiento-productos">
+          <button type="button" data-config-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target">Volver</button>
+          <p class="text-xs text-white/55">Si el producto tiene fecha de vencimiento y stock, el listado marca <strong class="text-red-300/90">VENCE PRONTO</strong> cuando falten esta cantidad de días o menos (o si ya venció).</p>
+          <label class="block text-sm text-white/70 mb-2">Días de anticipación (0–365)</label>
+          <input type="number" id="configVencimientoAvisoDias" min="0" max="365" step="1" class="w-full max-w-[10rem] glass rounded-xl px-4 py-3 border border-white/20 text-white tabular-nums focus:outline-none focus:ring-2 focus:ring-[#22c55e]" inputmode="numeric">
+          <p class="text-xs text-white/45">Valor por defecto si no guardás: 7 días. Con <strong class="text-white/60">0</strong> solo se resalta el mismo día del vencimiento o vencido.</p>
           <button data-config-save class="btn-glow rounded-xl py-3 px-6 font-semibold">Guardar</button>
         </div>
 
