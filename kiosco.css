@@ -2173,6 +2173,57 @@ select.ferriol-sponsor-select:-moz-focusring {
   cursor: pointer;
 }
 
+/* Caja · hub: gastos — control desplegable, acciones adentro */
+.caja-gastos-details > summary {
+  list-style: none;
+}
+
+.caja-gastos-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.caja-gastos-summary {
+  cursor: pointer;
+  padding: 1.15rem 1.25rem;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.caja-gastos-summary-main {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.caja-gastos-summary-icon {
+  width: 2.85rem;
+  height: 2.85rem;
+  border-radius: 1rem;
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.caja-gastos-chevron {
+  transition: transform 0.2s ease;
+}
+
+.caja-gastos-details[open] .caja-gastos-chevron {
+  transform: rotate(180deg);
+}
+
+.caja-gastos-inner {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 0.75rem;
+}
+
+html[data-ferriol-theme='blanco'] .caja-gastos-inner {
+  border-top-color: rgba(0, 0, 0, 0.08);
+}
+
 .caja-subview-header {
   display: flex;
   align-items: center;
