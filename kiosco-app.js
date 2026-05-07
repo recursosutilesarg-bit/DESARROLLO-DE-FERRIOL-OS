@@ -4703,27 +4703,46 @@
     }
 
     function ferriolCierreInteractivoSetMedioEstado(medio, val) {
-      _cierreInterModo[medio] = val;
+      if (val === 'confirmado') {
+        var previo = _cierreInterModo[medio];
+        // Si el usuario venía corrigiendo y ya cargó un real válido,
+        // "Confirmar" debe fijar esa corrección (no volver al sistema).
+        if ((previo === 'corregir' || previo === 'corregido')) {
+          var realCargado = null;
+          if (medio === 'efec') realCargado = ferriolParseMontoLocal((document.getElementById('cierreInterEfecReal') || {}).value);
+          if (medio === 'tarj') realCargado = ferriolParseMontoLocal((document.getElementById('cierreInterTarjReal') || {}).value);
+          if (medio === 'transf') realCargado = ferriolParseMontoLocal((document.getElementById('cierreInterTransfReal') || {}).value);
+          _cierreInterModo[medio] = realCargado === null ? 'confirmado' : 'corregido';
+        } else {
+          _cierreInterModo[medio] = 'confirmado';
+        }
+      } else {
+        _cierreInterModo[medio] = val;
+      }
       document.querySelectorAll('#cierreInteractivoRoot .ferriol-ci-action[data-ci-medio="' + medio + '"]').forEach(function (btn) {
-        btn.classList.toggle('active', btn.getAttribute('data-ci-val') === val);
+        if (btn.getAttribute('data-ci-val') === 'confirmado') {
+          btn.classList.toggle('active', _cierreInterModo[medio] === 'confirmado' || _cierreInterModo[medio] === 'corregido');
+        } else {
+          btn.classList.toggle('active', _cierreInterModo[medio] === 'corregir');
+        }
       });
       if (medio === 'efec') {
         var efecWrap = document.getElementById('cierreInterEfecRealWrap');
         var den = document.getElementById('cierreInterDenomSection');
-        if (efecWrap) efecWrap.classList.toggle('hidden', val !== 'corregir');
-        if (den) den.classList.toggle('hidden', val !== 'corregir');
-        if (val === 'confirmado') {
+        if (efecWrap) efecWrap.classList.toggle('hidden', _cierreInterModo[medio] !== 'corregir');
+        if (den) den.classList.toggle('hidden', _cierreInterModo[medio] !== 'corregir');
+        if (_cierreInterModo[medio] === 'confirmado') {
           var ef = document.getElementById('cierreInterEfecReal');
           if (ef) ef.value = String(_cierreInterMetricas.efecSistema);
         }
       }
       if (medio === 'tarj') {
         var tw = document.getElementById('cierreInterTarjRealWrap');
-        if (tw) tw.classList.toggle('hidden', val !== 'corregir');
+        if (tw) tw.classList.toggle('hidden', _cierreInterModo[medio] !== 'corregir');
       }
       if (medio === 'transf') {
         var trw = document.getElementById('cierreInterTransfRealWrap');
-        if (trw) trw.classList.toggle('hidden', val !== 'corregir');
+        if (trw) trw.classList.toggle('hidden', _cierreInterModo[medio] !== 'corregir');
       }
       ferriolCierreInteractivoRenderVs();
       ferriolCierreInteractivoRefreshAuditUi();
