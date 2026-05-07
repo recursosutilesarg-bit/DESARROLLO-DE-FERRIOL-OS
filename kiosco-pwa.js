@@ -98,9 +98,6 @@
 
     /** Pull-to-refresh en móvil: solo desde el tope del scroll; al soltar, solo si seguís “tirando abajo” lo suficiente (si volvés el dedo hacia arriba antes de soltar, no recarga). */
     (function () {
-      // Usuario prefiere el pull-to-refresh nativo del navegador.
-      // Dejamos desactivado el PTR personalizado.
-      return;
       var CAN_TOUCH = 'ontouchstart' in window || (typeof navigator !== 'undefined' && (navigator.maxTouchPoints || 0) > 0);
       if (!CAN_TOUCH) return;
 
@@ -117,7 +114,7 @@
       }
       if (!allowsPTR()) return;
 
-      var THRESH = 64;
+      var THRESH = 52;
       var SCROLL_EPS = 6;
       var tracking = false;
       var refreshing = false;
@@ -256,6 +253,14 @@
         if (!allowsPTR() || e.touches.length !== 1) return;
         var x = e.touches[0].clientX;
         var y = e.touches[0].clientY;
+        // Permite iniciar gesto desde más abajo (hasta ~75% de pantalla),
+        // evitando exigir swipe desde el borde superior.
+        var maxStartY = Math.max(280, Math.round(window.innerHeight * 0.75));
+        if (y > maxStartY) {
+          tracking = false;
+          lastDy = 0;
+          return;
+        }
         var hit = targetUnderFinger(x, y);
         if (blocksFromEl(hit)) {
           tracking = false;
