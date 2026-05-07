@@ -1503,39 +1503,55 @@
           <i data-lucide="settings" class="w-5 h-5 text-[#86efac]"></i>
           Configuración del negocio
         </h2>
-        <p class="text-sm text-white/70 mb-4">Podés exportar o importar una copia de tus datos (productos, ventas del día) más abajo en esta pantalla.</p>
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm text-white/70 mb-2">Nombre del negocio</label>
-            <input type="text" id="configKioscoName" placeholder="Ej: Mi Negocio" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
-          </div>
-          <p class="text-xs text-white/50 -mt-2 mb-1"><strong class="text-white/75">Cuota mensual Ferriol:</strong> desde <strong class="text-white/78">tu foto → Cuenta → Mi plan</strong> (<strong class="text-[#86efac]/90">Pagar suscripción mensual</strong> / <strong class="text-[#86efac]/90">Pagar cuota mensual</strong>). Recordatorios de vigencia también figuran en la <strong class="text-white/60">campana</strong> cuando corresponda.</p>
-          <div>
-            <label class="block text-sm text-white/70 mb-2">Mensaje de cobro por WhatsApp (usá <code class="text-[#86efac]">{cliente}</code> y <code class="text-[#86efac]">{monto}</code>)</label>
-            <textarea id="configWhatsappMsg" rows="4" placeholder="Hola {cliente}, tenés un saldo de ${monto}..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] resize-y"></textarea>
-          </div>
-          <div class="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-            <label class="block text-xs text-white/60 mb-1">Aviso de vencimiento de productos — cuántos días antes</label>
-            <input type="number" id="configVencimientoAvisoDias" min="0" max="365" step="1" placeholder="Ej. 7" class="w-full max-w-[11rem] glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
-            <p class="text-xs text-white/45 mt-2">Para productos con fecha de vencimiento cargada: este margen controla cuándo mostrar el aviso rojo «VENCE PRONTO» en inventario (0 = solo el día de vencimiento).</p>
-          </div>
-          <div class="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-            <label class="flex items-start gap-3 cursor-pointer touch-target">
-              <input type="checkbox" id="configNotifSoundEnabled" class="mt-1 rounded border-white/30 bg-black/20 text-[#22c55e] focus:ring-[#22c55e] shrink-0" checked>
-              <span>
-                <span class="text-sm text-white/85 font-medium block">Sonido al recibir avisos</span>
-                <span class="text-xs text-white/50 block mt-1">Un aviso corto cuando el administrador envía un mensaje nuevo. Los navegadores suelen activar el audio después de que toques la pantalla una vez.</span>
-              </span>
-            </label>
-          </div>
-          <button id="saveConfig" class="btn-glow rounded-xl py-3 px-6 font-semibold">Guardar</button>
+        <div id="configSubHub" class="space-y-3">
+          <button type="button" data-config-open="negocio" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Nombre del negocio</span></button>
+          <button type="button" data-config-open="whatsapp" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Mensaje de cobro por WhatsApp</span></button>
+          <button type="button" data-config-open="vencimiento" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Aviso de vencimientos</span></button>
+          <button type="button" data-config-open="sonido" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Sonido de notificaciones</span></button>
+          <button type="button" data-config-open="respaldo" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Copia de seguridad y CSV</span></button>
+        </div>
 
-          <div class="mt-6 pt-6 border-t border-white/10">
+        <div class="config-subview hidden space-y-4" data-config-sub="negocio">
+          <button type="button" data-config-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target">Volver</button>
+          <label class="block text-sm text-white/70 mb-2">Nombre del negocio</label>
+          <input type="text" id="configKioscoName" placeholder="Ej: Mi Negocio" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+          <button data-config-save class="btn-glow rounded-xl py-3 px-6 font-semibold">Guardar</button>
+        </div>
+
+        <div class="config-subview hidden space-y-4" data-config-sub="whatsapp">
+          <button type="button" data-config-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target">Volver</button>
+          <label class="block text-sm text-white/70 mb-2">Mensaje de cobro por WhatsApp (usá <code class="text-[#86efac]">{cliente}</code> y <code class="text-[#86efac]">{monto}</code>)</label>
+          <textarea id="configWhatsappMsg" rows="5" placeholder="Hola {cliente}, tenés un saldo de ${monto}..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] resize-y"></textarea>
+          <button data-config-save class="btn-glow rounded-xl py-3 px-6 font-semibold">Guardar</button>
+        </div>
+
+        <div class="config-subview hidden space-y-4" data-config-sub="vencimiento">
+          <button type="button" data-config-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target">Volver</button>
+          <label class="block text-xs text-white/60 mb-1">Aviso de vencimiento de productos — días antes</label>
+          <input type="number" id="configVencimientoAvisoDias" min="0" max="365" step="1" placeholder="Ej. 7" class="w-full max-w-[11rem] glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+          <p class="text-xs text-white/45 mt-2">0 = solo el día de vencimiento.</p>
+          <button data-config-save class="btn-glow rounded-xl py-3 px-6 font-semibold">Guardar</button>
+        </div>
+
+        <div class="config-subview hidden space-y-4" data-config-sub="sonido">
+          <button type="button" data-config-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target">Volver</button>
+          <label class="flex items-start gap-3 cursor-pointer touch-target rounded-xl border border-white/10 bg-white/[0.03] p-4">
+            <input type="checkbox" id="configNotifSoundEnabled" class="mt-1 rounded border-white/30 bg-black/20 text-[#22c55e] focus:ring-[#22c55e] shrink-0" checked>
+            <span>
+              <span class="text-sm text-white/85 font-medium block">Sonido al recibir avisos</span>
+              <span class="text-xs text-white/50 block mt-1">Requiere interacción previa con la pantalla.</span>
+            </span>
+          </label>
+          <button data-config-save class="btn-glow rounded-xl py-3 px-6 font-semibold">Guardar</button>
+        </div>
+
+        <div class="config-subview hidden space-y-4" data-config-sub="respaldo">
+          <button type="button" data-config-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target">Volver</button>
+          <div class="pt-1">
             <h3 class="font-semibold mb-2 flex items-center gap-2">
               <i data-lucide="database-backup" class="w-4 h-4 text-[#86efac]"></i>
               Copia de seguridad
             </h3>
-            <p class="text-sm text-white/60 mb-3">Exportá tus datos (productos, caja, ventas del día) antes de actualizar la app. Así podés actualizar sin riesgo: si algo falla, importá el archivo para recuperar todo.</p>
             <div class="flex flex-wrap gap-3">
               <button type="button" id="btnExportBackup" class="btn-glow rounded-xl py-3 px-4 font-medium flex items-center gap-2 touch-target">
                 <i data-lucide="download" class="w-4 h-4"></i> Exportar copia
@@ -1547,18 +1563,24 @@
             </div>
             <p id="backupMessage" class="text-sm mt-2 hidden"></p>
           </div>
-          <div class="mt-6 pt-6 border-t border-white/10">
+          <div class="pt-4 border-t border-white/10">
             <h3 class="font-semibold mb-2 flex items-center gap-2">
               <i data-lucide="file-spreadsheet" class="w-4 h-4 text-[#86efac]"></i>
-              Exportar a hoja de cálculo (CSV)
+              Exportar a CSV
             </h3>
-            <p class="text-sm text-white/60 mb-3">Descargá listas en formato CSV para abrir en Excel o Google Sheets. Las tildes se guardan correctamente (UTF-8).</p>
             <div class="flex flex-wrap gap-2">
               <button type="button" id="exportVentasCSVBtn" class="btn-neomorphic rounded-xl py-2.5 px-3 text-sm font-medium flex items-center gap-2 touch-target"><i data-lucide="receipt" class="w-4 h-4"></i> Ventas</button>
               <button type="button" id="exportProductosCSVBtn" class="btn-neomorphic rounded-xl py-2.5 px-3 text-sm font-medium flex items-center gap-2 touch-target"><i data-lucide="package" class="w-4 h-4"></i> Productos</button>
               <button type="button" id="exportClientesCSVBtn" class="btn-neomorphic rounded-xl py-2.5 px-3 text-sm font-medium flex items-center gap-2 touch-target"><i data-lucide="book-user" class="w-4 h-4"></i> Clientes</button>
             </div>
           </div>
+        </div>
+
+        <div class="mt-6 pt-6 border-t border-white/10">
+          <p class="text-xs text-white/50 mb-1"><strong class="text-white/75">Cuota mensual Ferriol:</strong> desde <strong class="text-white/78">tu foto → Cuenta → Mi plan</strong>.</p>
+          <p class="text-xs text-white/50">Recordatorios de vigencia también figuran en la campana.</p>
+        </div>
+        <div class="space-y-4">
           <div class="mt-6 pt-6 border-t border-white/10 kiosquero-only">
             <h3 class="font-semibold mb-2 flex items-center gap-2">
               <i data-lucide="log-out" class="w-4 h-4 text-[#86efac]"></i>

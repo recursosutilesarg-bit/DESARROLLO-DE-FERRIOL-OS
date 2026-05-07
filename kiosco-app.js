@@ -11503,6 +11503,36 @@ async function showApp() {
       if (ns) ns.checked = ferriolNotifSoundEnabled();
       loadKioscoLicensePaymentInfo();
     }
+    function openConfigSubview(target) {
+      var hub = document.getElementById('configSubHub');
+      var t = String(target || '').trim();
+      if (hub) hub.classList.toggle('hidden', !!t);
+      document.querySelectorAll('#panel-config .config-subview').forEach(function (el) {
+        el.classList.toggle('hidden', String(el.getAttribute('data-config-sub') || '') !== t);
+      });
+      try { if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+    }
+    (function bindConfigSubviewUiOnce() {
+      var root = document.getElementById('panel-config');
+      if (!root || root.dataset.cfgSubviewBound) return;
+      root.dataset.cfgSubviewBound = '1';
+      root.addEventListener('click', function (e) {
+        var openBtn = e.target.closest('[data-config-open]');
+        if (openBtn && root.contains(openBtn)) {
+          openConfigSubview(openBtn.getAttribute('data-config-open'));
+          return;
+        }
+        var backBtn = e.target.closest('[data-config-back]');
+        if (backBtn && root.contains(backBtn)) {
+          openConfigSubview('');
+          return;
+        }
+        var saveBtn = e.target.closest('[data-config-save]');
+        if (saveBtn && root.contains(saveBtn)) {
+          saveConfig();
+        }
+      });
+    })();
     (function setupNotifSoundCheckbox() {
       var el = document.getElementById('configNotifSoundEnabled');
       if (!el) return;
@@ -11528,7 +11558,7 @@ async function showApp() {
       document.getElementById('headerTitle').textContent = kioscoName || 'Ferriol OS';
       try { renderInventory(); } catch (_) {}
     }
-    document.getElementById('saveConfig').onclick = () => saveConfig();
+    openConfigSubview('');
 
     async function exportBackup() {
       if (!currentUser?.id) return;
