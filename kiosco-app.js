@@ -3493,6 +3493,8 @@
       _restoringFromHistory: false,
       _suppressCajaHistoryPush: false,
       historialFilter: 'hoy',
+      /** Profundidad del historial interno (popstate): 1 = solo inicio; máx. 5 = inicio + 4 pantallas atrás. */
+      _ferriolNavDepth: 1,
       superSection: 'ingresos',  // afiliados | ingresos | sistema | ajustes | ajustes-* | solicitudes | pagos-pendientes | mas | partner-comprobantes
       _returnSuperSectionFromComprobantes: 'ingresos',
       afiliadosSubTab: 'usuarios',  // usuarios (kiosquero) | distribuidores (partner)
@@ -3743,9 +3745,26 @@
       };
     }
 
+    var FERRIOL_HISTORY_MAX_DEPTH = 5;
+
+    function ferriolNavHistorySealRoot() {
+      state._ferriolNavDepth = 1;
+    }
+
+    function ferriolNavHistoryCommit(entry) {
+      if (state._restoringFromHistory) return;
+      if (!state._ferriolNavDepth || state._ferriolNavDepth < 1) state._ferriolNavDepth = 1;
+      if (state._ferriolNavDepth < FERRIOL_HISTORY_MAX_DEPTH) {
+        history.pushState(entry, '', location.href);
+        state._ferriolNavDepth++;
+      } else {
+        history.replaceState(entry, '', location.href);
+      }
+    }
+
     function pushHistoryExtra(extra) {
       if (state._restoringFromHistory) return;
-      history.pushState(Object.assign({}, currentHistoryBase(), extra || {}), '', location.href);
+      ferriolNavHistoryCommit(Object.assign({}, currentHistoryBase(), extra || {}));
     }
 
 
@@ -7443,10 +7462,10 @@
     function goToPanel(name, cajaTabOpt) {
       showPanel(name, cajaTabOpt);
       if (!state._restoringFromHistory) {
-        history.pushState({
+        ferriolNavHistoryCommit({
           panel: state.currentPanel,
           cajaTab: state.currentPanel === 'caja' ? state.cajaTab : undefined
-        }, '', location.href);
+        });
       }
     }
     window._goToCajaLibreta = function () {
@@ -7458,9 +7477,11 @@
       var s = e.state;
       if (s && s.panel) {
         showPanel(s.panel, s.cajaTab != null && s.cajaTab !== '' ? s.cajaTab : undefined);
+        state._ferriolNavDepth = Math.max(1, (state._ferriolNavDepth || 1) - 1);
       } else {
         showPanel('dashboard');
         history.replaceState({ panel: 'dashboard', root: true }, '', location.href);
+        ferriolNavHistorySealRoot();
       }
       state._restoringFromHistory = false;
     });
@@ -10619,7 +10640,7 @@
       state.cajaTab = tab;
       function maybePushCajaHistory() {
         if (!state._restoringFromHistory && !state._suppressCajaHistoryPush && state.currentPanel === 'caja' && prevTab !== tab) {
-          history.pushState({ panel: 'caja', cajaTab: tab }, '', location.href);
+          ferriolNavHistoryCommit({ panel: 'caja', cajaTab: tab });
         }
       }
       var libretalSubs = ['caja-sub-libreta', 'caja-sub-libreta-cliente'];
@@ -10893,6 +10914,7 @@ async function showApp() {
       showPanel('dashboard');
       state._restoringFromHistory = false;
       history.replaceState({ panel: 'dashboard', root: true }, '', location.href);
+      ferriolNavHistorySealRoot();
       ferriolStartNotificationPolling();
       lucide.createIcons();
     } else if (isSuper) {
@@ -10944,6 +10966,7 @@ async function showApp() {
       showPanel('dashboard');
       state._restoringFromHistory = false;
       history.replaceState({ panel: 'dashboard', root: true }, '', location.href);
+      ferriolNavHistorySealRoot();
       ferriolStartNotificationPolling();
       lucide.createIcons();
       await syncKiosqueroPartnerUpgradeUi();
@@ -11434,6 +11457,7 @@ async function showApp() {
       showPanel('dashboard');
       state._restoringFromHistory = false;
       history.replaceState({ panel: 'dashboard', root: true }, '', location.href);
+      ferriolNavHistorySealRoot();
       ferriolStartNotificationPolling();
       applyAppShell();
       lucide.createIcons();
@@ -11459,6 +11483,7 @@ async function showApp() {
       showPanel('dashboard');
       state._restoringFromHistory = false;
       history.replaceState({ panel: 'dashboard', root: true }, '', location.href);
+      ferriolNavHistorySealRoot();
       ferriolStartNotificationPolling();
       applyAppShell();
       lucide.createIcons();
