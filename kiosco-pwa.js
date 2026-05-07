@@ -98,6 +98,9 @@
 
     /** Pull-to-refresh en móvil: solo desde el tope del scroll; al soltar, solo si seguís “tirando abajo” lo suficiente (si volvés el dedo hacia arriba antes de soltar, no recarga). */
     (function () {
+      // Usuario prefiere el pull-to-refresh nativo del navegador.
+      // Dejamos desactivado el PTR personalizado.
+      return;
       var CAN_TOUCH = 'ontouchstart' in window || (typeof navigator !== 'undefined' && (navigator.maxTouchPoints || 0) > 0);
       if (!CAN_TOUCH) return;
 
