@@ -16,7 +16,7 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#171717">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -610,7 +610,7 @@
               </div>
               <div class="flex items-center gap-3 w-full sm:w-auto shrink-0 sm:ml-auto">
                 <span id="trialCountdownDays" class="trial-countdown-days-pill px-4 py-2 rounded-2xl bg-[#ffffff]/35 text-[#ffffff] font-black text-xl sm:text-2xl tabular-nums shrink-0 border border-[#ffffff]/45 shadow-[0_0_24px_rgba(34,197,94,0.2)]">15</span>
-                <button type="button" id="trialRenovarBtn" class="trial-renovar-btn flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 rounded-2xl py-3 px-5 text-sm sm:text-base font-bold touch-target shrink-0 bg-gradient-to-br from-[#ffffff] to-[#cbd5e1] hover:from-[#f1f5f9] hover:to-[#ffffff] text-slate-900 shadow-lg shadow-[#ffffff]/35 border border-white/20 active:scale-[0.98]">
+                <button type="button" id="trialRenovarBtn" class="trial-renovar-btn flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 rounded-2xl py-3 px-5 text-sm sm:text-base font-bold touch-target shrink-0 bg-gradient-to-br from-white to-neutral-300 hover:from-neutral-50 hover:to-white text-neutral-900 shadow-lg shadow-white/20 border border-white/25 active:scale-[0.98]">
                   <i data-lucide="refresh-cw" class="w-5 h-5"></i> Renovar ahora
                 </button>
               </div>
@@ -1197,7 +1197,7 @@
     </div>
 
     <!-- Modal: Sacar cuenta / cobrar (pantalla completa) -->
-    <div id="libretalCuentaModal" class="fixed inset-0 z-[96] hidden flex-col" style="background: linear-gradient(145deg, #020617 0%, #0f172a 45%, #1e293b 100%);">
+    <div id="libretalCuentaModal" class="fixed inset-0 z-[96] hidden flex-col" style="background: linear-gradient(145deg, #0a0a0a 0%, #171717 45%, #262626 100%);">
       <div class="flex items-center gap-3 px-4 border-b border-white/10 shrink-0" style="padding-top: max(0.75rem, env(safe-area-inset-top, 0)); padding-bottom: 0.75rem;">
         <button type="button" onclick="window._cerrarCuentaLibreta()" class="caja-back-btn touch-target shrink-0">
           <i data-lucide="chevron-left" class="w-5 h-5"></i>
@@ -1263,7 +1263,7 @@
     </div>
 
     <!-- Prompt post-pago: agregar a libreta de fiado (pantalla completa) -->
-    <div id="libretalFiadoPrompt" class="fixed inset-0 z-[80] hidden flex-col" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);">
+    <div id="libretalFiadoPrompt" class="fixed inset-0 z-[80] hidden flex-col" style="background:linear-gradient(135deg,#171717 0%,#262626 100%);">
       <!-- Header -->
       <div class="flex items-center gap-3 px-5 pt-5 pb-4 border-b border-white/10">
         <div class="w-10 h-10 rounded-2xl bg-[#ffffff]/20 flex items-center justify-center shrink-0">
@@ -1293,7 +1293,7 @@
           <p id="libretalPromptErr" class="text-red-400 text-xs hidden"></p>
           <div class="flex gap-2">
             <button onclick="window._cancelarNuevoClientePrompt()" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cancelar</button>
-            <button id="libretalPromptGuardarBtn" onclick="window._guardarNuevoClienteDesdePrompt()" class="flex-1 bg-[#ffffff] text-slate-900 rounded-xl py-2.5 text-sm font-semibold touch-target">Crear y agregar</button>
+            <button id="libretalPromptGuardarBtn" onclick="window._guardarNuevoClienteDesdePrompt()" class="flex-1 bg-[#ffffff] text-neutral-900 rounded-xl py-2.5 text-sm font-semibold touch-target">Crear y agregar</button>
           </div>
         </div>
 
@@ -3403,7 +3403,7 @@
   </div>
 
   <!-- Pantalla detalle de producto -->
-  <div id="productDetailPanel" class="fixed inset-0 z-[95] hidden flex-col" style="background: linear-gradient(145deg, #020617 0%, #0f172a 38%, #1e293b 62%, #020617 100%);">
+  <div id="productDetailPanel" class="fixed inset-0 z-[95] hidden flex-col" style="background: linear-gradient(145deg, #0a0a0a 0%, #171717 38%, #262626 62%, #0a0a0a 100%);">
     <div class="flex items-center gap-3 px-4 border-b border-white/10" style="padding-top: max(0.75rem, env(safe-area-inset-top, 0)); padding-bottom: 0.75rem;">
       <button type="button" id="productDetailBack" class="btn-neomorphic rounded-xl p-2.5 touch-target shrink-0">
         <i data-lucide="arrow-left" class="w-5 h-5"></i>

@@ -1,6 +1,6 @@
 :root {
-  --indigo-deep: #0f172a;
-  --indigo-mid: #334155;
+  --indigo-deep: #171717;
+  --indigo-mid: #525252;
   --violet-electric: #ffffff;
   --violet-light: #ffffff;
   --white-pure: #ffffff;
@@ -33,7 +33,7 @@ html {
 
 body {
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  background: linear-gradient(145deg, #020617 0%, #0f172a 38%, #1e293b 62%, #020617 100%);
+  background: linear-gradient(145deg, #0a0a0a 0%, #171717 38%, #262626 62%, #0a0a0a 100%);
   min-height: 100vh;
   min-height: 100dvh;
   min-height: 100svh;
@@ -69,7 +69,7 @@ body::before {
   background:
     radial-gradient(ellipse 90% 55% at 50% -15%, rgba(255,255,255, 0.22), transparent 55%),
     radial-gradient(ellipse 70% 45% at 100% 100%, rgba(255,255,255, 0.1), transparent 50%),
-    radial-gradient(ellipse 50% 40% at 0% 80%, rgba(30, 41, 59, 0.35), transparent 45%);
+    radial-gradient(ellipse 50% 40% at 0% 80%, rgba(38, 38, 38, 0.4), transparent 45%);
   pointer-events: none;
   z-index: 0;
 }
@@ -112,7 +112,7 @@ body::before {
   background: linear-gradient(135deg, var(--violet-electric), var(--indigo-mid));
   box-shadow: 0 0 28px var(--glow-violet);
   transition: transform 0.2s var(--ease-out), box-shadow 0.25s var(--ease-out), filter 0.2s;
-  color: #0f172a;
+  color: #171717;
 }
 
 .btn-glow:hover {
@@ -440,7 +440,7 @@ body::before {
   justify-content: center;
   border-radius: 0.65rem;
   border: 1px solid rgba(148, 163, 184, 0.22);
-  background: rgba(15, 23, 42, 0.55);
+  background: rgba(23, 23, 23, 0.55);
   color: rgba(226, 232, 240, 0.92);
   transition:
     transform 0.15s var(--ease-out),
@@ -707,7 +707,7 @@ button.header-sub.header-sub--toggle:active {
   padding: 1.5rem;
   background:
     radial-gradient(ellipse 100% 80% at 50% -20%, rgba(255,255,255, 0.28), transparent 50%),
-    linear-gradient(160deg, #020617 0%, #0f172a 45%, #1e293b 100%);
+    linear-gradient(160deg, #0a0a0a 0%, #171717 45%, #262626 100%);
 }
 
 #loginScreen.hidden {
@@ -1540,7 +1540,7 @@ body[data-panel="inventory"] #panel-inventory {
   align-items: center;
   justify-content: center;
   border: none;
-  color: #0f172a;
+  color: #171717;
   transform: scale(0.92);
   filter: brightness(1.1);
 }
@@ -1975,22 +1975,22 @@ body[data-panel="inventory"] #panel-inventory {
 select.ferriol-native-select,
 select.ferriol-native-select option {
   color-scheme: dark;
-  background-color: #0f172a;
-  color: #f1f5f9;
+  background-color: #171717;
+  color: #f5f5f5;
 }
 .panel select.ferriol-native-select {
-  background: rgba(15, 23, 42, 0.92) !important;
-  color: #f1f5f9 !important;
+  background: rgba(23, 23, 23, 0.92) !important;
+  color: #f5f5f5 !important;
   color-scheme: dark;
 }
 .panel select.ferriol-native-select option {
-  background-color: #0f172a;
-  color: #f1f5f9;
+  background-color: #171717;
+  color: #f5f5f5;
 }
 select.ferriol-native-select option:hover,
 select.ferriol-native-select option:focus,
 select.ferriol-native-select option:active {
-  background-color: #1e293b;
+  background-color: #404040;
   color: #fff;
 }
 
@@ -2000,9 +2000,9 @@ select.ferriol-sponsor-select {
   color: rgba(255, 255, 255, 0.95) !important;
   background: linear-gradient(
     165deg,
-    rgba(5, 42, 22, 0.94) 0%,
-    rgba(8, 58, 31, 0.9) 45%,
-    rgba(5, 28, 16, 0.96) 100%
+    rgba(28, 28, 28, 0.94) 0%,
+    rgba(45, 45, 45, 0.9) 45%,
+    rgba(20, 20, 20, 0.96) 100%
   ) !important;
   border: 1px solid rgba(255,255,255, 0.4) !important;
   backdrop-filter: blur(12px);
@@ -2069,7 +2069,7 @@ select.ferriol-sponsor-select:-moz-focusring {
 .panel .btn-glow {
   background: linear-gradient(135deg, var(--violet-electric), var(--indigo-mid)) !important;
   border: none !important;
-  color: #0f172a !important;
+  color: #171717 !important;
 }
 
 .panel .btn-neomorphic {
@@ -2112,7 +2112,7 @@ select.ferriol-sponsor-select:-moz-focusring {
 .ferriol-cierre-hero {
   border-radius: 1rem;
   padding: 1rem 1.1rem;
-  background: linear-gradient(145deg, rgba(255,255,255, 0.12), rgba(15,23,42, 0.35));
+  background: linear-gradient(145deg, rgba(255,255,255, 0.12), rgba(23, 23, 23, 0.35));
   border: 1px solid rgba(255,255,255, 0.22);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
 }
@@ -2205,7 +2205,7 @@ select.ferriol-sponsor-select:-moz-focusring {
 }
 
 .ferriol-cierre-banner--ok .ferriol-cierre-banner-dot {
-  background: #f1f5f9;
+  background: #f5f5f5;
   box-shadow: 0 0 12px rgba(255, 255, 255, 0.55);
 }
 
@@ -2279,8 +2279,8 @@ select.ferriol-sponsor-select:-moz-focusring {
   justify-content: center;
   font-size: 0.8125rem;
   font-weight: 800;
-  color: rgba(15, 23, 42, 0.95);
-  background: linear-gradient(145deg, #ffffff, #f1f5f9);
+  color: rgba(23, 23, 23, 0.95);
+  background: linear-gradient(145deg, #ffffff, #f5f5f5);
   box-shadow: 0 2px 12px rgba(255, 255, 255, 0.12);
 }
 
@@ -2680,7 +2680,7 @@ select.ferriol-sponsor-select:-moz-focusring {
 }
 
 .ferriol-cierre-hist-status--ok {
-  background: linear-gradient(180deg, #f1f5f9, #ffffff);
+  background: linear-gradient(180deg, #f5f5f5, #ffffff);
   box-shadow: 0 0 14px rgba(255, 255, 255, 0.28);
 }
 
@@ -2911,7 +2911,7 @@ select.ferriol-sponsor-select:-moz-focusring {
 
 /* Modal Ventas del día: pantalla completa, renglones compactos borde a borde (como lista de productos) */
 #ventasCobradasModal .ventas-dia-sheet {
-  background: linear-gradient(165deg, #020617 0%, #0f172a 48%, #0c1220 100%);
+  background: linear-gradient(165deg, #0a0a0a 0%, #171717 48%, #141414 100%);
   padding-bottom: max(0.65rem, env(safe-area-inset-bottom, 0));
 }
 

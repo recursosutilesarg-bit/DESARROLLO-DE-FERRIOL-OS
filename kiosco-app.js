@@ -9802,7 +9802,7 @@
       return '<div class="libreta-detalle-row ' + pagadoStyle + '" onclick="window._abrirItemDetalle(\'' + item.id + '\')">' +
         '<span class="libreta-detalle-desc flex flex-wrap items-center gap-1.5 min-w-0' + (item.pagado ? ' line-through opacity-50' : '') + '">' + desc + coment + tipoChip + '</span>' +
         '<div class="flex items-center gap-2 shrink-0">' +
-        '<span class="libreta-detalle-monto ' + (item.pagado ? 'text-white' : 'text-[#f1f5f9]') + '">$' + Math.round(monto).toLocaleString('es-AR') + '</span>' +
+        '<span class="libreta-detalle-monto ' + (item.pagado ? 'text-white' : 'text-[#f5f5f5]') + '">$' + Math.round(monto).toLocaleString('es-AR') + '</span>' +
         (!item.pagado ? '<button onclick="event.stopPropagation();window._eliminarItemLibreta(\'' + item.id + '\')" class="libreta-detalle-del touch-target"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' : '') +
         '</div>' +
         '</div>';
@@ -10187,7 +10187,7 @@
           var desc = (item.descripcion || '').replace(/</g, '&lt;');
           var m = Math.round(Number(item.monto || 0)).toLocaleString('es-AR');
           var tipoTag = item.tipo === 'transferencia_pendiente' ? ' <span class="text-orange-300/90 text-[10px]">(Transf. pend.)</span>' : '';
-          return '<div class="libreta-cuenta-line flex justify-between gap-3 px-4 py-3 border-b border-white/08"><span class="text-white/90 min-w-0 flex-1">' + desc + tipoTag + '</span><span class="font-bold text-[#f1f5f9] shrink-0">$' + m + '</span></div>';
+          return '<div class="libreta-cuenta-line flex justify-between gap-3 px-4 py-3 border-b border-white/08"><span class="text-white/90 min-w-0 flex-1">' + desc + tipoTag + '</span><span class="font-bold text-[#f5f5f5] shrink-0">$' + m + '</span></div>';
         }).join('') + '<div class="flex justify-between items-baseline px-4 pt-4 pb-2"><span class="text-white/60 text-sm">Total adeudado</span><span class="font-bold text-xl text-amber-400">$' + Math.round(total).toLocaleString('es-AR') + '</span></div>';
       }
       if (sinTel) {
@@ -11906,7 +11906,7 @@ async function showApp() {
         var sub = (viewerHelpWhatsApp.sourceRole === 'kiosquero') ? '<p class="text-[11px] text-white/45 mb-2">Contacto de tu referidor / patrocinador.</p>' : '<p class="text-[11px] text-white/45 mb-2">Contacto configurado por la empresa (fundadores).</p>';
         container.innerHTML = sub + list.map(function (num, i) {
           var label = list.length > 1 ? 'WhatsApp (' + (i + 1) + ')' : 'Escribir por WhatsApp';
-          return '<a href="' + getWhatsAppUrl(num, msg) + '" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white/90 hover:bg-white text-slate-900 font-medium touch-target"><i data-lucide="message-circle" class="w-5 h-5"></i> ' + label + '</a>';
+          return '<a href="' + getWhatsAppUrl(num, msg) + '" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white/90 hover:bg-white text-neutral-900 font-medium touch-target"><i data-lucide="message-circle" class="w-5 h-5"></i> ' + label + '</a>';
         }).join('');
       }
       lucide.createIcons();
@@ -11921,7 +11921,7 @@ async function showApp() {
       } else {
         container.innerHTML = list.map(function (num, i) {
           var label = list.length > 1 ? 'WhatsApp (' + (i + 1) + ')' : 'Escribir por WhatsApp';
-          return '<a href="' + getWhatsAppUrl(num, msg) + '" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-white/90 hover:bg-white text-slate-900 font-medium text-sm touch-target"><i data-lucide="message-circle" class="w-5 h-5"></i> ' + label + '</a>';
+          return '<a href="' + getWhatsAppUrl(num, msg) + '" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-white/90 hover:bg-white text-neutral-900 font-medium text-sm touch-target"><i data-lucide="message-circle" class="w-5 h-5"></i> ' + label + '</a>';
         }).join('');
       }
       lucide.createIcons();
