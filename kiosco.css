@@ -1471,6 +1471,24 @@ body[data-panel="inventory"] #panel-inventory {
   background: rgba(34, 197, 94, 0.08);
 }
 
+.inventory-item.inv-expiry-soon {
+  background: rgba(251, 146, 60, 0.14);
+  border-left: 3px solid rgb(251, 146, 60);
+}
+
+.inventory-item.inv-expiry-soon:active {
+  background: rgba(251, 146, 60, 0.22);
+}
+
+.inventory-item.inv-expiry-expired {
+  background: rgba(239, 68, 68, 0.16);
+  border-left: 3px solid rgb(248, 113, 113);
+}
+
+.inventory-item.inv-expiry-expired:active {
+  background: rgba(239, 68, 68, 0.24);
+}
+
 .inv-item-info {
   flex: 1;
   min-width: 0;

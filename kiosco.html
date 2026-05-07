@@ -1506,7 +1506,7 @@
         <div id="configSubHub" class="space-y-3">
           <button type="button" data-config-open="negocio" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Nombre del negocio</span></button>
           <button type="button" data-config-open="whatsapp" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Mensaje de cobro por WhatsApp</span></button>
-          <button type="button" data-config-open="vencimiento-productos" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Aviso «VENCE PRONTO» (inventario)</span><span class="block text-xs text-white/50 font-normal mt-0.5">Cuántos días antes del vencimiento del lote mostrar la alerta en rojo</span></button>
+          <button type="button" data-config-open="vencimiento-productos" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Aviso de vencimiento (inventario)</span><span class="block text-xs text-white/50 font-normal mt-0.5">Filas naranjas por vencer y rojas si ya venció; definí cuántos días antes alertar</span></button>
           <button type="button" data-config-open="sonido" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Sonido de notificaciones</span></button>
           <button type="button" data-config-open="respaldo" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Copia de seguridad y CSV</span></button>
         </div>
@@ -1527,7 +1527,7 @@
 
         <div class="config-subview hidden space-y-4" data-config-sub="vencimiento-productos">
           <button type="button" data-config-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target">Volver</button>
-          <p class="text-xs text-white/55">Si el producto tiene fecha de vencimiento y stock, el listado marca <strong class="text-red-300/90">VENCE PRONTO</strong> cuando falten esta cantidad de días o menos (o si ya venció).</p>
+          <p class="text-xs text-white/55">Con fecha de lote, el listado muestra <strong class="text-amber-300/95">POR VENCER</strong> (fila naranja) dentro del plazo que elijas, y <strong class="text-red-300/90">VENCIDO</strong> (fila roja) si la fecha ya pasó.</p>
           <label class="block text-sm text-white/70 mb-2">Días de anticipación (0–365)</label>
           <input type="number" id="configVencimientoAvisoDias" min="0" max="365" step="1" class="w-full max-w-[10rem] glass rounded-xl px-4 py-3 border border-white/20 text-white tabular-nums focus:outline-none focus:ring-2 focus:ring-[#22c55e]" inputmode="numeric">
           <p class="text-xs text-white/45">Valor por defecto si no guardás: 7 días. Con <strong class="text-white/60">0</strong> solo se resalta el mismo día del vencimiento o vencido.</p>
@@ -3314,7 +3314,7 @@
         <div>
           <label class="block text-xs text-white/60 mb-1">Fecha de vencimiento del lote (opcional)</label>
           <input type="date" id="prodFechaVencimiento" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e] scheme-dark">
-          <p class="text-[11px] text-white/45 mt-1">Si cargás la fecha, el sistema avisará en rojo («VENCE PRONTO») dentro del plazo que configures en <strong class="text-white/60">Configuración</strong>.</p>
+          <p class="text-[11px] text-white/45 mt-1">Si cargás la fecha, el listado resalta en <strong class="text-amber-300/90">naranja</strong> al acercarse el vencimiento y en <strong class="text-red-300/90">rojo</strong> si ya venció; el plazo lo configurás en <strong class="text-white/60">Configuración</strong>.</p>
         </div>
         <div id="prodStockInicialWrap" class="hidden">
           <label class="block text-xs text-white/60 mb-1">Stock inicial (solo referencia)</label>

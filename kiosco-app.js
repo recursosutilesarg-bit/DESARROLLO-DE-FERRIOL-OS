@@ -4062,15 +4062,14 @@
      * @returns {{ kind: 'soon' | 'expired' | null, label: string, days: number | null }}
      */
     function ferriolProductExpiryUrgency(p) {
-      var stock = Math.max(0, Number(p && p.stock) || 0);
       var raw = p && (p.fechaVencimiento || p.fecha_vencimiento);
       var fv = raw != null && String(raw).trim() !== '' ? String(raw).trim().slice(0, 10) : '';
-      if (!fv || stock <= 0) return { kind: null, label: '', days: null };
+      if (!fv) return { kind: null, label: '', days: null };
       var days = ferriolDaysUntilExpiryYmd(fv);
       if (days === null) return { kind: null, label: '', days: null };
       var aviso = ferriolVencimientoAvisoDias();
-      if (days < 0) return { kind: 'expired', label: 'VENCE PRONTO', days: days };
-      if (days <= aviso) return { kind: 'soon', label: 'VENCE PRONTO', days: days };
+      if (days < 0) return { kind: 'expired', label: 'VENCIDO', days: days };
+      if (days <= aviso) return { kind: 'soon', label: 'POR VENCER', days: days };
       return { kind: null, label: '', days: days };
     }
 
@@ -4126,11 +4125,17 @@
         const quedan = Math.max(0, Number(p.stock) || 0);
         const stockColor = quedan === 0 ? 'text-red-400' : quedan <= 3 ? 'text-amber-400' : 'text-white/40';
         var urg = ferriolProductExpiryUrgency(p);
+        var rowExpiryCls = urg.kind === 'expired' ? ' inv-expiry-expired' : urg.kind === 'soon' ? ' inv-expiry-soon' : '';
+        var badgeCls = urg.kind === 'expired'
+          ? 'text-[10px] font-bold uppercase tracking-tight text-red-400 leading-tight'
+          : urg.kind === 'soon'
+            ? 'text-[10px] font-bold uppercase tracking-tight text-amber-400 leading-tight'
+            : '';
         var badgeRow = urg.kind
-          ? '<span class="text-[10px] font-bold uppercase tracking-tight text-red-500 leading-tight">' + String(urg.label).replace(/</g, '&lt;') + '</span>'
+          ? '<span class="' + badgeCls + '">' + String(urg.label).replace(/</g, '&lt;') + '</span>'
           : '';
         return `
-          <div class="inventory-item" data-codigo="${p.codigo}" role="button" tabindex="0">
+          <div class="inventory-item${rowExpiryCls}" data-codigo="${p.codigo}" role="button" tabindex="0">
             <div class="inv-item-info">
               <div class="flex flex-col flex-1 min-w-0 gap-0.5">
                 <span class="inv-item-name">${(p.nombre || '').replace(/</g, '&lt;')}</span>
@@ -4185,10 +4190,15 @@
         }
       }
       if (ban) {
-        if (urgDet.kind === 'soon' || urgDet.kind === 'expired') {
+        ban.classList.remove('text-red-400', 'text-amber-400');
+        if (urgDet.kind === 'soon') {
           ban.textContent = urgDet.label;
           ban.classList.remove('hidden');
-          ban.classList.toggle('text-red-500', true);
+          ban.classList.add('text-amber-400');
+        } else if (urgDet.kind === 'expired') {
+          ban.textContent = urgDet.label;
+          ban.classList.remove('hidden');
+          ban.classList.add('text-red-400');
         } else {
           ban.classList.add('hidden');
           ban.textContent = '';
