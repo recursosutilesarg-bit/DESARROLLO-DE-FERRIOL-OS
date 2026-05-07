@@ -642,7 +642,7 @@
       var pd = document.getElementById('partnerProofScreenPaneDistribuidores');
       var isC = which === 'comercios';
       var activeCls =
-        'partner-proof-screen-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-[#22c55e]/50 bg-[#22c55e]/20 text-white transition-all';
+        'partner-proof-screen-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-[#ffffff]/50 bg-[#ffffff]/20 text-white transition-all';
       var idleCls =
         'partner-proof-screen-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-transparent text-white/55 hover:text-white/80 transition-all';
       if (tc) {
@@ -712,7 +712,7 @@
             '</div>'
           : '<p class="text-[11px] text-white/35 shrink-0 self-center">Sin imagen</p>') +
         '</div>' +
-        '<button type="button" class="partner-kiosk-proof-register-sale w-full py-2 rounded-lg bg-emerald-500/20 border border-emerald-400/40 text-emerald-100 text-sm font-medium touch-target active:scale-[0.99]" data-queue-id="' +
+        '<button type="button" class="partner-kiosk-proof-register-sale w-full py-2 rounded-lg bg-white/20 border border-white/40 text-white text-sm font-medium touch-target active:scale-[0.99]" data-queue-id="' +
         idEsc +
         '">Registrar</button>' +
         '</div>'
@@ -784,7 +784,7 @@
       }
       if (msgEl) {
         msgEl.textContent = 'Listo.';
-        msgEl.className = 'text-xs mt-4 text-center px-1 text-emerald-300/95';
+        msgEl.className = 'text-xs mt-4 text-center px-1 text-white/95';
         msgEl.classList.remove('hidden');
         setTimeout(function () {
           msgEl.classList.add('hidden');
@@ -1159,7 +1159,7 @@
             var br = Number(r.amount || 0);
             var lb = ledByPay[r.id] || { company: 0, payout: 0 };
             var nm = nameBy[r.payer_user_id] || '—';
-            return '<div class="grid grid-cols-12 gap-1 px-3 py-2.5 border-b border-white/[0.06] text-xs items-center"><div class="col-span-2 text-white/55 tabular-nums">' + d + '</div><div class="col-span-2 text-white/85 truncate" title="">' + String(ferriolIngresosPaymentTypeLabel(r.payment_type)).replace(/</g, '&lt;') + '</div><div class="col-span-2 text-[#86efac] font-semibold tabular-nums">$ ' + br.toLocaleString('es-AR') + '</div><div class="col-span-2 text-cyan-200/90 tabular-nums">$ ' + Number(lb.company).toLocaleString('es-AR') + '</div><div class="col-span-2 text-violet-200/90 tabular-nums">$ ' + Number(lb.payout).toLocaleString('es-AR') + '</div><div class="col-span-2 text-white/55 truncate">' + String(nm).replace(/</g, '&lt;') + '</div></div>';
+            return '<div class="grid grid-cols-12 gap-1 px-3 py-2.5 border-b border-white/[0.06] text-xs items-center"><div class="col-span-2 text-white/55 tabular-nums">' + d + '</div><div class="col-span-2 text-white/85 truncate" title="">' + String(ferriolIngresosPaymentTypeLabel(r.payment_type)).replace(/</g, '&lt;') + '</div><div class="col-span-2 text-[#ffffff] font-semibold tabular-nums">$ ' + br.toLocaleString('es-AR') + '</div><div class="col-span-2 text-cyan-200/90 tabular-nums">$ ' + Number(lb.company).toLocaleString('es-AR') + '</div><div class="col-span-2 text-violet-200/90 tabular-nums">$ ' + Number(lb.payout).toLocaleString('es-AR') + '</div><div class="col-span-2 text-white/55 truncate">' + String(nm).replace(/</g, '&lt;') + '</div></div>';
           }).join('');
           wrap.innerHTML = headF + bodyF;
         }
@@ -1490,7 +1490,7 @@
             var origin = L.origin_user_id || null;
             var nmWho = py || origin;
             var nm = nmWho ? (nameBy[nmWho] || '…') : '—';
-            return '<div class="grid grid-cols-12 gap-1 px-3 py-2.5 border-b border-white/[0.06] text-xs items-center"><div class="col-span-2 text-white/55 tabular-nums">' + d + '</div><div class="col-span-2 text-white/85 truncate" title="">' + String(tipoLab).replace(/</g, '&lt;') + '</div><div class="col-span-2 text-[#86efac] font-semibold tabular-nums">$ ' + Number(L.amount || 0).toLocaleString('es-AR') + '</div><div class="col-span-2 text-amber-200/80 truncate">' + String(nivelLab).replace(/</g, '&lt;') + '</div><div class="col-span-2 text-white/50 tabular-nums">' + pctV + '</div><div class="col-span-2 text-white/60 truncate">' + String(nm).replace(/</g, '&lt;') + '</div></div>';
+            return '<div class="grid grid-cols-12 gap-1 px-3 py-2.5 border-b border-white/[0.06] text-xs items-center"><div class="col-span-2 text-white/55 tabular-nums">' + d + '</div><div class="col-span-2 text-white/85 truncate" title="">' + String(tipoLab).replace(/</g, '&lt;') + '</div><div class="col-span-2 text-[#ffffff] font-semibold tabular-nums">$ ' + Number(L.amount || 0).toLocaleString('es-AR') + '</div><div class="col-span-2 text-amber-200/80 truncate">' + String(nivelLab).replace(/</g, '&lt;') + '</div><div class="col-span-2 text-white/50 tabular-nums">' + pctV + '</div><div class="col-span-2 text-white/60 truncate">' + String(nm).replace(/</g, '&lt;') + '</div></div>';
           }).join('');
           wrap.innerHTML = head + body;
         }
@@ -1603,7 +1603,7 @@
           '<p class="text-xs text-white/55">' + escHtmlCsr(ferriolIngresosPaymentTypeLabel(row.payment_type)) + (row.period_month ? ' · Mes: ' + escHtmlCsr(String(row.period_month).slice(0, 7)) : '') + ' · <strong class="text-red-200/90">$ ' + Number(row.amount_ars || 0).toLocaleString('es-AR') + '</strong></p>' +
           '<p class="text-xs text-amber-100/90"><strong>Motivo:</strong> ' + reason + '</p>' +
           (img ? ferriolInlineComprobantePreviewHtml(img, 'Comprobante enviado') : '') +
-          '<button type="button" class="ferriol-rej-prefill-csr w-full mt-1 py-2 rounded-lg border border-emerald-400/35 text-emerald-200 text-xs font-semibold touch-target" data-csr-id="' + escHtmlCsr(row.id) + '">Corregir y reenviar (cargar formulario)</button>' +
+          '<button type="button" class="ferriol-rej-prefill-csr w-full mt-1 py-2 rounded-lg border border-white/35 text-white text-xs font-semibold touch-target" data-csr-id="' + escHtmlCsr(row.id) + '">Corregir y reenviar (cargar formulario)</button>' +
           '</div>'
         );
       });
@@ -1616,7 +1616,7 @@
           '<p class="text-xs text-white/55">' + escHtmlCsr(ferriolIngresosPaymentTypeLabel(r.payment_type)) + (r.period_month ? ' · Mes: ' + escHtmlCsr(String(r.period_month).slice(0, 7)) : '') + ' · <strong class="text-red-200/90">$ ' + Number(r.amount || 0).toLocaleString('es-AR') + '</strong></p>' +
           '<p class="text-white/75 text-xs"><strong>Comprador:</strong> ' + escHtmlCsr(r.payer_label || '—') + (r.payer_email ? ' · ' + escHtmlCsr(r.payer_email) : '') + '</p>' +
           '<p class="text-xs text-amber-100/90"><strong>Motivo:</strong> ' + reason + '</p>' +
-          '<button type="button" class="ferriol-rej-prefill-pay w-full mt-1 py-2 rounded-lg border border-emerald-400/35 text-emerald-200 text-xs font-semibold touch-target" data-pay-id="' + escHtmlCsr(r.id) + '">Nueva solicitud con estos datos</button>' +
+          '<button type="button" class="ferriol-rej-prefill-pay w-full mt-1 py-2 rounded-lg border border-white/35 text-white text-xs font-semibold touch-target" data-pay-id="' + escHtmlCsr(r.id) + '">Nueva solicitud con estos datos</button>' +
           '</div>'
         );
       });
@@ -2177,11 +2177,11 @@
           hist.innerHTML = '<p class="text-xs text-white/45 py-3 text-center">Todavía no tenés solicitudes de retiro.</p>';
         } else {
           hist.innerHTML = '<div class="space-y-2 max-h-[40vh] overflow-y-auto">' + rows.map(function (w) {
-            var st = w.status === 'paid' ? 'text-emerald-200' : w.status === 'rejected' ? 'text-red-200/90' : w.status === 'approved_pending_payout' ? 'text-cyan-200' : 'text-amber-200';
+            var st = w.status === 'paid' ? 'text-white' : w.status === 'rejected' ? 'text-red-200/90' : w.status === 'approved_pending_payout' ? 'text-cyan-200' : 'text-amber-200';
             var lab = w.status === 'pending_review' ? 'En revisión empresa' : w.status === 'approved_pending_payout' ? 'Aprobado · pendiente transferencia' : w.status === 'paid' ? 'Pagado' : 'Rechazado';
             var dt = String(w.created_at || '').slice(0, 16).replace('T', ' ');
             var extra = '';
-            if (w.status === 'paid' && w.founder_congrats_message) extra = '<p class="text-[10px] text-emerald-100/80 mt-1">' + String(w.founder_congrats_message).replace(/</g, '&lt;') + '</p>';
+            if (w.status === 'paid' && w.founder_congrats_message) extra = '<p class="text-[10px] text-white/80 mt-1">' + String(w.founder_congrats_message).replace(/</g, '&lt;') + '</p>';
             if (w.status === 'rejected' && w.reject_note) extra = '<p class="text-[10px] text-red-200/80 mt-1">Motivo: ' + String(w.reject_note).replace(/</g, '&lt;') + '</p>';
             return '<div class="rounded-lg border border-white/10 bg-black/25 px-3 py-2"><p class="text-xs"><span class="' + st + ' font-medium">' + lab + '</span> · ' + dt + '</p><p class="text-sm text-white/90 font-semibold">$ ' + Number(w.amount_ars || 0).toLocaleString('es-AR') + ' ARS</p>' + extra + '</div>';
           }).join('') + '</div>';
@@ -2294,7 +2294,7 @@
           return '<div class="rounded-xl border border-cyan-500/35 bg-black/25 p-4 space-y-2">' +
             '<p class="text-sm font-semibold text-white/90">Socio: ' + legal + '</p>' +
             '<p class="text-xs text-white/50">' + (p.email ? String(p.email).replace(/</g, '&lt;') : '') + '</p>' +
-            '<p class="text-lg font-bold text-[#86efac]">$ ' + Number(row.amount_ars || 0).toLocaleString('es-AR') + ' ARS</p>' +
+            '<p class="text-lg font-bold text-[#ffffff]">$ ' + Number(row.amount_ars || 0).toLocaleString('es-AR') + ' ARS</p>' +
             '<p class="text-[10px] text-amber-200/90">Verificá que el titular de la cuenta coincida con: <strong class="text-white/80">' + legal + '</strong></p>' +
             '<div class="text-xs text-white/75 bg-black/30 rounded-lg p-3 border border-white/10 max-h-40 overflow-y-auto">' + bank + '</div>' +
             '<p class="text-[10px] text-white/45">Solicitado: ' + dt + '</p>' +
@@ -2368,8 +2368,8 @@
         var on = btn.getAttribute('data-solicitud-tab') === tabId;
         btn.setAttribute('aria-selected', on ? 'true' : 'false');
         if (on) {
-          btn.style.border = '1px solid rgba(34, 197, 94, 0.55)';
-          btn.style.background = 'rgba(34, 197, 94, 0.22)';
+          btn.style.border = '1px solid rgba(255, 255, 255, 0.55)';
+          btn.style.background = 'rgba(255, 255, 255, 0.22)';
           btn.style.color = '#ffffff';
         } else {
           btn.style.border = '1px solid transparent';
@@ -2418,8 +2418,8 @@
         var on = btn.getAttribute('data-partner-solic-tab') === tabId;
         btn.setAttribute('aria-selected', on ? 'true' : 'false');
         if (on) {
-          btn.style.border = '1px solid rgba(34, 197, 94, 0.55)';
-          btn.style.background = 'rgba(34, 197, 94, 0.22)';
+          btn.style.border = '1px solid rgba(255, 255, 255, 0.55)';
+          btn.style.background = 'rgba(255, 255, 255, 0.22)';
           btn.style.color = '#ffffff';
         } else {
           btn.style.border = '1px solid transparent';
@@ -2693,7 +2693,7 @@
         var roleL = d.role === 'super' ? 'Administrador' : (d.role === 'partner' ? 'Socio vendedor' : 'Referidor');
         var em = d.email ? String(d.email).replace(/</g, '&lt;').replace(/&/g, '&amp;') : '';
         var nmEsc = String(nm).replace(/</g, '&lt;').replace(/&/g, '&amp;');
-        var html = '<span class="text-white/50">Nombre en la red · </span><strong class="text-[#86efac]/95">' + nmEsc + '</strong>' + (em ? ' · <span class="text-white/55">' + em + '</span>' : '') + ' <span class="text-white/40">· ' + roleL + '</span>';
+        var html = '<span class="text-white/50">Nombre en la red · </span><strong class="text-[#ffffff]/95">' + nmEsc + '</strong>' + (em ? ' · <span class="text-white/55">' + em + '</span>' : '') + ' <span class="text-white/40">· ' + roleL + '</span>';
         return { html: html, ok: true, partnerTransferInfo: '' };
       } catch (_) {
         return { html: 'Consultá con el administrador quién es tu referidor.', ok: false, partnerTransferInfo: '' };
@@ -2926,7 +2926,7 @@
             daysLeft === 1 ? 'Último día' : urgentSoon ? 'Pronto vence' : 'Vigencia';
           stripEye.className =
             'text-[9px] font-medium uppercase tracking-wide mb-0.5 ' +
-            (urgentSoon ? 'text-amber-200/80' : 'text-emerald-200/65');
+            (urgentSoon ? 'text-amber-200/80' : 'text-white/65');
           stripLine.textContent =
             daysLeft === 1 ?
               'Te queda 1 día de suscripción antes del vencimiento.' :
@@ -2941,10 +2941,10 @@
             ' ' +
             (urgentSoon ?
               'border-amber-400/35 bg-amber-950/18' :
-              'border-emerald-400/22 bg-emerald-950/12');
+              'border-white/22 bg-white/12');
           stripNum.className =
             'text-3xl sm:text-4xl font-bold tabular-nums leading-none ' +
-            (urgentSoon ? 'text-amber-100/95' : 'text-emerald-100/90');
+            (urgentSoon ? 'text-amber-100/95' : 'text-white/90');
           strip.classList.remove('animate-kiosco-days-pulse');
         } else {
           if (stripSuf) stripSuf.classList.add('hidden');
@@ -2993,7 +2993,7 @@
       var amt = FERRIOL_PLAN_AMOUNTS.kioscoMonthly;
       var amtStr = amt.toLocaleString('es-AR');
       if (priceEl) {
-        priceEl.innerHTML = 'Referencia mensual <strong class="text-[#86efac]">$ ' + amtStr + ' ARS</strong>';
+        priceEl.innerHTML = 'Referencia mensual <strong class="text-[#ffffff]">$ ' + amtStr + ' ARS</strong>';
       }
       var transferBody = 'Falta cargar en Ajustes (fundador) los datos oficiales de la cuenta de Ferriol (empresa) a la que se transfiere la suscripción mensual de todos los negocios.';
       if (!supabaseClient) {
@@ -3022,9 +3022,9 @@
           var txtComp = 'Hola, te envío el comprobante del pago de la suscripción Ferriol OS de mi negocio.';
           var waUrl = getWhatsAppUrl(waNum, txtComp);
           waWrap.innerHTML = '<p class="text-[10px] font-semibold uppercase tracking-wide text-white/45 mb-1.5">WhatsApp para el comprobante</p>' +
-            '<p class="text-lg font-semibold font-mono text-[#86efac] mb-3 tracking-wide select-all">' + String(disp).replace(/</g, '&lt;') + '</p>' +
+            '<p class="text-lg font-semibold font-mono text-[#ffffff] mb-3 tracking-wide select-all">' + String(disp).replace(/</g, '&lt;') + '</p>' +
             '<div class="flex flex-col sm:flex-row gap-2">' +
-            '<a href="' + waUrl.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-3 px-4 bg-[#22c55e]/25 hover:bg-[#22c55e]/38 border border-[#22c55e]/45 text-sm font-semibold text-[#86efac] touch-target active:scale-[0.98]">' +
+            '<a href="' + waUrl.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener" class="flex-1 inline-flex items-center justify-center gap-2 rounded-xl py-3 px-4 bg-[#ffffff]/25 hover:bg-[#ffffff]/38 border border-[#ffffff]/45 text-sm font-semibold text-[#ffffff] touch-target active:scale-[0.98]">' +
             '<i data-lucide="message-circle" class="w-5 h-5 shrink-0"></i> Abrir WhatsApp · comprobante</a>' +
             '<button type="button" id="btnKioscoCopyWaComprobante" class="rounded-xl py-3 px-4 border border-white/20 bg-white/[0.08] hover:bg-white/15 text-sm font-semibold touch-target active:scale-[0.98]">Copiar número</button>' +
             '</div>';
@@ -4863,7 +4863,7 @@
           allDone = false;
         } else if (st === 'confirmado') {
           el.textContent = 'Confirmado';
-          el.className = 'text-[11px] text-emerald-300 mt-1';
+          el.className = 'text-[11px] text-white mt-1';
         } else {
           el.textContent = 'Corregido';
           el.className = 'text-[11px] text-cyan-300 mt-1';
@@ -4885,7 +4885,7 @@
           estEl.className = 'font-semibold text-amber-200';
         } else {
           estEl.textContent = 'Listo para finalizar';
-          estEl.className = 'font-semibold text-emerald-300';
+          estEl.className = 'font-semibold text-white';
         }
       }
       document.querySelectorAll('#cierreWizardSteps .ferriol-cierre-step-chip').forEach(function (chip) {
@@ -4916,7 +4916,7 @@
       var diff = Math.round((realTotal - sysTotal) * 100) / 100;
       var sign = diff > 0 ? '+' : diff < 0 ? '−' : '';
       diffEl.textContent = sign + '$' + Math.abs(diff).toLocaleString('es-AR');
-      diffEl.className = 'font-extrabold tabular-nums ' + (diff === 0 ? 'text-[#86efac]' : diff < 0 ? 'text-red-400' : 'text-amber-300');
+      diffEl.className = 'font-extrabold tabular-nums ' + (diff === 0 ? 'text-[#ffffff]' : diff < 0 ? 'text-red-400' : 'text-amber-300');
     }
 
     function ferriolCierreInteractivoApplyDashboardMetricas(m) {
@@ -5064,10 +5064,10 @@
       var porMetodoEl = document.getElementById('resumenDiaPorMetodo');
       if (porMetodoEl) {
         var methods = [
-          { key: 'efectivo', label: 'Efectivo', icon: 'banknote', color: 'text-green-400', bg: 'bg-green-500/20' },
+          { key: 'efectivo', label: 'Efectivo', icon: 'banknote', color: 'text-white', bg: 'bg-white/15' },
           { key: 'tarjeta', label: 'Tarjeta', icon: 'credit-card', color: 'text-blue-400', bg: 'bg-blue-500/20' },
           { key: 'transferencia', label: 'Transf.', icon: 'smartphone', color: 'text-cyan-400', bg: 'bg-cyan-500/20' },
-          { key: 'cobro_libreta', label: 'Cobro libreta', icon: 'wallet', color: 'text-emerald-300', bg: 'bg-emerald-500/20' },
+          { key: 'cobro_libreta', label: 'Cobro libreta', icon: 'wallet', color: 'text-white', bg: 'bg-white/20' },
           { key: 'fiado', label: 'Fiado (cuenta)', icon: 'user-check', color: 'text-amber-400', bg: 'bg-amber-500/20', libreta: true },
           { key: 'transferencia_pendiente', label: 'Pend. (cuenta)', icon: 'clock', color: 'text-orange-400', bg: 'bg-orange-500/20', libreta: true }
         ];
@@ -5166,7 +5166,7 @@
     function applyEstadoCuentaFilterUi() {
       document.querySelectorAll('.estado-cuenta-filter-btn').forEach(function (btn) {
         var active = btn.dataset.filter === _estadoCuentaFilter;
-        btn.className = 'estado-cuenta-filter-btn px-2.5 py-1 rounded-lg text-[11px] border touch-target transition-all ' + (active ? 'bg-[#22c55e]/30 border-[#22c55e]/50 text-[#bbf7d0]' : 'border-white/20 bg-white/5 text-white/80');
+        btn.className = 'estado-cuenta-filter-btn px-2.5 py-1 rounded-lg text-[11px] border touch-target transition-all ' + (active ? 'bg-[#ffffff]/30 border-[#ffffff]/50 text-[#bbf7d0]' : 'border-white/20 bg-white/5 text-white/80');
       });
     }
     async function renderEstadoCuentaNegocio(metricasDia) {
@@ -5302,11 +5302,11 @@
       }
       if (resultadoEl) {
         resultadoEl.textContent = (gananciaNeta >= 0 ? '+' : '−') + '$' + Math.abs(Math.round(gananciaNeta)).toLocaleString('es-AR');
-        resultadoEl.className = 'text-lg sm:text-2xl font-bold tabular-nums ' + (gananciaNeta > 0 ? 'text-[#86efac]' : (gananciaNeta < 0 ? 'text-red-300' : 'text-amber-300'));
+        resultadoEl.className = 'text-lg sm:text-2xl font-bold tabular-nums ' + (gananciaNeta > 0 ? 'text-[#ffffff]' : (gananciaNeta < 0 ? 'text-red-300' : 'text-amber-300'));
       }
       if (etiquetaEl) {
         etiquetaEl.textContent = estado + (gananciaBruta < 0 && ingresos > 0 ? ' · revisá costos' : '');
-        etiquetaEl.className = 'text-[11px] font-medium shrink-0 ' + (gananciaNeta > 0 ? 'text-emerald-400/90' : (gananciaNeta < 0 ? 'text-red-300/90' : 'text-amber-300/90'));
+        etiquetaEl.className = 'text-[11px] font-medium shrink-0 ' + (gananciaNeta > 0 ? 'text-white/90' : (gananciaNeta < 0 ? 'text-red-300/90' : 'text-amber-300/90'));
       }
       if (gapLineEl) {
         var todoCero = ingresos <= 0 && mercaderiaVendida <= 0 && gastosTotales <= 0;
@@ -5315,7 +5315,7 @@
           gapLineEl.className = 'text-[11px] text-center leading-snug px-1 text-white/45';
         } else if (gananciaNeta >= 0) {
           gapLineEl.textContent = 'La mercadería vendida es inversión ya consumida en esas ventas; los gastos son cuenta y compras; lo verde arriba es lo que te queda.';
-          gapLineEl.className = 'text-[11px] text-center leading-snug px-1 text-emerald-200/80';
+          gapLineEl.className = 'text-[11px] text-center leading-snug px-1 text-white/80';
         } else {
           gapLineEl.textContent = 'Este período mercadería más gastos fueron más que lo cobrado. Subí ventas o revisá precios y gastos.';
           gapLineEl.className = 'text-[11px] text-center leading-snug px-1 text-amber-200/90';
@@ -5393,7 +5393,7 @@
         var precio = prod ? prod.precio : 0;
         var stock = prod ? prod.stock : 0;
         var disabled = stock <= 0 ? ' opacity-50 pointer-events-none' : '';
-        return '<button type="button" class="freq-product-btn flex-shrink-0 glass rounded-xl px-4 py-3 border border-white/10 hover:border-[#22c55e]/50 active:opacity-90 touch-target text-left min-w-0 max-w-[140px]' + disabled + '" data-codigo="' + (p.codigo || '').replace(/"/g, '&quot;') + '" title="Elegir cantidad y agregar"><p class="font-medium truncate text-sm leading-snug">' + (nombre || '').replace(/</g, '&lt;') + '</p><p class="text-[#86efac] text-xs mt-1 leading-none tabular-nums">$' + (precio || 0).toLocaleString('es-AR') + '</p></button>';
+        return '<button type="button" class="freq-product-btn flex-shrink-0 glass rounded-xl px-4 py-3 border border-white/10 hover:border-[#ffffff]/50 active:opacity-90 touch-target text-left min-w-0 max-w-[140px]' + disabled + '" data-codigo="' + (p.codigo || '').replace(/"/g, '&quot;') + '" title="Elegir cantidad y agregar"><p class="font-medium truncate text-sm leading-snug">' + (nombre || '').replace(/</g, '&lt;') + '</p><p class="text-[#ffffff] text-xs mt-1 leading-none tabular-nums">$' + (precio || 0).toLocaleString('es-AR') + '</p></button>';
       }).join('');
       cont.querySelectorAll('.freq-product-btn').forEach(function (btn) {
         btn.onclick = function () {
@@ -5443,7 +5443,7 @@
       listEl.innerHTML = entries.map(function (p) {
         var safeName = (p.nombre || '').replace(/</g, '&lt;').replace(/"/g, '&quot;');
         var cEsc = ferriolEscapeHtmlAttr(p.codigo);
-        return '<button type="button" class="cobro-rapido-stock-pick w-full text-left flex items-center justify-between gap-2 py-2 px-2.5 rounded-lg bg-white/5 border border-white/10 hover:border-[#22c55e]/45 hover:bg-[#22c55e]/10 touch-target text-xs text-white" data-cobro-rapido-codigo="' + cEsc + '">' +
+        return '<button type="button" class="cobro-rapido-stock-pick w-full text-left flex items-center justify-between gap-2 py-2 px-2.5 rounded-lg bg-white/5 border border-white/10 hover:border-[#ffffff]/45 hover:bg-[#ffffff]/10 touch-target text-xs text-white" data-cobro-rapido-codigo="' + cEsc + '">' +
           '<span class="truncate flex-1">' + safeName + '</span>' +
           '<span class="shrink-0 text-white/60 tabular-nums">' + p.stock + ' u. · $' + p.precio.toLocaleString('es-AR') + '</span></button>';
       }).join('');
@@ -6529,7 +6529,7 @@
           ? 'text-cyan-400'
           : variant === 'violet'
           ? 'text-violet-400'
-          : 'text-emerald-400';
+          : 'text-white';
       var sym = variant === 'violet' ? '★' : '✓';
       ulEl.innerHTML = (lines || []).map(function (t) {
         return (
@@ -6724,12 +6724,12 @@
       function rowCopiable(label, slot, value) {
         if (!value) return '';
         var vEsc = ferriolEscapeHtmlLite(value).replace(/\r?\n/g, '<br>');
-        return '<div class="rounded-xl border border-emerald-500/35 bg-black/35 p-3 mb-3">' +
+        return '<div class="rounded-xl border border-white/35 bg-black/35 p-3 mb-3">' +
           '<div class="flex items-start justify-between gap-2">' +
           '<div class="min-w-0 flex-1">' +
-          '<p class="text-[10px] uppercase tracking-wide text-emerald-200/85 font-semibold mb-1">' + ferriolEscapeHtmlLite(label) + '</p>' +
+          '<p class="text-[10px] uppercase tracking-wide text-white/85 font-semibold mb-1">' + ferriolEscapeHtmlLite(label) + '</p>' +
           '<p class="text-sm text-white font-mono break-all leading-snug">' + vEsc + '</p></div>' +
-          '<button type="button" class="kiosco-subpay-copy-trigger shrink-0 rounded-lg px-3 py-2 text-xs font-semibold bg-emerald-500/25 hover:bg-emerald-500/40 border border-emerald-400/50 text-emerald-100 touch-target active:scale-95"' +
+          '<button type="button" class="kiosco-subpay-copy-trigger shrink-0 rounded-lg px-3 py-2 text-xs font-semibold bg-white/25 hover:bg-white/40 border border-white/50 text-white touch-target active:scale-95"' +
           ' data-kcopy-slot="' + slot + '">' +
           '<i data-lucide="copy" class="inline w-4 h-4 mr-1 align-text-bottom"></i>Copiar</button></div></div>';
       }
@@ -6861,12 +6861,12 @@
       if (box) {
         box.className = admin
           ? 'rounded-2xl border border-cyan-500/45 bg-gradient-to-b from-cyan-950/50 to-black/45 py-6 px-4 mb-6 text-center ring-1 ring-cyan-400/25 shadow-xl shadow-black/30'
-          : 'rounded-2xl border border-emerald-500/45 bg-gradient-to-b from-emerald-950/40 to-black/45 py-6 px-4 mb-6 text-center ring-1 ring-emerald-400/25 shadow-xl shadow-black/30';
+          : 'rounded-2xl border border-white/45 bg-gradient-to-b from-white/40 to-black/45 py-6 px-4 mb-6 text-center ring-1 ring-white/25 shadow-xl shadow-black/30';
       }
       if (big) {
         big.className = admin
           ? 'text-[2.35rem] sm:text-5xl font-black tabular-nums text-cyan-50 tracking-tight leading-none drop-shadow-lg'
-          : 'text-[2.35rem] sm:text-5xl font-black tabular-nums text-emerald-50 tracking-tight leading-none drop-shadow-lg';
+          : 'text-[2.35rem] sm:text-5xl font-black tabular-nums text-white tracking-tight leading-none drop-shadow-lg';
       }
       var dpb = document.getElementById('planCheckoutDistribPriceBig');
       if (dpb) {
@@ -6905,7 +6905,7 @@
       if (expired) {
         el.innerHTML = '<span class="font-semibold text-red-300/95">Suscripción / vigencia:</span> vencida (<time>' + ferriolEscapeHtmlLite(fechaStr) + '</time>). Regularizá con el pago a Ferriol.';
       } else {
-        el.innerHTML = '<span class="font-semibold text-emerald-200/95">Tu vigencia en el sistema:</span> hasta <strong class="text-white/90">' + ferriolEscapeHtmlLite(fechaStr) + '</strong> · quedan <strong class="tabular-nums">' + String(daysLeft) + '</strong> día(s).';
+        el.innerHTML = '<span class="font-semibold text-white/95">Tu vigencia en el sistema:</span> hasta <strong class="text-white/90">' + ferriolEscapeHtmlLite(fechaStr) + '</strong> · quedan <strong class="tabular-nums">' + String(daysLeft) + '</strong> día(s).';
       }
       el.classList.remove('hidden');
     }
@@ -7000,7 +7000,7 @@
           var kt = (copy.modal_distrib_kit || '').trim();
           intro.innerHTML = kt
             ? ferriolEscapeHtmlLite(kt).replace(/\r?\n/g, '<br>')
-            : 'Abonás el <strong class="text-white/88">kit inicial y la licencia de distribuidor</strong> únicamente a la <strong class="text-[#86efac]/95">cuenta empresa Ferriol</strong>. Usá los datos de abajo y enviá el comprobante cuando la empresa lo indique.';
+            : 'Abonás el <strong class="text-white/88">kit inicial y la licencia de distribuidor</strong> únicamente a la <strong class="text-[#ffffff]/95">cuenta empresa Ferriol</strong>. Usá los datos de abajo y enviá el comprobante cuando la empresa lo indique.';
         }
       } else {
         if (tit) {
@@ -7140,7 +7140,7 @@
         if (pBlock) pBlock.classList.remove('hidden');
         if (bWrap) bWrap.classList.add('hidden');
         if (emailHint) emailHint.classList.add('hidden');
-        if (titleEl) titleEl.innerHTML = '<i data-lucide="user-circle" class="w-5 h-5 text-emerald-300"></i> Mis datos personales';
+        if (titleEl) titleEl.innerHTML = '<i data-lucide="user-circle" class="w-5 h-5 text-white"></i> Mis datos personales';
         if (saveBtn) saveBtn.textContent = 'Guardar cambios';
         var em = document.getElementById('accountProfileEmail');
         if (em) em.value = currentUser.email || '';
@@ -7853,7 +7853,7 @@
           if (!bankTitB || !bankBcoB || (!bankCbuB && !bankAliasB)) {
             if (msg) {
               msg.textContent = 'Completá titular, banco y CBU/CVU o alias.';
-              msg.classList.remove('hidden', 'text-emerald-300');
+              msg.classList.remove('hidden', 'text-white');
               msg.classList.add('text-red-300');
             }
             return;
@@ -7861,7 +7861,7 @@
           if (bankCbuB && !/^\d+$/.test(bankCbuB)) {
             if (msg) {
               msg.textContent = 'El CBU/CVU solo debe contener números (sin guiones).';
-              msg.classList.remove('hidden', 'text-emerald-300');
+              msg.classList.remove('hidden', 'text-white');
               msg.classList.add('text-red-300');
             }
             return;
@@ -7884,13 +7884,13 @@
             if (msg) {
           msg.textContent = 'Mis datos bancarios guardados.';
               msg.classList.remove('hidden', 'text-red-300');
-              msg.classList.add('text-emerald-300');
+              msg.classList.add('text-white');
             }
             closeAccountProfileModal();
           } catch (eB) {
             if (msg) {
               msg.textContent = String(eB.message || eB);
-              msg.classList.remove('hidden', 'text-emerald-300');
+              msg.classList.remove('hidden', 'text-white');
               msg.classList.add('text-red-300');
             }
           } finally {
@@ -7916,7 +7916,7 @@
           if (file.size > 3 * 1024 * 1024) {
             if (msg) {
               msg.textContent = 'La imagen supera 3 MB. Elegí un archivo más liviano.';
-              msg.classList.remove('hidden', 'text-emerald-300'); msg.classList.add('text-red-300');
+              msg.classList.remove('hidden', 'text-white'); msg.classList.add('text-red-300');
             }
             return;
           }
@@ -7932,7 +7932,7 @@
           } catch (e) {
             if (msg) {
               msg.textContent = 'No se pudo subir la foto: ' + String(e.message || e);
-              msg.classList.remove('hidden', 'text-emerald-300'); msg.classList.add('text-red-300');
+              msg.classList.remove('hidden', 'text-white'); msg.classList.add('text-red-300');
             }
             return;
           }
@@ -7952,13 +7952,13 @@
           await loadSuperMasBankingSection();
           if (msg) {
             msg.textContent = 'Cambios guardados.';
-            msg.classList.remove('hidden', 'text-red-300'); msg.classList.add('text-emerald-300');
+            msg.classList.remove('hidden', 'text-red-300'); msg.classList.add('text-white');
           }
           closeAccountProfileModal();
         } catch (e2) {
           if (msg) {
             msg.textContent = String(e2.message || e2);
-            msg.classList.remove('hidden', 'text-emerald-300'); msg.classList.add('text-red-300');
+            msg.classList.remove('hidden', 'text-white'); msg.classList.add('text-red-300');
           }
         } finally {
           accountProfileSaveBtn.disabled = false;
@@ -7977,7 +7977,7 @@
         if (!supabaseClient || !currentUser || !isNetworkAdminRole(currentUser.role) || isAnyKioscoPreviewMode()) {
           if (msg) {
             msg.textContent = 'Solo un administrador (partner o fundador, sin modo tienda) puede guardar esto.';
-            msg.classList.remove('hidden', 'text-emerald-300');
+            msg.classList.remove('hidden', 'text-white');
             msg.classList.add('text-red-300');
           }
           return;
@@ -7991,7 +7991,7 @@
         if (up.error) {
           if (msg) {
             msg.textContent = 'No se pudo guardar. ¿Ejecutaste el SQL de partner_transfer_info y las políticas RLS? ' + (up.error.message || '');
-            msg.classList.remove('hidden', 'text-emerald-300');
+            msg.classList.remove('hidden', 'text-white');
             msg.classList.add('text-red-300');
           }
           return;
@@ -8000,7 +8000,7 @@
         if (msg) {
           msg.textContent = 'Listo. Guardado en tu perfil (no visible para el negocio referido).';
           msg.classList.remove('hidden', 'text-red-300');
-          msg.classList.add('text-emerald-300');
+          msg.classList.add('text-white');
         }
         await loadSuperMasBankingSection();
         closePartnerTransferInfoModal();
@@ -8155,7 +8155,7 @@
       const el = document.getElementById('scanToast');
       const text = document.getElementById('scanToastText');
       text.textContent = msg;
-      text.className = 'glass-strong rounded-xl px-4 py-3 text-sm font-medium shadow-lg ' + (isError ? 'text-red-300' : 'text-green-300');
+      text.className = 'glass-strong rounded-xl px-4 py-3 text-sm font-medium shadow-lg ' + (isError ? 'text-red-300' : 'text-white');
       el.classList.remove('hidden');
       el.classList.add('flex');
       lucide.createIcons();
@@ -8248,7 +8248,7 @@
       if (wrap) wrap.classList.toggle('hidden', _ventasCobradasFilter !== 'fecha');
       document.querySelectorAll('.ventas-cobradas-filter-btn').forEach(function (btn) {
         var active = btn.dataset.filter === _ventasCobradasFilter;
-        btn.className = 'ventas-cobradas-filter-btn px-3 py-1.5 rounded-xl text-xs font-medium border touch-target transition-all ' + (active ? 'bg-[#22c55e]/30 border-[#22c55e]/50 text-[#bbf7d0]' : 'border-white/20 bg-white/5 text-white/80');
+        btn.className = 'ventas-cobradas-filter-btn px-3 py-1.5 rounded-xl text-xs font-medium border touch-target transition-all ' + (active ? 'bg-[#ffffff]/30 border-[#ffffff]/50 text-[#bbf7d0]' : 'border-white/20 bg-white/5 text-white/80');
       });
     }
     function renderVentasCobradasModal() {
@@ -8868,7 +8868,7 @@
         <p class="text-white/60 text-sm">Fiado (cuenta, no ingreso hasta cobrar): $${fiado.toLocaleString('es-AR')}</p>
         <p class="text-white/60 text-sm">Transf. pendiente: $${transfPend.toLocaleString('es-AR')}</p>
         <p>Cant. movimientos: ${d.transacciones || 0}</p>
-        <p class="text-green-400">Ganancia del día (precio − costo): $${utilidadDiaTicket.toLocaleString('es-AR')}</p>
+        <p class="text-white">Ganancia del día (precio − costo): $${utilidadDiaTicket.toLocaleString('es-AR')}</p>
         ${arqueoHtml}
       `;
       document.getElementById('ticketTotal').textContent = `Ingresos de caja: $${totalIngresos.toLocaleString('es-AR')}`;
@@ -8993,7 +8993,7 @@
       if (gtEl) gtEl.textContent = '−$' + Math.round(gastosTot).toLocaleString('es-AR');
       if (balEl) {
         balEl.textContent = (balance >= 0 ? '' : '−') + '$' + Math.abs(Math.round(balance)).toLocaleString('es-AR');
-        balEl.className = 'font-bold text-xl shrink-0 ' + (balance >= 0 ? 'text-[#86efac]' : 'text-red-300');
+        balEl.className = 'font-bold text-xl shrink-0 ' + (balance >= 0 ? 'text-[#ffffff]' : 'text-red-300');
       }
       if (fuenteEl && fuente) {
         fuenteEl.textContent = fuente;
@@ -9097,7 +9097,7 @@
         '<p class="text-[11px] text-white/45 mt-1">Cierre auditado · tocá para ver detalle</p>' +
         '</div>' +
         '<div class="text-right shrink-0 py-3 pr-3 flex flex-col justify-center">' +
-        '<span class="font-bold text-[#86efac] tabular-nums text-sm">' +
+        '<span class="font-bold text-[#ffffff] tabular-nums text-sm">' +
         ferriolHistEsc(ventas) +
         '</span>' +
         '<span class="text-[10px] text-white/40 mt-0.5">ventas día</span>' +
@@ -9126,10 +9126,10 @@
         '<p class="text-[11px] text-white/45 mt-1">Sin detalle interactivo · resumen básico</p>' +
         '</div>' +
         '<div class="text-right shrink-0 py-3 pr-3 flex flex-col justify-center">' +
-        '<span class="font-bold text-[#86efac] tabular-nums text-sm">' +
+        '<span class="font-bold text-[#ffffff] tabular-nums text-sm">' +
         ferriolHistEsc(total) +
         '</span>' +
-        '<span class="text-[10px] text-green-400/80">' +
+        '<span class="text-[10px] text-white/80">' +
         Math.round(Number(r.ganancia) || 0).toLocaleString('es-AR') +
         ' gan.</span>' +
         '</div>' +
@@ -9637,7 +9637,7 @@
         }
         var icono = tipo === 'proveedor' ? 'truck' : 'receipt';
         return '<div class="gasto-item glass rounded-xl px-4 py-3 border border-white/10 flex items-center gap-3">' +
-          '<i data-lucide="' + icono + '" class="w-4 h-4 text-[#86efac] shrink-0"></i>' +
+          '<i data-lucide="' + icono + '" class="w-4 h-4 text-[#ffffff] shrink-0"></i>' +
           '<div class="flex-1 min-w-0"><p class="font-medium text-sm truncate flex flex-wrap items-center gap-1.5">' + desc.replace(/</g,'&lt;') + chipPer + '</p>' +
           '<p class="text-xs text-white/50">' + fecha + '</p></div>' +
           '<div class="flex items-center gap-2 shrink-0">' +
@@ -9802,7 +9802,7 @@
       return '<div class="libreta-detalle-row ' + pagadoStyle + '" onclick="window._abrirItemDetalle(\'' + item.id + '\')">' +
         '<span class="libreta-detalle-desc flex flex-wrap items-center gap-1.5 min-w-0' + (item.pagado ? ' line-through opacity-50' : '') + '">' + desc + coment + tipoChip + '</span>' +
         '<div class="flex items-center gap-2 shrink-0">' +
-        '<span class="libreta-detalle-monto ' + (item.pagado ? 'text-green-400' : 'text-[#4ade80]') + '">$' + Math.round(monto).toLocaleString('es-AR') + '</span>' +
+        '<span class="libreta-detalle-monto ' + (item.pagado ? 'text-white' : 'text-[#f1f5f9]') + '">$' + Math.round(monto).toLocaleString('es-AR') + '</span>' +
         (!item.pagado ? '<button onclick="event.stopPropagation();window._eliminarItemLibreta(\'' + item.id + '\')" class="libreta-detalle-del touch-target"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>' : '') +
         '</div>' +
         '</div>';
@@ -9874,7 +9874,7 @@
           datos = datos.filter(function (d) { return d.total > 0; });
         }
         if (datos.length === 0) {
-          el.innerHTML = '<div class="text-center py-10 px-4"><p class="text-white/50 text-sm">Nadie debe dinero en este momento.</p><p class="text-white/35 text-xs mt-2">Tocá <span class="text-[#86efac] font-medium">Todos</span> para ver clientes al día.</p></div>';
+          el.innerHTML = '<div class="text-center py-10 px-4"><p class="text-white/50 text-sm">Nadie debe dinero en este momento.</p><p class="text-white/35 text-xs mt-2">Tocá <span class="text-[#ffffff] font-medium">Todos</span> para ver clientes al día.</p></div>';
           lucide.createIcons();
           _syncLibretaFiltroChips();
           return;
@@ -9884,9 +9884,9 @@
           var total = d.total;
           var montoStr = total > 0
             ? '<span class="libreta-item-deuda text-amber-400">$' + Math.round(total).toLocaleString('es-AR') + '</span>'
-            : '<span class="libreta-item-deuda text-green-400 text-xs">Al día</span>';
+            : '<span class="libreta-item-deuda text-white text-xs">Al día</span>';
           return '<button onclick="window._verClienteLibreta(\'' + c.id + '\')" class="libreta-item-row w-full touch-target">' +
-            '<div class="libreta-item-icon"><i data-lucide="user" class="w-4 h-4 text-[#86efac]"></i></div>' +
+            '<div class="libreta-item-icon"><i data-lucide="user" class="w-4 h-4 text-[#ffffff]"></i></div>' +
             '<div class="libreta-item-info">' +
             '<span class="libreta-item-nombre">' + (c.nombre || '').replace(/</g,'&lt;') + '</span>' +
             (c.telefono ? '<span class="libreta-item-tel">' + c.telefono + '</span>' : '') +
@@ -9937,8 +9937,8 @@
             : 'sin fecha';
           var gid = String(g.grupoId || '').replace(/\\/g, '').replace(/'/g, '');
           var head = '<div class="libreta-cobro-bloque-head flex items-center justify-between gap-2 px-3 py-2 bg-white/5 border-b border-white/10">' +
-            '<span class="text-xs text-white/70 min-w-0">Cobro · ' + fLabel + ' · <strong class="text-[#86efac]">$' + Math.round(g.total).toLocaleString('es-AR') + '</strong></span>' +
-            '<button type="button" onclick="event.stopPropagation();window._libretaCompartirCobroHistorial(\'' + gid + '\')" class="shrink-0 text-[11px] px-2.5 py-1.5 rounded-lg bg-[#25d366]/25 text-[#86efac] touch-target font-semibold">Ticket</button>' +
+            '<span class="text-xs text-white/70 min-w-0">Cobro · ' + fLabel + ' · <strong class="text-[#ffffff]">$' + Math.round(g.total).toLocaleString('es-AR') + '</strong></span>' +
+            '<button type="button" onclick="event.stopPropagation();window._libretaCompartirCobroHistorial(\'' + gid + '\')" class="shrink-0 text-[11px] px-2.5 py-1.5 rounded-lg bg-[#25d366]/25 text-[#ffffff] touch-target font-semibold">Ticket</button>' +
             '</div>';
           var rows = g.items.map(_libretaItemRowHtml).join('');
           return '<div class="libreta-cobro-bloque rounded-xl border border-white/10 overflow-hidden mb-2">' + head + rows + '</div>';
@@ -10187,7 +10187,7 @@
           var desc = (item.descripcion || '').replace(/</g, '&lt;');
           var m = Math.round(Number(item.monto || 0)).toLocaleString('es-AR');
           var tipoTag = item.tipo === 'transferencia_pendiente' ? ' <span class="text-orange-300/90 text-[10px]">(Transf. pend.)</span>' : '';
-          return '<div class="libreta-cuenta-line flex justify-between gap-3 px-4 py-3 border-b border-white/08"><span class="text-white/90 min-w-0 flex-1">' + desc + tipoTag + '</span><span class="font-bold text-[#4ade80] shrink-0">$' + m + '</span></div>';
+          return '<div class="libreta-cuenta-line flex justify-between gap-3 px-4 py-3 border-b border-white/08"><span class="text-white/90 min-w-0 flex-1">' + desc + tipoTag + '</span><span class="font-bold text-[#f1f5f9] shrink-0">$' + m + '</span></div>';
         }).join('') + '<div class="flex justify-between items-baseline px-4 pt-4 pb-2"><span class="text-white/60 text-sm">Total adeudado</span><span class="font-bold text-xl text-amber-400">$' + Math.round(total).toLocaleString('es-AR') + '</span></div>';
       }
       if (sinTel) {
@@ -10400,8 +10400,8 @@
           listEl.innerHTML = '<p class="text-white/40 text-sm text-center py-2">Sin clientes aún. Creá uno nuevo.</p>';
         } else {
           listEl.innerHTML = clientes.map(function (c) {
-            return '<button onclick="window._elegirClienteDesdePrompt(\'' + c.id + '\')" class="w-full glass rounded-xl px-4 py-3 flex items-center gap-3 border border-white/10 hover:border-[#22c55e]/40 touch-target active:scale-[0.98] transition-all">' +
-              '<div class="w-8 h-8 rounded-lg bg-[#22c55e]/20 flex items-center justify-center shrink-0"><i data-lucide="user" class="w-4 h-4 text-[#86efac]"></i></div>' +
+            return '<button onclick="window._elegirClienteDesdePrompt(\'' + c.id + '\')" class="w-full glass rounded-xl px-4 py-3 flex items-center gap-3 border border-white/10 hover:border-[#ffffff]/40 touch-target active:scale-[0.98] transition-all">' +
+              '<div class="w-8 h-8 rounded-lg bg-[#ffffff]/20 flex items-center justify-center shrink-0"><i data-lucide="user" class="w-4 h-4 text-[#ffffff]"></i></div>' +
               '<span class="text-sm font-medium flex-1 text-left">' + (c.nombre || '').replace(/</g,'&lt;') + '</span>' +
               '<i data-lucide="chevron-right" class="w-4 h-4 text-white/30 shrink-0"></i></button>';
           }).join('');
@@ -10443,8 +10443,8 @@
           var safeTel = (c.telefono || '').replace(/'/g, "\\'");
           return '<button type="button" id="clientePicker_' + c.id + '" ' +
             'onclick="window._elegirClienteParaPago(\'' + c.id + '\',\'' + safeName + '\',\'' + safeTel + '\',\'' + nameInputId + '\',\'' + waInputId + '\')" ' +
-            'class="cliente-picker-btn w-full glass rounded-lg px-3 py-2 flex items-center gap-2 border border-white/10 hover:border-[#22c55e]/40 touch-target active:scale-[0.98] transition-all text-left">' +
-            '<i data-lucide="user" class="w-3.5 h-3.5 text-[#86efac] shrink-0"></i>' +
+            'class="cliente-picker-btn w-full glass rounded-lg px-3 py-2 flex items-center gap-2 border border-white/10 hover:border-[#ffffff]/40 touch-target active:scale-[0.98] transition-all text-left">' +
+            '<i data-lucide="user" class="w-3.5 h-3.5 text-[#ffffff] shrink-0"></i>' +
             '<span class="text-sm flex-1 truncate">' + (c.nombre || '').replace(/</g, '&lt;') + '</span>' +
             (c.telefono ? '<span class="text-xs text-white/40 shrink-0">' + c.telefono + '</span>' : '') +
             '</button>';
@@ -10460,11 +10460,11 @@
       var waEl = document.getElementById(waInputId);
       if (waEl && telefono) waEl.value = telefono;
       document.querySelectorAll('.cliente-picker-btn').forEach(function (b) {
-        b.classList.remove('border-[#22c55e]', 'bg-[#22c55e]/10');
+        b.classList.remove('border-[#ffffff]', 'bg-[#ffffff]/10');
         b.classList.add('border-white/10');
       });
       var sel = document.getElementById('clientePicker_' + clienteId);
-      if (sel) { sel.classList.remove('border-white/10'); sel.classList.add('border-[#22c55e]', 'bg-[#22c55e]/10'); }
+      if (sel) { sel.classList.remove('border-white/10'); sel.classList.add('border-[#ffffff]', 'bg-[#ffffff]/10'); }
     };
 
     window._confirmarPagoFiado = function () {
@@ -11178,7 +11178,7 @@ async function showApp() {
         return;
       }
       errEl.textContent = 'Contraseña actualizada. Ya podés iniciar sesión con la nueva contraseña.';
-      errEl.style.color = '#86efac';
+      errEl.style.color = '#ffffff';
       errEl.classList.add('show');
       document.getElementById('setNewPwdBox').classList.add('hidden');
       document.getElementById('loginFormWrap').classList.remove('hidden');
@@ -11228,7 +11228,7 @@ async function showApp() {
         return;
       }
       errEl.textContent = 'Revisá tu email. Te enviamos un enlace para restablecer la contraseña.';
-      errEl.style.color = '#86efac';
+      errEl.style.color = '#ffffff';
       errEl.classList.add('show');
       document.getElementById('resetPwdBox').classList.add('hidden');
     };
@@ -11624,7 +11624,7 @@ async function showApp() {
       a.click();
       URL.revokeObjectURL(a.href);
       var msg = document.getElementById('backupMessage');
-      if (msg) { msg.textContent = 'Copia exportada (productos, clientes, caja del día). Guardá el archivo en un lugar seguro.'; msg.classList.remove('hidden'); msg.className = 'text-sm mt-2 text-green-400'; setTimeout(function () { msg.classList.add('hidden'); }, 4000); }
+      if (msg) { msg.textContent = 'Copia exportada (productos, clientes, caja del día). Guardá el archivo en un lugar seguro.'; msg.classList.remove('hidden'); msg.className = 'text-sm mt-2 text-white'; setTimeout(function () { msg.classList.add('hidden'); }, 4000); }
       lucide.createIcons();
     }
     function importBackup(file) {
@@ -11650,7 +11650,7 @@ async function showApp() {
           }
           saveToLocalStorage();
           setData({ products: _dataCache.products, ventas: _dataCache.ventas, transacciones: _dataCache.transacciones, lastCierreDate: _dataCache.lastCierreDate });
-          if (msgEl) { msgEl.textContent = 'Datos restaurados (productos, clientes, caja). Recargá la página si no ves los cambios.'; msgEl.classList.remove('hidden'); msgEl.className = 'text-sm mt-2 text-green-400'; setTimeout(function () { msgEl.classList.add('hidden'); }, 5000); }
+          if (msgEl) { msgEl.textContent = 'Datos restaurados (productos, clientes, caja). Recargá la página si no ves los cambios.'; msgEl.classList.remove('hidden'); msgEl.className = 'text-sm mt-2 text-white'; setTimeout(function () { msgEl.classList.add('hidden'); }, 5000); }
           renderInventory();
           updateDashboard();
           if (typeof loadClientes === 'function') loadClientes().then(function () { if (typeof renderClientes === 'function') renderClientes(); });
@@ -11867,7 +11867,7 @@ async function showApp() {
         var ta = document.createElement('textarea');
         ta.rows = 2;
         ta.setAttribute('data-trial-msg-day', sk);
-        ta.className = 'w-full glass rounded-xl px-3 py-2 border border-white/20 text-white text-sm placeholder-white/35 focus:outline-none focus:ring-2 focus:ring-[#22c55e] resize-y min-h-[3.5rem]';
+        ta.className = 'w-full glass rounded-xl px-3 py-2 border border-white/20 text-white text-sm placeholder-white/35 focus:outline-none focus:ring-2 focus:ring-[#ffffff] resize-y min-h-[3.5rem]';
         ta.placeholder = 'Ej: Aprovechá hoy para renovar y seguir con stock, caja y libreta sin cortes.';
         var v = pres[sk] != null ? pres[sk] : (msgs[sk] != null ? msgs[sk] : (msgs[d] != null ? msgs[d] : ''));
         ta.value = typeof v === 'string' ? v : String(v || '');
@@ -11906,7 +11906,7 @@ async function showApp() {
         var sub = (viewerHelpWhatsApp.sourceRole === 'kiosquero') ? '<p class="text-[11px] text-white/45 mb-2">Contacto de tu referidor / patrocinador.</p>' : '<p class="text-[11px] text-white/45 mb-2">Contacto configurado por la empresa (fundadores).</p>';
         container.innerHTML = sub + list.map(function (num, i) {
           var label = list.length > 1 ? 'WhatsApp (' + (i + 1) + ')' : 'Escribir por WhatsApp';
-          return '<a href="' + getWhatsAppUrl(num, msg) + '" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-green-600 hover:bg-green-500 text-white font-medium touch-target"><i data-lucide="message-circle" class="w-5 h-5"></i> ' + label + '</a>';
+          return '<a href="' + getWhatsAppUrl(num, msg) + '" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white/90 hover:bg-white text-slate-900 font-medium touch-target"><i data-lucide="message-circle" class="w-5 h-5"></i> ' + label + '</a>';
         }).join('');
       }
       lucide.createIcons();
@@ -11921,7 +11921,7 @@ async function showApp() {
       } else {
         container.innerHTML = list.map(function (num, i) {
           var label = list.length > 1 ? 'WhatsApp (' + (i + 1) + ')' : 'Escribir por WhatsApp';
-          return '<a href="' + getWhatsAppUrl(num, msg) + '" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white font-medium text-sm touch-target"><i data-lucide="message-circle" class="w-5 h-5"></i> ' + label + '</a>';
+          return '<a href="' + getWhatsAppUrl(num, msg) + '" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-white/90 hover:bg-white text-slate-900 font-medium text-sm touch-target"><i data-lucide="message-circle" class="w-5 h-5"></i> ' + label + '</a>';
         }).join('');
       }
       lucide.createIcons();
@@ -11990,7 +11990,7 @@ async function showApp() {
         span.textContent = t.expired ? 'Vencida' : t.text;
         span.className =
           'inv-item-price super-list-countdown ' +
-          (t.expired ? 'text-red-300' : isKit ? 'text-amber-200/95' : 'text-[#86efac]');
+          (t.expired ? 'text-red-300' : isKit ? 'text-amber-200/95' : 'text-[#ffffff]');
       });
     }
     function superAfiliadosFilterBySubTab(list) {
@@ -12005,8 +12005,8 @@ async function showApp() {
       var isU = state.afiliadosSubTab !== 'distribuidores';
       u.setAttribute('aria-selected', isU ? 'true' : 'false');
       d.setAttribute('aria-selected', !isU ? 'true' : 'false');
-      u.className = 'super-afiliados-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border transition-all ' + (isU ? 'border-[#22c55e]/50 bg-[#22c55e]/20 text-white' : 'border-transparent text-white/55 hover:text-white/80');
-      d.className = 'super-afiliados-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border transition-all ' + (!isU ? 'border-[#22c55e]/50 bg-[#22c55e]/20 text-white' : 'border-transparent text-white/55 hover:text-white/80');
+      u.className = 'super-afiliados-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border transition-all ' + (isU ? 'border-[#ffffff]/50 bg-[#ffffff]/20 text-white' : 'border-transparent text-white/55 hover:text-white/80');
+      d.className = 'super-afiliados-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border transition-all ' + (!isU ? 'border-[#ffffff]/50 bg-[#ffffff]/20 text-white' : 'border-transparent text-white/55 hover:text-white/80');
     }
     function buildSuperAfiliadoRowHtml(u) {
       var name = (u.kiosco_name || u.email || 'Sin nombre').replace(/</g, '&lt;');
@@ -12018,7 +12018,7 @@ async function showApp() {
       var email = (u.email || '').replace(/</g, '&lt;');
       var stockClass = u.active ? 'text-white/45' : 'text-red-400/90';
       var sinRef = (!u.sponsor_id && isEmpresaLensSuper()) ? '<span class="text-amber-200/80 text-[10px] font-normal"> · sin ref.</span>' : '';
-      var priceClass = trialFull.expired ? 'text-red-300' : kitReviewRow ? 'text-amber-200/95' : 'text-[#86efac]';
+      var priceClass = trialFull.expired ? 'text-red-300' : kitReviewRow ? 'text-amber-200/95' : 'text-[#ffffff]';
       var kitRev = '';
       if (kitReviewRow) {
         kitRev = ' <span class="ml-1 inline-block text-[9px] font-bold uppercase tracking-wide text-amber-200 bg-amber-500/25 border border-amber-400/40 rounded px-1 py-0.5 align-middle">Kit</span>';
@@ -12135,7 +12135,7 @@ async function showApp() {
     function buildSuperMdrSumInnerHtml(user) {
       var isPartner = user.role === 'partner';
       var amtDef = isPartner ? FERRIOL_PLAN_AMOUNTS.vendorMonthly : FERRIOL_PLAN_AMOUNTS.kioscoMonthly;
-      var shell = isPartner ? 'rounded-xl border border-violet-500/35 bg-violet-500/08 p-4 space-y-3' : 'rounded-xl border border-emerald-500/35 bg-emerald-500/08 p-4 space-y-3';
+      var shell = isPartner ? 'rounded-xl border border-violet-500/35 bg-violet-500/08 p-4 space-y-3' : 'rounded-xl border border-white/35 bg-white/08 p-4 space-y-3';
       var intro = isPartner
         ? '<p class="text-xs text-white/65 leading-relaxed">Cuando el socio ya te pagó la cuota, indicá monto y 20% a Ferriol. La empresa aprueba y recién ahí se actualiza la vigencia de la membresía.</p>'
         : '<p class="text-xs text-white/65 leading-relaxed">Ej. suscripción mensual <strong class="text-white/80">$ ' + FERRIOL_PLAN_AMOUNTS.kioscoMonthly.toLocaleString('es-AR') + '</strong>. Completás el 20% a la empresa en la solicitud; Ferriol aprueba y recién ahí cambia el contador del negocio.</p>';
@@ -12162,7 +12162,7 @@ async function showApp() {
         '<input type="text" class="super-detail-req-company-note w-full glass rounded-lg px-3 py-2.5 border border-white/20 text-white text-sm mt-1" placeholder="Ej. transferencia, fecha, banco">' +
         '</div>' +
         '<button type="button" class="super-detail-req-submit-add w-full py-3 rounded-xl text-sm touch-target font-medium ' +
-        (isPartner ? 'bg-violet-500/25 text-violet-50 border border-violet-400/45' : 'bg-emerald-500/25 text-emerald-100 border border-green-500/45') +
+        (isPartner ? 'bg-violet-500/25 text-violet-50 border border-violet-400/45' : 'bg-white/25 text-white border border-white/45') +
         '">Enviar solicitud</button>' +
         '</div>'
       );
@@ -12203,7 +12203,7 @@ async function showApp() {
         ttl.className =
           subjectUser.role === 'partner'
             ? 'font-bold text-lg text-violet-100 pr-6'
-            : 'font-bold text-lg text-emerald-100 pr-6';
+            : 'font-bold text-lg text-white pr-6';
       }
       cnt.innerHTML = buildSuperMdrSumInnerHtml(subjectUser);
       wireMdrSumForm(cnt, subjectUser);
@@ -12318,13 +12318,13 @@ async function showApp() {
         }
         assignHtml = `
         <div class="border-t border-white/10 pt-4 space-y-2">
-          <p class="text-sm font-medium text-[#86efac] flex items-center gap-2"><i data-lucide="git-branch" class="w-4 h-4"></i> Asignar referidor / admin de la red</p>
-          <p class="text-xs text-white/50">Solo cuentas <span class="text-[#86efac]">super</span> (fundadores) y <span class="text-violet-300/95">partner</span> (distribuidores) pueden patrocinar suscriptores.</p>
+          <p class="text-sm font-medium text-[#ffffff] flex items-center gap-2"><i data-lucide="git-branch" class="w-4 h-4"></i> Asignar referidor / admin de la red</p>
+          <p class="text-xs text-white/50">Solo cuentas <span class="text-[#ffffff]">super</span> (fundadores) y <span class="text-violet-300/95">partner</span> (distribuidores) pueden patrocinar suscriptores.</p>
           <div class="relative">
             <select id="superDetailSponsorSelect" class="ferriol-sponsor-select w-full rounded-xl pl-3 pr-10 py-3 text-sm appearance-none cursor-pointer min-h-[3rem]">${opts.join('')}</select>
-            <i data-lucide="chevron-down" class="ferriol-sponsor-select-chevron pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#86efac]/70"></i>
+            <i data-lucide="chevron-down" class="ferriol-sponsor-select-chevron pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#ffffff]/70"></i>
           </div>
-          <button type="button" class="super-detail-save-sponsor w-full py-2.5 rounded-xl text-sm bg-[#22c55e]/25 text-[#86efac] border border-[#22c55e]/50 touch-target font-medium">Guardar referidor</button>
+          <button type="button" class="super-detail-save-sponsor w-full py-2.5 rounded-xl text-sm bg-[#ffffff]/25 text-[#ffffff] border border-[#ffffff]/50 touch-target font-medium">Guardar referidor</button>
         </div>`;
       }
       var sponsorIsPartner = false;
@@ -12384,7 +12384,7 @@ async function showApp() {
           </label>
           <div class="relative">
             <select id="superBulkReassignSponsorSelect" class="ferriol-sponsor-select w-full rounded-xl pl-3 pr-10 py-3 text-sm appearance-none cursor-pointer min-h-[3rem]">${optsBulk.join('')}</select>
-            <i data-lucide="chevron-down" class="ferriol-sponsor-select-chevron pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#86efac]/70"></i>
+            <i data-lucide="chevron-down" class="ferriol-sponsor-select-chevron pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#ffffff]/70"></i>
           </div>
           <button type="button" class="super-detail-bulk-reassign w-full py-2.5 rounded-xl text-sm bg-amber-500/20 text-amber-100 border border-amber-400/45 touch-target font-medium">Reasignar toda la línea directa</button>
           <button type="button" class="super-detail-partner-penalty w-full py-2.5 rounded-xl text-sm bg-red-600/25 text-red-200 border border-red-500/50 touch-target font-medium ${user.active ? '' : 'opacity-50 pointer-events-none'}" ${user.active ? '' : 'disabled'}>Penalidad: desactivar acceso del socio</button>
@@ -12405,7 +12405,7 @@ async function showApp() {
           ' <strong class="text-amber-100/90">' +
           kLab +
           '</strong></p>' +
-          '<button type="button" class="super-detail-clear-kit-review w-full py-2.5 rounded-xl text-sm bg-emerald-600/22 text-emerald-100 border border-emerald-400/45 touch-target font-medium">Confirmé el cobro del kit — quitar aviso del perfil</button>' +
+          '<button type="button" class="super-detail-clear-kit-review w-full py-2.5 rounded-xl text-sm bg-white/22 text-white border border-white/45 touch-target font-medium">Confirmé el cobro del kit — quitar aviso del perfil</button>' +
           '</div>';
       }
       var quitarHtml = isSocioLens ? '' : `
@@ -12414,7 +12414,7 @@ async function showApp() {
             </button>`;
       var founderActionsHtml = `
         <div class="border-t border-white/10 pt-4 space-y-3 super-detail-actions-founder">
-          <p class="text-xs text-white/55 leading-relaxed">Los <strong class="text-[#86efac]/90">días de vigencia</strong> (kiosco o socio) no se cargan a mano acá: solo desde la <strong class="text-white/75">cola de aprobaciones</strong> en Negocios, después de verificar el cobro y el pago a Ferriol.</p>
+          <p class="text-xs text-white/55 leading-relaxed">Los <strong class="text-[#ffffff]/90">días de vigencia</strong> (kiosco o socio) no se cargan a mano acá: solo desde la <strong class="text-white/75">cola de aprobaciones</strong> en Negocios, después de verificar el cobro y el pago a Ferriol.</p>
           <div class="flex items-center gap-2 flex-wrap">
             <span class="text-sm text-white/70">Activar/Desactivar:</span>
             <button type="button" class="super-detail-toggle toggle-switch ${user.active ? 'active' : ''}" title="${user.active ? 'Desactivar' : 'Activar'}"></button>
@@ -12433,7 +12433,7 @@ async function showApp() {
         <div class="border-t border-white/10 pt-5 space-y-4 super-detail-actions-socio-kiosquero">
           <p class="text-xs text-white/55 leading-relaxed">Los administradores de red no modifican los días a mano: cada acción abre su propia pantalla. La empresa aprueba antes de aplicar cambios al contador (suscripción mensual ejemplo <strong class="text-white/70">$ ${FERRIOL_PLAN_AMOUNTS.kioscoMonthly.toLocaleString('es-AR')}</strong>).</p>
           <div class="flex flex-col gap-4">
-            <button type="button" class="super-detail-open-mdr-sum w-full py-3.5 rounded-xl text-sm bg-emerald-500/20 text-emerald-100 border border-emerald-500/45 touch-target font-medium shadow-sm shadow-black/15">Solicitar suma de días</button>
+            <button type="button" class="super-detail-open-mdr-sum w-full py-3.5 rounded-xl text-sm bg-white/20 text-white border border-white/45 touch-target font-medium shadow-sm shadow-black/15">Solicitar suma de días</button>
             <button type="button" class="super-detail-open-mdr-rem w-full py-3.5 rounded-xl text-sm bg-red-600/22 text-red-100 border border-red-500/45 touch-target font-medium shadow-sm shadow-black/15">Solicitar quita de días</button>
             <button type="button" class="super-detail-reset w-full py-3.5 rounded-xl text-sm bg-amber-500/20 text-amber-300 border border-amber-500/40 touch-target flex items-center justify-center gap-2 shadow-sm shadow-black/15">
               <i data-lucide="key" class="w-4 h-4"></i> Recuperar contraseña
@@ -12466,7 +12466,7 @@ async function showApp() {
         <div class="space-y-1 text-sm text-white/80">
           <p><span class="text-white/50">Email:</span> ${email || '—'}</p>
           <p><span class="text-white/50">Rol:</span> ${(user.role || 'kiosquero').replace(/</g, '&lt;')}</p>
-          <p><span class="text-white/50">Estado:</span> <span class="${user.active ? 'text-green-300' : 'text-red-300'}">${user.active ? 'Activo' : 'Inactivo'}</span></p>
+          <p><span class="text-white/50">Estado:</span> <span class="${user.active ? 'text-white' : 'text-red-300'}">${user.active ? 'Activo' : 'Inactivo'}</span></p>
           <p><span class="text-white/50">${kitRevLive ? 'Aprobación kit (cuenta atrás):' : 'Membresía:'}</span> <span id="superDetailCountdown" class="${trialFull.expired ? 'text-red-300' : kitRevLive ? 'text-amber-200' : 'text-[#f87171]'}">${trialFull.text}</span></p>
           <p><span class="text-white/50">Código de referido:</span> ${refCodeEsc}</p>
           <p><span class="text-white/50">Referido por:</span> ${sponsorLine}</p>
@@ -12794,7 +12794,7 @@ async function showApp() {
             html += '<p class="text-[11px] font-medium text-amber-100/90 mb-1">Membresía · días</p><div class="space-y-2 max-h-[32vh] overflow-y-auto pr-1 mb-3">';
             rows.forEach(function (row) {
               var targProf = pool.find(function (x) { return x.id === row.kiosquero_user_id; });
-              var kindLab = targProf && targProf.role === 'partner' ? '<span class="text-violet-300/90 text-[10px]">Socio · </span>' : '<span class="text-emerald-300/90 text-[10px]">Kiosco · </span>';
+              var kindLab = targProf && targProf.role === 'partner' ? '<span class="text-violet-300/90 text-[10px]">Socio · </span>' : '<span class="text-white/90 text-[10px]">Kiosco · </span>';
               var kname = kindLab + String(nameOf(row.kiosquero_user_id)).replace(/</g, '&lt;');
               var reqname = String(nameOf(row.requested_by)).replace(/</g, '&lt;');
               var sign = row.days_delta > 0 ? '+' : '';
@@ -12833,14 +12833,14 @@ async function showApp() {
           if (kprErr) {
             html += '<p class="text-[10px] text-red-300 mb-2">Altas de negocios (kioscos): error. ' + String(kprErr.message || '') + '</p>';
           } else if (kprRows.length > 0) {
-            html += '<p class="text-[11px] font-medium text-emerald-200/95 mb-1">Nuevo negocio (kiosco · gestión)</p><div class="space-y-2 max-h-[28vh] overflow-y-auto pr-1">';
+            html += '<p class="text-[11px] font-medium text-white/95 mb-1">Nuevo negocio (kiosco · gestión)</p><div class="space-y-2 max-h-[28vh] overflow-y-auto pr-1">';
             kprRows.forEach(function (row) {
               var reqname = String(nameOf(row.requested_by)).replace(/</g, '&lt;');
               var em = String(row.target_email || '').replace(/</g, '&lt;');
               var kn = String(row.kiosco_name || '').replace(/</g, '&lt;');
               var payLine = row.client_payment_ars != null ? '<p class="text-[10px] text-white/50">Cobro ARS: ' + row.client_payment_ars + ' · 20% empresa: ' + (row.company_share_ars != null ? row.company_share_ars : '—') + '</p>' : '';
               var noteLine = row.company_transfer_note ? '<p class="text-[10px] text-cyan-100/80">Ref.: ' + String(row.company_transfer_note).replace(/</g, '&lt;') + '</p>' : '';
-              html += '<div class="rounded-lg border border-emerald-500/30 bg-emerald-950/15 p-2 text-xs">' +
+              html += '<div class="rounded-lg border border-white/30 bg-white/15 p-2 text-xs">' +
                 '<p class="font-medium text-white/90">' + kn + '</p><p class="text-[10px] text-white/55">' + em + ' · Solicita: ' + reqname + '</p>' + payLine + noteLine +
                 '<div class="flex flex-wrap gap-2 mt-2">' +
                 '<button type="button" class="ferriol-kpr-approve btn-glow rounded-lg py-1.5 px-3 text-[11px] font-semibold touch-target" data-kpr-id="' + row.id + '">Aprobar alta kiosco</button>' +
@@ -13003,7 +13003,7 @@ async function showApp() {
             } else {
               h2 += '<div class="space-y-1.5 max-h-[22vh] overflow-y-auto text-[11px] mb-3">';
               rows2.forEach(function (row) {
-                var st = row.status === 'pending' ? 'text-amber-200' : row.status === 'approved' ? 'text-emerald-200' : 'text-red-200/80';
+                var st = row.status === 'pending' ? 'text-amber-200' : row.status === 'approved' ? 'text-white' : 'text-red-200/80';
                 var kn = String(nameOf2(row.kiosquero_user_id)).replace(/</g, '&lt;');
                 var dt = row.created_at ? String(row.created_at).slice(0, 10) : '';
                 h2 += '<div class="rounded-lg border border-white/10 bg-black/20 px-2 py-1.5"><span class="' + st + '">' + row.status + '</span> · ' + kn + ' · ' + (row.days_delta > 0 ? '+' : '') + row.days_delta + ' d · ' + dt + '</div>';
@@ -13021,7 +13021,7 @@ async function showApp() {
             } else {
               h2 += '<div class="space-y-1.5 max-h-[22vh] overflow-y-auto text-[11px]">';
               prow.forEach(function (pr) {
-                var st = pr.status === 'pending' ? 'text-amber-200' : pr.status === 'approved' ? 'text-emerald-200' : pr.status === 'completed' ? 'text-white/55' : 'text-red-200/80';
+                var st = pr.status === 'pending' ? 'text-amber-200' : pr.status === 'approved' ? 'text-white' : pr.status === 'completed' ? 'text-white/55' : 'text-red-200/80';
                 var em = String(pr.target_email || '').replace(/</g, '&lt;');
                 var dt = pr.created_at ? String(pr.created_at).slice(0, 10) : '';
                 var btnC = '';
@@ -13034,16 +13034,16 @@ async function showApp() {
             }
           }
           if (r2k.error) {
-            h2 += '<p class="text-xs text-emerald-200/90 font-medium mb-1 mt-2">Altas de negocios (kioscos)</p><p class="text-[10px] text-red-300/90">' + String(r2k.error.message || '') + '</p>';
+            h2 += '<p class="text-xs text-white/90 font-medium mb-1 mt-2">Altas de negocios (kioscos)</p><p class="text-[10px] text-red-300/90">' + String(r2k.error.message || '') + '</p>';
           } else {
             var krows = r2k.data || [];
-            h2 += '<p class="text-xs text-emerald-200/90 font-medium mb-2 mt-2">Altas de negocios (kioscos)</p>';
+            h2 += '<p class="text-xs text-white/90 font-medium mb-2 mt-2">Altas de negocios (kioscos)</p>';
             if (krows.length === 0) {
               h2 += '<p class="text-[10px] text-white/50">Las solicitudes las cargan los partners desde el panel correspondiente; la empresa aprueba antes de crear el usuario.</p>';
             } else {
               h2 += '<div class="space-y-1.5 max-h-[22vh] overflow-y-auto text-[11px]">';
               krows.forEach(function (kr) {
-                var st = kr.status === 'pending' ? 'text-amber-200' : kr.status === 'approved' ? 'text-emerald-200' : kr.status === 'completed' ? 'text-white/55' : 'text-red-200/80';
+                var st = kr.status === 'pending' ? 'text-amber-200' : kr.status === 'approved' ? 'text-white' : kr.status === 'completed' ? 'text-white/55' : 'text-red-200/80';
                 var em = String(kr.target_email || '').replace(/</g, '&lt;');
                 var kn = String(kr.kiosco_name || '').replace(/</g, '&lt;');
                 var dt = kr.created_at ? String(kr.created_at).slice(0, 10) : '';
@@ -13051,7 +13051,7 @@ async function showApp() {
                 if (kr.status === 'approved' && kr.completion_token) {
                   btnK = '<button type="button" class="ferriol-kpr-complete mt-1 w-full btn-glow rounded-lg py-1.5 text-[10px] font-semibold touch-target" data-token="' + String(kr.completion_token) + '" data-email-enc="' + encodeURIComponent(kr.target_email || '') + '">Definir contraseña del kiosco</button>';
                 }
-                h2 += '<div class="rounded-lg border border-emerald-500/25 bg-black/20 px-2 py-1.5"><span class="' + st + '">' + kr.status + '</span> · ' + kn + ' · ' + em + ' · ' + dt + btnK + '</div>';
+                h2 += '<div class="rounded-lg border border-white/25 bg-black/20 px-2 py-1.5"><span class="' + st + '">' + kr.status + '</span> · ' + kn + ' · ' + em + ' · ' + dt + btnK + '</div>';
               });
               h2 += '</div>';
             }
@@ -13384,8 +13384,8 @@ async function showApp() {
       var el = document.getElementById('adminSliceMsg-' + slice);
       if (!el) return;
       el.textContent = text;
-      el.classList.remove('hidden', 'text-green-300', 'text-red-300', 'text-amber-300');
-      el.classList.add(isErr ? 'text-red-300' : 'text-green-300');
+      el.classList.remove('hidden', 'text-white', 'text-red-300', 'text-amber-300');
+      el.classList.add(isErr ? 'text-red-300' : 'text-white');
       el.classList.remove('hidden');
       if (!isErr) {
         setTimeout(function () {
@@ -13614,7 +13614,7 @@ async function showApp() {
         a.download = 'ferriol-respaldo-todos-' + new Date().toISOString().slice(0, 10) + '.json';
         a.click();
         URL.revokeObjectURL(a.href);
-        if (msgEl) { msgEl.textContent = 'Copia exportada: ' + backup.users.length + ' usuario(s). Guardá el archivo en un lugar seguro.'; msgEl.className = 'text-xs mt-2 text-green-400'; setTimeout(function () { msgEl.classList.add('hidden'); }, 6000); }
+        if (msgEl) { msgEl.textContent = 'Copia exportada: ' + backup.users.length + ' usuario(s). Guardá el archivo en un lugar seguro.'; msgEl.className = 'text-xs mt-2 text-white'; setTimeout(function () { msgEl.classList.add('hidden'); }, 6000); }
       } catch (e) {
         if (msgEl) { msgEl.textContent = 'Error: ' + (e.message || 'No se pudo exportar. Revisá que las políticas RLS permitan al admin leer productos y clientes de otros usuarios.'); msgEl.className = 'text-xs mt-2 text-amber-300'; }
       }
@@ -13675,7 +13675,7 @@ async function showApp() {
           if (msgEl) {
             if (err > 0) msgEl.textContent = 'Complementados: ' + ok + ' usuario(s). Fallaron: ' + err + '.';
             else msgEl.textContent = 'Importación lista: se sumaron los datos del archivo a los existentes en ' + ok + ' usuario(s). No se reemplazó nada.';
-            msgEl.className = 'text-xs mt-2 ' + (err > 0 ? 'text-amber-300' : 'text-green-400');
+            msgEl.className = 'text-xs mt-2 ' + (err > 0 ? 'text-amber-300' : 'text-white');
             setTimeout(function () { msgEl.classList.add('hidden'); }, 8000);
           }
         } catch (e) {
@@ -13811,7 +13811,7 @@ async function showApp() {
         if (err) throw err;
         if (textarea) textarea.value = '';
         var destHint = audience === 'all' ? 'todos los destinatarios de la campana' : audience === 'kiosquero' ? 'solo negocios (kiosqueros)' : audience === 'partner' ? 'solo distribuidores (rol partner)' : 'solo la red comercial (socios + fundador en vista socio)';
-        if (msgEl) { msgEl.textContent = 'Enviado: ' + destHint + '. Lo ven en la campana quienes correspondan.'; msgEl.classList.remove('hidden'); msgEl.className = 'text-xs mt-2 text-green-300'; setTimeout(function () { msgEl.classList.add('hidden'); }, 5000); }
+        if (msgEl) { msgEl.textContent = 'Enviado: ' + destHint + '. Lo ven en la campana quienes correspondan.'; msgEl.classList.remove('hidden'); msgEl.className = 'text-xs mt-2 text-white'; setTimeout(function () { msgEl.classList.add('hidden'); }, 5000); }
       } catch (e) {
         if (msgEl) { msgEl.textContent = 'Error: ' + (e.message || 'Creá la tabla notifications en Supabase (ver comentarios en el código).'); msgEl.classList.remove('hidden'); msgEl.className = 'text-xs mt-2 text-red-300'; }
       }

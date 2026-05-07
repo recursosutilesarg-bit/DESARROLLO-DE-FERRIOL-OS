@@ -16,7 +16,7 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#052e16">
+  <meta name="theme-color" content="#0f172a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -128,7 +128,7 @@
         <h1>Ferriol OS</h1>
         <p class="sub">Sistema de gestión para negocios pequeños</p>
         <div id="loginErr" class="login-err"></div>
-        <div id="loginContactAdminWrap" class="hidden mt-3 p-3 rounded-xl bg-[#22c55e]/20 border border-[#22c55e]/40">
+        <div id="loginContactAdminWrap" class="hidden mt-3 p-3 rounded-xl bg-[#ffffff]/20 border border-[#ffffff]/40">
           <p id="loginContactIntro" class="text-sm text-white/80 mb-2">Contacto para regularizar tu acceso (referidor si sos negocio; empresa si sos administrador de red):</p>
           <div id="loginContactWhatsAppLinks" class="space-y-2"></div>
         </div>
@@ -154,9 +154,9 @@
             <span class="login-signup-tile-label">Quiero ser distribuidor del sistema</span>
           </button>
         </div>
-        <p id="loginKiosqueroPartnerHint" class="text-[11px] text-white/45 text-center leading-snug px-2 mt-3 max-w-sm mx-auto">¿Ya tenés <strong class="text-white/60">cuenta de negocio</strong> y querés vender Ferriol? <strong class="text-[#86efac]/90">Iniciá sesión</strong> y en el inicio tocá <strong class="text-white/70">Quiero ser distribuidor</strong>.</p>
+        <p id="loginKiosqueroPartnerHint" class="text-[11px] text-white/45 text-center leading-snug px-2 mt-3 max-w-sm mx-auto">¿Ya tenés <strong class="text-white/60">cuenta de negocio</strong> y querés vender Ferriol? <strong class="text-[#ffffff]/90">Iniciá sesión</strong> y en el inicio tocá <strong class="text-white/70">Quiero ser distribuidor</strong>.</p>
         <p class="login-hint login-hint--solo-link" id="loginHint">
-          <a href="#" id="forgotPwd" class="text-[#86efac]">¿Olvidaste tu contraseña?</a>
+          <a href="#" id="forgotPwd" class="text-[#ffffff]">¿Olvidaste tu contraseña?</a>
         </p>
         <div id="resetPwdBox" class="hidden mt-4 pt-4 border-t border-white/10">
           <p class="text-sm text-white/70 mb-2">Ingresá tu email y te enviamos un enlace para restablecer la contraseña.</p>
@@ -197,7 +197,7 @@
           <input type="text" id="signUpKioscoName" placeholder="Ej. Kiosco de la esquina" autocomplete="organization" class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white">
         </div>
         <div id="signUpWrapDistribuidor" class="hidden">
-          <p class="text-[11px] text-amber-200/90 leading-snug mb-2">Si <strong class="text-white/90">ya tenés cuenta de negocio</strong> con este email, no uses «Crear cuenta»: <strong class="text-[#86efac]/95">iniciá sesión</strong> y tocá <strong class="text-white/80">«Quiero ser distribuidor»</strong>.</p>
+          <p class="text-[11px] text-amber-200/90 leading-snug mb-2">Si <strong class="text-white/90">ya tenés cuenta de negocio</strong> con este email, no uses «Crear cuenta»: <strong class="text-[#ffffff]/95">iniciá sesión</strong> y tocá <strong class="text-white/80">«Quiero ser distribuidor»</strong>.</p>
           <label for="signUpNombreApellido" class="block text-xs text-white/60 mb-1">Nombre y apellido</label>
           <input type="text" id="signUpNombreApellido" placeholder="Como querés que te vea la red" autocomplete="name" class="w-full mb-3 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white">
           <label for="signUpReferralCode" class="block text-xs text-white/60 mb-1">Código de referido (opcional)</label>
@@ -206,11 +206,11 @@
         <div class="mb-4 flex items-start gap-2 sign-up-terms-row">
           <input type="checkbox" id="signUpAcceptTerms" class="shrink-0">
           <label for="signUpAcceptTerms" class="text-sm text-white/80 leading-tight">
-            Acepto los <button type="button" id="openTermsModal" class="text-[#86efac] underline font-medium">Términos y Condiciones</button> y el Contrato de Servicio de Ferriol OS (incluyendo que no hay responsabilidad por pérdida de datos y que los datos están sujetos a la licencia del servicio).
+            Acepto los <button type="button" id="openTermsModal" class="text-[#ffffff] underline font-medium">Términos y Condiciones</button> y el Contrato de Servicio de Ferriol OS (incluyendo que no hay responsabilidad por pérdida de datos y que los datos están sujetos a la licencia del servicio).
           </label>
         </div>
         <button type="button" id="doSignUp" class="btn-login w-full py-2">Crear cuenta</button>
-        <p class="login-hint mt-4"><a href="#" id="backToLogin" class="text-[#86efac]">Volver al inicio de sesión</a></p>
+        <p class="login-hint mt-4"><a href="#" id="backToLogin" class="text-[#ffffff]">Volver al inicio de sesión</a></p>
       </div>
 
       <!-- Modal Términos y Condiciones -->
@@ -247,7 +247,7 @@
         <button type="button" id="kioscoSubscriptionPayModalClose" class="btn-neomorphic rounded-xl p-2 touch-target shrink-0" title="Cerrar"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <div id="kioscoSubPayBankFields"></div>
-      <button type="button" id="btnOpenKioscoEmpresaPaymentProofModal" class="mt-5 w-full py-3.5 rounded-xl font-semibold touch-target active:scale-[0.99] flex items-center justify-center gap-2 border-2 border-[#86efac]/55 bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-100 shadow-lg shadow-emerald-900/25">
+      <button type="button" id="btnOpenKioscoEmpresaPaymentProofModal" class="mt-5 w-full py-3.5 rounded-xl font-semibold touch-target active:scale-[0.99] flex items-center justify-center gap-2 border-2 border-[#ffffff]/55 bg-white/15 hover:bg-white/25 text-white shadow-lg shadow-black/25">
         <i data-lucide="circle-check" class="w-5 h-5 shrink-0"></i>
         YA PAGUÉ
       </button>
@@ -258,10 +258,10 @@
   <!-- Modal: enviar comprobante de pago a cuenta Ferriol (mismo usuario que paga) -->
   <div id="kioscoEmpresaPaymentProofModal" class="fixed inset-0 z-[74] hidden flex items-center justify-center p-4" aria-modal="true" role="dialog">
     <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" id="kioscoEmpresaPaymentProofModalOverlay"></div>
-    <div class="relative glass-strong rounded-2xl p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto scale-in border border-emerald-500/35 shadow-xl shadow-emerald-950/40">
+    <div class="relative glass-strong rounded-2xl p-5 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto scale-in border border-white/35 shadow-xl shadow-black/40">
       <div class="flex items-center justify-between mb-3">
-        <h3 id="kioscoEmpresaPaymentProofTitle" class="font-bold text-lg flex items-center gap-2 text-emerald-100">
-          <i data-lucide="receipt" class="w-5 h-5 text-emerald-300"></i>
+        <h3 id="kioscoEmpresaPaymentProofTitle" class="font-bold text-lg flex items-center gap-2 text-white">
+          <i data-lucide="receipt" class="w-5 h-5 text-white"></i>
           <span id="kioscoEmpresaPaymentProofTitleSpan">Enviar comprobante</span>
         </h3>
         <button type="button" id="kioscoEmpresaPaymentProofModalClose" class="btn-neomorphic rounded-xl p-2 touch-target" title="Cerrar"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -302,11 +302,11 @@
   <!-- Detalle de cierre (historial auditado, desde panel Caja) -->
   <div id="cierreHistDetalleModal" class="fixed inset-0 z-[82] hidden flex items-center justify-center p-4" aria-modal="true" role="dialog" aria-labelledby="cierreHistDetalleTitle">
     <div class="absolute inset-0 bg-black/72 backdrop-blur-sm" id="cierreHistDetalleOverlay"></div>
-    <div class="relative glass-strong rounded-2xl p-5 sm:p-6 w-full max-w-lg max-h-[min(88vh,32rem)] overflow-hidden flex flex-col scale-in border border-emerald-500/25 shadow-xl shadow-black/40">
+    <div class="relative glass-strong rounded-2xl p-5 sm:p-6 w-full max-w-lg max-h-[min(88vh,32rem)] overflow-hidden flex flex-col scale-in border border-white/25 shadow-xl shadow-black/40">
       <div class="flex items-start justify-between gap-2 shrink-0 mb-3">
         <div class="min-w-0 pr-2">
-          <h3 id="cierreHistDetalleTitle" class="font-bold text-lg text-emerald-50 leading-snug flex items-center gap-2">
-            <i data-lucide="clipboard-list" class="w-5 h-5 text-emerald-300 shrink-0"></i>
+          <h3 id="cierreHistDetalleTitle" class="font-bold text-lg text-white leading-snug flex items-center gap-2">
+            <i data-lucide="clipboard-list" class="w-5 h-5 text-white shrink-0"></i>
             Detalle del cierre
           </h3>
           <p class="text-[11px] text-white/45 mt-1">Auditoría · solo lectura</p>
@@ -348,10 +348,10 @@
           <i data-lucide="shopping-cart" class="w-5 h-5"></i>
           <span id="cartCount" class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#dc2626] text-xs font-bold flex items-center justify-center">0</span>
         </button>
-        <button type="button" id="headerProfileBtn" class="relative w-10 h-10 rounded-full border-2 border-white/30 bg-gradient-to-br from-emerald-600/40 to-violet-600/35 overflow-hidden shrink-0 touch-target shadow-md hover:border-emerald-300/50 active:scale-95 transition-all cursor-pointer z-[51]" title="Mi cuenta" aria-label="Abrir menú de mi cuenta">
+        <button type="button" id="headerProfileBtn" class="relative w-10 h-10 rounded-full border-2 border-white/30 bg-gradient-to-br from-white/40 to-violet-600/35 overflow-hidden shrink-0 touch-target shadow-md hover:border-white/50 active:scale-95 transition-all cursor-pointer z-[51]" title="Mi cuenta" aria-label="Abrir menú de mi cuenta">
           <img id="headerProfileImg" alt="" class="hidden absolute inset-0 w-full h-full object-cover z-10 pointer-events-none select-none" draggable="false">
           <span id="headerProfileInitials" class="absolute inset-0 flex items-center justify-center text-sm font-bold text-white/95 pointer-events-none z-0 select-none">?</span>
-          <span id="headerProfileKitReviewDot" class="hidden absolute bottom-0.5 right-0.5 z-20 w-2.5 h-2.5 rounded-full bg-amber-400 border-2 border-emerald-950/90 shadow-[0_0_8px_rgba(251,191,36,0.65)] pointer-events-none" aria-hidden="true"></span>
+          <span id="headerProfileKitReviewDot" class="hidden absolute bottom-0.5 right-0.5 z-20 w-2.5 h-2.5 rounded-full bg-amber-400 border-2 border-white/90 shadow-[0_0_8px_rgba(251,191,36,0.65)] pointer-events-none" aria-hidden="true"></span>
         </button>
       </div>
     </div>
@@ -455,19 +455,19 @@
         </div>
         <!-- Ventas del día: fuera del bloque de resumen / cobro rápido -->
         <div class="kiosquero-only mb-5">
-          <button type="button" id="btnVentasDelDia" onclick="window._openVentasDelDia && window._openVentasDelDia()" class="w-full py-2.5 px-3 rounded-xl border border-[#22c55e]/35 bg-[#22c55e]/10 hover:bg-[#22c55e]/18 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-[#86efac] active:scale-[0.99]">
+          <button type="button" id="btnVentasDelDia" onclick="window._openVentasDelDia && window._openVentasDelDia()" class="w-full py-2.5 px-3 rounded-xl border border-[#ffffff]/35 bg-[#ffffff]/10 hover:bg-[#ffffff]/18 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-[#ffffff] active:scale-[0.99]">
             <i data-lucide="clipboard-list" class="w-4 h-4 shrink-0"></i>
             Ventas del día
           </button>
         </div>
         <!-- Resumen del día: entraron + ventas + chips por método + cobro rápido -->
-        <div id="dashboardResumenDia" class="glass rounded-2xl p-4 sm:p-5 slide-up kiosquero-only border border-[#22c55e]/30">
+        <div id="dashboardResumenDia" class="glass rounded-2xl p-4 sm:p-5 slide-up kiosquero-only border border-[#ffffff]/30">
           <div class="min-w-0">
             <p class="text-sm text-white/60 mb-0.5">Resumen del día</p>
-            <p id="resumenDiaTexto" class="text-2xl sm:text-3xl font-bold text-[#86efac]">Entraron $0</p>
+            <p id="resumenDiaTexto" class="text-2xl sm:text-3xl font-bold text-[#ffffff]">Entraron $0</p>
             <p id="resumenDiaVentas" class="text-sm text-white/50 mt-1">0 ventas</p>
             <div id="resumenDiaPorMetodo" class="flex flex-wrap gap-1.5 mt-2"></div>
-            <button type="button" id="btnCobroRapido" onclick="window._abrirCobroRapido && window._abrirCobroRapido()" class="w-full mt-5 py-2.5 px-4 rounded-xl border border-[#22c55e]/40 bg-[#22c55e]/08 hover:bg-[#22c55e]/14 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-[#86efac] active:scale-[0.99]">
+            <button type="button" id="btnCobroRapido" onclick="window._abrirCobroRapido && window._abrirCobroRapido()" class="w-full mt-5 py-2.5 px-4 rounded-xl border border-[#ffffff]/40 bg-[#ffffff]/08 hover:bg-[#ffffff]/14 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-[#ffffff] active:scale-[0.99]">
               <i data-lucide="zap" class="w-4 h-4 shrink-0"></i>
               Cobro rápido
             </button>
@@ -476,7 +476,7 @@
         <!-- Productos frecuentes (más vendidos hoy) -->
         <div id="dashboardFrecuentesWrap" class="kiosquero-only hidden">
           <h3 class="font-semibold mb-2 flex items-center gap-2 text-sm text-white/80">
-            <i data-lucide="trending-up" class="w-4 h-4 text-[#86efac]"></i>
+            <i data-lucide="trending-up" class="w-4 h-4 text-[#ffffff]"></i>
             Más vendidos hoy
           </h3>
           <div id="dashboardFrecuentes" class="flex gap-2 overflow-x-auto pb-2 -mx-1 scrollbar-hide">
@@ -485,18 +485,18 @@
         </div>
         <div class="glass rounded-2xl p-6 slide-up">
           <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
-            <i data-lucide="activity" class="w-5 h-5 text-[#86efac]"></i>
+            <i data-lucide="activity" class="w-5 h-5 text-[#ffffff]"></i>
             Métricas del día
           </h2>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            <button type="button" id="btnVentasCard" class="glass rounded-xl p-4 border border-white/10 text-left transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
+            <button type="button" id="btnVentasCard" class="glass rounded-xl p-4 border border-white/10 text-left transition-all hover:border-[#ffffff]/50 active:scale-[0.98] touch-target">
               <p class="text-xs text-white/60 mb-1">Dinero que entró</p>
-              <p id="metricVentas" class="text-2xl font-bold text-[#86efac]">$0</p>
+              <p id="metricVentas" class="text-2xl font-bold text-[#ffffff]">$0</p>
               <p class="text-xs text-white/50 mt-1">Facturación del día</p>
             </button>
-            <button type="button" id="btnTransCard" class="glass rounded-xl p-4 border border-white/10 text-left transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
+            <button type="button" id="btnTransCard" class="glass rounded-xl p-4 border border-white/10 text-left transition-all hover:border-[#ffffff]/50 active:scale-[0.98] touch-target">
               <p class="text-xs text-white/60 mb-1">Ganancia / Rentabilidad</p>
-              <p id="metricTrans" class="text-2xl font-bold text-green-400">$0</p>
+              <p id="metricTrans" class="text-2xl font-bold text-white">$0</p>
               <p class="text-xs text-white/50 mt-1">Precio − costo de productos</p>
             </button>
           </div>
@@ -511,13 +511,13 @@
             <button type="button" class="estado-cuenta-filter-btn px-2.5 py-1 rounded-lg text-[11px] border border-white/20 bg-white/5 touch-target" data-filter="fecha">Fecha</button>
           </div>
           <div id="estadoCuentaFechaWrap" class="hidden mb-2">
-            <input type="date" id="estadoCuentaFechaInput" class="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e]/40" />
+            <input type="date" id="estadoCuentaFechaInput" class="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#ffffff]/40" />
           </div>
           <div class="flex flex-col gap-1">
             <p id="estadoCuentaTitulo" class="text-xs text-white/60">Estado de cuenta · Hoy</p>
             <p class="text-[10px] text-white/45">Te queda (ganancia neta)</p>
             <div class="flex items-baseline justify-between gap-2 flex-wrap">
-              <p id="estadoCuentaResultado" class="text-lg sm:text-2xl font-bold text-[#86efac] tabular-nums">$0</p>
+              <p id="estadoCuentaResultado" class="text-lg sm:text-2xl font-bold text-[#ffffff] tabular-nums">$0</p>
               <p id="estadoCuentaEtiqueta" class="text-[11px] font-medium text-white/55 shrink-0"></p>
             </div>
           </div>
@@ -525,11 +525,11 @@
             <p class="text-[10px] text-white/45 uppercase tracking-wide">De dónde sale cada número</p>
             <div>
               <div class="flex justify-between items-center gap-2 mb-0.5">
-                <span class="text-[11px] font-semibold text-emerald-400 leading-tight">1 · Facturación <span class="text-[9px] font-normal text-white/45">(cobrado)</span></span>
+                <span class="text-[11px] font-semibold text-white leading-tight">1 · Facturación <span class="text-[9px] font-normal text-white/45">(cobrado)</span></span>
                 <span id="estadoCuentaIngresosBarLabel" class="text-[11px] tabular-nums text-white/90 font-semibold shrink-0">$0</span>
               </div>
               <div class="h-3.5 rounded-lg bg-white/10 overflow-hidden">
-                <div id="estadoCuentaBarIngresos" class="h-full rounded-lg bg-emerald-500 transition-all duration-300 min-w-0" style="width:0%"></div>
+                <div id="estadoCuentaBarIngresos" class="h-full rounded-lg bg-white transition-all duration-300 min-w-0" style="width:0%"></div>
               </div>
             </div>
             <div>
@@ -571,9 +571,9 @@
             <p id="estadoCuentaGapLine" class="text-[11px] text-center leading-snug px-1"></p>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 mt-2.5 text-[11px] sm:text-xs">
-            <div class="rounded-xl bg-emerald-500/10 border border-emerald-400/20 px-2 py-1.5">
+            <div class="rounded-xl bg-white/10 border border-white/20 px-2 py-1.5">
               <p class="text-white/55">Facturación</p>
-              <p id="estadoCuentaIngresos" class="font-semibold text-emerald-300">$0</p>
+              <p id="estadoCuentaIngresos" class="font-semibold text-white">$0</p>
             </div>
             <div class="rounded-xl bg-orange-500/10 border border-orange-400/20 px-2 py-1.5">
               <p class="text-white/55">Mercadería vendida</p>
@@ -595,13 +595,13 @@
           <p id="estadoCuentaNota" class="hidden"></p>
         </div>
         <!-- Cuenta regresiva prueba -->
-        <div id="trialCountdownBanner" class="trial-countdown-banner glass rounded-2xl p-4 sm:p-5 slide-up kiosquero-only hidden border border-[#22c55e]/40 relative overflow-hidden">
+        <div id="trialCountdownBanner" class="trial-countdown-banner glass rounded-2xl p-4 sm:p-5 slide-up kiosquero-only hidden border border-[#ffffff]/40 relative overflow-hidden">
           <div class="trial-countdown-banner-glow pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300"></div>
           <div class="relative flex flex-col gap-4">
             <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
               <div class="flex items-start gap-3 flex-1 min-w-0">
-                <div class="trial-countdown-icon-wrap flex items-center justify-center rounded-2xl w-12 h-12 sm:w-14 sm:h-14 shrink-0 bg-[#22c55e]/25 border border-[#22c55e]/35">
-                  <i data-lucide="clock" class="w-6 h-6 sm:w-7 sm:h-7 text-[#86efac] shrink-0"></i>
+                <div class="trial-countdown-icon-wrap flex items-center justify-center rounded-2xl w-12 h-12 sm:w-14 sm:h-14 shrink-0 bg-[#ffffff]/25 border border-[#ffffff]/35">
+                  <i data-lucide="clock" class="w-6 h-6 sm:w-7 sm:h-7 text-[#ffffff] shrink-0"></i>
                 </div>
                 <div class="min-w-0 flex-1 pt-0.5">
                   <p id="trialCountdownText" class="font-semibold text-white text-base sm:text-lg leading-snug">15 días de prueba restantes</p>
@@ -609,8 +609,8 @@
                 </div>
               </div>
               <div class="flex items-center gap-3 w-full sm:w-auto shrink-0 sm:ml-auto">
-                <span id="trialCountdownDays" class="trial-countdown-days-pill px-4 py-2 rounded-2xl bg-[#22c55e]/35 text-[#86efac] font-black text-xl sm:text-2xl tabular-nums shrink-0 border border-[#22c55e]/45 shadow-[0_0_24px_rgba(34,197,94,0.2)]">15</span>
-                <button type="button" id="trialRenovarBtn" class="trial-renovar-btn flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 rounded-2xl py-3 px-5 text-sm sm:text-base font-bold touch-target shrink-0 bg-gradient-to-br from-[#22c55e] to-[#15803d] hover:from-[#4ade80] hover:to-[#22c55e] text-white shadow-lg shadow-[#22c55e]/35 border border-white/20 active:scale-[0.98]">
+                <span id="trialCountdownDays" class="trial-countdown-days-pill px-4 py-2 rounded-2xl bg-[#ffffff]/35 text-[#ffffff] font-black text-xl sm:text-2xl tabular-nums shrink-0 border border-[#ffffff]/45 shadow-[0_0_24px_rgba(34,197,94,0.2)]">15</span>
+                <button type="button" id="trialRenovarBtn" class="trial-renovar-btn flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 rounded-2xl py-3 px-5 text-sm sm:text-base font-bold touch-target shrink-0 bg-gradient-to-br from-[#ffffff] to-[#cbd5e1] hover:from-[#f1f5f9] hover:to-[#ffffff] text-slate-900 shadow-lg shadow-[#ffffff]/35 border border-white/20 active:scale-[0.98]">
                   <i data-lucide="refresh-cw" class="w-5 h-5"></i> Renovar ahora
                 </button>
               </div>
@@ -677,7 +677,7 @@
         </div>
       </div>
       <div class="inv-searchbar">
-        <input type="text" id="searchInventory" placeholder="Buscar producto..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/15 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base" autocomplete="off">
+        <input type="text" id="searchInventory" placeholder="Buscar producto..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/15 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-base" autocomplete="off">
       </div>
       <div id="inventoryList" class="inventory-scroll">
         <!-- productos dinámicos -->
@@ -689,20 +689,20 @@
       <!-- HUB: tarjetas (grid 2 columnas) -->
       <div id="caja-hub" class="p-4">
         <h2 class="font-bold text-xl mb-5 flex items-center gap-2 pt-1">
-          <i data-lucide="wallet" class="w-5 h-5 text-[#86efac]"></i>
+          <i data-lucide="wallet" class="w-5 h-5 text-[#ffffff]"></i>
           Caja
         </h2>
         <div class="grid grid-cols-2 gap-4">
-          <button onclick="window._switchCajaTab('cierre')" class="caja-hub-btn glass rounded-2xl p-5 border border-white/10 flex flex-col items-center gap-3 w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
-            <div class="w-12 h-12 rounded-2xl bg-[#22c55e]/20 flex items-center justify-center">
-              <i data-lucide="check-circle" class="w-6 h-6 text-[#86efac]"></i>
+          <button onclick="window._switchCajaTab('cierre')" class="caja-hub-btn glass rounded-2xl p-5 border border-white/10 flex flex-col items-center gap-3 w-full transition-all hover:border-[#ffffff]/50 active:scale-[0.98] touch-target">
+            <div class="w-12 h-12 rounded-2xl bg-[#ffffff]/20 flex items-center justify-center">
+              <i data-lucide="check-circle" class="w-6 h-6 text-[#ffffff]"></i>
             </div>
             <span class="font-semibold text-sm">Cierre de caja</span>
             <span class="text-xs text-white/50 text-center leading-tight">Liquidación y arqueo</span>
           </button>
-          <button onclick="window._switchCajaTab('libreta')" class="caja-hub-btn glass rounded-2xl p-5 border border-white/10 flex flex-col items-center gap-3 w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
-            <div class="w-12 h-12 rounded-2xl bg-[#22c55e]/20 flex items-center justify-center">
-              <i data-lucide="notebook-pen" class="w-6 h-6 text-[#86efac]"></i>
+          <button onclick="window._switchCajaTab('libreta')" class="caja-hub-btn glass rounded-2xl p-5 border border-white/10 flex flex-col items-center gap-3 w-full transition-all hover:border-[#ffffff]/50 active:scale-[0.98] touch-target">
+            <div class="w-12 h-12 rounded-2xl bg-[#ffffff]/20 flex items-center justify-center">
+              <i data-lucide="notebook-pen" class="w-6 h-6 text-[#ffffff]"></i>
             </div>
             <span class="font-semibold text-sm">Libreta de fiado</span>
             <span class="text-xs text-white/50 text-center leading-tight">Clientes con deuda</span>
@@ -862,7 +862,7 @@
                   <p class="text-[11px] text-white/45 uppercase font-semibold mb-2">Resultado final</p>
                   <div class="flex justify-between items-center gap-2 text-base">
                     <span class="text-white/65">Diferencia total (real − sistema)</span>
-                    <span id="cierreInterAuditDiff" class="font-extrabold tabular-nums text-[#86efac]">$0</span>
+                    <span id="cierreInterAuditDiff" class="font-extrabold tabular-nums text-[#ffffff]">$0</span>
                   </div>
                 </div>
                 <div id="cierreInterResumeCard" class="rounded-xl border border-white/12 bg-black/30 p-3 mb-3">
@@ -873,9 +873,9 @@
               </div>
             </section>
 
-            <div id="cajaMesResumenCard" class="ferriol-cierre-panel ferriol-cierre-panel--month glass rounded-2xl p-5 border border-[#22c55e]/18">
+            <div id="cajaMesResumenCard" class="ferriol-cierre-panel ferriol-cierre-panel--month glass rounded-2xl p-5 border border-[#ffffff]/18">
               <h3 class="font-semibold text-sm text-white/85 mb-0.5 flex items-center gap-2">
-                <i data-lucide="calendar-range" class="w-4 h-4 text-[#86efac]"></i>
+                <i data-lucide="calendar-range" class="w-4 h-4 text-[#ffffff]"></i>
                 Resumen mensual (solo referencia)
               </h3>
               <p id="cajaMesLabel" class="text-xs text-white/45 mb-3 capitalize"></p>
@@ -883,7 +883,7 @@
               <div class="space-y-2 text-sm">
                 <div class="flex justify-between gap-3 py-2 border-b border-white/08">
                   <span class="text-white/65">Ingresos (ventas cobradas)</span>
-                  <span id="cajaMesIngresos" class="font-semibold text-[#86efac] shrink-0">$0</span>
+                  <span id="cajaMesIngresos" class="font-semibold text-[#ffffff] shrink-0">$0</span>
                 </div>
                 <div class="flex justify-between gap-3 py-1.5 text-xs border-b border-white/06">
                   <span class="text-white/50">Gastos fijos</span>
@@ -918,7 +918,7 @@
 
             <section class="ferriol-cierre-panel ferriol-cierre-panel--ghost border-t border-white/10 pt-5 mt-1">
               <h3 class="font-semibold mb-3 flex items-center gap-2 text-sm text-white/80">
-                <i data-lucide="history" class="w-4 h-4 text-[#86efac]"></i>
+                <i data-lucide="history" class="w-4 h-4 text-[#ffffff]"></i>
                 Historial de cierres
               </h3>
               <div id="cierresCajaList" class="space-y-2 max-h-[40vh] overflow-y-auto text-sm">
@@ -940,27 +940,27 @@
           <!-- Planilla registro proveedores -->
           <div class="glass rounded-2xl p-5">
             <h3 class="font-bold text-base mb-2 flex items-center gap-2">
-              <i data-lucide="plus-circle" class="w-4 h-4 text-[#86efac]"></i>
+              <i data-lucide="plus-circle" class="w-4 h-4 text-[#ffffff]"></i>
               Registrar pago a proveedor
             </h3>
             <p class="text-[10px] text-white/45 mb-4 leading-snug">Solo <strong class="text-white/55">mercadería</strong> y proveedores. La <strong class="text-amber-200/80">suscripción mensual Ferriol</strong> se abona desde <strong class="text-white/60">Cuenta (foto)</strong> → <strong class="text-white/60">Mi plan</strong> (<strong class="text-white/60">Pagar suscripción mensual</strong>), no desde acá.</p>
             <div class="space-y-3">
               <div>
                 <label class="block text-xs text-white/60 mb-1">Proveedor</label>
-                <input type="text" id="provNombre" placeholder="Ej: Distribuidora Pérez" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+                <input type="text" id="provNombre" placeholder="Ej: Distribuidora Pérez" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
               </div>
               <div>
                 <label class="block text-xs text-white/60 mb-1">Descripción (opcional)</label>
-                <input type="text" id="provDescripcion" placeholder="Ej: Mercadería semanal, factura 001…" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+                <input type="text" id="provDescripcion" placeholder="Ej: Mercadería semanal, factura 001…" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
               </div>
               <div class="flex gap-3">
                 <div class="flex-1">
                   <label class="block text-xs text-white/60 mb-1">Monto ($)</label>
-                  <input type="number" id="provMonto" placeholder="0" min="1" step="1" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+                  <input type="number" id="provMonto" placeholder="0" min="1" step="1" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
                 </div>
                 <div class="flex-1">
                   <label class="block text-xs text-white/60 mb-1">Fecha</label>
-                  <input type="date" id="provFecha" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+                  <input type="date" id="provFecha" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
                 </div>
               </div>
             </div>
@@ -981,7 +981,7 @@
             </div>
             <div id="proveedoresResumen" class="hidden mb-3 p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
               <span class="text-sm text-white/70">Total pagado:</span>
-              <span id="proveedoresTotalText" class="font-bold text-[#86efac]">$0</span>
+              <span id="proveedoresTotalText" class="font-bold text-[#ffffff]">$0</span>
             </div>
             <div id="proveedoresList" class="space-y-2 text-sm">
               <p class="text-white/50 text-center py-4">Sin pagos registrados.</p>
@@ -1001,17 +1001,17 @@
           <!-- Planilla de registro -->
           <div class="glass rounded-2xl p-5">
             <h3 class="font-bold text-base mb-4 flex items-center gap-2">
-              <i data-lucide="plus-circle" class="w-4 h-4 text-[#86efac]"></i>
+              <i data-lucide="plus-circle" class="w-4 h-4 text-[#ffffff]"></i>
               Registrar gasto fijo
             </h3>
             <div class="space-y-3">
               <div>
                 <label class="block text-xs text-white/60 mb-1">Descripción</label>
-                <input type="text" id="gastoDescInline" placeholder="Ej: Luz, Alquiler, Limpieza…" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+                <input type="text" id="gastoDescInline" placeholder="Ej: Luz, Alquiler, Limpieza…" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
               </div>
               <div>
                 <label class="block text-xs text-white/60 mb-1">Periodicidad</label>
-                <select id="gastoPeriodicidadInline" class="ferriol-native-select w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+                <select id="gastoPeriodicidadInline" class="ferriol-native-select w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
                   <option value="diario">Diario</option>
                   <option value="semanal">Semanal</option>
                   <option value="quincenal">Quincenal</option>
@@ -1023,16 +1023,16 @@
               <div class="flex gap-3">
                 <div class="flex-1">
                   <label class="block text-xs text-white/60 mb-1">Monto ($)</label>
-                  <input type="number" id="gastoMontoInline" placeholder="0" min="1" step="1" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+                  <input type="number" id="gastoMontoInline" placeholder="0" min="1" step="1" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
                 </div>
                 <div class="flex-1">
                   <label class="block text-xs text-white/60 mb-1">Desde</label>
-                  <input type="date" id="gastoFechaInline" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+                  <input type="date" id="gastoFechaInline" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
                 </div>
               </div>
               <div id="gastoVigenciaHastaWrap">
                 <label class="block text-xs text-white/60 mb-1">Hasta (opcional)</label>
-                <input type="date" id="gastoVigenciaHastaInline" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+                <input type="date" id="gastoVigenciaHastaInline" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
               </div>
             </div>
             <p id="gastoErrInline" class="text-red-300 text-xs mt-2 hidden"></p>
@@ -1069,7 +1069,7 @@
             <i data-lucide="chevron-left" class="w-5 h-5"></i>
           </button>
           <span class="font-semibold text-sm flex items-center gap-1.5">
-            <i data-lucide="notebook-pen" class="w-4 h-4 text-[#86efac]"></i> Libreta de fiado
+            <i data-lucide="notebook-pen" class="w-4 h-4 text-[#ffffff]"></i> Libreta de fiado
           </span>
           <button onclick="window._abrirNuevoClienteLibreta()" class="btn-glow rounded-xl px-3 py-1.5 flex items-center gap-1 text-sm font-semibold touch-target">
             <i data-lucide="user-plus" class="w-4 h-4"></i> Nuevo
@@ -1097,7 +1097,7 @@
               <p id="libretalClienteNombre" class="font-bold text-sm truncate leading-tight">Cliente</p>
               <p id="libretalClienteTel" class="text-xs text-white/40 truncate leading-tight"></p>
             </div>
-            <button type="button" onclick="window._abrirEditarClienteLibreta()" class="shrink-0 rounded-lg p-2 border border-white/15 text-white/70 hover:text-white hover:border-[#22c55e]/40 touch-target" title="Editar cliente">
+            <button type="button" onclick="window._abrirEditarClienteLibreta()" class="shrink-0 rounded-lg p-2 border border-white/15 text-white/70 hover:text-white hover:border-[#ffffff]/40 touch-target" title="Editar cliente">
               <i data-lucide="pencil" class="w-4 h-4"></i>
             </button>
           </div>
@@ -1133,11 +1133,11 @@
         <div class="space-y-3">
           <div>
             <label class="block text-xs text-white/60 mb-1">Nombre del cliente</label>
-            <input type="text" id="libretalNuevoNombre" placeholder="Ej: Juan Pérez" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+            <input type="text" id="libretalNuevoNombre" placeholder="Ej: Juan Pérez" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
           </div>
           <div>
             <label class="block text-xs text-white/60 mb-1">WhatsApp (opcional)</label>
-            <input type="tel" id="libretalNuevoTel" placeholder="Ej: 549111234567" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+            <input type="tel" id="libretalNuevoTel" placeholder="Ej: 549111234567" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
           </div>
         </div>
         <p id="libretalNuevoClienteErr" class="text-red-300 text-xs mt-2 hidden"></p>
@@ -1156,11 +1156,11 @@
         <div class="space-y-3">
           <div>
             <label class="block text-xs text-white/60 mb-1">Nombre</label>
-            <input type="text" id="libretalEditNombre" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+            <input type="text" id="libretalEditNombre" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
           </div>
           <div>
             <label class="block text-xs text-white/60 mb-1">WhatsApp</label>
-            <input type="tel" id="libretalEditTel" placeholder="Ej: 549111234567" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+            <input type="tel" id="libretalEditTel" placeholder="Ej: 549111234567" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
           </div>
         </div>
         <p id="libretalEditClienteErr" class="text-red-300 text-xs mt-2 hidden"></p>
@@ -1180,11 +1180,11 @@
         <div class="space-y-3">
           <div>
             <label class="block text-xs text-white/60 mb-1">¿Qué se llevó?</label>
-            <input type="text" id="libretalItemDesc" placeholder="Ej: Gaseosa, pan, cigarrillos..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+            <input type="text" id="libretalItemDesc" placeholder="Ej: Gaseosa, pan, cigarrillos..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
           </div>
           <div>
             <label class="block text-xs text-white/60 mb-1">Monto ($)</label>
-            <input type="number" id="libretalItemMonto" placeholder="0" min="1" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm">
+            <input type="number" id="libretalItemMonto" placeholder="0" min="1" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
             <input type="hidden" id="libretalItemTipo" value="fiado">
           </div>
         </div>
@@ -1197,7 +1197,7 @@
     </div>
 
     <!-- Modal: Sacar cuenta / cobrar (pantalla completa) -->
-    <div id="libretalCuentaModal" class="fixed inset-0 z-[96] hidden flex-col" style="background: linear-gradient(145deg, #020b05 0%, #052e16 45%, #064e1f 100%);">
+    <div id="libretalCuentaModal" class="fixed inset-0 z-[96] hidden flex-col" style="background: linear-gradient(145deg, #020617 0%, #0f172a 45%, #1e293b 100%);">
       <div class="flex items-center gap-3 px-4 border-b border-white/10 shrink-0" style="padding-top: max(0.75rem, env(safe-area-inset-top, 0)); padding-bottom: 0.75rem;">
         <button type="button" onclick="window._cerrarCuentaLibreta()" class="caja-back-btn touch-target shrink-0">
           <i data-lucide="chevron-left" class="w-5 h-5"></i>
@@ -1220,7 +1220,7 @@
         </button>
       </div>
       <div id="libretalCuentaFooterExito" class="hidden libreta-cuenta-modal-footer shrink-0 border-t border-white/10 px-4 pt-3 flex flex-col gap-2 bg-[#020b05]/80 backdrop-blur-md">
-        <p id="libretalCuentaExitoTexto" class="text-center text-sm text-[#86efac] font-medium px-2"></p>
+        <p id="libretalCuentaExitoTexto" class="text-center text-sm text-[#ffffff] font-medium px-2"></p>
         <button type="button" id="libretalCuentaBtnWAComprobante" onclick="window._libretaCuentaCompartirComprobante()" class="btn-glow rounded-xl py-3.5 text-sm font-semibold touch-target flex items-center justify-center gap-2 w-full">
           <i data-lucide="send" class="w-4 h-4"></i> Compartir comprobante por WhatsApp
         </button>
@@ -1243,7 +1243,7 @@
         </div>
         <!-- Fecha y hora grande -->
         <div class="glass rounded-xl px-4 py-3 mb-4 flex items-center gap-3">
-          <i data-lucide="calendar-clock" class="w-5 h-5 text-[#86efac] shrink-0"></i>
+          <i data-lucide="calendar-clock" class="w-5 h-5 text-[#ffffff] shrink-0"></i>
           <div>
             <p id="itemDetalleFechaHora" class="font-semibold text-sm"></p>
             <p class="text-xs text-white/40">Fecha y hora del fiado</p>
@@ -1252,7 +1252,7 @@
         <!-- Comentario -->
         <div class="mb-4">
           <label class="block text-xs text-white/50 mb-1.5 font-medium">Comentario (opcional)</label>
-          <textarea id="itemDetalleComentario" rows="2" placeholder="Ej: quedó de pagar el viernes..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/30 text-sm focus:outline-none focus:ring-2 focus:ring-[#22c55e] resize-none"></textarea>
+          <textarea id="itemDetalleComentario" rows="2" placeholder="Ej: quedó de pagar el viernes..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/30 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffffff] resize-none"></textarea>
         </div>
         <div class="flex gap-2">
           <button onclick="window._cerrarItemDetalle()" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cerrar</button>
@@ -1263,11 +1263,11 @@
     </div>
 
     <!-- Prompt post-pago: agregar a libreta de fiado (pantalla completa) -->
-    <div id="libretalFiadoPrompt" class="fixed inset-0 z-[80] hidden flex-col" style="background:linear-gradient(135deg,#052e16 0%,#064e3b 100%);">
+    <div id="libretalFiadoPrompt" class="fixed inset-0 z-[80] hidden flex-col" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);">
       <!-- Header -->
       <div class="flex items-center gap-3 px-5 pt-5 pb-4 border-b border-white/10">
-        <div class="w-10 h-10 rounded-2xl bg-[#22c55e]/20 flex items-center justify-center shrink-0">
-          <i data-lucide="book-open" class="w-5 h-5 text-[#86efac]"></i>
+        <div class="w-10 h-10 rounded-2xl bg-[#ffffff]/20 flex items-center justify-center shrink-0">
+          <i data-lucide="book-open" class="w-5 h-5 text-[#ffffff]"></i>
         </div>
         <div class="flex-1">
           <h3 class="font-bold text-lg leading-tight">¿A quién fue el fiado?</h3>
@@ -1288,12 +1288,12 @@
         <!-- Formulario inline para nuevo cliente (oculto por defecto) -->
         <div id="libretalPromptNuevoForm" class="hidden space-y-2 mb-2">
           <p class="text-xs text-white/50 font-medium uppercase tracking-wide">Nuevo cliente</p>
-          <input id="libretalPromptNombre" type="text" placeholder="Nombre *" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#22c55e]" />
-          <input id="libretalPromptTel" type="tel" placeholder="Teléfono (opcional)" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#22c55e]" />
+          <input id="libretalPromptNombre" type="text" placeholder="Nombre *" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffffff]" />
+          <input id="libretalPromptTel" type="tel" placeholder="Teléfono (opcional)" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffffff]" />
           <p id="libretalPromptErr" class="text-red-400 text-xs hidden"></p>
           <div class="flex gap-2">
             <button onclick="window._cancelarNuevoClientePrompt()" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cancelar</button>
-            <button id="libretalPromptGuardarBtn" onclick="window._guardarNuevoClienteDesdePrompt()" class="flex-1 bg-[#22c55e] text-white rounded-xl py-2.5 text-sm font-semibold touch-target">Crear y agregar</button>
+            <button id="libretalPromptGuardarBtn" onclick="window._guardarNuevoClienteDesdePrompt()" class="flex-1 bg-[#ffffff] text-slate-900 rounded-xl py-2.5 text-sm font-semibold touch-target">Crear y agregar</button>
           </div>
         </div>
 
@@ -1308,27 +1308,27 @@
     <section id="panel-mas" class="panel hidden">
       <div class="glass rounded-2xl p-6 slide-up">
         <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
-          <i data-lucide="menu" class="w-5 h-5 text-[#86efac]"></i>
+          <i data-lucide="menu" class="w-5 h-5 text-[#ffffff]"></i>
           Más opciones
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button data-nav="historial" class="glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
-            <div class="w-14 h-14 rounded-2xl bg-[#22c55e]/30 flex items-center justify-center">
-              <i data-lucide="history" class="w-7 h-7 text-[#86efac]"></i>
+          <button data-nav="historial" class="glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#ffffff]/50 active:scale-[0.98] touch-target">
+            <div class="w-14 h-14 rounded-2xl bg-[#ffffff]/30 flex items-center justify-center">
+              <i data-lucide="history" class="w-7 h-7 text-[#ffffff]"></i>
             </div>
             <span class="font-semibold text-base">Historial</span>
             <span class="text-xs text-white/60">Ventas registradas</span>
           </button>
-          <button type="button" data-nav="config" class="kiosco-mas-config-entry glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
-            <div class="w-14 h-14 rounded-2xl bg-[#22c55e]/30 flex items-center justify-center">
-              <i data-lucide="settings" class="w-7 h-7 text-[#86efac]"></i>
+          <button type="button" data-nav="config" class="kiosco-mas-config-entry glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#ffffff]/50 active:scale-[0.98] touch-target">
+            <div class="w-14 h-14 rounded-2xl bg-[#ffffff]/30 flex items-center justify-center">
+              <i data-lucide="settings" class="w-7 h-7 text-[#ffffff]"></i>
             </div>
             <span class="font-semibold text-base">Configuración</span>
             <span class="text-xs text-white/60">Nombre, mensajes y copia de seguridad</span>
           </button>
-          <button data-nav="clientes" class="glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
-            <div class="w-14 h-14 rounded-2xl bg-[#22c55e]/30 flex items-center justify-center">
-              <i data-lucide="book-user" class="w-7 h-7 text-[#86efac]"></i>
+          <button data-nav="clientes" class="glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#ffffff]/50 active:scale-[0.98] touch-target">
+            <div class="w-14 h-14 rounded-2xl bg-[#ffffff]/30 flex items-center justify-center">
+              <i data-lucide="book-user" class="w-7 h-7 text-[#ffffff]"></i>
             </div>
             <span class="font-semibold text-base">Clientes</span>
             <span class="text-xs text-white/60">Lista con teléfono y datos</span>
@@ -1355,8 +1355,8 @@
             <p id="planCheckoutPriceExplain" class="text-[11px] text-white/52 mt-3 leading-snug px-2 hidden" aria-hidden="true"></p>
           </div>
           <div id="planCheckoutBenefitsBlocksKiosco" class="mb-5">
-            <p id="planCheckoutPayKioscoBenefMainLabel" class="text-[10px] font-semibold uppercase tracking-wide text-emerald-200/85 mb-2">Beneficios incluidos con tu suscripción</p>
-            <ul id="planCheckoutBenefitsKioscoList" class="space-y-2 text-sm text-emerald-50/95 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-emerald-500/35 bg-emerald-950/25 p-4 min-h-[2.5rem]"></ul>
+            <p id="planCheckoutPayKioscoBenefMainLabel" class="text-[10px] font-semibold uppercase tracking-wide text-white/85 mb-2">Beneficios incluidos con tu suscripción</p>
+            <ul id="planCheckoutBenefitsKioscoList" class="space-y-2 text-sm text-white/95 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-white/35 bg-white/25 p-4 min-h-[2.5rem]"></ul>
             <p id="planCheckoutPayKioscoProductsLabel" class="text-[10px] font-semibold uppercase tracking-wide text-white/52 mt-4 mb-2">Propuesta Ferriol</p>
             <ul id="planCheckoutBenefitsProductsListKiosco" class="space-y-2 text-sm text-white/82 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-white/15 bg-black/25 p-4 min-h-[2.5rem]"></ul>
           </div>
@@ -1449,7 +1449,7 @@
       <div class="glass rounded-2xl p-4 sm:p-6 slide-up">
         <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
           <h2 class="font-bold text-lg sm:text-xl flex items-center gap-2 shrink-0">
-            <i data-lucide="history" class="w-5 h-5 text-[#86efac]"></i>
+            <i data-lucide="history" class="w-5 h-5 text-[#ffffff]"></i>
             Historial
           </h2>
           <div class="flex flex-col gap-3">
@@ -1483,11 +1483,11 @@
     <section id="panel-clientes" class="panel hidden">
       <div class="glass rounded-2xl p-6 slide-up">
         <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
-          <i data-lucide="book-user" class="w-5 h-5 text-[#86efac]"></i>
+          <i data-lucide="book-user" class="w-5 h-5 text-[#ffffff]"></i>
           Lista de clientes
         </h2>
         <div class="flex flex-col sm:flex-row gap-2 mb-4">
-          <input type="text" id="clientesSearch" placeholder="Buscar por nombre o teléfono..." class="flex-1 glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base" autocomplete="off">
+          <input type="text" id="clientesSearch" placeholder="Buscar por nombre o teléfono..." class="flex-1 glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-base" autocomplete="off">
           <button type="button" id="btnAddCliente" class="btn-glow rounded-xl px-4 py-3 flex items-center justify-center gap-2 touch-target">
             <i data-lucide="user-plus" class="w-4 h-4"></i> Agregar cliente
           </button>
@@ -1500,7 +1500,7 @@
     <section id="panel-config" class="panel hidden">
       <div class="glass rounded-2xl p-6 slide-up">
         <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
-          <i data-lucide="settings" class="w-5 h-5 text-[#86efac]"></i>
+          <i data-lucide="settings" class="w-5 h-5 text-[#ffffff]"></i>
           Configuración del negocio
         </h2>
         <div id="configSubHub" class="space-y-3">
@@ -1514,14 +1514,14 @@
         <div class="config-subview hidden space-y-4" data-config-sub="negocio">
           <button type="button" data-config-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target">Volver</button>
           <label class="block text-sm text-white/70 mb-2">Nombre del negocio</label>
-          <input type="text" id="configKioscoName" placeholder="Ej: Mi Negocio" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+          <input type="text" id="configKioscoName" placeholder="Ej: Mi Negocio" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff]">
           <button data-config-save class="btn-glow rounded-xl py-3 px-6 font-semibold">Guardar</button>
         </div>
 
         <div class="config-subview hidden space-y-4" data-config-sub="whatsapp">
           <button type="button" data-config-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target">Volver</button>
-          <label class="block text-sm text-white/70 mb-2">Mensaje de cobro por WhatsApp (usá <code class="text-[#86efac]">{cliente}</code> y <code class="text-[#86efac]">{monto}</code>)</label>
-          <textarea id="configWhatsappMsg" rows="5" placeholder="Hola {cliente}, tenés un saldo de ${monto}..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] resize-y"></textarea>
+          <label class="block text-sm text-white/70 mb-2">Mensaje de cobro por WhatsApp (usá <code class="text-[#ffffff]">{cliente}</code> y <code class="text-[#ffffff]">{monto}</code>)</label>
+          <textarea id="configWhatsappMsg" rows="5" placeholder="Hola {cliente}, tenés un saldo de ${monto}..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] resize-y"></textarea>
           <button data-config-save class="btn-glow rounded-xl py-3 px-6 font-semibold">Guardar</button>
         </div>
 
@@ -1529,7 +1529,7 @@
           <button type="button" data-config-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target">Volver</button>
           <p class="text-xs text-white/55">Con fecha de lote, el listado muestra <strong class="text-amber-300/95">POR VENCER</strong> (fila naranja) dentro del plazo que elijas, y <strong class="text-red-300/90">VENCIDO</strong> (fila roja) si la fecha ya pasó.</p>
           <label class="block text-sm text-white/70 mb-2">Días de anticipación (0–365)</label>
-          <input type="number" id="configVencimientoAvisoDias" min="0" max="365" step="1" class="w-full max-w-[10rem] glass rounded-xl px-4 py-3 border border-white/20 text-white tabular-nums focus:outline-none focus:ring-2 focus:ring-[#22c55e]" inputmode="numeric">
+          <input type="number" id="configVencimientoAvisoDias" min="0" max="365" step="1" class="w-full max-w-[10rem] glass rounded-xl px-4 py-3 border border-white/20 text-white tabular-nums focus:outline-none focus:ring-2 focus:ring-[#ffffff]" inputmode="numeric">
           <p class="text-xs text-white/45">Valor por defecto si no guardás: 7 días. Con <strong class="text-white/60">0</strong> solo se resalta el mismo día del vencimiento o vencido.</p>
           <button data-config-save class="btn-glow rounded-xl py-3 px-6 font-semibold">Guardar</button>
         </div>
@@ -1537,7 +1537,7 @@
         <div class="config-subview hidden space-y-4" data-config-sub="sonido">
           <button type="button" data-config-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target">Volver</button>
           <label class="flex items-start gap-3 cursor-pointer touch-target rounded-xl border border-white/10 bg-white/[0.03] p-4">
-            <input type="checkbox" id="configNotifSoundEnabled" class="mt-1 rounded border-white/30 bg-black/20 text-[#22c55e] focus:ring-[#22c55e] shrink-0" checked>
+            <input type="checkbox" id="configNotifSoundEnabled" class="mt-1 rounded border-white/30 bg-black/20 text-[#ffffff] focus:ring-[#ffffff] shrink-0" checked>
             <span>
               <span class="text-sm text-white/85 font-medium block">Sonido al recibir avisos</span>
               <span class="text-xs text-white/50 block mt-1">Requiere interacción previa con la pantalla.</span>
@@ -1550,7 +1550,7 @@
           <button type="button" data-config-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target">Volver</button>
           <div class="pt-1">
             <h3 class="font-semibold mb-2 flex items-center gap-2">
-              <i data-lucide="database-backup" class="w-4 h-4 text-[#86efac]"></i>
+              <i data-lucide="database-backup" class="w-4 h-4 text-[#ffffff]"></i>
               Copia de seguridad
             </h3>
             <div class="flex flex-wrap gap-3">
@@ -1566,7 +1566,7 @@
           </div>
           <div class="pt-4 border-t border-white/10">
             <h3 class="font-semibold mb-2 flex items-center gap-2">
-              <i data-lucide="file-spreadsheet" class="w-4 h-4 text-[#86efac]"></i>
+              <i data-lucide="file-spreadsheet" class="w-4 h-4 text-[#ffffff]"></i>
               Exportar a CSV
             </h3>
             <div class="flex flex-wrap gap-2">
@@ -1592,7 +1592,7 @@
         <div id="super-section-afiliados" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up absolute inset-x-0 top-0 z-0 overflow-y-auto" style="max-height: 85vh; padding-bottom: 6rem;">
           <div class="mb-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
             <h2 class="font-bold text-xl flex min-w-0 items-center gap-2 shrink-0">
-              <i data-lucide="users" class="w-5 h-5 shrink-0 text-[#86efac]"></i>
+              <i data-lucide="users" class="w-5 h-5 shrink-0 text-[#ffffff]"></i>
               Afiliados
             </h2>
             <div class="flex flex-wrap gap-2 w-full sm:w-auto sm:justify-end sm:shrink-0 items-stretch">
@@ -1614,16 +1614,16 @@
           <p id="superDirectoryStats" class="hidden text-xs text-white/45 mb-2 super-only super-main-only"></p>
           <p class="text-xs text-white/50 mb-2 super-only super-main-only">Directorio global: filtro <strong class="text-white/65">Sin referidor</strong> y asignación desde el detalle de cada fila.</p>
           <p class="text-xs text-white/50 mb-3">Pestañas <strong class="text-white/70">Comercios</strong> / <strong class="text-white/70">Distribuidores</strong>: tocá una fila para detalle y membresía. Quitar cuentas: contraseña en la tarjeta <strong class="text-white/65">Ajustes del sistema</strong> (pestaña <strong class="text-white/65">Ajustes</strong>).</p>
-          <input type="text" id="superSearchEmail" placeholder="Buscar por email o nombre..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm mb-3" autocomplete="off">
+          <input type="text" id="superSearchEmail" placeholder="Buscar por email o nombre..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm mb-3" autocomplete="off">
           <div class="flex flex-wrap gap-2 mb-2">
-            <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-[#22c55e]/50 bg-[#22c55e]/30" data-filter="todos">Todos</button>
+            <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-[#ffffff]/50 bg-[#ffffff]/30" data-filter="todos">Todos</button>
             <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-white/20 glass" data-filter="activos">Activos</button>
             <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-white/20 glass" data-filter="inactivos">Inactivos</button>
             <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-red-500/40 glass" data-filter="vencida" title="Fecha de fin de vigencia / membresía ya pasada (trial_ends_at)">Vencida</button>
             <button type="button" class="super-filter-btn super-only super-main-only px-3 py-1.5 rounded-lg text-sm font-medium border border-amber-500/40 glass" data-filter="sin_referidor" title="Cuentas sin referidor asignado">Sin referidor</button>
           </div>
           <div class="flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 mb-3" role="tablist" aria-label="Tipo de afiliado">
-            <button type="button" id="superAfiliadosTabUsuarios" role="tab" aria-selected="true" class="super-afiliados-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-[#22c55e]/50 bg-[#22c55e]/20 text-white transition-all">Comercios</button>
+            <button type="button" id="superAfiliadosTabUsuarios" role="tab" aria-selected="true" class="super-afiliados-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-[#ffffff]/50 bg-[#ffffff]/20 text-white transition-all">Comercios</button>
             <button type="button" id="superAfiliadosTabDistribuidores" role="tab" aria-selected="false" class="super-afiliados-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-transparent text-white/55 hover:text-white/80 transition-all">Distribuidores</button>
           </div>
           <div id="superUsersList" class="max-h-[50vh] overflow-y-auto pr-1 rounded-xl border border-white/10 bg-black/15">
@@ -1661,7 +1661,7 @@
             <div class="ingresos-welcome-bg absolute inset-0 pointer-events-none"></div>
             <div class="relative flex flex-col sm:flex-row sm:items-center gap-3 p-4 sm:p-5">
               <div class="flex-1 min-w-0">
-                <p class="text-[10px] font-semibold uppercase tracking-widest text-[#86efac]/70 mb-0.5">Panel de administración</p>
+                <p class="text-[10px] font-semibold uppercase tracking-widest text-[#ffffff]/70 mb-0.5">Panel de administración</p>
                 <h2 id="ingresosBienvenidaTitle" class="text-lg sm:text-xl font-bold text-white leading-snug">Hola, te damos la bienvenida.</h2>
                 <p id="ingresosBienvenidaSub" class="text-sm text-white/55 mt-0.5">Panel de administración · Ferriol OS</p>
               </div>
@@ -1681,7 +1681,7 @@
           <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4">
             <div class="min-w-0">
               <h2 class="font-bold text-xl mb-1 flex items-center gap-2 text-white">
-                <i data-lucide="line-chart" class="w-5 h-5 text-[#86efac] shrink-0"></i>
+                <i data-lucide="line-chart" class="w-5 h-5 text-[#ffffff] shrink-0"></i>
                 <span id="ingresosSectionTitle">Gestión de ventas</span>
               </h2>
               <p id="ingresosSectionSubtitle" class="text-xs text-white/50 hidden mb-0"></p>
@@ -1709,7 +1709,7 @@
           <div id="ingresosKpiPartnerRow" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
             <div class="rounded-2xl border border-white/12 bg-gradient-to-b from-white/[0.08] to-transparent p-4">
               <p class="text-xs text-white/50 mb-1">Comisión acreditada</p>
-              <p id="ingresosKpiNet" class="text-2xl font-bold text-[#86efac] tabular-nums">—</p>
+              <p id="ingresosKpiNet" class="text-2xl font-bold text-[#ffffff] tabular-nums">—</p>
             </div>
             <div class="rounded-2xl border border-white/12 bg-gradient-to-b from-white/[0.08] to-transparent p-4">
               <p class="text-xs text-white/50 mb-1">Ventas</p>
@@ -1727,7 +1727,7 @@
           <div id="ingresosKpiFounderRow" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
             <div class="rounded-2xl border border-white/12 bg-gradient-to-b from-white/[0.08] to-transparent p-4">
               <p class="text-xs text-white/50 mb-1">Facturación bruta</p>
-              <p id="ingresosKpiGross" class="text-2xl font-bold text-[#86efac] tabular-nums">—</p>
+              <p id="ingresosKpiGross" class="text-2xl font-bold text-[#ffffff] tabular-nums">—</p>
               <p class="text-[10px] text-white/40 mt-1">Cobros <strong class="text-white/55">verificados</strong> (ARS)</p>
             </div>
             <div class="rounded-2xl border border-cyan-500/15 bg-gradient-to-b from-cyan-500/10 to-transparent p-4">
@@ -1771,7 +1771,7 @@
               </button>
               <div class="min-w-0">
                 <h2 class="font-bold text-xl flex items-center gap-2 text-white">
-                  <i data-lucide="inbox" class="w-5 h-5 shrink-0 text-[#86efac]"></i>
+                  <i data-lucide="inbox" class="w-5 h-5 shrink-0 text-[#ffffff]"></i>
                   Comprobantes
                 </h2>
                 <p class="text-xs text-white/50 mt-1 leading-snug">Comercios y distribuidores que subieron un comprobante para que registres la venta ante Ferriol.</p>
@@ -1779,7 +1779,7 @@
             </div>
           </div>
           <div class="flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 mb-4" role="tablist" aria-label="Tipo de comprobante">
-            <button type="button" id="partnerProofScreenTabComercios" role="tab" aria-selected="true" class="partner-proof-screen-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-[#22c55e]/50 bg-[#22c55e]/20 text-white transition-all">Comercios</button>
+            <button type="button" id="partnerProofScreenTabComercios" role="tab" aria-selected="true" class="partner-proof-screen-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-[#ffffff]/50 bg-[#ffffff]/20 text-white transition-all">Comercios</button>
             <button type="button" id="partnerProofScreenTabDistribuidores" role="tab" aria-selected="false" class="partner-proof-screen-tab flex-1 py-2.5 rounded-lg text-sm font-semibold touch-target border border-transparent text-white/55 hover:text-white/80 transition-all">Distribuidores</button>
           </div>
           <div id="partnerProofScreenPaneComercios" class="partner-proof-screen-pane space-y-3 text-sm min-h-[4rem]" data-pane="comercios"></div>
@@ -1796,17 +1796,17 @@
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
             <div>
               <h2 class="font-bold text-xl flex items-center gap-2">
-                <i data-lucide="git-fork" class="w-5 h-5 text-[#86efac]"></i>
+                <i data-lucide="git-fork" class="w-5 h-5 text-[#ffffff]"></i>
                 Tablero del Sistema
               </h2>
               <p class="text-xs text-white/45 mt-0.5">Red Ferriol OS · proceso de venta, estructura, flujo de dinero y comisiones</p>
             </div>
-            <span class="text-[10px] font-semibold uppercase tracking-widest text-[#86efac]/60 bg-[#22c55e]/10 border border-[#22c55e]/25 rounded-lg px-2.5 py-1 self-start sm:self-auto">Solo fundador</span>
+            <span class="text-[10px] font-semibold uppercase tracking-widest text-[#ffffff]/60 bg-[#ffffff]/10 border border-[#ffffff]/25 rounded-lg px-2.5 py-1 self-start sm:self-auto">Solo fundador</span>
           </div>
 
           <!-- ── TABS: Flujograma / Estructura / Dinero / Notas ── -->
           <div id="sistemaMlmTabBar" class="ferriol-sistema-mlm-tab-bar sticky top-0 z-[100] flex gap-1 p-1 rounded-xl bg-black/45 backdrop-blur-md border border-white/10 mb-5 flex-wrap" role="tablist" aria-label="Secciones del tablero">
-            <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-[#22c55e]/50 bg-[#22c55e]/20 text-white" data-sistema-tab="flujo" onclick="try{window._ferriolSistemaSwitchTab('flujo')}catch(e){}">Proceso de venta</button>
+            <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-[#ffffff]/50 bg-[#ffffff]/20 text-white" data-sistema-tab="flujo" onclick="try{window._ferriolSistemaSwitchTab('flujo')}catch(e){}">Proceso de venta</button>
             <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-sistema-tab="dinero" onclick="try{window._ferriolSistemaSwitchTab('dinero')}catch(e){}">Dinero</button>
             <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-sistema-tab="estructura" onclick="try{window._ferriolSistemaSwitchTab('estructura')}catch(e){}">Estructura MLM</button>
             <button type="button" class="sistema-tab flex-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-sistema-tab="notas" onclick="try{window._ferriolSistemaSwitchTab('notas')}catch(e){}"><i data-lucide="notebook-pen" class="w-3 h-3 inline -mt-0.5 mr-0.5"></i> Notas</button>
@@ -2024,9 +2024,9 @@
                     <div class="flujo-desc" data-default="Las cuentas se actualizan en tiempo real.">Las cuentas se actualizan en tiempo real.</div>
                     <div class="flujo-result-grid">
                       <div class="flujo-result-item flujo-result-item--green">
-                        <i data-lucide="store" class="w-4 h-4 text-[#86efac] shrink-0 mt-0.5"></i>
+                        <i data-lucide="store" class="w-4 h-4 text-[#ffffff] shrink-0 mt-0.5"></i>
                         <div>
-                          <strong class="text-[#86efac] text-xs block">Kiosquero</strong>
+                          <strong class="text-[#ffffff] text-xs block">Kiosquero</strong>
                           <span class="text-white/60 text-[11px]">Días de vigencia sumados · acceso completo al sistema</span>
                         </div>
                       </div>
@@ -2055,7 +2055,7 @@
           <div id="sistemaNotasBoard" class="mlm-board mb-4" data-sistema-tab="notas">
             <div class="flex items-center justify-between gap-2 mb-1">
               <p class="mlm-board-label mb-0">Notas del sistema</p>
-              <span id="notasStatus" class="text-[10px] text-[#86efac]/50 transition-opacity duration-500 opacity-0"></span>
+              <span id="notasStatus" class="text-[10px] text-[#ffffff]/50 transition-opacity duration-500 opacity-0"></span>
             </div>
             <p class="text-[10px] text-white/30 mb-4">Anotá ideas, pendientes o mejoras. Se guardan automáticamente en este dispositivo.</p>
 
@@ -2063,7 +2063,7 @@
             <div id="notasList" class="notas-list"></div>
 
             <!-- Botón nueva nota -->
-            <button type="button" id="notasAddBtn" class="notas-add-btn w-full mt-2 py-3 rounded-xl border border-dashed border-white/15 hover:border-[#22c55e]/40 text-white/30 hover:text-[#86efac]/70 text-xs transition-all touch-target flex items-center justify-center gap-2">
+            <button type="button" id="notasAddBtn" class="notas-add-btn w-full mt-2 py-3 rounded-xl border border-dashed border-white/15 hover:border-[#ffffff]/40 text-white/30 hover:text-[#ffffff]/70 text-xs transition-all touch-target flex items-center justify-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
               Nueva nota
             </button>
@@ -2232,15 +2232,15 @@
 
               <div class="mlm-access-card mlm-access-card--green">
                 <div class="mlm-access-header">
-                  <i data-lucide="store" class="w-4 h-4 text-[#86efac] shrink-0"></i>
-                  <span class="font-semibold text-sm text-[#86efac]">Kiosco</span>
+                  <i data-lucide="store" class="w-4 h-4 text-[#ffffff] shrink-0"></i>
+                  <span class="font-semibold text-sm text-[#ffffff]">Kiosco</span>
                 </div>
                 <ul class="mlm-access-list">
-                  <li><i data-lucide="check" class="w-3 h-3 text-[#86efac] shrink-0"></i>Productos y stock</li>
-                  <li><i data-lucide="check" class="w-3 h-3 text-[#86efac] shrink-0"></i>Caja del día</li>
-                  <li><i data-lucide="check" class="w-3 h-3 text-[#86efac] shrink-0"></i>Libreta de deudores</li>
-                  <li><i data-lucide="check" class="w-3 h-3 text-[#86efac] shrink-0"></i>Escáner de código</li>
-                  <li><i data-lucide="check" class="w-3 h-3 text-[#86efac] shrink-0"></i>Historial de ventas</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-[#ffffff] shrink-0"></i>Productos y stock</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-[#ffffff] shrink-0"></i>Caja del día</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-[#ffffff] shrink-0"></i>Libreta de deudores</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-[#ffffff] shrink-0"></i>Escáner de código</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-[#ffffff] shrink-0"></i>Historial de ventas</li>
                   <li><i data-lucide="minus" class="w-3 h-3 text-white/30 shrink-0"></i><span class="text-white/35">Sin panel de red</span></li>
                 </ul>
                 <span class="mlm-access-code">SQL: role = 'kiosquero'</span>
@@ -2255,7 +2255,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
               <div class="mlm-timeline">
-                <p class="mlm-timeline-title text-[#86efac]"><i data-lucide="store" class="w-3.5 h-3.5 inline mr-0.5"></i> Ciclo de vida del Kiosco</p>
+                <p class="mlm-timeline-title text-[#ffffff]"><i data-lucide="store" class="w-3.5 h-3.5 inline mr-0.5"></i> Ciclo de vida del Kiosco</p>
                 <div class="mlm-timeline-steps">
                   <div class="mlm-step mlm-step--active">
                     <span class="mlm-step-dot mlm-step-dot--green"></span>
@@ -2321,14 +2321,14 @@
                   <tr>
                     <td><span class="mlm-pill mlm-pill--violet">Kit inicial</span></td>
                     <td class="tabular-nums font-semibold text-white/90">$ 60.000</td>
-                    <td class="tabular-nums text-[#86efac] font-bold">80% · $ 48.000</td>
+                    <td class="tabular-nums text-[#ffffff] font-bold">80% · $ 48.000</td>
                     <td class="tabular-nums text-cyan-200">50% · $ 30.000</td>
                     <td class="tabular-nums text-amber-200">20–50% · $ 12–30k</td>
                   </tr>
                   <tr>
                     <td><span class="mlm-pill mlm-pill--green">Suscripción mensual kiosco</span></td>
                     <td class="tabular-nums font-semibold text-white/90">$ 9.900</td>
-                    <td class="tabular-nums text-[#86efac] font-bold">80% · $ 7.920</td>
+                    <td class="tabular-nums text-[#ffffff] font-bold">80% · $ 7.920</td>
                     <td class="tabular-nums text-cyan-200">50% · $ 4.950</td>
                     <td class="tabular-nums text-amber-200">20% · $ 1.980</td>
                   </tr>
@@ -2444,19 +2444,19 @@
             Volver a opciones principales
           </button>
           <h2 class="font-bold text-xl mb-2 flex items-center gap-2">
-            <i data-lucide="settings" class="w-5 h-5 text-[#86efac]"></i>
+            <i data-lucide="settings" class="w-5 h-5 text-[#ffffff]"></i>
             Ajustes del sistema
           </h2>
           <p class="text-xs text-white/50 mb-4">Elegí un tema: cada pantalla tiene su propio <strong class="text-white/70">Guardar</strong>. Los datos se cargan al abrir el panel de administración.</p>
           <p class="text-xs text-sky-200/95 mb-4 leading-relaxed rounded-lg border border-sky-500/35 bg-sky-950/40 px-3 py-2.5"><strong class="text-white/95">Mercado Pago:</strong> abrí <strong class="text-white/95">Links Mercado Pago</strong> en esta lista y pegá cada link público (<code class="text-sky-100/95">https://...</code>).</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <button type="button" data-ferriol-ajustes-target="ajustes-contacto" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/45 active:scale-[0.98] touch-target">
-              <div class="w-10 h-10 rounded-xl bg-[#22c55e]/20 flex items-center justify-center shrink-0"><i data-lucide="phone" class="w-5 h-5 text-[#86efac]"></i></div>
+            <button type="button" data-ferriol-ajustes-target="ajustes-contacto" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#ffffff]/45 active:scale-[0.98] touch-target">
+              <div class="w-10 h-10 rounded-xl bg-[#ffffff]/20 flex items-center justify-center shrink-0"><i data-lucide="phone" class="w-5 h-5 text-[#ffffff]"></i></div>
               <span class="font-semibold text-white">Contacto y seguridad</span>
               <span class="text-xs text-white/50">WhatsApp empresa, Ayuda en el menú, contraseña para quitar usuarios</span>
             </button>
-            <button type="button" data-ferriol-ajustes-target="ajustes-transferencia" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/45 active:scale-[0.98] touch-target">
-              <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0"><i data-lucide="landmark" class="w-5 h-5 text-emerald-200"></i></div>
+            <button type="button" data-ferriol-ajustes-target="ajustes-transferencia" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#ffffff]/45 active:scale-[0.98] touch-target">
+              <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0"><i data-lucide="landmark" class="w-5 h-5 text-white"></i></div>
               <span class="font-semibold text-white">Datos de transferencia Ferriol</span>
               <span class="text-xs text-white/50">Texto que ven los kioscos para abonar a la empresa</span>
             </button>
@@ -2475,8 +2475,8 @@
               <span class="font-semibold text-white">Aprobación kit distribuidor</span>
               <span class="text-xs text-white/50">Ventana en horas y mensaje en el avatar</span>
             </button>
-            <button type="button" data-ferriol-ajustes-target="ajustes-comisiones" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/45 active:scale-[0.98] touch-target sm:col-span-2">
-              <div class="w-10 h-10 rounded-xl bg-[#22c55e]/20 flex items-center justify-center shrink-0"><i data-lucide="percent" class="w-5 h-5 text-[#86efac]"></i></div>
+            <button type="button" data-ferriol-ajustes-target="ajustes-comisiones" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#ffffff]/45 active:scale-[0.98] touch-target sm:col-span-2">
+              <div class="w-10 h-10 rounded-xl bg-[#ffffff]/20 flex items-center justify-center shrink-0"><i data-lucide="percent" class="w-5 h-5 text-[#ffffff]"></i></div>
               <span class="font-semibold text-white">Comisiones administradores</span>
               <span class="text-xs text-white/50">Período inicial y % en Cobros (mlm_plan_config)</span>
             </button>
@@ -2485,8 +2485,8 @@
               <span class="font-semibold text-white">Avisos de renovación (prueba)</span>
               <span class="text-xs text-white/50">Ventana en días y textos por día en la campana</span>
             </button>
-            <button type="button" data-ferriol-ajustes-target="ajustes-precios" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-emerald-400/45 active:scale-[0.98] touch-target sm:col-span-2">
-              <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0"><i data-lucide="coins" class="w-5 h-5 text-emerald-200"></i></div>
+            <button type="button" data-ferriol-ajustes-target="ajustes-precios" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-white/45 active:scale-[0.98] touch-target sm:col-span-2">
+              <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0"><i data-lucide="coins" class="w-5 h-5 text-white"></i></div>
               <span class="font-semibold text-white">Precios de referencia (ARS)</span>
               <span class="text-xs text-white/50">Kit, suscripción kiosco y cuota distribuidor</span>
             </button>
@@ -2496,7 +2496,7 @@
               <span class="text-xs text-white/50">Cierres, beneficios y modales de pago</span>
             </button>
             <button type="button" data-ferriol-ajustes-target="ajustes-respaldo" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-white/25 active:scale-[0.98] touch-target sm:col-span-2">
-              <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0"><i data-lucide="database-backup" class="w-5 h-5 text-[#86efac]"></i></div>
+              <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0"><i data-lucide="database-backup" class="w-5 h-5 text-[#ffffff]"></i></div>
               <span class="font-semibold text-white">Respaldo masivo de usuarios</span>
               <span class="text-xs text-white/50">Exportar / importar JSON (sin botón Guardar)</span>
             </button>
@@ -2508,22 +2508,22 @@
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
             Volver a ajustes del sistema
           </button>
-          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="phone" class="w-5 h-5 text-[#86efac]"></i> Contacto y seguridad</h2>
+          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="phone" class="w-5 h-5 text-[#ffffff]"></i> Contacto y seguridad</h2>
           <div class="space-y-4">
             <p class="text-xs text-white/50 mb-2">Números de WhatsApp que verán los <strong class="text-white/65">administradores de red</strong> (socios) si su cuenta se desactiva o deben renovar o pagar. Los <strong class="text-white/65">negocios (kioscos)</strong> ven el teléfono que cargó su referidor en el perfil.</p>
             <label class="block text-xs text-white/70 mb-1">Contacto 1 (WhatsApp)</label>
-            <input type="tel" id="adminContactWhatsapp" placeholder="Ej. 5491112345678" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+            <input type="tel" id="adminContactWhatsapp" placeholder="Ej. 5491112345678" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-base mb-3">
             <label class="block text-xs text-white/70 mb-1">Contacto 2 (WhatsApp)</label>
-            <input type="tel" id="adminContactWhatsapp2" placeholder="Ej. 5491198765432 (opcional)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+            <input type="tel" id="adminContactWhatsapp2" placeholder="Ej. 5491198765432 (opcional)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-base mb-3">
             <label class="block text-xs text-white/70 mb-1">Contacto 3 (WhatsApp, opcional)</label>
-            <input type="tel" id="adminContactWhatsapp3" placeholder="Opcional" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+            <input type="tel" id="adminContactWhatsapp3" placeholder="Opcional" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-base mb-3">
             <label class="block text-xs text-white/70 mb-1">Contacto 4 (WhatsApp, opcional)</label>
-            <input type="tel" id="adminContactWhatsapp4" placeholder="Opcional" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+            <input type="tel" id="adminContactWhatsapp4" placeholder="Opcional" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-base mb-3">
             <label class="block text-xs text-white/70 mb-1 mt-2">Soporte · menú del perfil (Ayuda)</label>
             <p class="text-[10px] text-white/45 mb-2">Número o WhatsApp que ven <strong class="text-white/60">todos los usuarios</strong> al abrir el círculo del avatar → <strong class="text-white/60">Ayuda</strong>.</p>
             <input type="tel" id="adminSupportPhone" placeholder="Ej. 5491112345678" maxlength="80" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-sky-400/60 text-base mb-3">
             <label class="block text-xs text-white/70 mb-1">Contraseña para quitar usuarios (opcional)</label>
-            <input type="password" id="adminDeletePassword" placeholder="Al quitar un negocio se pedirá esta contraseña" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+            <input type="password" id="adminDeletePassword" placeholder="Al quitar un negocio se pedirá esta contraseña" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-base mb-3">
             <button type="button" class="ferriol-save-admin-slice btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold" data-admin-slice="contacto">Guardar</button>
             <p id="adminSliceMsg-contacto" class="text-xs mt-2 hidden"></p>
           </div>
@@ -2534,9 +2534,9 @@
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
             Volver a ajustes del sistema
           </button>
-          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 text-[#86efac]"></i> Datos de transferencia (Ferriol)</h2>
+          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 text-[#ffffff]"></i> Datos de transferencia (Ferriol)</h2>
           <p class="text-xs text-white/50 mb-3">Los kiosqueros ven estos datos solo como <strong class="text-white/70">instrucciones de pago de la empresa (Ferriol)</strong>. Los datos bancarios personales del socio <strong class="text-white/70">no se muestran</strong> al negocio referido.</p>
-          <textarea id="adminTransferInfo" rows="8" placeholder="Titular, CBU, alias, instrucciones..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-sm resize-y mb-4"></textarea>
+          <textarea id="adminTransferInfo" rows="8" placeholder="Titular, CBU, alias, instrucciones..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm resize-y mb-4"></textarea>
           <button type="button" class="ferriol-save-admin-slice btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold" data-admin-slice="transferencia">Guardar</button>
           <p id="adminSliceMsg-transferencia" class="text-xs mt-2 hidden"></p>
         </div>
@@ -2569,7 +2569,7 @@
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="calendar-clock" class="w-5 h-5 text-cyan-300"></i> Período de prueba</h2>
           <p class="text-xs text-white/50 mb-3">Solo afecta <strong class="text-white/75">nuevos</strong> registros (kiosco o socio).</p>
           <label class="block text-xs text-white/70 mb-1">Duración en días (1–365)</label>
-          <input type="number" id="adminTrialDurationDays" min="1" max="365" value="15" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-4">
+          <input type="number" id="adminTrialDurationDays" min="1" max="365" value="15" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-base mb-4">
           <button type="button" class="ferriol-save-admin-slice btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold" data-admin-slice="trial">Guardar</button>
           <p id="adminSliceMsg-trial" class="text-xs mt-2 hidden"></p>
         </div>
@@ -2594,10 +2594,10 @@
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
             Volver a ajustes del sistema
           </button>
-          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="percent" class="w-5 h-5 text-[#86efac]"></i> Comisiones a administradores</h2>
+          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="percent" class="w-5 h-5 text-[#ffffff]"></i> Comisiones a administradores</h2>
           <p class="text-xs text-white/50 mb-3">Sobre el monto bruto verificado en Cobros.</p>
           <label class="block text-xs text-white/70 mb-1">Meses de período inicial (0 = solo comisión normal)</label>
-          <input type="number" id="adminPartnerIntroMonths" min="0" max="36" value="1" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+          <input type="number" id="adminPartnerIntroMonths" min="0" max="36" value="1" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-base mb-3">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
             <div>
               <label class="block text-xs text-white/70 mb-1">% administrador (período inicial)</label>
@@ -2622,7 +2622,7 @@
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="bell-ring" class="w-5 h-5 text-amber-300"></i> Avisos de renovación (prueba)</h2>
           <p class="text-xs text-white/50 mb-3">Placeholders: <span class="text-white/70">{dias}</span>, <span class="text-white/70">{nombre}</span>.</p>
           <label class="block text-xs text-white/70 mb-1">Días antes del vencimiento para avisar (1–30)</label>
-          <input type="number" id="trialReminderWindowDays" min="1" max="30" value="5" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-3">
+          <input type="number" id="trialReminderWindowDays" min="1" max="30" value="5" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-base mb-3">
           <div id="trialReminderMsgsContainer" class="space-y-1 max-h-[40vh] overflow-y-auto pr-1 mb-4"></div>
           <button type="button" class="ferriol-save-admin-slice btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold" data-admin-slice="renovacion">Guardar</button>
           <p id="adminSliceMsg-renovacion" class="text-xs mt-2 hidden"></p>
@@ -2633,7 +2633,7 @@
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
             Volver a ajustes del sistema
           </button>
-          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="coins" class="w-5 h-5 text-emerald-300"></i> Precios de referencia (ARS)</h2>
+          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="coins" class="w-5 h-5 text-white"></i> Precios de referencia (ARS)</h2>
           <p class="text-xs text-white/50 mb-3">Enteros en pesos · <code class="text-white/55">app_settings.ferriol_plan_amounts</code></p>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
             <div>
@@ -2668,7 +2668,7 @@
             <label class="block text-xs text-white/70 mb-1">Título beneficios · distribuidor</label>
             <input type="text" id="adminCheckoutDistribBeneficiosTitle" placeholder="Beneficios" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm" maxlength="80">
             <hr class="border-white/15 my-3">
-            <p class="text-xs text-emerald-200/90 font-semibold uppercase">Plan · suscripción mensual (negocio)</p>
+            <p class="text-xs text-white/90 font-semibold uppercase">Plan · suscripción mensual (negocio)</p>
             <input type="text" id="adminCheckoutPayKioscoEyebrow" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2 font-mono" maxlength="140" placeholder="Encabezado">
             <input type="text" id="adminCheckoutPayKioscoHeadline" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2" placeholder="Titular">
             <textarea id="adminCheckoutPayKioscoLead" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2" placeholder="Texto opcional"></textarea>
@@ -2705,7 +2705,7 @@
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
             Volver a ajustes del sistema
           </button>
-          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="database-backup" class="w-5 h-5 text-[#86efac]"></i> Respaldo de todos los usuarios</h2>
+          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="database-backup" class="w-5 h-5 text-[#ffffff]"></i> Respaldo de todos los usuarios</h2>
           <p class="text-xs text-white/50 mb-3">Exportá o importá JSON; al importar se complementan datos (no se borra lo existente).</p>
           <div class="flex flex-wrap gap-2 mb-2">
             <button type="button" id="btnExportAllUsersBackup" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold flex items-center gap-2 touch-target">
@@ -2722,18 +2722,18 @@
         <div id="super-section-solicitudes" class="super-section super-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; min-height: 100%; max-height: 85vh; padding-bottom: 6rem;">
           <div id="partnerBilleteraPanel" class="partner-billetera-panel mb-6" style="display: none;">
             <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
-              <i data-lucide="wallet" class="w-5 h-5 text-[#86efac]"></i>
+              <i data-lucide="wallet" class="w-5 h-5 text-[#ffffff]"></i>
               Billetera
             </h2>
             <div id="partnerSolicitudesTabBar" class="partner-solicitudes-tab-bar mb-4 hidden flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 flex-wrap overflow-x-auto" role="tablist" aria-label="Secciones billetera">
-              <button type="button" class="partner-solic-tab inline-flex flex-1 min-w-[5.5rem] items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-[#22c55e]/50 bg-[#22c55e]/20 text-white" data-partner-solic-tab="billetera" role="tab" aria-selected="true"><span class="truncate">Saldo · retiros</span><span class="ferriol-partner-solic-badge pointer-events-none min-w-[1rem] h-4 shrink-0 rounded-full bg-red-500/95 px-0.5 text-[9px] font-bold leading-4 text-white text-center shadow tabular-nums hidden" data-partner-solic-badge="billetera" aria-hidden="true"></span></button>
+              <button type="button" class="partner-solic-tab inline-flex flex-1 min-w-[5.5rem] items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-[#ffffff]/50 bg-[#ffffff]/20 text-white" data-partner-solic-tab="billetera" role="tab" aria-selected="true"><span class="truncate">Saldo · retiros</span><span class="ferriol-partner-solic-badge pointer-events-none min-w-[1rem] h-4 shrink-0 rounded-full bg-red-500/95 px-0.5 text-[9px] font-bold leading-4 text-white text-center shadow tabular-nums hidden" data-partner-solic-badge="billetera" aria-hidden="true"></span></button>
               <button type="button" class="partner-solic-tab inline-flex flex-1 min-w-[5.5rem] items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-partner-solic-tab="tramites" role="tab" aria-selected="false"><span class="truncate">Trámites</span><span class="ferriol-partner-solic-badge pointer-events-none min-w-[1rem] h-4 shrink-0 rounded-full bg-red-500/95 px-0.5 text-[9px] font-bold leading-4 text-white text-center shadow tabular-nums hidden" data-partner-solic-badge="tramites" aria-hidden="true"></span></button>
             </div>
             <div id="partnerSolicPaneBilletera" class="ferriol-solic-partner-pane mb-4" data-partner-solic-pane="billetera">
             <p class="text-xs text-white/50 mb-4">El monto verde es <strong class="text-white/70">todo lo acreditado en Ingresos</strong> (mismo criterio: comisiones de venta aprobadas, histórico) <strong class="text-white/70">menos</strong> lo que ya figura en tu historial de retiros (pagados y pedidos en curso; los rechazados no restan). En <strong class="text-white/65">Ingresos</strong> el gráfico usa el período del filtro; acá el saldo es siempre <strong class="text-white/65">histórico completo</strong>. La empresa valida fondos y transfiere según los datos que cargaste en <strong class="text-white/65">Ajustes del sistema</strong> o en tu perfil (titular = nombre de tu cuenta).</p>
-            <div class="rounded-2xl border border-emerald-500/35 bg-emerald-500/[0.08] p-4 mb-4">
+            <div class="rounded-2xl border border-white/35 bg-white/[0.08] p-4 mb-4">
               <p class="text-xs text-white/50 mb-1">Disponible para retirar</p>
-              <p id="partnerWalletAvailable" class="text-2xl font-bold text-[#86efac] tabular-nums">—</p>
+              <p id="partnerWalletAvailable" class="text-2xl font-bold text-[#ffffff] tabular-nums">—</p>
               <p id="partnerWalletBreakdown" class="text-[10px] text-white/40 mt-2"></p>
               <button type="button" id="btnPartnerWithdrawOpen" class="btn-glow rounded-xl py-3 w-full font-semibold mt-4 touch-target">Retirar dinero</button>
             </div>
@@ -2751,27 +2751,27 @@
             </div><!-- /partnerSolicPaneTramites -->
           </div>
           <h2 class="founder-solicitudes-heading font-bold text-xl mb-1 flex items-center gap-2 super-only super-main-only">
-            <i data-lucide="clipboard-list" class="w-5 h-5 text-[#86efac]"></i>
+            <i data-lucide="clipboard-list" class="w-5 h-5 text-[#ffffff]"></i>
             Solicitudes
           </h2>
           <div id="founderSolicitudesTabBar" class="founder-solicitudes-tab-bar super-only super-main-only hidden mb-3 flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 flex-wrap" role="tablist" aria-label="Tipo de solicitud">
-            <button type="button" class="founder-solic-tab inline-flex flex-1 min-w-[6.75rem] items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-[#22c55e]/50 bg-[#22c55e]/20 text-white" data-solicitud-tab="retiros" role="tab" aria-selected="true"><span class="truncate">Retiros</span><span class="ferriol-founder-solic-badge pointer-events-none min-w-[1rem] h-4 shrink-0 rounded-full bg-red-500/95 px-0.5 text-[9px] font-bold leading-4 text-white text-center shadow tabular-nums hidden" data-founder-solic-badge="retiros" aria-hidden="true"></span></button>
+            <button type="button" class="founder-solic-tab inline-flex flex-1 min-w-[6.75rem] items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-[#ffffff]/50 bg-[#ffffff]/20 text-white" data-solicitud-tab="retiros" role="tab" aria-selected="true"><span class="truncate">Retiros</span><span class="ferriol-founder-solic-badge pointer-events-none min-w-[1rem] h-4 shrink-0 rounded-full bg-red-500/95 px-0.5 text-[9px] font-bold leading-4 text-white text-center shadow tabular-nums hidden" data-founder-solic-badge="retiros" aria-hidden="true"></span></button>
             <button type="button" class="founder-solic-tab inline-flex flex-1 min-w-[6.75rem] items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-solicitud-tab="ventas" role="tab" aria-selected="false"><span class="truncate">Ventas</span><span class="ferriol-founder-solic-badge pointer-events-none min-w-[1rem] h-4 shrink-0 rounded-full bg-red-500/95 px-0.5 text-[9px] font-bold leading-4 text-white text-center shadow tabular-nums hidden" data-founder-solic-badge="ventas" aria-hidden="true"></span></button>
             <button type="button" class="founder-solic-tab inline-flex flex-1 min-w-[6.75rem] items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-solicitud-tab="empresa" role="tab" aria-selected="false"><span class="truncate">Pagos empresa</span><span class="ferriol-founder-solic-badge pointer-events-none min-w-[1rem] h-4 shrink-0 rounded-full bg-red-500/95 px-0.5 text-[9px] font-bold leading-4 text-white text-center shadow tabular-nums hidden" data-founder-solic-badge="empresa" aria-hidden="true"></span></button>
             <button type="button" class="founder-solic-tab inline-flex flex-1 min-w-[6.75rem] items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-solicitud-tab="aprobaciones" role="tab" aria-selected="false"><span class="truncate">Aprobaciones</span><span class="ferriol-founder-solic-badge pointer-events-none min-w-[1rem] h-4 shrink-0 rounded-full bg-red-500/95 px-0.5 text-[9px] font-bold leading-4 text-white text-center shadow tabular-nums hidden" data-founder-solic-badge="aprobaciones" aria-hidden="true"></span></button>
           </div>
           <p class="text-[11px] text-white/42 mb-3 super-only super-main-only"><strong class="text-white/55">Fundador:</strong> elegí la pestaña del tipo de cola · transferencias ejecutadas te esperan en <strong class="text-white/55">Pagos</strong>.</p>
-          <p class="text-xs text-white/50 mb-3 super-only super-main-only founder-solicitudes-hint">En <strong class="text-amber-200/90">Retiros</strong> revisá fondos del libro y aprobá solicitudes de socios. En <strong class="text-emerald-200/90">Ventas</strong> están los comprobantes de venta de distribuidores. En <strong class="text-teal-200/90">Pagos empresa</strong>, comprobantes de cuotas cuenta empresa. En <strong class="text-amber-100/90">Aprobaciones</strong>: días de vigencia, altas socio/negocio y upgrade kiosco→socio.</p>
+          <p class="text-xs text-white/50 mb-3 super-only super-main-only founder-solicitudes-hint">En <strong class="text-amber-200/90">Retiros</strong> revisá fondos del libro y aprobá solicitudes de socios. En <strong class="text-white/90">Ventas</strong> están los comprobantes de venta de distribuidores. En <strong class="text-teal-200/90">Pagos empresa</strong>, comprobantes de cuotas cuenta empresa. En <strong class="text-amber-100/90">Aprobaciones</strong>: días de vigencia, altas socio/negocio y upgrade kiosco→socio.</p>
           <div id="founderWithdrawalReviewBox" class="ferriol-solic-fundador-pane hidden mb-5 rounded-2xl border border-amber-500/45 bg-amber-500/[0.1] p-3 sm:p-4 super-only super-main-only" style="display: none;" data-solicitud-pane="retiros">
             <h3 class="text-sm font-semibold text-amber-200 mb-2 flex items-center gap-2"><i data-lucide="wallet" class="w-4 h-4"></i> Retiros de comisiones (revisión)</h3>
             <p class="text-[11px] text-white/50 mb-3">Solicitudes enviadas por administradores de red. Verificá que el saldo en el libro alcance; al aprobar pasan a <strong class="text-white/70">Pagos</strong> para transferir y adjuntar comprobante.</p>
             <div id="founderWithdrawalReviewList" class="space-y-2 text-sm min-h-[2rem]"></div>
           </div>
-          <div id="superClientSaleRequestsBox" class="ferriol-solic-fundador-pane hidden mb-5 rounded-2xl border border-emerald-500/40 bg-emerald-500/[0.08] p-3 sm:p-4 super-only super-main-only scroll-mt-8" style="display: none;" data-solicitud-pane="ventas">
-            <h3 class="text-sm font-semibold text-emerald-200 mb-2 flex items-center gap-2"><i data-lucide="image-plus" class="w-4 h-4"></i> Ventas con comprobante (socios)</h3>
+          <div id="superClientSaleRequestsBox" class="ferriol-solic-fundador-pane hidden mb-5 rounded-2xl border border-white/40 bg-white/[0.08] p-3 sm:p-4 super-only super-main-only scroll-mt-8" style="display: none;" data-solicitud-pane="ventas">
+            <h3 class="text-sm font-semibold text-white mb-2 flex items-center gap-2"><i data-lucide="image-plus" class="w-4 h-4"></i> Ventas con comprobante (socios)</h3>
             <p class="text-[11px] text-white/50 mb-3">Revisá nombre, email y monto, mirá el comprobante, y aprobá para generar el cobro y la <strong class="text-white/70">comisión del administrador en Ingresos</strong> (mismo flujo que verificar pago en Cobros).</p>
             <div id="superClientSaleRequestsList" class="space-y-3 text-sm min-h-[2rem]"></div>
-            <p id="superClientSaleRequestsMsg" class="text-xs mt-2 text-emerald-200/80 hidden"></p>
+            <p id="superClientSaleRequestsMsg" class="text-xs mt-2 text-white/80 hidden"></p>
           </div>
           <div id="superEmpresaPaymentProofBox" class="ferriol-solic-fundador-pane hidden mb-5 rounded-2xl border border-teal-500/40 bg-teal-500/[0.07] p-3 sm:p-4 super-only super-main-only scroll-mt-8" style="display: none;" data-solicitud-pane="empresa">
             <h3 class="text-sm font-semibold text-teal-200 mb-2 flex items-center gap-2"><i data-lucide="banknote" class="w-4 h-4"></i> Comprobantes · pagos propios (cuenta empresa)</h3>
@@ -2784,7 +2784,7 @@
         <!-- Pagos pendientes: retiros aprobados → transferencia + comprobante (solo fundador) -->
         <div id="super-section-pagos-pendientes" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; min-height: 100%; max-height: 85vh; padding-bottom: 6rem;">
           <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
-            <i data-lucide="banknote" class="w-5 h-5 text-[#86efac]"></i>
+            <i data-lucide="banknote" class="w-5 h-5 text-[#ffffff]"></i>
             Pagos pendientes
           </h2>
           <p class="text-xs text-white/50 mb-4">Retiros de socios ya <strong class="text-amber-200/90">aprobados</strong> en Solicitudes. Verificá que el titular bancario coincida con el nombre del perfil, transferí el importe, adjuntá el comprobante y registrá el pago.</p>
@@ -2802,33 +2802,33 @@
           </h2>
           <p class="text-xs text-white/50 mb-3">Elegí a quién va dirigido y escribí el texto. Lo ven en la <strong class="text-white/70">campana</strong> del encabezado quienes correspondan; el número rojo baja cuando abren el panel y no vuelve hasta que llegue un <strong class="text-white/70">aviso nuevo</strong>.</p>
           <label class="block text-sm font-medium text-white/80 mb-1" for="adminNotificationAudience">Destinatarios</label>
-          <select id="adminNotificationAudience" class="ferriol-native-select w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-3 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+          <select id="adminNotificationAudience" class="ferriol-native-select w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-3 focus:outline-none focus:ring-2 focus:ring-[#ffffff]">
             <option value="all">Todos (kiosqueros y red comercial)</option>
             <option value="kiosquero">Solo negocios (kiosqueros)</option>
             <option value="partner">Solo distribuidores (rol partner)</option>
             <option value="red">Solo red comercial (socios + fundador en vista socio)</option>
           </select>
           <label class="block text-sm font-medium text-white/80 mb-2" for="adminNotificationMessage">Mensaje</label>
-          <textarea id="adminNotificationMessage" rows="4" placeholder="Ej: Mañana cerramos a las 18 hs. / Recordá cargar stock de..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base resize-y mb-3 min-h-[100px]"></textarea>
+          <textarea id="adminNotificationMessage" rows="4" placeholder="Ej: Mañana cerramos a las 18 hs. / Recordá cargar stock de..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-base resize-y mb-3 min-h-[100px]"></textarea>
           <button type="button" id="sendNotificationBtn" class="btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold flex items-center justify-center gap-2 touch-target w-full sm:w-auto">
             <i data-lucide="send" class="w-4 h-4"></i> Enviar aviso
           </button>
-          <p id="adminNotificationMsg" class="text-xs mt-2 text-green-300 hidden"></p>
+          <p id="adminNotificationMsg" class="text-xs mt-2 text-white hidden"></p>
         </div>
         <!-- Sección hub (pestaña Ajustes; id mas por compatibilidad con switchSuperSection) -->
         <div id="super-section-mas" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
-            <i data-lucide="settings" class="w-5 h-5 text-[#86efac]"></i>
+            <i data-lucide="settings" class="w-5 h-5 text-[#ffffff]"></i>
             Ajustes
           </h2>
           <p class="text-xs text-white/50 mb-4"><strong class="text-white/70">Menú del perfil (tuerca):</strong> cada opción de <strong class="text-white/75">Ajustes</strong> abre su pantalla. Fundador en vista empresa: <strong class="text-white/65">Ajustes del sistema</strong> y <strong class="text-white/65">Aviso global</strong> desde el menú o desde los accesos de abajo. Las ventas con comprobante de socios se gestionan en <strong class="text-white/65">Solicitudes</strong>. <strong class="text-white/65">Socio / administración:</strong> <strong class="text-white/65">Billetera y solicitudes</strong> o <strong class="text-white/65">Comprobantes</strong> en el mismo menú. Enlaces para referir: <strong class="text-white/65">Afiliados</strong>. Datos bancarios propios: menú del perfil → <strong class="text-white/65">Mis datos bancarios</strong>.</p>
           <div class="super-only super-main-only mb-2">
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-[#86efac]/55">Fundador · accesos rápidos</p>
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-[#ffffff]/55">Fundador · accesos rápidos</p>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 super-only super-main-only">
-            <button type="button" id="btnSuperMasOpenAjustes" class="glass rounded-2xl p-5 border border-[#22c55e]/30 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#22c55e]/55 active:scale-[0.98] touch-target sm:col-span-2">
-              <div class="w-12 h-12 rounded-xl bg-[#22c55e]/25 flex items-center justify-center shrink-0">
-                <i data-lucide="settings" class="w-6 h-6 text-[#86efac]"></i>
+            <button type="button" id="btnSuperMasOpenAjustes" class="glass rounded-2xl p-5 border border-[#ffffff]/30 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#ffffff]/55 active:scale-[0.98] touch-target sm:col-span-2">
+              <div class="w-12 h-12 rounded-xl bg-[#ffffff]/25 flex items-center justify-center shrink-0">
+                <i data-lucide="settings" class="w-6 h-6 text-[#ffffff]"></i>
               </div>
               <span class="font-semibold text-base text-white">Ajustes del sistema</span>
               <span class="text-xs text-white/55">WhatsApp empresa, datos de transferencia, período de prueba, comisiones, precios y <strong class="text-sky-200/95">link Mercado Pago</strong>. Respaldo masivo.</span>
@@ -2916,7 +2916,7 @@
       <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="partnerWithdrawModalOverlay"></div>
       <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md scale-in">
         <div class="flex items-center justify-between mb-3">
-          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="wallet" class="w-5 h-5 text-emerald-300"></i> Solicitar retiro</h3>
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="wallet" class="w-5 h-5 text-white"></i> Solicitar retiro</h3>
           <button type="button" id="partnerWithdrawModalClose" class="btn-neomorphic rounded-xl p-2 touch-target"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div id="partnerWithdrawModalErr" class="text-xs text-red-300 mb-3 hidden"></div>
@@ -2954,7 +2954,7 @@
         </div>
         <p class="text-xs text-white/55 mb-3">Motivo que dejó la empresa y datos para corregir. Podés abrir el formulario con los datos cargados y adjuntar un comprobante nuevo.</p>
         <div id="ingresosRechazadasModalBody" class="overflow-y-auto flex-1 space-y-3 pr-1 min-h-[100px] text-sm"></div>
-        <button type="button" id="ingresosRechazadasModalNewSale" class="w-full mt-4 py-2.5 rounded-xl border border-emerald-400/40 bg-emerald-500/10 text-emerald-200 text-sm font-semibold touch-target">Nueva venta con comprobante</button>
+        <button type="button" id="ingresosRechazadasModalNewSale" class="w-full mt-4 py-2.5 rounded-xl border border-white/40 bg-white/10 text-white text-sm font-semibold touch-target">Nueva venta con comprobante</button>
       </div>
     </div>
 
@@ -2963,10 +2963,10 @@
       <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="clientSaleRequestModalOverlay"></div>
       <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto scale-in">
         <div class="flex items-center justify-between mb-3">
-          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="receipt" class="w-5 h-5 text-emerald-300"></i> Enviar venta con comprobante</h3>
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="receipt" class="w-5 h-5 text-white"></i> Enviar venta con comprobante</h3>
           <button type="button" id="clientSaleRequestModalClose" class="btn-neomorphic rounded-xl p-2 touch-target"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
-        <p class="text-sm text-white/60 mb-3">Completá los datos. El <strong class="text-white/85">cliente debe estar ya registrado en Ferriol</strong> con el mismo email (misma base que el perfil) para que la empresa pueda acreditar el pago y <strong class="text-emerald-200/90">tu comisión en Ingresos</strong> al aprobar.</p>
+        <p class="text-sm text-white/60 mb-3">Completá los datos. El <strong class="text-white/85">cliente debe estar ya registrado en Ferriol</strong> con el mismo email (misma base que el perfil) para que la empresa pueda acreditar el pago y <strong class="text-white/90">tu comisión en Ingresos</strong> al aprobar.</p>
         <div id="clientSaleRequestErr" class="text-xs text-red-300 mb-3 hidden"></div>
         <label class="block text-xs text-white/55 mb-1" for="clientSaleClientName">Nombre del cliente (referencia)</label>
         <input type="text" id="clientSaleClientName" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-3" placeholder="Nombre y apellido" autocomplete="name">
@@ -3059,9 +3059,9 @@
     <!-- Submodales desde detalle socio: suma/quita de días (menos cargado que el modal principal) -->
     <div id="superUserMdrSumModal" class="fixed inset-0 z-[92] hidden items-center justify-center p-3 sm:p-4">
       <div class="absolute inset-0 bg-black/65 backdrop-blur-sm" id="superUserMdrSumOverlay"></div>
-      <div class="relative glass-strong rounded-2xl p-5 sm:p-6 w-full max-w-md max-h-[92vh] overflow-y-auto shadow-2xl border border-emerald-500/25 scale-in">
+      <div class="relative glass-strong rounded-2xl p-5 sm:p-6 w-full max-w-md max-h-[92vh] overflow-y-auto shadow-2xl border border-white/25 scale-in">
         <div class="flex items-start justify-between gap-2 mb-4">
-          <h3 id="superUserMdrSumTitle" class="font-bold text-lg text-emerald-100 pr-6">Solicitar suma de días</h3>
+          <h3 id="superUserMdrSumTitle" class="font-bold text-lg text-white pr-6">Solicitar suma de días</h3>
           <button type="button" id="superUserMdrSumClose" class="btn-neomorphic shrink-0 rounded-xl p-2 touch-target"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div id="superUserMdrSumContent"></div>
@@ -3086,7 +3086,7 @@
       <div class="p-6 h-full flex flex-col">
         <div class="flex justify-between items-center mb-6">
           <h3 class="font-bold text-xl flex items-center gap-2">
-            <i data-lucide="shopping-bag" class="w-5 h-5 text-[#86efac]"></i>
+            <i data-lucide="shopping-bag" class="w-5 h-5 text-[#ffffff]"></i>
             Carrito
           </h3>
           <button id="closeCart" class="btn-neomorphic rounded-xl p-2.5 touch-target">
@@ -3098,10 +3098,10 @@
         </div>
         <div class="mt-6 pt-6 border-t border-white/10">
           <label class="block text-sm text-white/70 mb-2">Nombre del cliente</label>
-          <input type="text" id="cartClientName" placeholder="Ej: Juan, María..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-base mb-4">
+          <input type="text" id="cartClientName" placeholder="Ej: Juan, María..." class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-base mb-4">
           <div class="flex justify-between text-lg mb-4">
             <span>Total</span>
-            <span id="cartTotal" class="font-bold text-[#86efac]">$0</span>
+            <span id="cartTotal" class="font-bold text-[#ffffff]">$0</span>
           </div>
           <div class="flex flex-col gap-2">
             <button id="completeSale" class="w-full btn-glow rounded-xl py-4 font-semibold flex items-center justify-center gap-2 touch-target text-base">
@@ -3124,7 +3124,7 @@
       <h3 id="addToCartQtyTitle" class="font-bold text-lg mb-1 pr-8">¿Cuántas unidades?</h3>
       <p id="addToCartQtySubtitle" class="text-xs text-white/55 mb-4 leading-snug"></p>
       <label for="addToCartQtyInput" class="block text-xs text-white/60 mb-1">Cantidad</label>
-      <input type="number" id="addToCartQtyInput" min="1" step="1" value="1" inputmode="numeric" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-lg font-semibold tabular-nums focus:outline-none focus:ring-2 focus:ring-[#22c55e] mb-4">
+      <input type="number" id="addToCartQtyInput" min="1" step="1" value="1" inputmode="numeric" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-lg font-semibold tabular-nums focus:outline-none focus:ring-2 focus:ring-[#ffffff] mb-4">
       <p id="addToCartQtyHint" class="text-[11px] text-white/45 mb-4"></p>
       <div class="flex gap-2">
         <button type="button" id="addToCartQtyCancel" class="flex-1 btn-neomorphic rounded-xl py-3 text-sm font-medium touch-target">Cancelar</button>
@@ -3144,20 +3144,20 @@
       <p id="paymentWhatsappErr" class="hidden"></p>
       <div id="paymentWhatsappWrap" class="hidden"></div>
       <div class="grid grid-cols-2 gap-3">
-        <button data-payment="efectivo" class="payment-option glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#22c55e]/50 active:scale-[0.98] touch-target transition-all">
-          <i data-lucide="banknote" class="w-8 h-8 text-[#86efac]"></i>
+        <button data-payment="efectivo" class="payment-option glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#ffffff]/50 active:scale-[0.98] touch-target transition-all">
+          <i data-lucide="banknote" class="w-8 h-8 text-[#ffffff]"></i>
           <span class="font-medium text-sm">Efectivo</span>
         </button>
-        <button data-payment="tarjeta" class="payment-option glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#22c55e]/50 active:scale-[0.98] touch-target transition-all">
-          <i data-lucide="credit-card" class="w-8 h-8 text-[#86efac]"></i>
+        <button data-payment="tarjeta" class="payment-option glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#ffffff]/50 active:scale-[0.98] touch-target transition-all">
+          <i data-lucide="credit-card" class="w-8 h-8 text-[#ffffff]"></i>
           <span class="font-medium text-sm">Tarjeta</span>
         </button>
-        <button data-payment="transferencia" class="payment-option glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#22c55e]/50 active:scale-[0.98] touch-target transition-all">
-          <i data-lucide="smartphone" class="w-8 h-8 text-[#86efac]"></i>
+        <button data-payment="transferencia" class="payment-option glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#ffffff]/50 active:scale-[0.98] touch-target transition-all">
+          <i data-lucide="smartphone" class="w-8 h-8 text-[#ffffff]"></i>
           <span class="font-medium text-sm">Transferencia</span>
         </button>
-        <button data-payment="fiado" class="payment-option glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#22c55e]/50 active:scale-[0.98] touch-target transition-all">
-          <i data-lucide="user-check" class="w-8 h-8 text-[#86efac]"></i>
+        <button data-payment="fiado" class="payment-option glass rounded-xl p-4 flex flex-col items-center gap-2 border border-white/10 hover:border-[#ffffff]/50 active:scale-[0.98] touch-target transition-all">
+          <i data-lucide="user-check" class="w-8 h-8 text-[#ffffff]"></i>
           <span class="font-medium text-sm">Fiado</span>
           <span class="text-[11px] text-white/45 text-center leading-tight">Cuenta / transferencia pendiente</span>
         </button>
@@ -3174,7 +3174,7 @@
       <p class="text-xs text-white/55 text-center mb-4">Elegí cómo queda registrado en la cuenta del cliente</p>
       <div class="space-y-2">
         <button type="button" id="fiadoTipoOpcFiado" class="w-full btn-neomorphic rounded-xl py-3 text-sm font-medium touch-target flex items-center justify-center gap-2">
-          <i data-lucide="user-check" class="w-4 h-4 text-[#86efac]"></i>
+          <i data-lucide="user-check" class="w-4 h-4 text-[#ffffff]"></i>
           Fiado en cuenta
         </button>
         <button type="button" id="fiadoTipoOpcTransfPend" class="w-full glass rounded-xl py-3 text-sm font-medium touch-target flex flex-col items-center gap-0.5 border border-orange-400/35 hover:border-orange-400/55">
@@ -3192,10 +3192,10 @@
     <div class="relative glass-strong rounded-2xl p-4 w-full max-w-sm scale-in max-h-[92vh] overflow-y-auto">
       <h3 class="font-bold text-base sm:text-lg mb-3 text-center">Cobro rápido</h3>
       <div id="cobroRapidoOtroWrap" class="mb-2">
-        <input type="text" id="cobroRapidoOtroNombre" placeholder="Nombre (opcional)" class="w-full glass rounded-xl px-3 py-2 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+        <input type="text" id="cobroRapidoOtroNombre" placeholder="Nombre (opcional)" class="w-full glass rounded-xl px-3 py-2 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffffff]">
       </div>
       <div class="mb-2">
-        <input type="number" id="cobroRapidoMonto" placeholder="Precio final ($)" min="1" step="1" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/45 focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-center text-base font-medium">
+        <input type="number" id="cobroRapidoMonto" placeholder="Precio final ($)" min="1" step="1" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/45 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-center text-base font-medium">
       </div>
       <details class="mb-2 group">
         <summary class="text-[11px] text-white/45 cursor-pointer list-none flex items-center justify-center gap-1 py-1 hover:text-white/60 touch-target [&::-webkit-details-marker]:hidden">
@@ -3203,20 +3203,20 @@
           <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform group-open:rotate-180"></i>
         </summary>
         <div class="pt-2">
-          <input type="number" id="cobroRapidoMargen" placeholder="Margen % (opcional)" min="0" step="1" class="w-full glass rounded-lg px-3 py-2 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#22c55e] text-center" title="Ganancia % para calcular costo">
+          <input type="number" id="cobroRapidoMargen" placeholder="Margen % (opcional)" min="0" step="1" class="w-full glass rounded-lg px-3 py-2 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-center" title="Ganancia % para calcular costo">
         </div>
       </details>
       <div id="cobroRapidoListaWrap" class="mb-2 min-h-0">
         <div id="cobroRapidoLista" class="space-y-1 max-h-28 overflow-y-auto text-sm"></div>
         <p id="cobroRapidoListaEmpty" class="text-[11px] text-white/40 py-1">Sin ítems aún.</p>
-        <p id="cobroRapidoTotal" class="text-right text-sm font-bold text-[#86efac] mt-1 hidden">Total: $0</p>
+        <p id="cobroRapidoTotal" class="text-right text-sm font-bold text-[#ffffff] mt-1 hidden">Total: $0</p>
       </div>
       <button type="button" id="cobroRapidoAgregarBtn" class="w-full btn-neomorphic rounded-xl py-2 text-sm font-medium flex items-center justify-center gap-2 touch-target mb-2">
         <i data-lucide="plus" class="w-4 h-4"></i> Agregar
       </button>
       <div class="mb-2">
-        <button type="button" id="cobroRapidoIrProductosBtn" class="w-full glass rounded-xl py-2.5 px-2 text-xs font-medium flex flex-col items-center justify-center gap-1 border border-white/15 hover:border-[#22c55e]/50 hover:bg-[#22c55e]/08 touch-target active:scale-[0.98] text-white">
-          <i data-lucide="layout-grid" class="w-4 h-4 text-[#86efac] shrink-0"></i>
+        <button type="button" id="cobroRapidoIrProductosBtn" class="w-full glass rounded-xl py-2.5 px-2 text-xs font-medium flex flex-col items-center justify-center gap-1 border border-white/15 hover:border-[#ffffff]/50 hover:bg-[#ffffff]/08 touch-target active:scale-[0.98] text-white">
+          <i data-lucide="layout-grid" class="w-4 h-4 text-[#ffffff] shrink-0"></i>
           <span class="leading-tight text-center">Agregar<br class="sm:hidden"> producto</span>
         </button>
       </div>
@@ -3226,20 +3226,20 @@
       <div id="cobroRapidoWhatsappWrap" class="hidden"></div>
       <p class="text-[11px] text-white/45 text-center mb-1.5">Forma de pago</p>
       <div class="grid grid-cols-2 gap-1.5 mb-2">
-        <button type="button" data-quick-payment="efectivo" class="quick-payment-option glass rounded-lg py-2.5 px-2 flex flex-row items-center justify-center gap-2 border border-white/10 hover:border-[#22c55e]/45 touch-target transition-all active:scale-[0.98]">
-          <i data-lucide="banknote" class="w-5 h-5 text-[#86efac] shrink-0"></i>
+        <button type="button" data-quick-payment="efectivo" class="quick-payment-option glass rounded-lg py-2.5 px-2 flex flex-row items-center justify-center gap-2 border border-white/10 hover:border-[#ffffff]/45 touch-target transition-all active:scale-[0.98]">
+          <i data-lucide="banknote" class="w-5 h-5 text-[#ffffff] shrink-0"></i>
           <span class="font-medium text-xs">Efectivo</span>
         </button>
-        <button type="button" data-quick-payment="tarjeta" class="quick-payment-option glass rounded-lg py-2.5 px-2 flex flex-row items-center justify-center gap-2 border border-white/10 hover:border-[#22c55e]/45 touch-target transition-all active:scale-[0.98]">
-          <i data-lucide="credit-card" class="w-5 h-5 text-[#86efac] shrink-0"></i>
+        <button type="button" data-quick-payment="tarjeta" class="quick-payment-option glass rounded-lg py-2.5 px-2 flex flex-row items-center justify-center gap-2 border border-white/10 hover:border-[#ffffff]/45 touch-target transition-all active:scale-[0.98]">
+          <i data-lucide="credit-card" class="w-5 h-5 text-[#ffffff] shrink-0"></i>
           <span class="font-medium text-xs">Tarjeta</span>
         </button>
-        <button type="button" data-quick-payment="transferencia" class="quick-payment-option glass rounded-lg py-2.5 px-2 flex flex-row items-center justify-center gap-2 border border-white/10 hover:border-[#22c55e]/45 touch-target transition-all active:scale-[0.98]">
-          <i data-lucide="smartphone" class="w-5 h-5 text-[#86efac] shrink-0"></i>
+        <button type="button" data-quick-payment="transferencia" class="quick-payment-option glass rounded-lg py-2.5 px-2 flex flex-row items-center justify-center gap-2 border border-white/10 hover:border-[#ffffff]/45 touch-target transition-all active:scale-[0.98]">
+          <i data-lucide="smartphone" class="w-5 h-5 text-[#ffffff] shrink-0"></i>
           <span class="font-medium text-xs">Transf.</span>
         </button>
-        <button type="button" data-quick-payment="fiado" class="quick-payment-option glass rounded-lg py-2.5 px-2 flex flex-row items-center justify-center gap-2 border border-white/10 hover:border-[#22c55e]/45 touch-target transition-all active:scale-[0.98]">
-          <i data-lucide="user-check" class="w-5 h-5 text-[#86efac] shrink-0"></i>
+        <button type="button" data-quick-payment="fiado" class="quick-payment-option glass rounded-lg py-2.5 px-2 flex flex-row items-center justify-center gap-2 border border-white/10 hover:border-[#ffffff]/45 touch-target transition-all active:scale-[0.98]">
+          <i data-lucide="user-check" class="w-5 h-5 text-[#ffffff] shrink-0"></i>
           <span class="font-medium text-xs">Fiado</span>
         </button>
       </div>
@@ -3254,11 +3254,11 @@
       <h3 class="font-bold text-lg mb-4" id="clienteModalTitle">Nuevo cliente</h3>
       <input type="hidden" id="clienteId" value="">
       <div class="space-y-3">
-        <input type="text" id="clienteNombre" placeholder="Nombre completo" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
-        <input type="tel" id="clienteTelefono" placeholder="Teléfono (con código de país)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
-        <input type="email" id="clienteEmail" placeholder="Email (opcional)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
-        <input type="text" id="clienteDireccion" placeholder="Dirección (opcional)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
-        <textarea id="clienteNotas" placeholder="Notas (opcional)" rows="2" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e] resize-none"></textarea>
+        <input type="text" id="clienteNombre" placeholder="Nombre completo" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffffff]">
+        <input type="tel" id="clienteTelefono" placeholder="Teléfono (con código de país)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffffff]">
+        <input type="email" id="clienteEmail" placeholder="Email (opcional)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffffff]">
+        <input type="text" id="clienteDireccion" placeholder="Dirección (opcional)" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffffff]">
+        <textarea id="clienteNotas" placeholder="Notas (opcional)" rows="2" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffffff] resize-none"></textarea>
         <button type="button" id="saveCliente" class="w-full btn-glow rounded-xl py-3 font-semibold">Guardar</button>
       </div>
     </div>
@@ -3277,9 +3277,9 @@
       <input type="hidden" id="prodEditCodigo" value="">
       <div class="flex-1 overflow-y-auto px-4 sm:px-6 pb-4 sm:pb-6" style="padding-bottom: max(1rem, env(safe-area-inset-bottom, 0));">
       <div class="space-y-4 pt-4">
-        <input type="text" id="prodNombre" placeholder="Nombre" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+        <input type="text" id="prodNombre" placeholder="Nombre" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffffff]">
         <div class="flex gap-2">
-          <input type="text" id="prodCodigo" placeholder="Código" class="flex-1 glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+          <input type="text" id="prodCodigo" placeholder="Código" class="flex-1 glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffffff]">
           <button type="button" id="prodEscanearCodigo" class="btn-neomorphic rounded-xl px-4 py-3 shrink-0 touch-target" title="Escanear código">
             <i data-lucide="scan" class="w-5 h-5"></i>
           </button>
@@ -3288,37 +3288,37 @@
         <div>
           <label class="block text-xs text-white/60 mb-1">Margen de ganancia (%)</label>
           <div class="flex gap-1.5 mb-2 flex-wrap">
-            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="20" onclick="window._setMargenRapido(20)">20%</button>
-            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="30" onclick="window._setMargenRapido(30)">30%</button>
-            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="40" onclick="window._setMargenRapido(40)">40%</button>
-            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="50" onclick="window._setMargenRapido(50)">50%</button>
-            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#22c55e]/60 transition-colors" data-margen="100" onclick="window._setMargenRapido(100)">100%</button>
+            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#ffffff]/60 transition-colors" data-margen="20" onclick="window._setMargenRapido(20)">20%</button>
+            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#ffffff]/60 transition-colors" data-margen="30" onclick="window._setMargenRapido(30)">30%</button>
+            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#ffffff]/60 transition-colors" data-margen="40" onclick="window._setMargenRapido(40)">40%</button>
+            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#ffffff]/60 transition-colors" data-margen="50" onclick="window._setMargenRapido(50)">50%</button>
+            <button type="button" class="margen-rapido-btn px-3 py-1 rounded-lg text-xs font-semibold glass border border-white/20 hover:border-[#ffffff]/60 transition-colors" data-margen="100" onclick="window._setMargenRapido(100)">100%</button>
           </div>
-          <input type="number" id="prodMargen" placeholder="O escribí el % manualmente" min="0" max="500" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+          <input type="number" id="prodMargen" placeholder="O escribí el % manualmente" min="0" max="500" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffffff]">
           <p id="prodMargenError" class="text-xs text-red-400 mt-1 hidden">Falta el porcentaje de ganancia.</p>
         </div>
         <!-- 2. Costo -->
         <div>
           <label class="block text-xs text-white/60 mb-1">Costo ($)</label>
-          <input type="number" id="prodCosto" placeholder="Lo que pagaste por el producto" min="0" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+          <input type="number" id="prodCosto" placeholder="Lo que pagaste por el producto" min="0" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffffff]">
           <p id="prodCostoHint" class="text-xs text-red-400 mt-1 hidden">Poné 0 para poder recalcular el costo desde el precio.</p>
         </div>
         <!-- 3. Precio al consumidor (calculado automáticamente) -->
         <div>
           <label class="block text-xs text-white/60 mb-1">Precio al consumidor ($) <span class="text-white/35">— se calcula solo, o editalo vos</span></label>
-          <input type="number" id="prodPrecio" placeholder="Se calcula desde costo + margen" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+          <input type="number" id="prodPrecio" placeholder="Se calcula desde costo + margen" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffffff]">
           <p class="text-xs text-white/35 mt-1">Se redondea al 100 más cercano (ej. 3048 → $3000).</p>
         </div>
         <label class="block text-xs text-white/60 mb-1">Stock disponible</label>
-        <input type="number" id="prodStock" placeholder="Stock disponible" value="10" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+        <input type="number" id="prodStock" placeholder="Stock disponible" value="10" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffffff]">
         <div>
           <label class="block text-xs text-white/60 mb-1">Fecha de vencimiento del lote (opcional)</label>
-          <input type="date" id="prodFechaVencimiento" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e] scheme-dark">
+          <input type="date" id="prodFechaVencimiento" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffffff] scheme-dark">
           <p class="text-[11px] text-white/45 mt-1">Si cargás la fecha, el listado resalta en <strong class="text-amber-300/90">naranja</strong> al acercarse el vencimiento y en <strong class="text-red-300/90">rojo</strong> si ya venció; el plazo lo configurás en <strong class="text-white/60">Configuración</strong>.</p>
         </div>
         <div id="prodStockInicialWrap" class="hidden">
           <label class="block text-xs text-white/60 mb-1">Stock inicial (solo referencia)</label>
-          <input type="number" id="prodStockInicial" placeholder="Ej. 50" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+          <input type="number" id="prodStockInicial" placeholder="Ej. 50" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffffff]">
         </div>
         <div class="flex gap-2">
           <button id="saveProduct" class="flex-1 btn-glow rounded-xl py-3 font-semibold">Guardar</button>
@@ -3333,7 +3333,7 @@
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="ventasProductosOverlay"></div>
     <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md max-h-[85vh] flex flex-col scale-in">
       <h3 class="font-bold text-lg mb-1 flex items-center gap-2">
-        <i data-lucide="package" class="w-5 h-5 text-[#86efac]"></i>
+        <i data-lucide="package" class="w-5 h-5 text-[#ffffff]"></i>
         Productos vendidos (hoy)
       </h3>
       <p class="text-xs text-white/50 mb-3">Suma de unidades por producto: incluye efectivo, tarjeta, transferencia, cobro libreta <strong class="text-white/70">y fiado</strong> (lo que salió del mostrador).</p>
@@ -3348,7 +3348,7 @@
     <div class="relative z-[1] flex h-full min-h-0 flex-col ventas-dia-sheet">
       <header class="ventas-dia-topbar">
         <div class="ventas-dia-title">
-          <i data-lucide="clipboard-list" class="w-4 h-4 shrink-0 text-[#86efac]"></i>
+          <i data-lucide="clipboard-list" class="w-4 h-4 shrink-0 text-[#ffffff]"></i>
           Ventas del día
         </div>
         <button type="button" id="closeVentasCobradas" class="btn-neomorphic rounded-xl p-2.5 touch-target shrink-0" title="Cerrar" aria-label="Cerrar">
@@ -3363,7 +3363,7 @@
           <button type="button" class="ventas-cobradas-filter-btn px-3 py-1.5 rounded-xl text-xs font-medium border border-white/20 bg-white/5 touch-target" data-filter="fecha">Por fecha</button>
         </div>
         <div id="ventasCobradasFechaWrap" class="hidden">
-          <input type="date" id="ventasCobradasFechaInput" class="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#22c55e]/40" />
+          <input type="date" id="ventasCobradasFechaInput" class="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-[#ffffff]/40" />
         </div>
       </div>
       <div id="ventasCobradasList" class="ventas-dia-list flex-1 min-h-0"></div>
@@ -3376,7 +3376,7 @@
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="transaccionesOverlay"></div>
     <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md max-h-[85vh] flex flex-col scale-in">
       <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-        <i data-lucide="receipt" class="w-5 h-5 text-[#86efac]"></i>
+        <i data-lucide="receipt" class="w-5 h-5 text-[#ffffff]"></i>
         Todas las transacciones (hoy)
       </h3>
       <div id="transaccionesList" class="flex-1 overflow-y-auto space-y-4 text-sm"></div>
@@ -3390,7 +3390,7 @@
     <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto scale-in">
       <div class="flex items-center justify-between mb-4">
         <h3 class="font-bold text-lg flex items-center gap-2">
-          <i data-lucide="receipt" class="w-5 h-5 text-[#86efac]"></i>
+          <i data-lucide="receipt" class="w-5 h-5 text-[#ffffff]"></i>
           Detalle de la venta
         </h3>
         <button type="button" id="detalleVentaModalClose" class="btn-neomorphic rounded-xl p-2 touch-target">
@@ -3403,7 +3403,7 @@
   </div>
 
   <!-- Pantalla detalle de producto -->
-  <div id="productDetailPanel" class="fixed inset-0 z-[95] hidden flex-col" style="background: linear-gradient(145deg, #020b05 0%, #052e16 38%, #064e1f 62%, #020d06 100%);">
+  <div id="productDetailPanel" class="fixed inset-0 z-[95] hidden flex-col" style="background: linear-gradient(145deg, #020617 0%, #0f172a 38%, #1e293b 62%, #020617 100%);">
     <div class="flex items-center gap-3 px-4 border-b border-white/10" style="padding-top: max(0.75rem, env(safe-area-inset-top, 0)); padding-bottom: 0.75rem;">
       <button type="button" id="productDetailBack" class="btn-neomorphic rounded-xl p-2.5 touch-target shrink-0">
         <i data-lucide="arrow-left" class="w-5 h-5"></i>
@@ -3417,7 +3417,7 @@
       <div class="flex flex-col gap-4">
         <div class="flex justify-between items-center py-3 border-b border-white/8">
           <span class="text-white/60 text-sm">Precio</span>
-          <span id="productDetailPrice" class="font-bold text-2xl text-[#86efac]"></span>
+          <span id="productDetailPrice" class="font-bold text-2xl text-[#ffffff]"></span>
         </div>
         <div class="flex justify-between items-center py-3 border-b border-white/8">
           <span class="text-white/60 text-sm">Costo</span>
@@ -3425,7 +3425,7 @@
         </div>
         <div class="flex justify-between items-center py-3 border-b border-white/8">
           <span class="text-white/60 text-sm">Ganancia</span>
-          <span id="productDetailMargin" class="font-semibold text-green-400"></span>
+          <span id="productDetailMargin" class="font-semibold text-white"></span>
         </div>
         <div class="flex justify-between items-center py-3 border-b border-white/8">
           <span class="text-white/60 text-sm">Stock</span>
@@ -3439,15 +3439,15 @@
           <span class="text-white/60 text-sm">Código</span>
           <span id="productDetailCode" class="font-mono text-white/80 text-sm"></span>
         </div>
-        <div class="rounded-xl border border-[#22c55e]/35 bg-[#22c55e]/08 p-4 space-y-3 mt-2">
-          <p class="text-sm font-semibold text-[#86efac] flex items-center gap-2">
+        <div class="rounded-xl border border-[#ffffff]/35 bg-[#ffffff]/08 p-4 space-y-3 mt-2">
+          <p class="text-sm font-semibold text-[#ffffff] flex items-center gap-2">
             <i data-lucide="shopping-cart" class="w-4 h-4"></i>
             Agregar a la venta
           </p>
           <div class="flex flex-wrap items-end gap-3">
             <div class="flex-1 min-w-[6rem]">
               <label for="productDetailQty" class="block text-xs text-white/55 mb-1">Unidades</label>
-              <input type="number" id="productDetailQty" min="1" step="1" value="1" inputmode="numeric" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white font-semibold tabular-nums focus:outline-none focus:ring-2 focus:ring-[#22c55e]">
+              <input type="number" id="productDetailQty" min="1" step="1" value="1" inputmode="numeric" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white font-semibold tabular-nums focus:outline-none focus:ring-2 focus:ring-[#ffffff]">
             </div>
             <p id="productDetailQtyHint" class="text-[11px] text-white/45 pb-2 flex-1 min-w-[8rem]"></p>
           </div>
@@ -3527,7 +3527,7 @@
           <p class="px-3 pt-1 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">Ajustes</p>
           <div id="accountMenuEmpresaAjustesBtns" class="hidden flex flex-col gap-0.5">
             <button type="button" id="accountMenuBtnEmpAjustesSistema" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors">
-              <i data-lucide="settings" class="w-[1.125rem] h-[1.125rem] text-emerald-600 shrink-0 stroke-[1.75]"></i>
+              <i data-lucide="settings" class="w-[1.125rem] h-[1.125rem] text-white shrink-0 stroke-[1.75]"></i>
               <span class="flex-1 min-w-0 text-left">
                 <span class="block leading-snug">Ajustes del sistema</span>
                 <span class="block text-[11px] text-gray-500 font-normal mt-0.5 leading-snug">Contactos, transferencia empresa, Mercado Pago, precios, respaldo…</span>
@@ -3543,7 +3543,7 @@
           </div>
           <div id="accountMenuRedAjustesBtns" class="hidden flex flex-col gap-0.5">
             <button type="button" id="accountMenuBtnRedSolicitudes" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors">
-              <i data-lucide="wallet" class="w-[1.125rem] h-[1.125rem] text-emerald-600 shrink-0 stroke-[1.75]"></i>
+              <i data-lucide="wallet" class="w-[1.125rem] h-[1.125rem] text-white shrink-0 stroke-[1.75]"></i>
               <span class="flex-1 min-w-0 text-left">
                 <span class="block leading-snug">Billetera y solicitudes</span>
                 <span class="block text-[11px] text-gray-500 font-normal mt-0.5 leading-snug">Retiros, trámites y colas</span>
@@ -3619,7 +3619,7 @@
     <button type="button" class="absolute inset-0 bg-black/70 backdrop-blur-sm border-0 cursor-default" id="accountProfileModalOverlay" aria-label="Cerrar panel"></button>
     <div class="relative z-[1] flex flex-col w-full h-full min-h-0 max-h-[100dvh] sm:h-auto sm:max-h-[92vh] sm:max-w-lg sm:rounded-2xl glass-strong border-0 sm:border border-white/15 shadow-2xl overflow-hidden" role="dialog" aria-labelledby="accountProfileTitle">
       <div class="flex items-center justify-between gap-2 px-4 pt-4 pb-3 border-b border-white/10 shrink-0 bg-black/20">
-        <h3 id="accountProfileTitle" class="font-bold text-lg flex items-center gap-2"><i data-lucide="user-circle" class="w-5 h-5 text-emerald-300"></i> Mis datos personales</h3>
+        <h3 id="accountProfileTitle" class="font-bold text-lg flex items-center gap-2"><i data-lucide="user-circle" class="w-5 h-5 text-white"></i> Mis datos personales</h3>
         <button type="button" id="accountProfileModalClose" class="btn-neomorphic rounded-xl p-2 touch-target shrink-0" title="Cerrar"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <div class="flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:p-5 min-h-0">
@@ -3627,9 +3627,9 @@
         <p id="accountProfileBankEmailHint" class="hidden text-xs text-white/50 mb-3"></p>
         <div id="accountProfilePersonalBlock">
         <div class="flex flex-col items-center gap-3 mb-4">
-          <div id="accountProfilePreviewRing" class="relative w-24 h-24 rounded-full border-2 border-emerald-400/45 overflow-hidden bg-black/45 flex items-center justify-center shrink-0">
+          <div id="accountProfilePreviewRing" class="relative w-24 h-24 rounded-full border-2 border-white/45 overflow-hidden bg-black/45 flex items-center justify-center shrink-0">
             <img id="accountProfilePreviewImg" alt="" class="hidden absolute inset-0 w-full h-full object-cover z-10 pointer-events-none">
-            <span id="accountProfilePreviewInitials" class="relative z-0 text-2xl font-bold text-emerald-100/90">?</span>
+            <span id="accountProfilePreviewInitials" class="relative z-0 text-2xl font-bold text-white/90">?</span>
           </div>
           <div class="flex flex-wrap gap-2 justify-center">
             <label class="btn-neomorphic rounded-xl py-2 px-3 text-xs font-medium cursor-pointer touch-target inline-flex items-center gap-1.5">
