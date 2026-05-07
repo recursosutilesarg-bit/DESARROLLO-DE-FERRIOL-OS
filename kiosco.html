@@ -16,7 +16,27 @@
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#171717">
+  <meta name="theme-color" content="#171717" id="ferriolMetaThemeColor">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('ferriol_ui_theme');
+        if (t === 'blanco' || t === 'morado' || t === 'naranja') {
+          document.documentElement.setAttribute('data-ferriol-theme', t);
+        } else {
+          document.documentElement.removeAttribute('data-ferriol-theme');
+          t = '';
+        }
+        var meta = document.getElementById('ferriolMetaThemeColor');
+        if (meta) {
+          if (t === 'blanco') meta.setAttribute('content', '#f4f4f5');
+          else if (t === 'morado') meta.setAttribute('content', '#1e1035');
+          else if (t === 'naranja') meta.setAttribute('content', '#3b1a0a');
+          else meta.setAttribute('content', '#171717');
+        }
+      } catch (e) {}
+    })();
+  </script>
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -318,7 +338,7 @@
   </div>
 
   <!-- Header: gradiente verde-morado fijo; kiosquero sin botón cerrar sesión (está en Ajustes) -->
-  <header id="mainHeader" class="sticky top-0 z-50 border-b border-white/10 px-4 py-3 header-gradient" style="padding-top: max(0.75rem, env(safe-area-inset-top, 0))">
+  <header id="mainHeader" class="sticky top-0 z-50 border-b border-transparent px-4 py-3 header-gradient" style="padding-top: max(0.75rem, env(safe-area-inset-top, 0))">
     <div class="flex items-center justify-between max-w-7xl mx-auto">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl btn-glow flex items-center justify-center">
@@ -1504,11 +1524,40 @@
           Configuración del negocio
         </h2>
         <div id="configSubHub" class="space-y-3">
+          <button type="button" data-config-open="apariencia" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Colores de la app</span><span class="block text-xs text-white/50 font-normal mt-0.5">Negro, blanco, morado u naranja · solo este dispositivo</span></button>
           <button type="button" data-config-open="negocio" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Nombre del negocio</span></button>
           <button type="button" data-config-open="whatsapp" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Mensaje de cobro por WhatsApp</span></button>
           <button type="button" data-config-open="vencimiento-productos" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Aviso de vencimiento (inventario)</span><span class="block text-xs text-white/50 font-normal mt-0.5">Filas naranjas por vencer y rojas si ya venció; definí cuántos días antes alertar</span></button>
           <button type="button" data-config-open="sonido" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Sonido de notificaciones</span></button>
           <button type="button" data-config-open="respaldo" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Copia de seguridad y CSV</span></button>
+        </div>
+
+        <div class="config-subview hidden space-y-4" data-config-sub="apariencia">
+          <button type="button" data-config-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target">Volver</button>
+          <p class="text-xs text-white/55">Elegí un estilo visual. Se guarda en este celular o PC (no en la nube).</p>
+          <div id="ferriolThemeChips" class="grid grid-cols-2 gap-3">
+            <button type="button" data-ferriol-theme-pick="negro" class="ferriol-theme-chip rounded-xl border border-white/15 bg-black/25 p-4 text-left touch-target transition-all hover:border-white/35 active:scale-[0.98] ring-2 ring-transparent">
+              <span class="ferriol-theme-chip-swatch mb-2 block h-10 w-full rounded-lg bg-gradient-to-br from-neutral-800 via-neutral-900 to-black shadow-inner ring-1 ring-white/10"></span>
+              <span class="font-semibold text-sm text-white block">Negro</span>
+              <span class="text-[11px] text-white/50">Grises neutros</span>
+            </button>
+            <button type="button" data-ferriol-theme-pick="blanco" class="ferriol-theme-chip rounded-xl border border-white/15 bg-black/25 p-4 text-left touch-target transition-all hover:border-white/35 active:scale-[0.98] ring-2 ring-transparent">
+              <span class="ferriol-theme-chip-swatch mb-2 block h-10 w-full rounded-lg bg-gradient-to-br from-white via-neutral-100 to-neutral-200 shadow-inner ring-1 ring-black/10"></span>
+              <span class="font-semibold text-sm text-white block">Blanco</span>
+              <span class="text-[11px] text-white/50">Modo claro</span>
+            </button>
+            <button type="button" data-ferriol-theme-pick="morado" class="ferriol-theme-chip rounded-xl border border-white/15 bg-black/25 p-4 text-left touch-target transition-all hover:border-white/35 active:scale-[0.98] ring-2 ring-transparent">
+              <span class="ferriol-theme-chip-swatch mb-2 block h-10 w-full rounded-lg bg-gradient-to-br from-violet-600 via-purple-800 to-indigo-950 shadow-inner ring-1 ring-violet-300/20"></span>
+              <span class="font-semibold text-sm text-white block">Morado</span>
+              <span class="text-[11px] text-white/50">Violeta profundo</span>
+            </button>
+            <button type="button" data-ferriol-theme-pick="naranja" class="ferriol-theme-chip rounded-xl border border-white/15 bg-black/25 p-4 text-left touch-target transition-all hover:border-white/35 active:scale-[0.98] ring-2 ring-transparent">
+              <span class="ferriol-theme-chip-swatch mb-2 block h-10 w-full rounded-lg bg-gradient-to-br from-amber-500 via-orange-700 to-red-950 shadow-inner ring-1 ring-amber-200/25"></span>
+              <span class="font-semibold text-sm text-white block">Naranja</span>
+              <span class="text-[11px] text-white/50">Cálido</span>
+            </button>
+          </div>
+          <p id="ferriolThemeSavedHint" class="text-xs text-white/45 hidden">Listo: ya aplicamos el tema en esta pantalla.</p>
         </div>
 
         <div class="config-subview hidden space-y-4" data-config-sub="negocio">

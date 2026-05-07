@@ -48,6 +48,58 @@
     }
     ferriolCleanReloadParamsOnce();
 
+    var FERRIOL_UI_THEME_KEY = 'ferriol_ui_theme';
+    var FERRIOL_UI_THEME_IDS = { negro: 1, blanco: 1, morado: 1, naranja: 1 };
+    function ferriolMetaThemeColorFromPick(raw) {
+      if (raw === 'blanco') return '#f4f4f5';
+      if (raw === 'morado') return '#1e1035';
+      if (raw === 'naranja') return '#3b1a0a';
+      return '#171717';
+    }
+    function ferriolGetUiTheme() {
+      try {
+        var r = localStorage.getItem(FERRIOL_UI_THEME_KEY);
+        if (r === 'blanco' || r === 'morado' || r === 'naranja') return r;
+      } catch (_) {}
+      return 'negro';
+    }
+    function ferriolSyncThemeChipUi() {
+      var wrap = document.getElementById('ferriolThemeChips');
+      if (!wrap) return;
+      var cur = ferriolGetUiTheme();
+      wrap.querySelectorAll('[data-ferriol-theme-pick]').forEach(function (btn) {
+        var v = String(btn.getAttribute('data-ferriol-theme-pick') || '').toLowerCase();
+        if (v === 'negro') btn.classList.toggle('ferriol-theme-chip--active', cur === 'negro');
+        else btn.classList.toggle('ferriol-theme-chip--active', cur === v);
+      });
+    }
+    function ferriolApplyUiTheme(theme) {
+      var raw = String(theme || '').trim().toLowerCase();
+      if (!FERRIOL_UI_THEME_IDS[raw]) raw = 'negro';
+      try {
+        if (raw === 'negro') {
+          localStorage.removeItem(FERRIOL_UI_THEME_KEY);
+          document.documentElement.removeAttribute('data-ferriol-theme');
+        } else {
+          localStorage.setItem(FERRIOL_UI_THEME_KEY, raw);
+          document.documentElement.setAttribute('data-ferriol-theme', raw);
+        }
+      } catch (_) {}
+      var meta = document.getElementById('ferriolMetaThemeColor');
+      if (meta) meta.setAttribute('content', ferriolMetaThemeColorFromPick(raw));
+      ferriolSyncThemeChipUi();
+    }
+    window.ferriolApplyUiTheme = ferriolApplyUiTheme;
+    (function ferriolInitUiThemeMetaAndChips() {
+      function go() {
+        var meta = document.getElementById('ferriolMetaThemeColor');
+        if (meta) meta.setAttribute('content', ferriolMetaThemeColorFromPick(ferriolGetUiTheme()));
+        ferriolSyncThemeChipUi();
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go);
+      else go();
+    })();
+
     function ferriolHardReload() {
       var go = function () {
         try {
@@ -11546,6 +11598,7 @@ async function showApp() {
         el.classList.toggle('hidden', String(el.getAttribute('data-config-sub') || '') !== t);
       });
       try { if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+      if (t === 'apariencia') ferriolSyncThemeChipUi();
     }
     (function bindConfigSubviewUiOnce() {
       var root = document.getElementById('panel-config');
@@ -11560,6 +11613,19 @@ async function showApp() {
         var backBtn = e.target.closest('[data-config-back]');
         if (backBtn && root.contains(backBtn)) {
           openConfigSubview('');
+          return;
+        }
+        var themePick = e.target.closest('[data-ferriol-theme-pick]');
+        if (themePick && root.contains(themePick)) {
+          ferriolApplyUiTheme(themePick.getAttribute('data-ferriol-theme-pick'));
+          var hint = document.getElementById('ferriolThemeSavedHint');
+          if (hint) {
+            hint.classList.remove('hidden');
+            try {
+              clearTimeout(root._ferriolThemeHintT);
+              root._ferriolThemeHintT = setTimeout(function () { hint.classList.add('hidden'); }, 2400);
+            } catch (_) {}
+          }
           return;
         }
         var saveBtn = e.target.closest('[data-config-save]');
