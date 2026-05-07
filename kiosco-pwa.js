@@ -114,8 +114,8 @@
       }
       if (!allowsPTR()) return;
 
-      // Umbral de arrastre para refrescar (~1-2 cm en la mayoría de móviles)
-      var THRESH = 88;
+      // Umbral firme, similar a navegador nativo.
+      var THRESH = 104;
       var SCROLL_EPS = 6;
       var tracking = false;
       var refreshing = false;
