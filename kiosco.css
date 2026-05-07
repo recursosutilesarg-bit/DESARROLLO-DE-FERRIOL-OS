@@ -4196,6 +4196,15 @@ html[data-ferriol-theme='blanco'] .nota-chars {
   color: rgba(24, 24, 27, 0.35);
 }
 
+#ferriolNativeDialogMessage {
+  word-break: break-word;
+}
+
+html[data-ferriol-theme='blanco'] #ferriolNativeDialogIconWrap {
+  background: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
 html[data-ferriol-theme='blanco'] .panel input,
 html[data-ferriol-theme='blanco'] .panel textarea,
 html[data-ferriol-theme='blanco'] .panel select:not(.ferriol-sponsor-select) {

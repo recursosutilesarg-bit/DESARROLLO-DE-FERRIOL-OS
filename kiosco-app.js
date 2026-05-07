@@ -101,6 +101,133 @@
       else go();
     })();
 
+    (function ferriolNativeDialogInit() {
+      var pending = null;
+      var bound = false;
+      var currentType = 'alert';
+
+      function finish(confirmResult) {
+        document.removeEventListener('keydown', onKey);
+        var root = document.getElementById('ferriolNativeDialog');
+        if (root) {
+          root.classList.add('hidden');
+          root.setAttribute('aria-hidden', 'true');
+        }
+        var fn = pending;
+        pending = null;
+        if (!fn) return;
+        if (currentType === 'confirm') fn(!!confirmResult);
+        else fn();
+      }
+
+      function onKey(e) {
+        if (e.key !== 'Escape') return;
+        e.preventDefault();
+        if (currentType === 'confirm') finish(false);
+        else finish();
+      }
+
+      function bindOnce() {
+        if (bound) return;
+        bound = true;
+        var root = document.getElementById('ferriolNativeDialog');
+        if (!root) return;
+        var ov = root.querySelector('[data-ferriol-native-dialog-overlay]');
+        var btnOk = document.getElementById('ferriolNativeDialogOk');
+        var btnCancel = document.getElementById('ferriolNativeDialogCancel');
+        if (ov) {
+          ov.addEventListener('click', function () {
+            if (currentType === 'confirm') finish(false);
+            else finish();
+          });
+        }
+        if (btnOk) btnOk.addEventListener('click', function () { finish(currentType === 'confirm'); });
+        if (btnCancel) btnCancel.addEventListener('click', function () { finish(false); });
+      }
+
+      function show(opts) {
+        bindOnce();
+        var root = document.getElementById('ferriolNativeDialog');
+        if (!root) return false;
+        if (pending) {
+          var old = pending;
+          pending = null;
+          if (currentType === 'confirm') old(false);
+          else old();
+        }
+        currentType = opts.type === 'confirm' ? 'confirm' : 'alert';
+        pending = opts.resolve;
+
+        var titleEl = document.getElementById('ferriolNativeDialogTitle');
+        var msgEl = document.getElementById('ferriolNativeDialogMessage');
+        var btnCancel = document.getElementById('ferriolNativeDialogCancel');
+        var btnOk = document.getElementById('ferriolNativeDialogOk');
+        var iconWrap = document.getElementById('ferriolNativeDialogIconWrap');
+
+        if (titleEl) titleEl.textContent = opts.title || (currentType === 'confirm' ? 'Confirmar' : 'Aviso');
+        if (msgEl) msgEl.textContent = opts.message || '';
+        if (btnCancel) {
+          btnCancel.classList.toggle('hidden', currentType !== 'confirm');
+          btnCancel.textContent = opts.cancelText || 'Cancelar';
+        }
+        if (btnOk) btnOk.textContent = opts.okText || (currentType === 'confirm' ? 'Aceptar' : 'Entendido');
+
+        if (iconWrap) {
+          iconWrap.innerHTML =
+            '<i data-lucide="' +
+            (currentType === 'confirm' ? 'circle-alert' : 'info') +
+            '" class="w-5 h-5 ' +
+            (currentType === 'confirm' ? 'text-amber-200' : 'text-cyan-200') +
+            '"></i>';
+          try {
+            if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons({ nodes: [iconWrap] });
+          } catch (_) {}
+        }
+
+        root.classList.remove('hidden');
+        root.setAttribute('aria-hidden', 'false');
+        document.addEventListener('keydown', onKey);
+        requestAnimationFrame(function () {
+          if (btnOk) btnOk.focus();
+        });
+        return true;
+      }
+
+      window.ferriolAppConfirm = function (message, opt) {
+        return new Promise(function (resolve) {
+          if (
+            !show({
+              type: 'confirm',
+              message: String(message || ''),
+              title: opt && opt.title,
+              okText: opt && opt.okText,
+              cancelText: opt && opt.cancelText,
+              resolve: resolve,
+            })
+          ) {
+            resolve(window.confirm(String(message || '')));
+          }
+        });
+      };
+
+      window.ferriolAppAlert = function (message, opt) {
+        return new Promise(function (resolve) {
+          if (
+            !show({
+              type: 'alert',
+              message: String(message || ''),
+              title: opt && opt.title,
+              okText: opt && opt.okText,
+              resolve: resolve,
+            })
+          ) {
+            window.alert(String(message || ''));
+            resolve();
+          }
+        });
+      };
+    })();
+
     function ferriolHardReload() {
       var go = function () {
         try {
@@ -213,7 +340,7 @@
       if (!t) return;
       var done = function () {
         if (typeof showScanToast === 'function') showScanToast(doneMsg || 'Copiado.', false);
-        else alert(doneMsg || 'Copiado.');
+        else ferriolAppAlert(doneMsg || 'Copiado.');
       };
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(t).then(done).catch(function () { window.prompt('Copiá:', t); });
@@ -355,7 +482,7 @@
           if (!cc) {
             try {
               if (typeof showScanToast === 'function') showScanToast('No se pudo generar tu código de referido. Revisá la conexión o el permiso de actualización en Supabase (profiles).', true);
-              else alert('No se pudo generar tu código de referido. Revisá la conexión o permisos en Supabase.');
+              else ferriolAppAlert('No se pudo generar tu código de referido. Revisá la conexión o permisos en Supabase.');
             } catch (_) {}
           }
         });
@@ -807,7 +934,7 @@
         msgEl.classList.add('hidden');
         msgEl.textContent = '';
       }
-      if (!confirm('¿Registrar ante Ferriol?')) return;
+      if (!(await ferriolAppConfirm('¿Registrar ante Ferriol?'))) return;
       var rpc = await supabaseClient.rpc('ferriol_partner_register_sale_from_kiosk_proof', { p_queue_id: qid });
       if (rpc.error) {
         var em = rpc.error.message || String(rpc.error);
@@ -816,7 +943,7 @@
           msgEl.className = 'text-xs mt-4 text-center px-1 text-red-300';
           msgEl.classList.remove('hidden');
         }
-        alert(em);
+        ferriolAppAlert(em);
         return;
       }
       var out = rpc.data;
@@ -832,7 +959,7 @@
           msgEl.className = 'text-xs mt-4 text-center px-1 text-red-300';
           msgEl.classList.remove('hidden');
         }
-        alert(em2);
+        ferriolAppAlert(em2);
         return;
       }
       if (msgEl) {
@@ -1882,11 +2009,11 @@
     window._ferriolExecEmpresaProofApprove = async function (id, approves, rejectNote, amountOverride) {
       if (!supabaseClient || !isEmpresaLensSuper() || !id) return;
       if (
-        !window.confirm(
+        !(await ferriolAppConfirm(
           approves
             ? '¿Verificar cobro Ferriol y aplicar liquidación/compensaciones como en Cobros manuales?'
             : '¿Rechazar esta solicitud?'
-        )
+        ))
       )
         return;
       var msgEl = document.getElementById('superEmpresaPaymentProofMsg');
@@ -1909,7 +2036,7 @@
           } catch (_) {}
         }
         if (!out || out.ok !== true) {
-          alert((out && out.error) ? out.error : 'No se pudo completar la operación.');
+          ferriolAppAlert((out && out.error) ? out.error : 'No se pudo completar la operación.');
           return;
         }
         if (msgEl) {
@@ -1921,7 +2048,7 @@
         scheduleRefreshFerriolSolicitudesBadges();
         if (state.superSection === 'sistema' || state.superSection === 'cobros') await renderSuperCobrosSection();
       } catch (e) {
-        alert('Error: ' + (e && e.message ? e.message : e));
+        ferriolAppAlert('Error: ' + (e && e.message ? e.message : e));
       }
     };
     (function setupFounderEmpresaProofDelegation() {
@@ -1936,7 +2063,7 @@
           var raw = inp ? String(inp.value || '').replace(/\./g, '').replace(',', '.') : '';
           var amt = parseFloat(raw, 10);
           if (isNaN(amt) || amt <= 0) {
-            alert('Ingresá un monto ARS válido en el recuadro.');
+            ferriolAppAlert('Ingresá un monto ARS válido en el recuadro.');
             return;
           }
           void window._ferriolExecEmpresaProofApprove(id, true, null, amt);
@@ -1953,7 +2080,7 @@
     })();
     window._ferriolExecCsrApprove = async function (id, approves, rejectNote, amountOverride) {
       if (!supabaseClient || !isEmpresaLensSuper() || !id) return;
-      if (!window.confirm(approves ? '¿Aprobar esta venta, verificar pago y acreditar comisiones (libro + Ingresos del socio)?' : '¿Rechazar esta solicitud?')) return;
+      if (!(await ferriolAppConfirm(approves ? '¿Aprobar esta venta, verificar pago y acreditar comisiones (libro + Ingresos del socio)?' : '¿Rechazar esta solicitud?'))) return;
       var msgEl = document.getElementById('superClientSaleRequestsMsg');
       if (msgEl) { msgEl.classList.add('hidden'); msgEl.textContent = ''; }
       try {
@@ -1967,7 +2094,7 @@
         var out = rpc.data;
         if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
         if (!out || out.ok !== true) {
-          alert((out && out.error) ? out.error : 'No se pudo completar la operación.');
+          ferriolAppAlert((out && out.error) ? out.error : 'No se pudo completar la operación.');
           return;
         }
         if (msgEl) {
@@ -1978,7 +2105,7 @@
         scheduleRefreshFerriolSolicitudesBadges();
         if (state.superSection === 'sistema' || state.superSection === 'cobros') await renderSuperCobrosSection();
       } catch (e) {
-        alert('Error: ' + (e && e.message ? e.message : e));
+        ferriolAppAlert('Error: ' + (e && e.message ? e.message : e));
       }
     };
     (function setupFounderClientSaleDelegation() {
@@ -1993,7 +2120,7 @@
           var raw = inp ? String(inp.value || '').replace(/\./g, '').replace(',', '.') : '';
           var amt = parseFloat(raw, 10);
           if (isNaN(amt) || amt <= 0) {
-            alert('Ingresá un monto ARS válido en el recuadro.');
+            ferriolAppAlert('Ingresá un monto ARS válido en el recuadro.');
             return;
           }
           void window._ferriolExecCsrApprove(id, true, null, amt);
@@ -2048,7 +2175,7 @@
       if (btnOpen) {
         btnOpen.addEventListener('click', function () {
           if (!canUserRequestCommissionWithdrawal()) {
-            try { alert('No podés pedir retiro en esta vista. Usá la cuenta de administrador o la vista administración del fundador.'); } catch (_) {}
+            try { ferriolAppAlert('No podés pedir retiro en esta vista. Usá la cuenta de administrador o la vista administración del fundador.'); } catch (_) {}
             return;
           }
           openPartnerWithdrawModal();
@@ -2086,7 +2213,7 @@
             }
             closePartnerWithdrawModal();
             await loadPartnerBilleteraSection();
-            alert('Solicitud enviada. La empresa revisará que tengas fondos y te avisará.');
+            ferriolAppAlert('Solicitud enviada. La empresa revisará que tengas fondos y te avisará.');
           } catch (e) {
             if (err) { err.textContent = String(e.message || e); err.classList.remove('hidden'); }
           } finally {
@@ -2152,7 +2279,7 @@
             closeFounderWithdrawPayModal();
             await loadFounderPagosPendientesSection();
             scheduleRefreshFerriolSolicitudesBadges();
-            alert('Pago registrado. El socio verá la solicitud como pagada y se actualizará su billetera.');
+            ferriolAppAlert('Pago registrado. El socio verá la solicitud como pagada y se actualizará su billetera.');
           } catch (e) {
             if (err) { err.textContent = String(e.message || e); err.classList.remove('hidden'); }
           } finally {
@@ -2293,12 +2420,12 @@
         list.querySelectorAll('.ferriol-wr-approve').forEach(function (btn) {
           btn.onclick = async function () {
             var id = btn.getAttribute('data-wr-id');
-            if (!id || !confirm('¿Aprobar este retiro? Pasará a Pagos pendientes para transferir y adjuntar comprobante.')) return;
+            if (!id || !(await ferriolAppConfirm('¿Aprobar este retiro? Pasará a Pagos pendientes para transferir y adjuntar comprobante.'))) return;
             var rpc = await supabaseClient.rpc('ferriol_founder_review_partner_withdrawal', { p_request_id: id, p_approve: true, p_reject_note: null });
-            if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+            if (rpc.error) { ferriolAppAlert('Error: ' + rpc.error.message); return; }
             var out = rpc.data;
             if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
-            if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo aprobar.'); return; }
+            if (!out || out.ok !== true) { ferriolAppAlert((out && out.error) ? out.error : 'No se pudo aprobar.'); return; }
             await loadFounderWithdrawalReviewList();
             await loadFounderPagosPendientesSection();
           };
@@ -2310,10 +2437,10 @@
             var note = (typeof window.prompt === 'function') ? window.prompt('Motivo del rechazo (opcional):', '') : '';
             if (note === null) return;
             var rpc = await supabaseClient.rpc('ferriol_founder_review_partner_withdrawal', { p_request_id: id, p_approve: false, p_reject_note: note || null });
-            if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+            if (rpc.error) { ferriolAppAlert('Error: ' + rpc.error.message); return; }
             var out = rpc.data;
             if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
-            if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo rechazar.'); return; }
+            if (!out || out.ok !== true) { ferriolAppAlert((out && out.error) ? out.error : 'No se pudo rechazar.'); return; }
             await loadFounderWithdrawalReviewList();
           };
         });
@@ -3198,13 +3325,13 @@
           pendingEl.querySelectorAll('.ferriol-verify-pay').forEach(function (btn) {
             btn.onclick = async function () {
               var pid = btn.dataset.id;
-              if (!confirm('¿Confirmás que la transferencia está acreditada? Se generarán comisiones en mlm_ledger.')) return;
+              if (!(await ferriolAppConfirm('¿Confirmás que la transferencia está acreditada? Se generarán comisiones en mlm_ledger.'))) return;
               var rpc = await supabaseClient.rpc('ferriol_verify_payment', { p_payment_id: pid });
-              if (rpc.error) { alert('Error: ' + (rpc.error.message || '')); return; }
+              if (rpc.error) { ferriolAppAlert('Error: ' + (rpc.error.message || '')); return; }
               var out = rpc.data;
               if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
-              if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo verificar.'); return; }
-              alert('Listo. Comisiones registradas.');
+              if (!out || out.ok !== true) { ferriolAppAlert((out && out.error) ? out.error : 'No se pudo verificar.'); return; }
+              ferriolAppAlert('Listo. Comisiones registradas.');
               renderSuperCobrosSection();
               lucide.createIcons();
             };
@@ -3267,7 +3394,7 @@
     }
     async function exportClientesCSV() {
       if (!supabaseClient || !currentUser?.id) {
-        alert('Configurá Supabase para exportar clientes.');
+        ferriolAppAlert('Configurá Supabase para exportar clientes.');
         return;
       }
       var list = await loadClientes();
@@ -3280,7 +3407,7 @@
     }
     async function exportVentasCSV() {
       if (!supabaseClient || !currentUser?.id) {
-        alert('Configurá Supabase para exportar el historial de ventas.');
+        ferriolAppAlert('Configurá Supabase para exportar el historial de ventas.');
         return;
       }
       var end = new Date();
@@ -3293,7 +3420,7 @@
       var _r = await supabaseClient.from('ventas').select('id, fecha_hora, total, metodo_pago, cliente_nombre, items').eq('user_id', currentUser.id).gte('fecha_hora', rangeStart).lte('fecha_hora', rangeEnd).order('fecha_hora', { ascending: false });
       var list = _r.data || [];
       if (_r.error) {
-        alert('No se pudo cargar el historial. Revisá la tabla ventas en Supabase.');
+        ferriolAppAlert('No se pudo cargar el historial. Revisá la tabla ventas en Supabase.');
         return;
       }
       var header = 'Fecha y hora;Cliente;Método de pago;Total;Productos';
@@ -4261,9 +4388,9 @@
         closeProductDetail();
         openEditProduct(codigo);
       };
-      document.getElementById('productDetailDelete').onclick = function() {
-        if (confirm('¿Eliminar "' + (p.nombre || 'este producto') + '"?')) {
-          deleteProduct(codigo);
+      document.getElementById('productDetailDelete').onclick = async function() {
+        if (await ferriolAppConfirm('¿Eliminar "' + (p.nombre || 'este producto') + '"?')) {
+          await deleteProduct(codigo);
           closeProductDetail();
         }
       };
@@ -4345,8 +4472,8 @@
       lucide.createIcons();
     }
 
-    function deleteProduct(codigo) {
-      if (confirm('¿Eliminar este producto?')) {
+    async function deleteProduct(codigo) {
+      if (await ferriolAppConfirm('¿Eliminar este producto?')) {
         const d = getData();
         delete d.products[codigo];
         setData(d);
@@ -5661,7 +5788,7 @@
       } else {
         var montoEl = document.getElementById('cobroRapidoMonto');
         var amount = parseInt((montoEl.value || '').replace(/\D/g, ''), 10) || 0;
-        if (amount <= 0) { alert('Agregá al menos un producto (producto + monto → Agregar) o ingresá un monto.'); return; }
+        if (amount <= 0) { ferriolAppAlert('Agregá al menos un producto (producto + monto → Agregar) o ingresá un monto.'); return; }
         var productName = getCobroRapidoProductoNombre();
         var margen = getCobroRapidoProductoMargen();
         var costo = costoDesdeMargen(amount, margen);
@@ -5968,7 +6095,7 @@
         var hasWa = viewerHelpWhatsApp.list && viewerHelpWhatsApp.list.length > 0;
         var hasMail = viewerHelpWhatsApp.note === 'sponsor_no_phone' && viewerHelpWhatsApp.sponsorEmail;
         if (!hasWa && !hasMail) {
-          alert(currentUser.role === 'kiosquero' ? 'No hay WhatsApp de tu referidor cargado. Pedile que actualice su perfil o contactá al soporte.' : 'La empresa aún no configuró números de contacto para administradores.');
+          ferriolAppAlert(currentUser.role === 'kiosquero' ? 'No hay WhatsApp de tu referidor cargado. Pedile que actualice su perfil o contactá al soporte.' : 'La empresa aún no configuró números de contacto para administradores.');
           return;
         }
         document.getElementById('renovarModal').classList.remove('hidden');
@@ -5984,7 +6111,7 @@
         var hasWa = viewerHelpWhatsApp.list && viewerHelpWhatsApp.list.length > 0;
         var hasMail = viewerHelpWhatsApp.note === 'sponsor_no_phone' && viewerHelpWhatsApp.sponsorEmail;
         if (!hasWa && !hasMail) {
-          alert('Configurá en Ajustes del sistema los números empresa (WhatsApp) para coordinar renovación entre administradores.');
+          ferriolAppAlert('Configurá en Ajustes del sistema los números empresa (WhatsApp) para coordinar renovación entre administradores.');
           return;
         }
         document.getElementById('renovarModal').classList.remove('hidden');
@@ -7793,7 +7920,7 @@
     if (accountProfileBankCopyBtn) {
       accountProfileBankCopyBtn.addEventListener('click', function () {
         var txt = ferriolBuildAccountBankingInfoFromForm();
-        if (!txt.trim()) { alert('Completá tus datos bancarios primero.'); return; }
+        if (!txt.trim()) { ferriolAppAlert('Completá tus datos bancarios primero.'); return; }
         copyTextToClipboard(txt, 'Datos bancarios copiados.');
       });
     }
@@ -7801,7 +7928,7 @@
     if (accountProfileBankWhatsappBtn) {
       accountProfileBankWhatsappBtn.addEventListener('click', function () {
         var txt = ferriolBuildAccountBankingInfoFromForm();
-        if (!txt.trim()) { alert('Completá tus datos bancarios primero.'); return; }
+        if (!txt.trim()) { ferriolAppAlert('Completá tus datos bancarios primero.'); return; }
         var msg = 'Te comparto mis datos bancarios para transferencia:\n\n' + txt;
         var waDigits = (currentUser && currentUser.phone ? String(currentUser.phone) : '').replace(/\D/g, '');
         try {
@@ -8159,7 +8286,7 @@
     document.getElementById('cobroRapidoOverlay').onclick = closeCobroRapidoModal;
     document.getElementById('cobroRapidoAgregarBtn').onclick = function () {
       var amount = parseInt((document.getElementById('cobroRapidoMonto').value || '').replace(/\D/g, ''), 10) || 0;
-      if (amount <= 0) { alert('Ingresá un monto mayor a 0.'); return; }
+      if (amount <= 0) { ferriolAppAlert('Ingresá un monto mayor a 0.'); return; }
       var productName = getCobroRapidoProductoNombre();
       var margen = getCobroRapidoProductoMargen();
       var costo = costoDesdeMargen(amount, margen);
@@ -8620,7 +8747,7 @@
       const email = document.getElementById('clienteEmail').value.trim();
       const direccion = document.getElementById('clienteDireccion').value.trim();
       const notas = document.getElementById('clienteNotas').value.trim();
-      if (!nombre && !telefono) { alert('Nombre o teléfono es obligatorio.'); return; }
+      if (!nombre && !telefono) { ferriolAppAlert('Nombre o teléfono es obligatorio.'); return; }
       if (!supabaseClient || !currentUser?.id) return;
       const row = { user_id: currentUser.id, nombre: nombre || null, telefono: telefono || null, email: email || null, direccion: direccion || null, notas: notas || null };
       if (id) {
@@ -8634,7 +8761,7 @@
       document.getElementById('clienteModal').classList.remove('flex');
     }
     async function deleteCliente(id) {
-      if (!confirm('¿Eliminar este cliente?')) return;
+      if (!(await ferriolAppConfirm('¿Eliminar este cliente?'))) return;
       if (!supabaseClient || !currentUser?.id) return;
       await supabaseClient.from('clientes').delete().eq('id', id).eq('user_id', currentUser.id);
       await loadClientes();
@@ -8876,7 +9003,7 @@
         video.srcObject = scannerStream;
         await video.play();
       } catch (e) {
-        alert('No se pudo acceder a la cámara');
+        ferriolAppAlert('No se pudo acceder a la cámara');
       }
     }
     window._startScannerCamera = startScannerCamera;
@@ -9520,7 +9647,7 @@
       var transfRealN = ferriolCierreInteractivoGetReal('transf');
 
       if (efecReal === null || tarjRealN === null || transfRealN === null) {
-        alert('Completá los montos reales en los métodos que marcaste como "Corregir".');
+        ferriolAppAlert('Completá los montos reales en los métodos que marcaste como "Corregir".');
         return;
       }
 
@@ -9539,7 +9666,7 @@
       lines.push('Diferencia final: ' + (diffFinal >= 0 ? '+' : '−') + '$' + Math.abs(diffFinal).toLocaleString('es-AR'));
       lines.push('');
       lines.push('¿Cerrar y reiniciar el día operativo?');
-      if (!confirm(lines.join('\n'))) return;
+      if (!(await ferriolAppConfirm(lines.join('\n')))) return;
 
       var hoyOp = ferriolTodayYmdLocal();
       var egresosSnap = [];
@@ -9813,7 +9940,7 @@
     };
 
     window._eliminarGasto = async function (id, tipo) {
-      if (!confirm('¿Eliminar este registro?')) return;
+      if (!(await ferriolAppConfirm('¿Eliminar este registro?'))) return;
       if (!supabaseClient || !currentUser?.id) return;
       try {
         await supabaseClient.from('gastos').delete().eq('id', id).eq('user_id', currentUser.id);
@@ -10114,7 +10241,7 @@
     };
 
     window._eliminarItemLibreta = async function (itemId) {
-      if (!confirm('¿Eliminar este ítem?')) return;
+      if (!(await ferriolAppConfirm('¿Eliminar este ítem?'))) return;
       if (!supabaseClient || !currentUser?.id || !_libretalClienteActual) return;
       try {
         await supabaseClient.from('libreta_items').delete().eq('id', itemId).eq('user_id', currentUser.id);
@@ -10288,7 +10415,7 @@
       var items = _libretalCuentaItemsCache;
       if (!items || !items.length) return;
       var total = items.reduce(function (s, i) { return s + Number(i.monto || 0); }, 0);
-      if (!confirm('¿Confirmás que cobraste $' + Math.round(total).toLocaleString('es-AR') + ' y querés saldar la cuenta?')) return;
+      if (!(await ferriolAppConfirm('¿Confirmás que cobraste $' + Math.round(total).toLocaleString('es-AR') + ' y querés saldar la cuenta?'))) return;
       var ids = items.map(function (i) { return i.id; }).filter(Boolean);
       if (!ids.length) return;
       var cobroGrupoId = _libretaNewCobroGrupoId();
@@ -10307,7 +10434,7 @@
         if (lastErr) {
           var msg = (lastErr.message || '').toLowerCase();
           if (msg.indexOf('cobro_grupo') !== -1 || msg.indexOf('schema cache') !== -1 || lastErr.code === 'PGRST204') {
-            alert('Para agrupar cada cobro como ticket ejecutá en Supabase → SQL:\n\nALTER TABLE libreta_items ADD COLUMN IF NOT EXISTS cobro_grupo_id text;\n');
+            ferriolAppAlert('Para agrupar cada cobro como ticket ejecutá en Supabase → SQL:\n\nALTER TABLE libreta_items ADD COLUMN IF NOT EXISTS cobro_grupo_id text;\n');
             throw lastErr;
           }
           throw lastErr;
@@ -10658,7 +10785,7 @@
       if (res.error) {
         console.error('guardarComentario error:', res.error);
         if (res.error.message && res.error.message.includes('comentario')) {
-          alert('Para usar comentarios ejecutá este SQL en Supabase:\n\nALTER TABLE libreta_items ADD COLUMN IF NOT EXISTS comentario text DEFAULT \'\';');
+          ferriolAppAlert('Para usar comentarios ejecutá este SQL en Supabase:\n\nALTER TABLE libreta_items ADD COLUMN IF NOT EXISTS comentario text DEFAULT \'\';');
         }
       } else {
         window._cerrarItemDetalle();
@@ -10763,7 +10890,7 @@
     document.getElementById('addProduct').onclick = () => {
       const d = getData();
       if (Object.keys(d.products || {}).length >= 100) {
-        alert('Llegaste al límite de 100 productos. Eliminá alguno para agregar uno nuevo.');
+        ferriolAppAlert('Llegaste al límite de 100 productos. Eliminá alguno para agregar uno nuevo.');
         return;
       }
       document.getElementById('productModalTitle').textContent = 'Nuevo producto';
@@ -10787,11 +10914,11 @@
       document.getElementById('prodMargenError').classList.add('hidden');
       lucide.createIcons();
     };
-    document.getElementById('deleteProductInModal').onclick = () => {
+    document.getElementById('deleteProductInModal').onclick = async () => {
       const codigo = document.getElementById('prodEditCodigo').value;
       if (!codigo) return;
-      if (confirm('¿Eliminar este producto?')) {
-        deleteProduct(codigo);
+      if (await ferriolAppConfirm('¿Eliminar este producto?')) {
+        await deleteProduct(codigo);
         document.getElementById('productModal').classList.add('hidden');
         document.getElementById('productModal').classList.remove('flex');
       }
@@ -10907,7 +11034,7 @@
       d.products = d.products || {};
       const isNew = !editCodigo;
       if (isNew && Object.keys(d.products).length >= 100) {
-        alert('Límite de 100 productos alcanzado.');
+        ferriolAppAlert('Límite de 100 productos alcanzado.');
         return;
       }
       if (!nombre || precio <= 0) return;
@@ -11194,7 +11321,7 @@ async function showApp() {
         const msg = 'Error inesperado: ' + (err.message || String(err));
         errEl.textContent = msg;
         errEl.classList.add('show');
-        alert(msg);
+        ferriolAppAlert(msg);
       }
     }
     document.getElementById('loginBtn').onclick = doLogin;
@@ -12155,12 +12282,12 @@ async function showApp() {
           var daysIn = rootEl.querySelector('.super-detail-req-add-days');
           var days = Math.max(1, Math.min(365, parseInt(daysIn && daysIn.value ? daysIn.value : 30, 10) || 30));
           var pay = parseFloat(String((payInEl && payInEl.value) || '').replace(',', '.'), 10);
-          if (isNaN(pay) || pay <= 0) { alert('Indicá el monto cobrado al cliente o socio.'); return; }
+          if (isNaN(pay) || pay <= 0) { ferriolAppAlert('Indicá el monto cobrado al cliente o socio.'); return; }
           var share = Math.round(pay * 0.2 * 100) / 100;
           var noteEl = rootEl.querySelector('.super-detail-req-company-note');
           var note = noteEl ? String(noteEl.value || '').trim() : '';
           var who = u.role === 'partner' ? 'este socio' : 'este negocio';
-          if (!confirm('Se enviará la solicitud de +' + days + ' días para ' + who + '. La empresa debe aprobar antes de cambiar el contador. ¿Continuar?')) return;
+          if (!(await ferriolAppConfirm('Se enviará la solicitud de +' + days + ' días para ' + who + '. La empresa debe aprobar antes de cambiar el contador. ¿Continuar?'))) return;
           var ins = await supabaseClient.from('ferriol_membership_day_requests').insert({
             requested_by: currentUser.id,
             kiosquero_user_id: u.id,
@@ -12170,8 +12297,8 @@ async function showApp() {
             company_transfer_note: note || null,
             reason: null
           });
-          if (ins.error) { alert('Error: ' + ins.error.message + '\n\nSi la tabla no existe, ejecutá supabase-ferriol-membership-day-requests.sql en Supabase.'); return; }
-          alert('Solicitud enviada.');
+          if (ins.error) { ferriolAppAlert('Error: ' + ins.error.message + '\n\nSi la tabla no existe, ejecutá supabase-ferriol-membership-day-requests.sql en Supabase.'); return; }
+          ferriolAppAlert('Solicitud enviada.');
           renderSuper();
           closeSuperMdrSumModal();
         };
@@ -12186,8 +12313,8 @@ async function showApp() {
           var daysRm = Math.max(1, Math.min(365, parseInt(dIn && dIn.value ? dIn.value : 1, 10) || 1));
           var reasonEl = rootEl.querySelector('.super-detail-req-remove-reason');
           var reason = reasonEl ? String(reasonEl.value || '').trim() : '';
-          if (reason.length < 5) { alert('El motivo es obligatorio (mínimo 5 caracteres).'); return; }
-          if (!confirm('Se enviará la solicitud de quitar ' + daysRm + ' días. La empresa debe aprobarla. ¿Continuar?')) return;
+          if (reason.length < 5) { ferriolAppAlert('El motivo es obligatorio (mínimo 5 caracteres).'); return; }
+          if (!(await ferriolAppConfirm('Se enviará la solicitud de quitar ' + daysRm + ' días. La empresa debe aprobarla. ¿Continuar?'))) return;
           var ins = await supabaseClient.from('ferriol_membership_day_requests').insert({
             requested_by: currentUser.id,
             kiosquero_user_id: u.id,
@@ -12197,8 +12324,8 @@ async function showApp() {
             company_transfer_note: null,
             reason: reason
           });
-          if (ins.error) { alert('Error: ' + ins.error.message + '\n\nSi la tabla no existe, ejecutá supabase-ferriol-membership-day-requests.sql en Supabase.'); return; }
-          alert('Solicitud de quita enviada.');
+          if (ins.error) { ferriolAppAlert('Error: ' + ins.error.message + '\n\nSi la tabla no existe, ejecutá supabase-ferriol-membership-day-requests.sql en Supabase.'); return; }
+          ferriolAppAlert('Solicitud de quita enviada.');
           renderSuper();
           closeSuperMdrRemModal();
         };
@@ -12561,13 +12688,13 @@ async function showApp() {
       if (defSaleBtn) {
         defSaleBtn.onclick = async function () {
           if (!supabaseClient) return;
-          if (!confirm('Se registrará en el libro la venta de suscripción mensual de este negocio (20% empresa, 80% del socio vendedor referidor). Solo se puede una vez por kiosco. ¿Continuar?')) return;
+          if (!(await ferriolAppConfirm('Se registrará en el libro la venta de suscripción mensual de este negocio (20% empresa, 80% del socio vendedor referidor). Solo se puede una vez por kiosco. ¿Continuar?'))) return;
           var rpc = await supabaseClient.rpc('ferriol_register_kiosco_definitive_sale', { p_kiosco_user_id: u.id });
-          if (rpc.error) { alert('Error: ' + (rpc.error.message || '')); return; }
+          if (rpc.error) { ferriolAppAlert('Error: ' + (rpc.error.message || '')); return; }
           var out = rpc.data;
           if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
-          if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo registrar.'); return; }
-          alert('Registrado. Empresa: 20% pendiente de cobro. Socio: 20% a pagar y 80% comisión pendiente (ver panel del socio).');
+          if (!out || out.ok !== true) { ferriolAppAlert((out && out.error) ? out.error : 'No se pudo registrar.'); return; }
+          ferriolAppAlert('Registrado. Empresa: 20% pendiente de cobro. Socio: 20% a pagar y 80% comisión pendiente (ver panel del socio).');
           if (state.superSection === 'sistema' || state.superSection === 'cobros') renderSuperCobrosSection();
           openSuperUserDetail(u);
         };
@@ -12588,19 +12715,19 @@ async function showApp() {
           const email = u.email;
           if (!email) return;
           const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: (typeof APP_URL !== 'undefined' && APP_URL) ? APP_URL : window.location.href });
-          if (error) alert('Error: ' + error.message);
-          else alert('Se envió un correo a ' + email + ' para restablecer la contraseña.');
+          if (error) ferriolAppAlert('Error: ' + error.message);
+          else ferriolAppAlert('Se envió un correo a ' + email + ' para restablecer la contraseña.');
         };
       }
       var emailHelpBtn = content.querySelector('.super-detail-email');
       if (emailHelpBtn) {
-        emailHelpBtn.onclick = function () {
+        emailHelpBtn.onclick = async function () {
           const m = (SUPABASE_URL || '').match(/https:\/\/([^.]+)\.supabase\.co/);
           const projectRef = m ? m[1] : null;
           const supabaseAuthUrl = projectRef ? 'https://supabase.com/dashboard/project/' + projectRef + '/auth/users' : null;
           const msg = 'Para cambiar el email:\n\n1. Supabase → Authentication → Users\n2. Buscá: ' + u.email + '\n3. Edit → cambiá el email.\n\n¿Abrir Supabase?';
-          if (supabaseAuthUrl && confirm(msg)) window.open(supabaseAuthUrl, '_blank');
-          else alert(msg);
+          if (supabaseAuthUrl && (await ferriolAppConfirm(msg))) window.open(supabaseAuthUrl, '_blank');
+          else await ferriolAppAlert(msg);
         };
       }
       var saveSponsorBtn = content.querySelector('.super-detail-save-sponsor');
@@ -12609,13 +12736,13 @@ async function showApp() {
         var sel = content.querySelector('#superDetailSponsorSelect');
         var val = sel ? String(sel.value || '').trim() : '';
         var newSid = val || null;
-        if (newSid === u.id) { alert('No puede ser su propio referidor.'); return; }
+        if (newSid === u.id) { ferriolAppAlert('No puede ser su propio referidor.'); return; }
         var { error: errSp } = await supabaseClient.from('profiles').update({ sponsor_id: newSid }).eq('id', u.id);
-        if (errSp) { alert('Error: ' + errSp.message); return; }
+        if (errSp) { ferriolAppAlert('Error: ' + errSp.message); return; }
         u.sponsor_id = newSid;
         var idxAll = (window._ferriolAllProfilesCache || []).findIndex(function (r) { return r.id === u.id; });
         if (idxAll >= 0) window._ferriolAllProfilesCache[idxAll].sponsor_id = newSid;
-        alert('Referidor actualizado.');
+        ferriolAppAlert('Referidor actualizado.');
         openSuperUserDetail(u);
         renderSuper();
       };
@@ -12626,8 +12753,8 @@ async function showApp() {
           if (u.role !== 'partner') return;
           var sel = content.querySelector('#superBulkReassignSponsorSelect');
           var newSid = sel ? String(sel.value || '').trim() : '';
-          if (!newSid) { alert('Elegí el nuevo referidor o administrador de la red.'); return; }
-          if (newSid === u.id) { alert('El nuevo referidor no puede ser el mismo socio.'); return; }
+          if (!newSid) { ferriolAppAlert('Elegí el nuevo referidor o administrador de la red.'); return; }
+          if (newSid === u.id) { ferriolAppAlert('El nuevo referidor no puede ser el mismo socio.'); return; }
           var incP = content.querySelector('#superBulkReassignIncludePartners');
           var poolNet = window._ferriolAllProfilesCache || [];
           var ids = [];
@@ -12637,17 +12764,17 @@ async function showApp() {
             if (incP && incP.checked && p.role === 'partner') ids.push(p.id);
           });
           if (ids.length === 0) {
-            alert('No hay referidos directos para reasignar (revisá el tilde «Incluir socios» si correspondía).');
+            ferriolAppAlert('No hay referidos directos para reasignar (revisá el tilde «Incluir socios» si correspondía).');
             return;
           }
-          if (!confirm('Se reasignarán ' + ids.length + ' cuenta(s) al nuevo patrocinador. El socio actual conserva su usuario pero ya no figura como referidor de esas cuentas. ¿Continuar?')) return;
+          if (!(await ferriolAppConfirm('Se reasignarán ' + ids.length + ' cuenta(s) al nuevo patrocinador. El socio actual conserva su usuario pero ya no figura como referidor de esas cuentas. ¿Continuar?'))) return;
           var { error: errUp } = await supabaseClient.from('profiles').update({ sponsor_id: newSid }).in('id', ids);
-          if (errUp) { alert('Error: ' + errUp.message); return; }
+          if (errUp) { ferriolAppAlert('Error: ' + errUp.message); return; }
           ids.forEach(function (id) {
             var ix = (window._ferriolAllProfilesCache || []).findIndex(function (r) { return r.id === id; });
             if (ix >= 0) window._ferriolAllProfilesCache[ix].sponsor_id = newSid;
           });
-          alert('Listo: ' + ids.length + ' cuenta(s) reasignadas.');
+          ferriolAppAlert('Listo: ' + ids.length + ' cuenta(s) reasignadas.');
           renderSuper();
           openSuperUserDetail(u);
         };
@@ -12656,13 +12783,13 @@ async function showApp() {
       if (penaltyPartnerBtn && u.active) {
         penaltyPartnerBtn.onclick = async function () {
           if (!supabaseClient) return;
-          if (!confirm('Penalidad por incumplimiento: ¿desactivar el acceso de este socio?\n\nNo podrá iniciar sesión. Los negocios referidos no se borran: antes o después usá «Reasignar toda la línea directa» si querés otro referidor.')) return;
+          if (!(await ferriolAppConfirm('Penalidad por incumplimiento: ¿desactivar el acceso de este socio?\n\nNo podrá iniciar sesión. Los negocios referidos no se borran: antes o después usá «Reasignar toda la línea directa» si querés otro referidor.'))) return;
           var { error: errPen } = await supabaseClient.from('profiles').update({ active: false }).eq('id', u.id);
-          if (errPen) { alert('Error: ' + errPen.message); return; }
+          if (errPen) { ferriolAppAlert('Error: ' + errPen.message); return; }
           u.active = false;
           var idxP = (window._ferriolAllProfilesCache || []).findIndex(function (r) { return r.id === u.id; });
           if (idxP >= 0) window._ferriolAllProfilesCache[idxP].active = false;
-          alert('Socio desactivado (penalidad).');
+          ferriolAppAlert('Socio desactivado (penalidad).');
           renderSuper();
           openSuperUserDetail(u);
         };
@@ -12672,14 +12799,14 @@ async function showApp() {
         clrKitBtn.onclick = async function () {
           if (!supabaseClient) return;
           var rpc = await supabaseClient.rpc('ferriol_founder_clear_partner_kit_review', { p_profile_id: u.id });
-          if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+          if (rpc.error) { ferriolAppAlert('Error: ' + rpc.error.message); return; }
           var out = rpc.data;
           if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
-          if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo actualizar.'); return; }
+          if (!out || out.ok !== true) { ferriolAppAlert((out && out.error) ? out.error : 'No se pudo actualizar.'); return; }
           u.partner_kit_review_until = null;
           var ixk = (window._ferriolAllProfilesCache || []).findIndex(function (r) { return r.id === u.id; });
           if (ixk >= 0) window._ferriolAllProfilesCache[ixk].partner_kit_review_until = null;
-          alert('Listo: aviso de kit quitado.');
+          ferriolAppAlert('Listo: aviso de kit quitado.');
           renderSuper();
           openSuperUserDetail(u);
         };
@@ -12688,14 +12815,14 @@ async function showApp() {
       if (quitarBtn) quitarBtn.onclick = async () => {
         var pwdInput = document.getElementById('adminDeletePassword');
         var storedPwd = (pwdInput && pwdInput.value) ? pwdInput.value : '';
-        if (!storedPwd) { alert('Configurá primero la contraseña para quitar usuarios en Ajustes.'); return; }
+        if (!storedPwd) { ferriolAppAlert('Configurá primero la contraseña para quitar usuarios en Ajustes.'); return; }
         var entered = prompt('Ingresá la contraseña de admin para quitar este negocio:');
         if (entered === null) return;
-        if (entered !== storedPwd) { alert('Contraseña incorrecta.'); return; }
-        if (!confirm('¿Desactivar este negocio? Ya no podrá iniciar sesión.')) return;
+        if (entered !== storedPwd) { ferriolAppAlert('Contraseña incorrecta.'); return; }
+        if (!(await ferriolAppConfirm('¿Desactivar este negocio? Ya no podrá iniciar sesión.'))) return;
         if (!supabaseClient) return;
         const { error } = await supabaseClient.from('profiles').update({ active: false }).eq('id', u.id);
-        if (error) { alert('Error: ' + error.message); return; }
+        if (error) { ferriolAppAlert('Error: ' + error.message); return; }
         document.getElementById('superUserDetailClose').click();
         renderSuper();
       };
@@ -12944,13 +13071,13 @@ async function showApp() {
           founderBox.querySelectorAll('.ferriol-mdr-approve').forEach(function (btn) {
             btn.onclick = async function () {
               var id = btn.getAttribute('data-id');
-              if (!id || !confirm('¿Aprobar y aplicar los días de vigencia en la cuenta (kiosco o socio)?')) return;
+              if (!id || !(await ferriolAppConfirm('¿Aprobar y aplicar los días de vigencia en la cuenta (kiosco o socio)?'))) return;
               var rpc = await supabaseClient.rpc('ferriol_approve_membership_day_request', { p_request_id: id, p_approve: true, p_reject_note: null });
-              if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+              if (rpc.error) { ferriolAppAlert('Error: ' + rpc.error.message); return; }
               var out = rpc.data;
               if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
-              if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo aprobar.'); return; }
-              alert('Listo: los días ya figuran en la vigencia de la cuenta.');
+              if (!out || out.ok !== true) { ferriolAppAlert((out && out.error) ? out.error : 'No se pudo aprobar.'); return; }
+              ferriolAppAlert('Listo: los días ya figuran en la vigencia de la cuenta.');
               renderSuper();
             };
           });
@@ -12961,26 +13088,26 @@ async function showApp() {
               var note = prompt('Motivo del rechazo (opcional):');
               if (note === null) return;
               var rpc = await supabaseClient.rpc('ferriol_approve_membership_day_request', { p_request_id: id, p_approve: false, p_reject_note: note || null });
-              if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+              if (rpc.error) { ferriolAppAlert('Error: ' + rpc.error.message); return; }
               var out = rpc.data;
               if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
-              if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo rechazar.'); return; }
+              if (!out || out.ok !== true) { ferriolAppAlert((out && out.error) ? out.error : 'No se pudo rechazar.'); return; }
               renderSuper();
             };
           });
           founderBox.querySelectorAll('.ferriol-ppr-approve').forEach(function (btn) {
             btn.onclick = async function () {
               var id = btn.getAttribute('data-ppr-id');
-              if (!id || !confirm('¿Aprobar el alta de distribuidor? Verificá el 20 % a Ferriol. Si el socio ya creó cuenta, se acreditarán los días de licencia.')) return;
+              if (!id || !(await ferriolAppConfirm('¿Aprobar el alta de distribuidor? Verificá el 20 % a Ferriol. Si el socio ya creó cuenta, se acreditarán los días de licencia.'))) return;
               var rpc = await supabaseClient.rpc('ferriol_approve_partner_provision_request', { p_request_id: id, p_approve: true, p_reject_note: null });
-              if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+              if (rpc.error) { ferriolAppAlert('Error: ' + rpc.error.message); return; }
               var out = rpc.data;
               if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
-              if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo aprobar.'); return; }
+              if (!out || out.ok !== true) { ferriolAppAlert((out && out.error) ? out.error : 'No se pudo aprobar.'); return; }
               if (out.action === 'approved_completed') {
-                alert('Listo: el socio ya tenía cuenta. Licencia de distribuidor acreditada (' + (out.license_days != null ? out.license_days + ' días' : 'revisá app_settings.partner_distribution_license_days') + ').');
+                ferriolAppAlert('Listo: el socio ya tenía cuenta. Licencia de distribuidor acreditada (' + (out.license_days != null ? out.license_days + ' días' : 'revisá app_settings.partner_distribution_license_days') + ').');
               } else {
-                alert('Alta aprobada. Si el socio aún no se registró, el referidor verá el botón para definir la contraseña.');
+                ferriolAppAlert('Alta aprobada. Si el socio aún no se registró, el referidor verá el botón para definir la contraseña.');
               }
               renderSuper();
             };
@@ -12992,23 +13119,23 @@ async function showApp() {
               var note = prompt('Motivo del rechazo (opcional):');
               if (note === null) return;
               var rpc = await supabaseClient.rpc('ferriol_approve_partner_provision_request', { p_request_id: id, p_approve: false, p_reject_note: note || null });
-              if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+              if (rpc.error) { ferriolAppAlert('Error: ' + rpc.error.message); return; }
               var out = rpc.data;
               if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
-              if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo rechazar.'); return; }
+              if (!out || out.ok !== true) { ferriolAppAlert((out && out.error) ? out.error : 'No se pudo rechazar.'); return; }
               renderSuper();
             };
           });
           founderBox.querySelectorAll('.ferriol-kpr-approve').forEach(function (btn) {
             btn.onclick = async function () {
               var id = btn.getAttribute('data-kpr-id');
-              if (!id || !confirm('¿Aprobar el alta del negocio? El referidor podrá definir la contraseña del kiosco.')) return;
+              if (!id || !(await ferriolAppConfirm('¿Aprobar el alta del negocio? El referidor podrá definir la contraseña del kiosco.'))) return;
               var rpc = await supabaseClient.rpc('ferriol_approve_kiosquero_provision_request', { p_request_id: id, p_approve: true, p_reject_note: null });
-              if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+              if (rpc.error) { ferriolAppAlert('Error: ' + rpc.error.message); return; }
               var out = rpc.data;
               if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
-              if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo aprobar.'); return; }
-              alert('Alta de kiosco aprobada.');
+              if (!out || out.ok !== true) { ferriolAppAlert((out && out.error) ? out.error : 'No se pudo aprobar.'); return; }
+              ferriolAppAlert('Alta de kiosco aprobada.');
               renderSuper();
             };
           });
@@ -13019,23 +13146,23 @@ async function showApp() {
               var note = prompt('Motivo del rechazo (opcional):');
               if (note === null) return;
               var rpc = await supabaseClient.rpc('ferriol_approve_kiosquero_provision_request', { p_request_id: id, p_approve: false, p_reject_note: note || null });
-              if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+              if (rpc.error) { ferriolAppAlert('Error: ' + rpc.error.message); return; }
               var out = rpc.data;
               if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
-              if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo rechazar.'); return; }
+              if (!out || out.ok !== true) { ferriolAppAlert((out && out.error) ? out.error : 'No se pudo rechazar.'); return; }
               renderSuper();
             };
           });
           founderBox.querySelectorAll('.ferriol-kpur-approve').forEach(function (btn) {
             btn.onclick = async function () {
               var id = btn.getAttribute('data-kpur-id');
-              if (!id || !confirm('¿Aprobar el pasaje a distribuidor? Se actualizará la misma cuenta y la licencia según app_settings.')) return;
+              if (!id || !(await ferriolAppConfirm('¿Aprobar el pasaje a distribuidor? Se actualizará la misma cuenta y la licencia según app_settings.'))) return;
               var rpc = await supabaseClient.rpc('ferriol_approve_kiosquero_partner_upgrade', { p_request_id: id, p_approve: true, p_reject_note: null });
-              if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+              if (rpc.error) { ferriolAppAlert('Error: ' + rpc.error.message); return; }
               var out = rpc.data;
               if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
-              if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo aprobar.'); return; }
-              alert('Upgrade aplicado. El usuario debe cerrar sesión y volver a entrar para ver el panel de socio.');
+              if (!out || out.ok !== true) { ferriolAppAlert((out && out.error) ? out.error : 'No se pudo aprobar.'); return; }
+              ferriolAppAlert('Upgrade aplicado. El usuario debe cerrar sesión y volver a entrar para ver el panel de socio.');
               renderSuper();
             };
           });
@@ -13046,10 +13173,10 @@ async function showApp() {
               var note = prompt('Motivo del rechazo (opcional):');
               if (note === null) return;
               var rpc = await supabaseClient.rpc('ferriol_approve_kiosquero_partner_upgrade', { p_request_id: id, p_approve: false, p_reject_note: note || null });
-              if (rpc.error) { alert('Error: ' + rpc.error.message); return; }
+              if (rpc.error) { ferriolAppAlert('Error: ' + rpc.error.message); return; }
               var out = rpc.data;
               if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
-              if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo rechazar.'); return; }
+              if (!out || out.ok !== true) { ferriolAppAlert((out && out.error) ? out.error : 'No se pudo rechazar.'); return; }
               renderSuper();
             };
           });
@@ -13761,10 +13888,10 @@ async function showApp() {
     var btnExportAllUsersBackup = document.getElementById('btnExportAllUsersBackup');
     if (btnExportAllUsersBackup) btnExportAllUsersBackup.onclick = exportAllUsersBackup;
     var inputImportAllUsersBackup = document.getElementById('inputImportAllUsersBackup');
-    if (inputImportAllUsersBackup) inputImportAllUsersBackup.onchange = function (e) {
+    if (inputImportAllUsersBackup) inputImportAllUsersBackup.onchange = async function (e) {
       var f = e.target.files[0];
       if (f) {
-        if (!confirm('¿Importar y complementar datos? Se sumarán los productos, clientes y deudas del archivo a lo que ya tiene cada usuario (no se borra nada existente). Los usuarios pueden recargar la app para ver los cambios.')) { e.target.value = ''; return; }
+        if (!(await ferriolAppConfirm('¿Importar y complementar datos? Se sumarán los productos, clientes y deudas del archivo a lo que ya tiene cada usuario (no se borra nada existente). Los usuarios pueden recargar la app para ver los cambios.'))) { e.target.value = ''; return; }
         importAllUsersBackup(f);
       }
       e.target.value = '';
@@ -13899,13 +14026,13 @@ async function showApp() {
     if (ferriolBtnMonthly) {
       ferriolBtnMonthly.onclick = async function () {
         if (!supabaseClient || !isEmpresaLensSuper()) return;
-        if (!confirm('¿Generar en el libro los cargos automáticos del mes calendario actual (Argentina)? No duplica si ya existen (idempotencia).')) return;
+        if (!(await ferriolAppConfirm('¿Generar en el libro los cargos automáticos del mes calendario actual (Argentina)? No duplica si ya existen (idempotencia).'))) return;
         var rpc = await supabaseClient.rpc('ferriol_accrue_monthly_billing', {});
-        if (rpc.error) { alert('Error: ' + (rpc.error.message || '')); return; }
+        if (rpc.error) { ferriolAppAlert('Error: ' + (rpc.error.message || '')); return; }
         var out = rpc.data;
         if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
-        if (!out || out.ok !== true) { alert((out && out.error) ? out.error : 'No se pudo ejecutar.'); return; }
-        alert('Listo. Mes: ' + (out.period_month || '') + '. Kioscos nuevos: ' + (out.kiosco_months_new != null ? out.kiosco_months_new : '—') + '. Socios nuevos: ' + (out.partner_months_new != null ? out.partner_months_new : '—'));
+        if (!out || out.ok !== true) { ferriolAppAlert((out && out.error) ? out.error : 'No se pudo ejecutar.'); return; }
+        ferriolAppAlert('Listo. Mes: ' + (out.period_month || '') + '. Kioscos nuevos: ' + (out.kiosco_months_new != null ? out.kiosco_months_new : '—') + '. Socios nuevos: ' + (out.partner_months_new != null ? out.partner_months_new : '—'));
         if (state.superSection === 'sistema' || state.superSection === 'cobros') renderSuperCobrosSection();
         lucide.createIcons();
       };
@@ -13914,20 +14041,20 @@ async function showApp() {
     if (ferriolBtnDemo) {
       ferriolBtnDemo.onclick = async function () {
         if (!supabaseClient || !isEmpresaLensSuper()) return;
-        if (!confirm('¿Insertar 3 movimientos de demostración en mlm_ledger? No duplica si ya existen.')) return;
+        if (!(await ferriolAppConfirm('¿Insertar 3 movimientos de demostración en mlm_ledger? No duplica si ya existen.'))) return;
         var rpc = await supabaseClient.rpc('ferriol_demo_seed_ledger', {});
         if (rpc.error) {
-          alert('Error: ' + (rpc.error.message || '') + '\n\n¿Ejecutaste supabase-ferriol-demo-seed.sql en Supabase?');
+          ferriolAppAlert('Error: ' + (rpc.error.message || '') + '\n\n¿Ejecutaste supabase-ferriol-demo-seed.sql en Supabase?');
           return;
         }
         var out = rpc.data;
         if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
         if (!out || out.ok !== true) {
-          alert((out && out.error) ? out.error : 'No se pudo completar la demo.');
+          ferriolAppAlert((out && out.error) ? out.error : 'No se pudo completar la demo.');
           return;
         }
         var n = out.inserted_rows != null ? out.inserted_rows : '—';
-        alert('Listo. Filas nuevas: ' + n + '. Revisá Sistema → Cobros (admin). Los kiosqueros ven la suscripción en Caja.');
+        ferriolAppAlert('Listo. Filas nuevas: ' + n + '. Revisá Sistema → Cobros (admin). Los kiosqueros ven la suscripción en Caja.');
         if (state.superSection === 'sistema' || state.superSection === 'cobros') renderSuperCobrosSection();
         await loadKioscoLicensePaymentInfo();
         lucide.createIcons();
@@ -13937,19 +14064,19 @@ async function showApp() {
     if (ferriolBtnDemoClear) {
       ferriolBtnDemoClear.onclick = async function () {
         if (!supabaseClient || !isEmpresaLensSuper()) return;
-        if (!confirm('¿Eliminar del libro solo las 3 filas de demostración (claves ferriol:demo:seed:*)? No afecta cargos reales.')) return;
+        if (!(await ferriolAppConfirm('¿Eliminar del libro solo las 3 filas de demostración (claves ferriol:demo:seed:*)? No afecta cargos reales.'))) return;
         var rpc = await supabaseClient.rpc('ferriol_demo_clear_seed_ledger', {});
         if (rpc.error) {
-          alert('Error: ' + (rpc.error.message || '') + '\n\nActualizá supabase-ferriol-demo-seed.sql en Supabase si falta la función.');
+          ferriolAppAlert('Error: ' + (rpc.error.message || '') + '\n\nActualizá supabase-ferriol-demo-seed.sql en Supabase si falta la función.');
           return;
         }
         var out = rpc.data;
         if (typeof out === 'string') { try { out = JSON.parse(out); } catch (_) {} }
         if (!out || out.ok !== true) {
-          alert((out && out.error) ? out.error : 'No se pudo quitar la demo.');
+          ferriolAppAlert((out && out.error) ? out.error : 'No se pudo quitar la demo.');
           return;
         }
-        alert('Listo. Filas eliminadas: ' + (out.deleted_rows != null ? out.deleted_rows : '—') + '.');
+        ferriolAppAlert('Listo. Filas eliminadas: ' + (out.deleted_rows != null ? out.deleted_rows : '—') + '.');
         if (state.superSection === 'sistema' || state.superSection === 'cobros') renderSuperCobrosSection();
         await loadKioscoLicensePaymentInfo();
         lucide.createIcons();
@@ -14005,7 +14132,7 @@ async function showApp() {
         if (errEl) { errEl.textContent = ins.error.message || 'No se pudo registrar.'; errEl.classList.remove('hidden'); }
         return;
       }
-      alert('Cobro pendiente registrado. Cuando acredite la transferencia, tocá Verificar.');
+      ferriolAppAlert('Cobro pendiente registrado. Cuando acredite la transferencia, tocá Verificar.');
       if (state.superSection === 'sistema' || state.superSection === 'cobros') renderSuperCobrosSection();
       lucide.createIcons();
     };
@@ -14058,7 +14185,7 @@ async function showApp() {
         return;
       }
       var share = Math.round(pay * 0.2 * 100) / 100;
-      if (!confirm('Se enviará la solicitud de alta del negocio a la empresa. Hasta la aprobación no podés crear el usuario. ¿Continuar?')) return;
+      if (!(await ferriolAppConfirm('Se enviará la solicitud de alta del negocio a la empresa. Hasta la aprobación no podés crear el usuario. ¿Continuar?'))) return;
       var ins = await supabaseClient.from('ferriol_kiosquero_provision_requests').insert({
         requested_by: currentUser.id,
         target_email: email,
@@ -14077,7 +14204,7 @@ async function showApp() {
         return;
       }
       closeKiosqueroProvisionRequestModal();
-      alert('Solicitud enviada. Cuando Ferriol apruebe, aparecerá el botón para definir la contraseña del kiosco.');
+      ferriolAppAlert('Solicitud enviada. Cuando Ferriol apruebe, aparecerá el botón para definir la contraseña del kiosco.');
       renderSuper();
     };
     var kprCompClose = document.getElementById('kiosqueroProvisionCompleteModalClose');
@@ -14123,7 +14250,7 @@ async function showApp() {
         return;
       }
       closeKiosqueroProvisionCompleteModal();
-      alert('Listo: el negocio ya puede iniciar sesión como kiosquero.');
+      ferriolAppAlert('Listo: el negocio ya puede iniciar sesión como kiosquero.');
       renderSuper();
     };
 
@@ -14222,7 +14349,7 @@ async function showApp() {
           return;
         }
         closeKiosqueroPartnerUpgradeModal();
-        alert('Solicitud enviada. Cuando Ferriol la apruebe, cerrá sesión y volvé a entrar para ver el panel de socio.');
+        ferriolAppAlert('Solicitud enviada. Cuando Ferriol la apruebe, cerrá sesión y volvé a entrar para ver el panel de socio.');
         await syncKiosqueroPartnerUpgradeUi();
       };
     }
@@ -14525,7 +14652,7 @@ async function showApp() {
           closeProofModal();
           if (fileIn) fileIn.value = '';
           void ferriolRefreshPartnerKitGateFlag();
-          alert(
+          ferriolAppAlert(
             routeKioskToPartnerQueue
               ? currentUser.role === 'partner'
                 ? 'Enviado a tu distribuidor directo. Va a revisar el comprobante y cargará la venta ante Ferriol cuando corresponda.'
@@ -14542,7 +14669,7 @@ async function showApp() {
           if (window._ferriolPlanCheckoutMode === 'partner_kit') {
             var stillNeed = await ferriolPartnerNeedsInitialKitProofGate();
             if (stillNeed) {
-              alert(
+              ferriolAppAlert(
                 'Primero cargá el comprobante del kit inicial ante tu distribuidor directo (datos de pago abajo → «Ya pagué» / Mercado Pago y adjuntá la imagen).'
               );
               return;
@@ -14659,7 +14786,7 @@ async function showApp() {
         }
         closeClientSaleRequestModal();
         if (fileIn) fileIn.value = '';
-        alert('Enviado. La empresa lo revisa en Solicitudes. Cuando apruebe, verás la comisión en Ingresos.');
+        ferriolAppAlert('Enviado. La empresa lo revisa en Solicitudes. Cuando apruebe, verás la comisión en Ingresos.');
       };
     }
     var provCompClose = document.getElementById('partnerProvisionCompleteModalClose');
@@ -14705,7 +14832,7 @@ async function showApp() {
         return;
       }
       closePartnerProvisionCompleteModal();
-      alert('Listo: el nuevo administrador de red ya puede iniciar sesión como socio.');
+      ferriolAppAlert('Listo: el nuevo administrador de red ya puede iniciar sesión como socio.');
       renderSuper();
     };
 
@@ -14912,8 +15039,8 @@ async function showApp() {
         delBtn.className = 'nota-del-btn touch-target';
         delBtn.title = 'Eliminar nota';
         delBtn.textContent = '✕';
-        delBtn.addEventListener('click', function () {
-          if (!confirm('¿Eliminar esta nota?')) return;
+        delBtn.addEventListener('click', async function () {
+          if (!(await ferriolAppConfirm('¿Eliminar esta nota?'))) return;
           arr.splice(idx, 1);
           notasSave(arr);
           card.parentNode && card.parentNode.removeChild(card);
@@ -15271,18 +15398,20 @@ async function showApp() {
           del.className = 'mt-2 text-[11px] text-red-300/90 touch-target self-start';
           del.textContent = 'Eliminar';
           del.addEventListener('click', function () {
-            if (!confirm('¿Eliminar este recordatorio?')) return;
-            var id = r.id;
-            var arr2 = masRemLoad().filter(function (x) { return x.id !== id; });
-            masRemSave(arr2);
-            masRemRender();
-            try { masCalRenderAll(); } catch (_) {}
+            ferriolAppConfirm('¿Eliminar este recordatorio?').then(function (ok) {
+              if (!ok) return;
+              var id = r.id;
+              var arr2 = masRemLoad().filter(function (x) { return x.id !== id; });
+              masRemSave(arr2);
+              masRemRender();
+              try { masCalRenderAll(); } catch (_) {}
+            });
           });
           row.appendChild(del);
           list.appendChild(row);
         });
       }
-      function masRemAdd() {
+      async function masRemAdd() {
         var titleEl = document.getElementById('masRemTitle');
         var dateEl = document.getElementById('masRemDate');
         var timeEl = document.getElementById('masRemTime');
@@ -15290,12 +15419,12 @@ async function showApp() {
         if (!titleEl || !dateEl) return;
         var title = String(titleEl.value || '').trim();
         if (!title) {
-          alert('Escribí un título para el recordatorio.');
+          await ferriolAppAlert('Escribí un título para el recordatorio.');
           return;
         }
         var date = String(dateEl.value || '').trim();
         if (!date) {
-          alert('Elegí una fecha.');
+          await ferriolAppAlert('Elegí una fecha.');
           return;
         }
         var time = timeEl ? String(timeEl.value || '').trim() : '';
@@ -15430,10 +15559,12 @@ async function showApp() {
         delBtn.title = 'Eliminar';
         delBtn.textContent = '✕';
         delBtn.addEventListener('click', function () {
-          if (!confirm('¿Eliminar esta nota?')) return;
-          var id = nota.id;
-          masIdeasSave(masIdeasLoad().filter(function (x) { return x.id !== id; }));
-          masIdeasRender();
+          ferriolAppConfirm('¿Eliminar esta nota?').then(function (ok) {
+            if (!ok) return;
+            var id = nota.id;
+            masIdeasSave(masIdeasLoad().filter(function (x) { return x.id !== id; }));
+            masIdeasRender();
+          });
         });
         top.appendChild(delBtn);
         card.appendChild(top);
