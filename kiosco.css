@@ -29,6 +29,12 @@
   --ferriol-header-border: rgba(255, 255, 255, 0.2);
   --ferriol-header-shadow-drop: rgba(0, 0, 0, 0.35);
   --ferriol-header-shadow-line: rgba(255, 255, 255, 0.1);
+  /* Texto en componentes CSS propios (inventario, nav, cierre, etc.) */
+  --ferriol-ui-text: #ffffff;
+  --ferriol-ui-text-soft: rgba(255, 255, 255, 0.72);
+  --ferriol-ui-text-muted: rgba(255, 255, 255, 0.55);
+  --ferriol-ui-cierre-title: rgba(254, 252, 232, 0.98);
+  --ferriol-ui-cierre-strong: rgba(236, 253, 245, 0.92);
 }
 
 * {
@@ -743,14 +749,14 @@ button.header-sub.header-sub--toggle:active {
 }
 
 .bottom-nav-btn {
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--ferriol-ui-text-soft);
   transition: color 0.2s, background 0.2s var(--ease-out), transform 0.15s;
   border-radius: 0.75rem;
 }
 
 .bottom-nav-btn:hover,
 .bottom-nav-btn.active {
-  color: #fff;
+  color: var(--ferriol-ui-text);
   background: rgba(255,255,255, 0.25);
 }
 
@@ -1517,7 +1523,7 @@ body[data-panel="inventory"] #panel-inventory {
   gap: 0.4rem;
   font-size: 0.85rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.55);
+  color: var(--ferriol-ui-text-muted);
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
@@ -1577,6 +1583,7 @@ body[data-panel="inventory"] #panel-inventory {
 .inv-item-name {
   font-weight: 500;
   font-size: 0.95rem;
+  color: var(--ferriol-ui-text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1592,7 +1599,7 @@ body[data-panel="inventory"] #panel-inventory {
 .inv-item-price {
   font-weight: 700;
   font-size: 0.9rem;
-  color: #ffffff;
+  color: var(--ferriol-ui-text);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -1603,6 +1610,7 @@ body[data-panel="inventory"] #panel-inventory {
   flex-shrink: 0;
   min-width: 1.5rem;
   text-align: right;
+  color: var(--ferriol-ui-text-muted);
 }
 
 .inv-item-btn {
@@ -1899,12 +1907,12 @@ body[data-panel="inventory"] #panel-inventory {
     text-align: center;
     font-weight: 600;
     letter-spacing: 0.02em;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--ferriol-ui-text-soft);
   }
 
   #navKiosquero .bottom-nav-btn.active span,
   #navSuperBottom .bottom-nav-btn.active span {
-    color: rgba(255,255,255, 0.98);
+    color: var(--ferriol-ui-text);
   }
 
   #navKiosquero .bottom-nav-btn i,
@@ -2204,7 +2212,7 @@ select.ferriol-sponsor-select:-moz-focusring {
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255,255,255, 0.88);
+  color: var(--ferriol-ui-text-soft);
   margin-bottom: 0.35rem;
 }
 
@@ -2213,18 +2221,18 @@ select.ferriol-sponsor-select:-moz-focusring {
   font-size: 1.35rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: rgba(254, 252, 232, 0.98);
+  color: var(--ferriol-ui-cierre-title);
 }
 
 .ferriol-cierre-lead {
   margin: 0 0 0.85rem;
   font-size: 0.8125rem;
   line-height: 1.45;
-  color: rgba(255, 255, 255, 0.62);
+  color: var(--ferriol-ui-text-muted);
 }
 
 .ferriol-cierre-lead strong {
-  color: rgba(236, 253, 245, 0.92);
+  color: var(--ferriol-ui-cierre-strong);
   font-weight: 600;
 }
 
@@ -2243,11 +2251,11 @@ select.ferriol-sponsor-select:-moz-focusring {
   align-items: flex-start;
   font-size: 0.72rem;
   line-height: 1.4;
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--ferriol-ui-text-muted);
 }
 
 .ferriol-cierre-value-list strong {
-  color: rgba(236, 253, 245, 0.88);
+  color: var(--ferriol-ui-cierre-strong);
   font-weight: 600;
 }
 
@@ -2260,7 +2268,7 @@ select.ferriol-sponsor-select:-moz-focusring {
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.22);
-  color: #ffffff;
+  color: var(--ferriol-ui-text);
 }
 
 .ferriol-cierre-banner {
@@ -4044,6 +4052,33 @@ html[data-ferriol-theme='naranja'] {
   --ferriol-header-shadow-line: rgba(255, 237, 213, 0.14);
 }
 
+html[data-ferriol-theme='verde'] {
+  --indigo-deep: #14532d;
+  --indigo-mid: #22c55e;
+  --violet-electric: #ecfdf5;
+  --violet-light: #f0fdf4;
+  --glow-violet: rgba(34, 197, 94, 0.48);
+  --ferriol-body-bg: linear-gradient(145deg, #052e16 0%, #0f3d24 38%, #166534 62%, #052016 100%);
+  --ferriol-body-fg: #f0fdf4;
+  --ferriol-veil-bg:
+    radial-gradient(ellipse 90% 55% at 50% -15%, rgba(74, 222, 128, 0.18), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 100% 100%, rgba(22, 163, 74, 0.12), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 0% 80%, rgba(20, 83, 45, 0.45), transparent 45%);
+  --ferriol-btn-fg: #052e16;
+  --ferriol-glass-strong-bg: rgba(34, 197, 94, 0.12);
+  --ferriol-glass-strong-border: rgba(134, 239, 172, 0.3);
+  --ferriol-header-bg: linear-gradient(
+    105deg,
+    rgba(6, 40, 21, 0.98) 0%,
+    rgba(22, 101, 52, 0.92) 42%,
+    rgba(15, 61, 36, 0.94) 58%,
+    rgba(5, 30, 16, 0.98) 100%
+  );
+  --ferriol-header-border: rgba(134, 239, 172, 0.4);
+  --ferriol-header-shadow-drop: rgba(0, 0, 0, 0.4);
+  --ferriol-header-shadow-line: rgba(220, 252, 231, 0.14);
+}
+
 html[data-ferriol-theme='blanco'] {
   color-scheme: light;
   --indigo-deep: #f4f4f5;
@@ -4073,6 +4108,23 @@ html[data-ferriol-theme='blanco'] {
   --ferriol-header-border: rgba(0, 0, 0, 0.1);
   --ferriol-header-shadow-drop: rgba(0, 0, 0, 0.09);
   --ferriol-header-shadow-line: rgba(0, 0, 0, 0.05);
+  --ferriol-ui-text: #18181b;
+  --ferriol-ui-text-soft: rgba(24, 24, 27, 0.74);
+  --ferriol-ui-text-muted: rgba(24, 24, 27, 0.56);
+  --ferriol-ui-cierre-title: #18181b;
+  --ferriol-ui-cierre-strong: rgba(21, 128, 61, 0.92);
+}
+
+html[data-ferriol-theme='blanco'] .bottom-nav-btn:hover,
+html[data-ferriol-theme='blanco'] .bottom-nav-btn.active {
+  background: rgba(0, 0, 0, 0.07) !important;
+}
+
+@media (min-width: 768px) {
+  html[data-ferriol-theme='blanco'] #navKiosquero .bottom-nav-btn.active,
+  html[data-ferriol-theme='blanco'] #navSuperBottom .bottom-nav-btn.active {
+    box-shadow: inset 3px 0 0 rgba(24, 24, 27, 0.72);
+  }
 }
 
 html[data-ferriol-theme='blanco'] #ferriolThemeChips .ferriol-theme-chip {
@@ -4093,8 +4145,16 @@ html[data-ferriol-theme='blanco'] ::selection {
 
 /* Modo claro: utilidades Tailwind frecuentes (CDN) */
 html[data-ferriol-theme='blanco'] [class*='text-white'],
-html[data-ferriol-theme='blanco'] [class*='text-[#ffffff]'] {
+html[data-ferriol-theme='blanco'] [class*='text-[#ffffff]'],
+html[data-ferriol-theme='blanco'] [class*='text-[#fff'] {
   color: #18181b !important;
+}
+
+/* Zinc muy claros pensados para fondo oscuro → legibles en modo claro */
+html[data-ferriol-theme='blanco'] [class*='text-zinc-100'],
+html[data-ferriol-theme='blanco'] [class*='text-zinc-200'],
+html[data-ferriol-theme='blanco'] [class*='text-zinc-300'] {
+  color: #27272a !important;
 }
 
 html[data-ferriol-theme='blanco'] [class*='border-white'] {
@@ -4134,4 +4194,32 @@ html[data-ferriol-theme='blanco'] .nota-body::placeholder {
 
 html[data-ferriol-theme='blanco'] .nota-chars {
   color: rgba(24, 24, 27, 0.35);
+}
+
+html[data-ferriol-theme='blanco'] .panel input,
+html[data-ferriol-theme='blanco'] .panel textarea,
+html[data-ferriol-theme='blanco'] .panel select:not(.ferriol-sponsor-select) {
+  background: rgba(255, 255, 255, 0.94) !important;
+  color: #18181b !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+html[data-ferriol-theme='blanco'] .inv-searchbar input {
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: #18181b !important;
+}
+
+html[data-ferriol-theme='blanco'] select.ferriol-native-select,
+html[data-ferriol-theme='blanco'] select.ferriol-native-select option {
+  color-scheme: light !important;
+}
+
+html[data-ferriol-theme='blanco'] .panel select.ferriol-native-select {
+  background: rgba(255, 255, 255, 0.96) !important;
+  color: #18181b !important;
+}
+
+html[data-ferriol-theme='blanco'] .panel select.ferriol-native-select option {
+  background-color: #f4f4f5 !important;
+  color: #18181b !important;
 }

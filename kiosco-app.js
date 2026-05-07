@@ -49,17 +49,18 @@
     ferriolCleanReloadParamsOnce();
 
     var FERRIOL_UI_THEME_KEY = 'ferriol_ui_theme';
-    var FERRIOL_UI_THEME_IDS = { negro: 1, blanco: 1, morado: 1, naranja: 1 };
+    var FERRIOL_UI_THEME_IDS = { negro: 1, blanco: 1, verde: 1, morado: 1, naranja: 1 };
     function ferriolMetaThemeColorFromPick(raw) {
       if (raw === 'blanco') return '#f4f4f5';
       if (raw === 'morado') return '#1e1035';
       if (raw === 'naranja') return '#3b1a0a';
+      if (raw === 'verde') return '#052e16';
       return '#171717';
     }
     function ferriolGetUiTheme() {
       try {
         var r = localStorage.getItem(FERRIOL_UI_THEME_KEY);
-        if (r === 'blanco' || r === 'morado' || r === 'naranja') return r;
+        if (r === 'blanco' || r === 'morado' || r === 'naranja' || r === 'verde') return r;
       } catch (_) {}
       return 'negro';
     }

@@ -21,7 +21,7 @@
     (function () {
       try {
         var t = localStorage.getItem('ferriol_ui_theme');
-        if (t === 'blanco' || t === 'morado' || t === 'naranja') {
+        if (t === 'blanco' || t === 'morado' || t === 'naranja' || t === 'verde') {
           document.documentElement.setAttribute('data-ferriol-theme', t);
         } else {
           document.documentElement.removeAttribute('data-ferriol-theme');
@@ -32,6 +32,7 @@
           if (t === 'blanco') meta.setAttribute('content', '#f4f4f5');
           else if (t === 'morado') meta.setAttribute('content', '#1e1035');
           else if (t === 'naranja') meta.setAttribute('content', '#3b1a0a');
+          else if (t === 'verde') meta.setAttribute('content', '#052e16');
           else meta.setAttribute('content', '#171717');
         }
       } catch (e) {}
@@ -1524,7 +1525,7 @@
           Configuración del negocio
         </h2>
         <div id="configSubHub" class="space-y-3">
-          <button type="button" data-config-open="apariencia" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Colores de la app</span><span class="block text-xs text-white/50 font-normal mt-0.5">Negro, blanco, morado u naranja · solo este dispositivo</span></button>
+          <button type="button" data-config-open="apariencia" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Colores de la app</span><span class="block text-xs text-white/50 font-normal mt-0.5">Negro, blanco, verde, morado u naranja · solo este dispositivo</span></button>
           <button type="button" data-config-open="negocio" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Nombre del negocio</span></button>
           <button type="button" data-config-open="whatsapp" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Mensaje de cobro por WhatsApp</span></button>
           <button type="button" data-config-open="vencimiento-productos" class="w-full glass rounded-xl p-3 border border-white/15 text-left touch-target"><span class="font-semibold">Aviso de vencimiento (inventario)</span><span class="block text-xs text-white/50 font-normal mt-0.5">Filas naranjas por vencer y rojas si ya venció; definí cuántos días antes alertar</span></button>
@@ -1535,7 +1536,7 @@
         <div class="config-subview hidden space-y-4" data-config-sub="apariencia">
           <button type="button" data-config-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target">Volver</button>
           <p class="text-xs text-white/55">Elegí un estilo visual. Se guarda en este celular o PC (no en la nube).</p>
-          <div id="ferriolThemeChips" class="grid grid-cols-2 gap-3">
+          <div id="ferriolThemeChips" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <button type="button" data-ferriol-theme-pick="negro" class="ferriol-theme-chip rounded-xl border border-white/15 bg-black/25 p-4 text-left touch-target transition-all hover:border-white/35 active:scale-[0.98] ring-2 ring-transparent">
               <span class="ferriol-theme-chip-swatch mb-2 block h-10 w-full rounded-lg bg-gradient-to-br from-neutral-800 via-neutral-900 to-black shadow-inner ring-1 ring-white/10"></span>
               <span class="font-semibold text-sm text-white block">Negro</span>
@@ -1545,6 +1546,11 @@
               <span class="ferriol-theme-chip-swatch mb-2 block h-10 w-full rounded-lg bg-gradient-to-br from-white via-neutral-100 to-neutral-200 shadow-inner ring-1 ring-black/10"></span>
               <span class="font-semibold text-sm text-white block">Blanco</span>
               <span class="text-[11px] text-white/50">Modo claro</span>
+            </button>
+            <button type="button" data-ferriol-theme-pick="verde" class="ferriol-theme-chip rounded-xl border border-white/15 bg-black/25 p-4 text-left touch-target transition-all hover:border-white/35 active:scale-[0.98] ring-2 ring-transparent">
+              <span class="ferriol-theme-chip-swatch mb-2 block h-10 w-full rounded-lg bg-gradient-to-br from-emerald-700 via-green-800 to-emerald-950 shadow-inner ring-1 ring-emerald-300/25"></span>
+              <span class="font-semibold text-sm text-white block">Verde</span>
+              <span class="text-[11px] text-white/50">Esmeralda / Ferriol</span>
             </button>
             <button type="button" data-ferriol-theme-pick="morado" class="ferriol-theme-chip rounded-xl border border-white/15 bg-black/25 p-4 text-left touch-target transition-all hover:border-white/35 active:scale-[0.98] ring-2 ring-transparent">
               <span class="ferriol-theme-chip-swatch mb-2 block h-10 w-full rounded-lg bg-gradient-to-br from-violet-600 via-purple-800 to-indigo-950 shadow-inner ring-1 ring-violet-300/20"></span>
