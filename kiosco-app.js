@@ -4626,7 +4626,10 @@
       var difEl = document.getElementById('cierreArqueoDif');
       var inp = document.getElementById('cierreEfectivoContado');
       var omitir = document.getElementById('cierreOmitirArqueo');
-      if (!wrap || !difEl) return;
+      if (!wrap || !difEl) {
+        ferriolRefreshCierreEstado();
+        return;
+      }
       var esperado = Number(window._ferriolCierreEfectivoEsperado);
       if (!Number.isFinite(esperado)) esperado = 0;
       if (omitir && omitir.checked) {
@@ -4644,6 +4647,30 @@
       var abs = Math.abs(dif);
       difEl.textContent = sign + '$' + abs.toLocaleString('es-AR');
       difEl.className = 'font-semibold shrink-0 ' + (dif === 0 ? 'text-[#86efac]' : dif > 0 ? 'text-amber-300' : 'text-red-300');
+      ferriolRefreshCierreEstado();
+    }
+
+    /** Banner contextual: orienta al kiosquero antes de cerrar. */
+    function ferriolRefreshCierreEstado() {
+      var banner = document.getElementById('cierreEstadoBanner');
+      var titulo = document.getElementById('cierreEstadoTitulo');
+      var texto = document.getElementById('cierreEstadoTexto');
+      if (!banner || !titulo || !texto) return;
+      var esperado = Number(window._ferriolCierreEfectivoEsperado);
+      if (!Number.isFinite(esperado)) esperado = 0;
+      var omitirEl = document.getElementById('cierreOmitirArqueo');
+      var omitir = !!(omitirEl && omitirEl.checked);
+      var contado = ferriolParseMontoLocal((document.getElementById('cierreEfectivoContado') || {}).value);
+      var pendienteArqueo = esperado > 0 && !omitir && contado === null;
+      banner.classList.remove('ferriol-cierre-banner--ok', 'ferriol-cierre-banner--warn');
+      banner.classList.add(pendienteArqueo ? 'ferriol-cierre-banner--warn' : 'ferriol-cierre-banner--ok');
+      if (pendienteArqueo) {
+        titulo.textContent = 'Revisá el efectivo';
+        texto.textContent = 'Hay ventas en efectivo registradas: contá la gaveta o marcá «sin conteo físico» si querés cerrar sin dejar constancia del arqueo.';
+      } else {
+        titulo.textContent = 'Listo para cerrar';
+        texto.textContent = 'Generá el comprobante si lo necesitás y confirmá el cierre cuando termines.';
+      }
     }
 
     function ferriolSyncCierreArqueoEsperado(m) {
@@ -4671,6 +4698,8 @@
       document.getElementById('cajaTotal').textContent = '$' + m.total.toLocaleString('es-AR');
       var cajaUtilidadEl = document.getElementById('cajaUtilidad');
       if (cajaUtilidadEl) cajaUtilidadEl.textContent = '$' + Math.round(m.ganancia).toLocaleString('es-AR');
+      var cajaMovsEl = document.getElementById('cajaCierreMovimientos');
+      if (cajaMovsEl) cajaMovsEl.textContent = String(m.count != null ? m.count : 0);
       var resumenEl = document.getElementById('resumenDiaTexto');
       var resumenVentasEl = document.getElementById('resumenDiaVentas');
       if (resumenEl) resumenEl.textContent = 'Ingresos de caja $' + m.total.toLocaleString('es-AR');
@@ -4703,6 +4732,7 @@
       renderFrequentProducts();
       await renderEstadoCuentaNegocio(m);
       await loadKioscoLicensePaymentInfo();
+      ferriolRefreshCierreEstado();
     }
     var _estadoCuentaFilter = 'hoy';
     var _estadoCuentaFechaYmd = '';
@@ -8709,6 +8739,7 @@
           contado.disabled = !!omitir.checked;
           if (omitir.checked) contado.value = '';
           ferriolRefreshCierreArqueoDiff();
+          ferriolRefreshCierreEstado();
         });
       }
     })();
@@ -8728,14 +8759,20 @@
       lines.push('');
       lines.push('Total cobrado del día: $' + (Number(m.total) || 0).toLocaleString('es-AR'));
       lines.push('Efectivo registrado (sistema): $' + esperado.toLocaleString('es-AR'));
+      var diPrev = null;
       if (omitir) {
         lines.push('Arqueo: sin conteo físico');
       } else if (contadoNum !== null && Number.isFinite(contadoNum)) {
         lines.push('Efectivo contado: $' + contadoNum.toLocaleString('es-AR'));
-        var di = Math.round((contadoNum - esperado) * 100) / 100;
-        lines.push('Diferencia efectivo: ' + (di >= 0 ? '+' : '−') + '$' + Math.abs(di).toLocaleString('es-AR'));
+        diPrev = Math.round((contadoNum - esperado) * 100) / 100;
+        lines.push('Diferencia efectivo: ' + (diPrev >= 0 ? '+' : '−') + '$' + Math.abs(diPrev).toLocaleString('es-AR'));
+        var umbral = Math.max(500, esperado * 0.05);
+        if (esperado > 0 && Math.abs(diPrev) > umbral) {
+          lines.push('');
+          lines.push('ATENCIÓN: la diferencia es grande respecto al sistema. Verificá antes de confirmar.');
+        }
       } else if (esperado > 0) {
-        lines.push('⚠ No cargaste el efectivo contado.');
+        lines.push('Aviso: no cargaste efectivo contado (podés omitir arqueo con la casilla).');
       }
       if (notas) lines.push('Notas: ' + notas.slice(0, 200));
       lines.push('');

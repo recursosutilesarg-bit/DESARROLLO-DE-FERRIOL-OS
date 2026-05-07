@@ -680,7 +680,7 @@
               <i data-lucide="check-circle" class="w-6 h-6 text-[#86efac]"></i>
             </div>
             <span class="font-semibold text-sm">Cierre de caja</span>
-            <span class="text-xs text-white/50 text-center leading-tight">Resumen del día</span>
+            <span class="text-xs text-white/50 text-center leading-tight">Liquidación y arqueo</span>
           </button>
           <button onclick="window._switchCajaTab('libreta')" class="caja-hub-btn glass rounded-2xl p-5 border border-white/10 flex flex-col items-center gap-3 w-full transition-all hover:border-[#22c55e]/50 active:scale-[0.98] touch-target">
             <div class="w-12 h-12 rounded-2xl bg-[#22c55e]/20 flex items-center justify-center">
@@ -713,72 +713,103 @@
             <i data-lucide="chevron-left" class="w-5 h-5"></i> Caja
           </button>
         </div>
-        <div class="p-4">
-          <div class="glass rounded-2xl p-6">
-            <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
-              <i data-lucide="banknote" class="w-5 h-5 text-[#86efac]"></i>
-              Cierre de caja
-            </h2>
-            <p class="text-xs text-white/50 mb-4 leading-relaxed">Cierra el turno como en un local: revisás medios de cobro, <strong class="text-white/75">arqueás el efectivo</strong> y registrás el cierre. El total incluye efectivo, tarjeta, transferencia y cobros de libreta (fiado en cuenta no suma hasta cobrarlo).</p>
-            <div id="cajaSummary" class="space-y-4 mb-6">
-              <div class="flex justify-between py-3 border-b border-white/10">
-                <span>Efectivo</span><span id="cajaEfectivo" class="font-bold">$0</span>
+        <div class="p-4 ferriol-cierre-page">
+          <div class="ferriol-cierre-shell max-w-lg mx-auto w-full space-y-5 pb-2">
+            <header class="ferriol-cierre-hero">
+              <div class="ferriol-cierre-hero-brand">
+                <span class="ferriol-cierre-badge">Turno</span>
+                <h2 class="ferriol-cierre-title">Cierre de caja</h2>
+                <p class="ferriol-cierre-lead">Sirve para <strong>cerrar el día con números claros</strong>, detectar diferencias en efectivo y arrancar mañana sin mezclar ventas de ayer.</p>
               </div>
-              <div class="flex justify-between py-3 border-b border-white/10">
-                <span>Tarjeta</span><span id="cajaTarjeta" class="font-bold">$0</span>
-              </div>
-              <div class="flex justify-between py-3 border-b border-white/10">
-                <span>Transferencia</span><span id="cajaTransf" class="font-bold">$0</span>
-              </div>
-              <div class="flex justify-between py-3 border-b border-white/10">
-                <span>Cobro libreta</span><span id="cajaCobroLibreta" class="font-bold">$0</span>
-              </div>
-              <div class="flex justify-between items-center gap-2 py-3 border-b border-white/10">
-                <span class="flex items-center gap-2 min-w-0">Fiado (cuenta)
-                  <button type="button" onclick="window._goToCajaLibreta && window._goToCajaLibreta()" class="shrink-0 text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-lg bg-amber-500/25 text-amber-200 border border-amber-400/40 touch-target active:scale-95" title="Abrir libreta">Libreta</button>
-                </span><span id="cajaFiado" class="font-bold">$0</span>
-              </div>
-              <div class="flex justify-between py-3 border-b border-white/10">
-                <span>Transferir pendiente</span><span id="cajaTransfPend" class="font-bold">$0</span>
-              </div>
-              <div class="flex justify-between py-3 border-b border-white/10">
-                <span class="text-green-400/90">Ganancia del día</span>
-                <span id="cajaUtilidad" class="font-bold text-green-400">$0</span>
-              </div>
-              <div class="flex justify-between py-4 text-lg">
-                <span class="font-semibold">Total</span>
-                <span id="cajaTotal" class="font-bold text-[#86efac] text-xl">$0</span>
+              <ul class="ferriol-cierre-value-list" aria-label="Qué resolvés con el cierre">
+                <li><span class="ferriol-cierre-value-ic" aria-hidden="true"><i data-lucide="shield-check" class="w-4 h-4"></i></span><span><strong>Auditoría rápida:</strong> ves si la gaveta coincide con lo cargado.</span></li>
+                <li><span class="ferriol-cierre-value-ic" aria-hidden="true"><i data-lucide="file-check-2" class="w-4 h-4"></i></span><span><strong>Comprobante:</strong> podés mandarte el resumen por WhatsApp o guardarlo.</span></li>
+                <li><span class="ferriol-cierre-value-ic" aria-hidden="true"><i data-lucide="sunrise" class="w-4 h-4"></i></span><span><strong>Nuevo día:</strong> los totales del día se reinician; el stock queda como está.</span></li>
+              </ul>
+            </header>
+
+            <div id="cierreEstadoBanner" class="ferriol-cierre-banner ferriol-cierre-banner--ok" role="status" aria-live="polite">
+              <span class="ferriol-cierre-banner-dot" aria-hidden="true"></span>
+              <div class="ferriol-cierre-banner-body">
+                <strong id="cierreEstadoTitulo" class="ferriol-cierre-banner-title">Listo para cerrar</strong>
+                <p id="cierreEstadoTexto" class="ferriol-cierre-banner-text">Generá el comprobante y cerrá cuando termines.</p>
               </div>
             </div>
 
-            <div id="cierreArqueoCard" class="rounded-2xl p-4 mb-6 border border-cyan-500/28 bg-gradient-to-b from-cyan-950/35 to-transparent">
-              <h3 class="font-semibold text-sm text-white/90 mb-2 flex items-center gap-2">
-                <i data-lucide="scale" class="w-4 h-4 text-cyan-300 shrink-0"></i>
-                Arqueo de efectivo
-              </h3>
-              <p class="text-[11px] text-white/45 mb-3 leading-snug">Contá lo que hay en la gaveta y comparalo con lo que dice el sistema por ventas en efectivo.</p>
-              <div class="flex justify-between items-center gap-2 py-2.5 text-sm border-b border-white/10">
+            <section class="ferriol-cierre-panel ferriol-cierre-panel--accent" aria-labelledby="cierreLiquidacionHd">
+              <div class="ferriol-cierre-panel-head">
+                <span class="ferriol-cierre-step" aria-hidden="true">1</span>
+                <div>
+                  <h3 id="cierreLiquidacionHd" class="ferriol-cierre-panel-title">Liquidación del turno</h3>
+                  <p class="ferriol-cierre-panel-sub">Lo que entró hoy en la caja (cobros reales, no fiado en cuenta)</p>
+                </div>
+              </div>
+
+              <div id="cajaSummary" class="ferriol-cierre-summary">
+                <div class="ferriol-cierre-kpi-grid">
+                  <div class="ferriol-cierre-kpi-card">
+                    <span class="ferriol-cierre-kpi-label">Ingresos cobrados</span>
+                    <span id="cajaTotal" class="ferriol-cierre-kpi-value">$0</span>
+                    <span class="ferriol-cierre-kpi-hint">Efectivo + tarjeta + transf. + cobros libreta</span>
+                  </div>
+                  <div class="ferriol-cierre-kpi-card ferriol-cierre-kpi-card--gain">
+                    <span class="ferriol-cierre-kpi-label">Ganancia del día</span>
+                    <span id="cajaUtilidad" class="ferriol-cierre-kpi-value ferriol-cierre-text-gain">$0</span>
+                    <span class="ferriol-cierre-kpi-hint">Precio − costo de lo vendido</span>
+                  </div>
+                </div>
+                <p class="ferriol-cierre-movs">
+                  <i data-lucide="layers" class="ferriol-cierre-movs-icon" aria-hidden="true"></i>
+                  <span><strong id="cajaCierreMovimientos">0</strong> movimientos en este turno</span>
+                </p>
+                <h4 class="ferriol-cierre-subhd">Detalle por medio</h4>
+                <div class="ferriol-cierre-medios">
+                  <div class="ferriol-cierre-line"><span>Efectivo</span><span id="cajaEfectivo" class="ferriol-cierre-amt">$0</span></div>
+                  <div class="ferriol-cierre-line"><span>Tarjeta</span><span id="cajaTarjeta" class="ferriol-cierre-amt">$0</span></div>
+                  <div class="ferriol-cierre-line"><span>Transferencia</span><span id="cajaTransf" class="ferriol-cierre-amt">$0</span></div>
+                  <div class="ferriol-cierre-line"><span>Cobro libreta</span><span id="cajaCobroLibreta" class="ferriol-cierre-amt">$0</span></div>
+                  <div class="ferriol-cierre-line ferriol-cierre-line--muted ferriol-cierre-line--wrap">
+                    <span class="flex items-center gap-2 min-w-0">Fiado (cuenta)
+                      <button type="button" onclick="window._goToCajaLibreta && window._goToCajaLibreta()" class="shrink-0 text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-lg bg-amber-500/25 text-amber-200 border border-amber-400/40 touch-target active:scale-95">Libreta</button>
+                    </span>
+                    <span id="cajaFiado" class="ferriol-cierre-amt">$0</span>
+                  </div>
+                  <div class="ferriol-cierre-line ferriol-cierre-line--muted"><span>Transferencia pendiente</span><span id="cajaTransfPend" class="ferriol-cierre-amt">$0</span></div>
+                </div>
+                <p class="ferriol-cierre-footnote">Fiado y pendientes son deuda en cuenta: suman al ingreso cuando los cobrás desde la libreta.</p>
+              </div>
+            </section>
+
+            <section id="cierreArqueoCard" class="ferriol-cierre-panel ferriol-cierre-panel--cyan" aria-labelledby="cierreArqueoHd">
+              <div class="ferriol-cierre-panel-head">
+                <span class="ferriol-cierre-step" aria-hidden="true">2</span>
+                <div>
+                  <h3 id="cierreArqueoHd" class="ferriol-cierre-panel-title">Arqueo de efectivo</h3>
+                  <p class="ferriol-cierre-panel-sub">Evitás irte con la duda de si la gaveta cerró bien</p>
+                </div>
+              </div>
+              <div class="flex justify-between items-center gap-2 py-2.5 text-sm border-b border-white/10 mt-1">
                 <span class="text-white/65">Efectivo según sistema</span>
-                <span id="cierreEfectivoEsperado" class="font-semibold text-[#86efac] shrink-0">$0</span>
+                <span id="cierreEfectivoEsperado" class="font-semibold text-[#86efac] shrink-0 tabular-nums">$0</span>
               </div>
-              <label class="block mt-3 text-[11px] text-white/55 mb-1.5" for="cierreEfectivoContado">Efectivo contado en gaveta</label>
-              <input type="text" id="cierreEfectivoContado" inputmode="decimal" autocomplete="off" enterkeyhint="done" class="w-full rounded-xl px-3 py-3 bg-black/35 border border-white/15 text-white placeholder-white/35 text-base focus:outline-none focus:ring-2 focus:ring-cyan-500/35" placeholder="Ej: 45800 o dejar vacío">
-              <div id="cierreArqueoDifWrap" class="hidden mt-2 flex justify-between items-center gap-2 text-sm py-2 rounded-lg px-2.5 bg-black/30 border border-white/08">
+              <label class="block mt-3 text-[11px] text-white/55 mb-1.5 font-medium tracking-wide uppercase" for="cierreEfectivoContado">¿Cuánto hay en la gaveta?</label>
+              <input type="text" id="cierreEfectivoContado" inputmode="decimal" autocomplete="off" enterkeyhint="done" class="ferriol-cierre-input w-full rounded-xl px-3 py-3 bg-black/40 border border-white/12 text-white placeholder-white/30 text-base focus:outline-none focus:ring-2 focus:ring-cyan-500/40" placeholder="Ej. 45800 (vacío si solo vas a omitir)">
+              <div id="cierreArqueoDifWrap" class="hidden mt-2 flex justify-between items-center gap-2 text-sm py-2.5 rounded-xl px-3 bg-black/35 border border-white/08">
                 <span class="text-white/60">Diferencia</span>
-                <span id="cierreArqueoDif" class="font-semibold shrink-0"></span>
+                <span id="cierreArqueoDif" class="font-semibold shrink-0 tabular-nums"></span>
               </div>
-              <label class="flex items-center gap-2.5 mt-3 text-xs text-white/65 cursor-pointer touch-target py-1">
-                <input type="checkbox" id="cierreOmitirArqueo" class="rounded border-white/25 bg-black/40 text-cyan-500 focus:ring-cyan-500/40 w-4 h-4 shrink-0">
-                Cierro sin conteo físico
+              <label class="flex items-start gap-2.5 mt-3 text-xs text-white/70 cursor-pointer touch-target py-1 leading-snug">
+                <input type="checkbox" id="cierreOmitirArqueo" class="rounded border-white/25 bg-black/40 text-cyan-500 focus:ring-cyan-500/40 w-4 h-4 shrink-0 mt-0.5">
+                <span>Cierro sin conteo físico (viajo rápido o ya confío en los registros)</span>
               </label>
-              <label class="block mt-3 text-[11px] text-white/55 mb-1.5" for="cierreObsNotas">Notas del cierre (opcional)</label>
-              <textarea id="cierreObsNotas" rows="2" maxlength="500" class="w-full rounded-xl px-3 py-2 bg-black/35 border border-white/15 text-white placeholder-white/35 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/35 resize-none" placeholder="Ej.: vuelto en monedas, cambio prestado…"></textarea>
-            </div>
+              <label class="block mt-3 text-[11px] text-white/55 mb-1.5 font-medium tracking-wide uppercase" for="cierreObsNotas">Observaciones</label>
+              <textarea id="cierreObsNotas" rows="2" maxlength="500" class="ferriol-cierre-input w-full rounded-xl px-3 py-2.5 bg-black/40 border border-white/12 text-white placeholder-white/30 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/40 resize-none" placeholder="Ej.: cambio prestado, billetes rotos, diferencia ya vista…"></textarea>
+            </section>
 
-            <div id="cajaMesResumenCard" class="glass rounded-2xl p-5 mb-6 border border-[#22c55e]/20">
+            <div id="cajaMesResumenCard" class="ferriol-cierre-panel ferriol-cierre-panel--month glass rounded-2xl p-5 border border-[#22c55e]/18">
               <h3 class="font-semibold text-sm text-white/85 mb-0.5 flex items-center gap-2">
                 <i data-lucide="calendar-range" class="w-4 h-4 text-[#86efac]"></i>
-                Balance del mes
+                Contexto: balance del mes
               </h3>
               <p id="cajaMesLabel" class="text-xs text-white/45 mb-3 capitalize"></p>
               <p id="cajaMesIngresosFuente" class="text-[10px] text-white/35 mb-2 leading-snug hidden"></p>
@@ -806,20 +837,28 @@
               </div>
               <p id="cajaMesNota" class="text-[10px] text-white/40 mt-3 leading-relaxed"></p>
             </div>
-            <button id="generateTicket" class="w-full btn-glow rounded-xl py-3 font-semibold flex items-center justify-center gap-2 mb-3">
-              <i data-lucide="share-2" class="w-5 h-5"></i> Generar ticket digital
-            </button>
-            <button id="cerrarCaja" class="w-full btn-neomorphic rounded-xl py-3 font-semibold flex items-center justify-center gap-2 mb-6">
-              <i data-lucide="check-circle" class="w-5 h-5"></i> Cerrar caja y reiniciar
-            </button>
-            <div class="border-t border-white/10 pt-4">
+
+            <div class="ferriol-cierre-actions space-y-3">
+              <p class="text-[11px] text-white/45 text-center leading-snug px-1">Primero generá el comprobante si querés archivo o WhatsApp; después confirmá el cierre del día.</p>
+              <button type="button" id="generateTicket" class="w-full rounded-xl py-3.5 font-semibold flex items-center justify-center gap-2 border border-white/20 bg-white/06 text-white hover:bg-white/10 transition-colors touch-target active:scale-[0.99]">
+                <i data-lucide="share-2" class="w-5 h-5 shrink-0"></i>
+                Generar comprobante / compartir
+              </button>
+              <button type="button" id="cerrarCaja" class="w-full btn-glow rounded-xl py-3.5 font-semibold flex items-center justify-center gap-2 touch-target active:scale-[0.99] shadow-lg">
+                <i data-lucide="lock" class="w-5 h-5 shrink-0"></i>
+                Confirmar cierre y nuevo día
+              </button>
+            </div>
+
+            <section class="ferriol-cierre-panel ferriol-cierre-panel--ghost border-t border-white/10 pt-5 mt-1">
               <h3 class="font-semibold mb-3 flex items-center gap-2 text-sm text-white/80">
-                <i data-lucide="history" class="w-4 h-4 text-[#86efac]"></i> Historial de cierres
+                <i data-lucide="history" class="w-4 h-4 text-[#86efac]"></i>
+                Últimos cierres guardados
               </h3>
               <div id="cierresCajaList" class="space-y-2 max-h-[40vh] overflow-y-auto text-sm">
                 <p class="text-white/50 text-center py-4">Cargando...</p>
               </div>
-            </div>
+            </section>
           </div>
         </div>
       </div>
