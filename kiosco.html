@@ -1325,10 +1325,11 @@
       </div>
     </div>
 
-    <!-- Más — Historial, Configuración, Clientes -->
+    <!-- Más — Historial, Configuración, Clientes + Herramientas -->
     <section id="panel-mas" class="panel hidden">
       <div class="glass rounded-2xl p-6 slide-up">
-        <h2 class="font-bold text-xl mb-4 flex items-center gap-2">
+        <div id="masMainHub">
+        <h2 class="mas-hub-title font-bold text-xl mb-4 flex items-center gap-2">
           <i data-lucide="menu" class="w-5 h-5 text-[#ffffff]"></i>
           Más opciones
         </h2>
@@ -1354,6 +1355,156 @@
             <span class="font-semibold text-base">Clientes</span>
             <span class="text-xs text-white/60">Lista con teléfono y datos</span>
           </button>
+        </div>
+
+        <h3 class="font-semibold text-sm uppercase tracking-wide text-white/55 mt-8 mb-3">Herramientas útiles</h3>
+        <p class="text-xs text-white/45 mb-4">Solo en este dispositivo (se guardan recordatorios e ideas en el navegador).</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button type="button" data-mas-open="calc" class="mas-tool-tile glass rounded-xl p-4 border border-white/12 flex items-center gap-3 text-left w-full transition-all hover:border-white/30 active:scale-[0.99] touch-target">
+            <div class="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
+              <i data-lucide="calculator" class="w-5 h-5 text-[#ffffff]"></i>
+            </div>
+            <div class="min-w-0">
+              <span class="font-semibold text-sm block">Calculadora</span>
+              <span class="text-[11px] text-white/50">Sumas y porcentajes rápidos</span>
+            </div>
+          </button>
+          <button type="button" data-mas-open="precios" class="mas-tool-tile glass rounded-xl p-4 border border-white/12 flex items-center gap-3 text-left w-full transition-all hover:border-white/30 active:scale-[0.99] touch-target">
+            <div class="w-11 h-11 rounded-xl bg-emerald-500/25 flex items-center justify-center shrink-0">
+              <i data-lucide="badge-dollar-sign" class="w-5 h-5 text-emerald-200"></i>
+            </div>
+            <div class="min-w-0">
+              <span class="font-semibold text-sm block">Precios</span>
+              <span class="text-[11px] text-white/50">Costo, margen y precio de venta</span>
+            </div>
+          </button>
+          <button type="button" data-mas-open="recordatorios" class="mas-tool-tile glass rounded-xl p-4 border border-white/12 flex items-center gap-3 text-left w-full transition-all hover:border-white/30 active:scale-[0.99] touch-target">
+            <div class="w-11 h-11 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
+              <i data-lucide="bell" class="w-5 h-5 text-amber-200"></i>
+            </div>
+            <div class="min-w-0">
+              <span class="font-semibold text-sm block">Recordatorios</span>
+              <span class="text-[11px] text-white/50">Pagos, pedidos, tareas</span>
+            </div>
+          </button>
+          <button type="button" data-mas-open="calendario" class="mas-tool-tile glass rounded-xl p-4 border border-white/12 flex items-center gap-3 text-left w-full transition-all hover:border-white/30 active:scale-[0.99] touch-target">
+            <div class="w-11 h-11 rounded-xl bg-sky-500/20 flex items-center justify-center shrink-0">
+              <i data-lucide="calendar-days" class="w-5 h-5 text-sky-200"></i>
+            </div>
+            <div class="min-w-0">
+              <span class="font-semibold text-sm block">Calendario</span>
+              <span class="text-[11px] text-white/50">Mes y recordatorios del día</span>
+            </div>
+          </button>
+          <button type="button" data-mas-open="notas" class="mas-tool-tile glass rounded-xl p-4 border border-white/12 flex items-center gap-3 text-left w-full sm:col-span-2 transition-all hover:border-white/30 active:scale-[0.99] touch-target">
+            <div class="w-11 h-11 rounded-xl bg-violet-500/20 flex items-center justify-center shrink-0">
+              <i data-lucide="lightbulb" class="w-5 h-5 text-violet-200"></i>
+            </div>
+            <div class="min-w-0">
+              <span class="font-semibold text-sm block">Notas e ideas</span>
+              <span class="text-[11px] text-white/50">Borrador local para el negocio</span>
+            </div>
+          </button>
+        </div>
+        </div>
+
+        <!-- Subvista: calculadora -->
+        <div id="masSubview-calc" class="mas-subview hidden space-y-4" data-mas-subview="calc">
+          <button type="button" data-mas-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target inline-flex items-center gap-2">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver
+          </button>
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="calculator" class="w-5 h-5"></i> Calculadora</h3>
+          <input type="text" readonly id="masCalcDisplay" value="0" class="w-full glass rounded-xl px-4 py-4 border border-white/20 text-right text-2xl font-semibold tabular-nums text-[#ffffff] tracking-tight" inputmode="none" />
+          <div class="ferriol-calc-pad grid grid-cols-4 gap-2">
+            <button type="button" class="ferriol-calc-btn btn-neomorphic rounded-xl py-3 text-sm font-semibold touch-target" data-calc-act="clear">C</button>
+            <button type="button" class="ferriol-calc-btn btn-neomorphic rounded-xl py-3 text-sm font-semibold touch-target" data-calc-act="back">⌫</button>
+            <button type="button" class="ferriol-calc-btn btn-neomorphic rounded-xl py-3 text-sm font-semibold touch-target" data-calc-op="/">÷</button>
+            <button type="button" class="ferriol-calc-btn btn-neomorphic rounded-xl py-3 text-sm font-semibold touch-target" data-calc-op="*">×</button>
+            <button type="button" class="ferriol-calc-btn btn-neomorphic rounded-xl py-3 text-lg touch-target" data-calc-num="7">7</button>
+            <button type="button" class="ferriol-calc-btn btn-neomorphic rounded-xl py-3 text-lg touch-target" data-calc-num="8">8</button>
+            <button type="button" class="ferriol-calc-btn btn-neomorphic rounded-xl py-3 text-lg touch-target" data-calc-num="9">9</button>
+            <button type="button" class="ferriol-calc-btn btn-neomorphic rounded-xl py-3 text-lg touch-target" data-calc-op="-">−</button>
+            <button type="button" class="ferriol-calc-btn btn-neomorphic rounded-xl py-3 text-lg touch-target" data-calc-num="4">4</button>
+            <button type="button" class="ferriol-calc-btn btn-neomorphic rounded-xl py-3 text-lg touch-target" data-calc-num="5">5</button>
+            <button type="button" class="ferriol-calc-btn btn-neomorphic rounded-xl py-3 text-lg touch-target" data-calc-num="6">6</button>
+            <button type="button" class="ferriol-calc-btn btn-neomorphic rounded-xl py-3 text-lg touch-target" data-calc-op="+">+</button>
+            <button type="button" class="ferriol-calc-btn btn-neomorphic rounded-xl py-3 text-lg touch-target" data-calc-num="1">1</button>
+            <button type="button" class="ferriol-calc-btn btn-neomorphic rounded-xl py-3 text-lg touch-target" data-calc-num="2">2</button>
+            <button type="button" class="ferriol-calc-btn btn-neomorphic rounded-xl py-3 text-lg touch-target" data-calc-num="3">3</button>
+            <button type="button" class="ferriol-calc-btn btn-glow rounded-xl py-3 text-lg font-bold touch-target" data-calc-act="eq">=</button>
+            <button type="button" class="ferriol-calc-btn btn-neomorphic rounded-xl py-3 text-lg touch-target col-span-3" data-calc-num="0">0</button>
+            <button type="button" class="ferriol-calc-btn btn-neomorphic rounded-xl py-3 text-lg touch-target" data-calc-num=".">.</button>
+          </div>
+        </div>
+
+        <!-- Subvista: precios -->
+        <div id="masSubview-precios" class="mas-subview hidden space-y-4" data-mas-subview="precios">
+          <button type="button" data-mas-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target inline-flex items-center gap-2">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver
+          </button>
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="badge-dollar-sign" class="w-5 h-5 text-emerald-200"></i> Calculadora de precios</h3>
+          <p class="text-xs text-white/55">Completá dos valores y tocá <strong class="text-white/75">Calcular</strong>. El margen es sobre el costo (ej. 40 → 40 % de ganancia sobre costo).</p>
+          <div class="space-y-3">
+            <label class="block text-xs text-white/50">Costo ($)</label>
+            <input type="text" inputmode="decimal" id="masPrecioCosto" placeholder="0" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/35 focus:outline-none focus:ring-2 focus:ring-white/30" />
+            <label class="block text-xs text-white/50">Margen sobre costo (%)</label>
+            <input type="text" inputmode="decimal" id="masPrecioMargen" placeholder="Ej. 40" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/35 focus:outline-none focus:ring-2 focus:ring-white/30" />
+            <label class="block text-xs text-white/50">Precio de venta ($)</label>
+            <input type="text" inputmode="decimal" id="masPrecioVenta" placeholder="0" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/35 focus:outline-none focus:ring-2 focus:ring-white/30" />
+          </div>
+          <button type="button" id="masPrecioCalcularBtn" class="w-full btn-glow rounded-xl py-3 font-semibold touch-target">Calcular</button>
+          <p id="masPrecioResultado" class="text-sm text-white/70 min-h-[1.25rem]"></p>
+        </div>
+
+        <!-- Subvista: recordatorios -->
+        <div id="masSubview-recordatorios" class="mas-subview hidden space-y-4" data-mas-subview="recordatorios">
+          <button type="button" data-mas-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target inline-flex items-center gap-2">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver
+          </button>
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="bell" class="w-5 h-5 text-amber-200"></i> Recordatorios</h3>
+          <div class="glass rounded-xl p-3 border border-white/12 space-y-2">
+            <input type="text" id="masRemTitle" placeholder="Título (ej. Pedido proveedor)" class="w-full rounded-lg px-3 py-2 border border-white/15 bg-black/20 text-sm text-white placeholder-white/35 focus:outline-none focus:ring-2 focus:ring-amber-400/40" />
+            <div class="grid grid-cols-2 gap-2">
+              <input type="date" id="masRemDate" class="w-full rounded-lg px-2 py-2 border border-white/15 bg-black/20 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-400/40" />
+              <input type="time" id="masRemTime" class="w-full rounded-lg px-2 py-2 border border-white/15 bg-black/20 text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-400/40" />
+            </div>
+            <input type="text" id="masRemNote" placeholder="Nota (opcional)" class="w-full rounded-lg px-3 py-2 border border-white/15 bg-black/20 text-sm text-white placeholder-white/35 focus:outline-none focus:ring-2 focus:ring-amber-400/40" />
+            <button type="button" id="masRemAddBtn" class="w-full btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target">Agregar recordatorio</button>
+          </div>
+          <div id="masRemList" class="space-y-2 max-h-[45vh] overflow-y-auto"></div>
+          <p id="masRemEmpty" class="text-xs text-white/45 text-center py-4 hidden">No hay recordatorios. Agregá uno arriba.</p>
+        </div>
+
+        <!-- Subvista: calendario -->
+        <div id="masSubview-calendario" class="mas-subview hidden space-y-4" data-mas-subview="calendario">
+          <button type="button" data-mas-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target inline-flex items-center gap-2">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver
+          </button>
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="calendar-days" class="w-5 h-5 text-sky-200"></i> Calendario</h3>
+          <div class="flex items-center justify-between gap-2">
+            <button type="button" id="masCalPrev" class="btn-neomorphic rounded-xl px-3 py-2 touch-target" aria-label="Mes anterior">‹</button>
+            <span id="masCalMonthLabel" class="font-semibold text-sm text-center flex-1 tabular-nums"></span>
+            <button type="button" id="masCalNext" class="btn-neomorphic rounded-xl px-3 py-2 touch-target" aria-label="Mes siguiente">›</button>
+          </div>
+          <div class="ferriol-mini-cal-weekdays grid grid-cols-7 gap-1 text-[10px] font-semibold uppercase tracking-wide text-white/45 text-center">
+            <span>Do</span><span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span><span>Vi</span><span>Sá</span>
+          </div>
+          <div id="masCalGrid" class="ferriol-mini-cal-grid grid grid-cols-7 gap-1"></div>
+          <div class="rounded-xl border border-white/12 bg-black/20 p-3">
+            <p id="masCalDayLabel" class="text-xs font-semibold text-white/70 mb-2"></p>
+            <ul id="masCalDayList" class="text-sm text-white/80 space-y-1.5"></ul>
+          </div>
+        </div>
+
+        <!-- Subvista: notas / ideas -->
+        <div id="masSubview-notas" class="mas-subview hidden space-y-4" data-mas-subview="notas">
+          <button type="button" data-mas-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target inline-flex items-center gap-2">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver
+          </button>
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="lightbulb" class="w-5 h-5 text-violet-200"></i> Notas e ideas</h3>
+          <p id="masIdeasStatus" class="text-[11px] text-emerald-300/90 min-h-[1rem] opacity-0 transition-opacity">Guardado ✓</p>
+          <button type="button" id="masIdeasAddBtn" class="notas-add-btn w-full py-3 rounded-xl border-2 border-dashed border-white/25 text-sm font-medium text-white/70 touch-target hover:border-white/40 hover:bg-white/5">+ Nueva nota</button>
+          <div id="masIdeasList" class="notas-list"></div>
         </div>
       </div>
     </section>

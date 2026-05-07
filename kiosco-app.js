@@ -7519,6 +7519,11 @@
         renderHistorial(state.historialFilter || 'hoy');
       }
       if (name === 'clientes') loadClientes().then(renderClientes);
+      if (name === 'mas') {
+        try {
+          if (typeof window._ferriolMasOpenTool === 'function') window._ferriolMasOpenTool('');
+        } catch (_) {}
+      }
       applyAppShell();
       lucide.createIcons();
     }
@@ -15002,4 +15007,497 @@ async function showApp() {
       }
 
       notasRender();
+    })();
+
+    /* ══════════════════════════════════════════════════════════
+       MÁS · Herramientas (calculadora, precios, recordatorios, calendario, ideas)
+       ══════════════════════════════════════════════════════════ */
+    (function ferriolMasHerramientas() {
+      var hub = document.getElementById('masMainHub');
+      var panelMas = document.getElementById('panel-mas');
+      if (!panelMas) return;
+
+      function icons() {
+        try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+      }
+
+      function masShowSubview(id) {
+        if (!hub) return;
+        var showHub = !id;
+        hub.classList.toggle('hidden', !showHub);
+        var titleHub = hub.querySelector('.mas-hub-title');
+        if (titleHub) titleHub.classList.toggle('hidden', !showHub);
+        panelMas.querySelectorAll('.mas-subview').forEach(function (el) {
+          var sid = el.getAttribute('data-mas-subview') || '';
+          el.classList.toggle('hidden', showHub || sid !== id);
+        });
+        icons();
+      }
+
+      function ferriolMasOpenTool(which) {
+        var w = String(which || '').trim().toLowerCase();
+        if (
+          w !== 'calc' &&
+          w !== 'precios' &&
+          w !== 'recordatorios' &&
+          w !== 'calendario' &&
+          w !== 'notas'
+        ) {
+          masShowSubview('');
+          return;
+        }
+        masShowSubview(w);
+        if (w === 'recordatorios') masRemInitForm();
+        if (w === 'calendario') masCalRenderAll();
+        if (w === 'notas') masIdeasRender();
+      }
+      window._ferriolMasOpenTool = ferriolMasOpenTool;
+
+      panelMas.addEventListener('click', function (e) {
+        var op = e.target.closest('[data-mas-open]');
+        if (op && panelMas.contains(op)) {
+          ferriolMasOpenTool(op.getAttribute('data-mas-open'));
+          return;
+        }
+        var backEl = e.target.closest('[data-mas-back]');
+        if (backEl && panelMas.contains(backEl)) {
+          ferriolMasOpenTool('');
+          return;
+        }
+
+        var c = e.target.closest('.ferriol-calc-btn');
+        if (!c || !document.getElementById('masSubview-calc') || !document.getElementById('masSubview-calc').contains(c)) return;
+        if (c.hasAttribute('data-calc-num')) masCalcPushNum(c.getAttribute('data-calc-num'));
+        else if (c.hasAttribute('data-calc-op')) masCalcPushOp(c.getAttribute('data-calc-op'));
+        else if (c.hasAttribute('data-calc-act')) {
+          var a = c.getAttribute('data-calc-act');
+          if (a === 'clear') masCalcClear();
+          else if (a === 'back') masCalcBack();
+          else if (a === 'eq') masCalcEquals();
+        }
+      });
+
+      /* —— Calculadora —— */
+      var masCalcAcc = null;
+      var masCalcOp = null;
+      var masCalcInput = '0';
+      var masCalcFresh = false;
+
+      function masCalcDisplayEl() {
+        return document.getElementById('masCalcDisplay');
+      }
+      function masCalcFmt(n) {
+        if (typeof n !== 'number' || !isFinite(n)) return 'Error';
+        var s = String(n);
+        if (s.length > 16) s = n.toPrecision(12);
+        return s;
+      }
+      function masCalcUpdate() {
+        var d = masCalcDisplayEl();
+        if (d) d.value = masCalcInput;
+      }
+      function masCalcClear() {
+        masCalcAcc = null;
+        masCalcOp = null;
+        masCalcInput = '0';
+        masCalcFresh = false;
+        masCalcUpdate();
+      }
+      function masCalcApply(a, b, o) {
+        if (o === '+') return a + b;
+        if (o === '-') return a - b;
+        if (o === '*') return a * b;
+        if (o === '/') return b === 0 ? NaN : a / b;
+        return b;
+      }
+      function masCalcEquals() {
+        if (masCalcOp === null || masCalcAcc === null) return;
+        var b = parseFloat(masCalcInput);
+        if (!isFinite(b)) return;
+        var r = masCalcApply(masCalcAcc, b, masCalcOp);
+        masCalcInput = isFinite(r) ? masCalcFmt(r) : 'Error';
+        masCalcAcc = null;
+        masCalcOp = null;
+        masCalcFresh = true;
+        masCalcUpdate();
+      }
+      function masCalcPushOp(o) {
+        var sym = String(o || '');
+        var cur = parseFloat(masCalcInput);
+        if (!isFinite(cur) || masCalcInput === 'Error') {
+          masCalcInput = '0';
+          cur = 0;
+        }
+        if (masCalcOp !== null && masCalcAcc !== null && !masCalcFresh) {
+          masCalcAcc = masCalcApply(masCalcAcc, cur, masCalcOp);
+          if (!isFinite(masCalcAcc)) masCalcInput = 'Error';
+          else masCalcInput = masCalcFmt(masCalcAcc);
+          masCalcUpdate();
+        } else {
+          masCalcAcc = cur;
+        }
+        masCalcOp = sym;
+        masCalcFresh = true;
+      }
+      function masCalcPushNum(token) {
+        var t = String(token || '');
+        if (masCalcInput === 'Error') masCalcInput = '0';
+        if (masCalcFresh) {
+          masCalcInput = t === '.' ? '0.' : t;
+          masCalcFresh = false;
+        } else {
+          if (t === '.') {
+            if (masCalcInput.indexOf('.') >= 0) return;
+            masCalcInput = masCalcInput === '' ? '0.' : masCalcInput + '.';
+          } else {
+            masCalcInput = masCalcInput === '0' && t !== '.' ? t : masCalcInput + t;
+          }
+        }
+        masCalcUpdate();
+      }
+      function masCalcBack() {
+        if (masCalcFresh || masCalcInput === 'Error') return;
+        if (masCalcInput.length <= 1) masCalcInput = '0';
+        else masCalcInput = masCalcInput.slice(0, -1);
+        masCalcUpdate();
+      }
+
+      /* —— Precios —— */
+      function masParseMoney(s) {
+        var x = String(s || '')
+          .trim()
+          .replace(/\s/g, '')
+          .replace(',', '.');
+        if (x === '' || x === '.') return NaN;
+        return parseFloat(x);
+      }
+      function masPrecioRun() {
+        var cEl = document.getElementById('masPrecioCosto');
+        var mEl = document.getElementById('masPrecioMargen');
+        var pEl = document.getElementById('masPrecioVenta');
+        var out = document.getElementById('masPrecioResultado');
+        if (!cEl || !mEl || !pEl || !out) return;
+        var c = masParseMoney(cEl.value);
+        var m = masParseMoney(mEl.value);
+        var p = masParseMoney(pEl.value);
+        var nc = isFinite(c) && c >= 0 ? 1 : 0;
+        var nm = isFinite(m) ? 1 : 0;
+        var np = isFinite(p) && p >= 0 ? 1 : 0;
+        if (nc + nm + np < 2) {
+          out.textContent = 'Ingresá al menos dos valores (costo, margen % o precio).';
+          return;
+        }
+        if (nc && nm && !np) {
+          var pv = c * (1 + m / 100);
+          pEl.value = masCalcFmt(Math.round(pv * 100) / 100);
+          out.textContent = 'Precio de venta: $ ' + pEl.value + ' (margen ' + m + ' % sobre costo).';
+          return;
+        }
+        if (nc && np && !nm) {
+          if (c === 0) {
+            out.textContent = 'Con costo 0 no se calcula margen sobre costo.';
+            return;
+          }
+          var mm = ((p - c) / c) * 100;
+          mEl.value = masCalcFmt(Math.round(mm * 100) / 100);
+          out.textContent = 'Margen sobre costo: ' + mEl.value + ' %.';
+          return;
+        }
+        if (nm && np && !nc) {
+          var cc = p / (1 + m / 100);
+          cEl.value = masCalcFmt(Math.round(cc * 100) / 100);
+          out.textContent = 'Costo máximo para ese precio y margen: $ ' + cEl.value + '.';
+          return;
+        }
+        out.textContent = 'Dejá vacío solo el valor que querés obtener.';
+      }
+      var masPrecioBtn = document.getElementById('masPrecioCalcularBtn');
+      if (masPrecioBtn) masPrecioBtn.addEventListener('click', masPrecioRun);
+
+      /* —— Recordatorios —— */
+      var REM_KEY = 'ferriol_kiosco_reminders_v1';
+      function masRemLoad() {
+        try { return JSON.parse(localStorage.getItem(REM_KEY) || '[]'); } catch (_) { return []; }
+      }
+      function masRemSave(arr) {
+        try { localStorage.setItem(REM_KEY, JSON.stringify(arr)); } catch (_) {}
+      }
+      function masRemSort(arr) {
+        arr.sort(function (a, b) {
+          var da = (a.date || '') + 'T' + (a.time || '23:59');
+          var db = (b.date || '') + 'T' + (b.time || '23:59');
+          return da < db ? -1 : da > db ? 1 : 0;
+        });
+      }
+      function masRemInitForm() {
+        var d = document.getElementById('masRemDate');
+        if (d && !d.value) {
+          var n = new Date();
+          var mo = n.getMonth() + 1;
+          var day = n.getDate();
+          d.value = n.getFullYear() + '-' + (mo < 10 ? '0' : '') + mo + '-' + (day < 10 ? '0' : '') + day;
+        }
+        masRemRender();
+      }
+      function masRemRender() {
+        var list = document.getElementById('masRemList');
+        var empty = document.getElementById('masRemEmpty');
+        if (!list) return;
+        while (list.firstChild) list.removeChild(list.firstChild);
+        var arr = masRemLoad();
+        masRemSort(arr);
+        if (empty) empty.classList.toggle('hidden', arr.length > 0);
+        arr.forEach(function (r) {
+          var row = document.createElement('div');
+          row.className = 'glass rounded-xl p-3 border border-white/12 flex flex-col gap-1';
+          var dt = new Date((r.date || '') + 'T' + (r.time || '12:00'));
+          var past = !isNaN(dt.getTime()) && dt < new Date();
+          var title = document.createElement('div');
+          title.className = 'font-semibold text-sm ' + (past ? 'text-amber-200/95' : 'text-white');
+          title.textContent = r.title || 'Sin título';
+          var meta = document.createElement('div');
+          meta.className = 'text-xs text-white/55 tabular-nums';
+          meta.textContent = (r.date || '') + (r.time ? ' · ' + r.time : '');
+          row.appendChild(title);
+          row.appendChild(meta);
+          if (r.note) {
+            var note = document.createElement('div');
+            note.className = 'text-xs text-white/60 whitespace-pre-wrap';
+            note.textContent = r.note;
+            row.appendChild(note);
+          }
+          var del = document.createElement('button');
+          del.type = 'button';
+          del.className = 'mt-2 text-[11px] text-red-300/90 touch-target self-start';
+          del.textContent = 'Eliminar';
+          del.addEventListener('click', function () {
+            if (!confirm('¿Eliminar este recordatorio?')) return;
+            var id = r.id;
+            var arr2 = masRemLoad().filter(function (x) { return x.id !== id; });
+            masRemSave(arr2);
+            masRemRender();
+            try { masCalRenderAll(); } catch (_) {}
+          });
+          row.appendChild(del);
+          list.appendChild(row);
+        });
+      }
+      function masRemAdd() {
+        var titleEl = document.getElementById('masRemTitle');
+        var dateEl = document.getElementById('masRemDate');
+        var timeEl = document.getElementById('masRemTime');
+        var noteEl = document.getElementById('masRemNote');
+        if (!titleEl || !dateEl) return;
+        var title = String(titleEl.value || '').trim();
+        if (!title) {
+          alert('Escribí un título para el recordatorio.');
+          return;
+        }
+        var date = String(dateEl.value || '').trim();
+        if (!date) {
+          alert('Elegí una fecha.');
+          return;
+        }
+        var time = timeEl ? String(timeEl.value || '').trim() : '';
+        var note = noteEl ? String(noteEl.value || '').trim() : '';
+        var arr = masRemLoad();
+        arr.push({ id: Date.now(), title: title, date: date, time: time, note: note });
+        masRemSave(arr);
+        titleEl.value = '';
+        if (noteEl) noteEl.value = '';
+        masRemRender();
+        try { masCalRenderAll(); } catch (_) {}
+      }
+      var masRemAddBtn = document.getElementById('masRemAddBtn');
+      if (masRemAddBtn) masRemAddBtn.addEventListener('click', masRemAdd);
+
+      /* —— Calendario —— */
+      var masCalCursor = new Date();
+      var masCalPick = '';
+
+      function masCalYmd(d) {
+        var mo = d.getMonth() + 1;
+        var day = d.getDate();
+        return d.getFullYear() + '-' + (mo < 10 ? '0' : '') + mo + '-' + (day < 10 ? '0' : '') + day;
+      }
+      function masCalCountRemOnDay(ymd) {
+        return masRemLoad().filter(function (r) { return r.date === ymd; }).length;
+      }
+      function masCalRenderAll() {
+        if (!masCalPick) masCalPick = masCalYmd(new Date());
+        masCalRenderMonth();
+        masCalRenderDay();
+      }
+      function masCalRenderMonth() {
+        var grid = document.getElementById('masCalGrid');
+        var label = document.getElementById('masCalMonthLabel');
+        if (!grid || !label) return;
+        var y = masCalCursor.getFullYear();
+        var m0 = masCalCursor.getMonth();
+        label.textContent = masCalCursor.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+        while (grid.firstChild) grid.removeChild(grid.firstChild);
+        var first = new Date(y, m0, 1);
+        var startPad = first.getDay();
+        var lastDate = new Date(y, m0 + 1, 0).getDate();
+        var i;
+        for (i = 0; i < startPad; i++) {
+          var empty = document.createElement('div');
+          empty.className = 'ferriol-cal-cell ferriol-cal-cell--empty';
+          grid.appendChild(empty);
+        }
+        var today = masCalYmd(new Date());
+        for (var d = 1; d <= lastDate; d++) {
+          var ymd = y + '-' + (m0 + 1 < 10 ? '0' : '') + (m0 + 1) + '-' + (d < 10 ? '0' : '') + d;
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'ferriol-cal-day touch-target tabular-nums';
+          if (ymd === today) btn.classList.add('ferriol-cal-day--today');
+          if (ymd === masCalPick) btn.classList.add('ferriol-cal-day--pick');
+          btn.textContent = String(d);
+          var n = masCalCountRemOnDay(ymd);
+          if (n > 0) btn.classList.add('ferriol-cal-day--dot');
+          btn.setAttribute('data-cal-day', ymd);
+          btn.addEventListener('click', function (ev) {
+            var b = ev.currentTarget;
+            masCalPick = b.getAttribute('data-cal-day') || masCalPick;
+            masCalRenderAll();
+          });
+          grid.appendChild(btn);
+        }
+      }
+      function masCalRenderDay() {
+        var lab = document.getElementById('masCalDayLabel');
+        var ul = document.getElementById('masCalDayList');
+        if (!lab || !ul) return;
+        while (ul.firstChild) ul.removeChild(ul.firstChild);
+        lab.textContent = masCalPick
+          ? 'Recordatorios el ' + masCalPick.split('-').reverse().join('/')
+          : '';
+        var items = masRemLoad().filter(function (r) { return r.date === masCalPick; });
+        masRemSort(items);
+        if (items.length === 0) {
+          var li0 = document.createElement('li');
+          li0.className = 'text-white/45 text-xs';
+          li0.textContent = 'Nada agendado ese día.';
+          ul.appendChild(li0);
+          return;
+        }
+        items.forEach(function (r) {
+          var li = document.createElement('li');
+          li.className = 'border-b border-white/08 pb-1.5 last:border-0';
+          li.textContent = (r.time ? r.time + ' · ' : '') + (r.title || '');
+          ul.appendChild(li);
+        });
+      }
+      function masCalShiftMonth(delta) {
+        var y = masCalCursor.getFullYear();
+        var m = masCalCursor.getMonth() + delta;
+        masCalCursor = new Date(y, m, 1);
+        masCalRenderAll();
+      }
+      var masCalPrev = document.getElementById('masCalPrev');
+      var masCalNext = document.getElementById('masCalNext');
+      if (masCalPrev) masCalPrev.addEventListener('click', function () { masCalShiftMonth(-1); });
+      if (masCalNext) masCalNext.addEventListener('click', function () { masCalShiftMonth(1); });
+
+      /* —— Notas / ideas (local) —— */
+      var IDEAS_KEY = 'ferriol_kiosco_ideas_v1';
+      function masIdeasLoad() {
+        try { return JSON.parse(localStorage.getItem(IDEAS_KEY) || '[]'); } catch (_) { return []; }
+      }
+      function masIdeasSave(arr) {
+        try { localStorage.setItem(IDEAS_KEY, JSON.stringify(arr)); } catch (_) {}
+      }
+      function masIdeasStatus(msg) {
+        var el = document.getElementById('masIdeasStatus');
+        if (!el) return;
+        el.textContent = msg;
+        el.style.opacity = '1';
+        setTimeout(function () { el.style.opacity = '0'; }, 1600);
+      }
+      function masIdeasMakeCard(nota) {
+        var card = document.createElement('div');
+        card.className = 'nota-card';
+        var top = document.createElement('div');
+        top.className = 'nota-card-top';
+        var ts = document.createElement('span');
+        ts.className = 'nota-ts';
+        ts.textContent = nota.ts;
+        top.appendChild(ts);
+        var delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'nota-del-btn touch-target';
+        delBtn.title = 'Eliminar';
+        delBtn.textContent = '✕';
+        delBtn.addEventListener('click', function () {
+          if (!confirm('¿Eliminar esta nota?')) return;
+          var id = nota.id;
+          masIdeasSave(masIdeasLoad().filter(function (x) { return x.id !== id; }));
+          masIdeasRender();
+        });
+        top.appendChild(delBtn);
+        card.appendChild(top);
+        var textarea = document.createElement('textarea');
+        textarea.className = 'nota-body';
+        textarea.placeholder = 'Ideas, listas, proveedores…';
+        textarea.spellcheck = true;
+        textarea.value = nota.text || '';
+        textarea.rows = 4;
+        var saveTimer = null;
+        var footer = document.createElement('div');
+        footer.className = 'nota-footer';
+        var chars = document.createElement('span');
+        chars.className = 'nota-chars';
+        chars.textContent = (nota.text || '').length + ' car.';
+        footer.appendChild(chars);
+        textarea.addEventListener('input', function () {
+          var id = nota.id;
+          var nx = masIdeasLoad();
+          var ok = false;
+          for (var i = 0; i < nx.length; i++) {
+            if (nx[i].id === id) {
+              nx[i].text = textarea.value;
+              ok = true;
+              break;
+            }
+          }
+          if (!ok) return;
+          clearTimeout(saveTimer);
+          saveTimer = setTimeout(function () {
+            masIdeasSave(nx);
+            masIdeasStatus('Guardado ✓');
+          }, 500);
+          chars.textContent = textarea.value.length + ' car.';
+        });
+        card.appendChild(textarea);
+        card.appendChild(footer);
+        return card;
+      }
+      function masIdeasRender() {
+        var container = document.getElementById('masIdeasList');
+        if (!container) return;
+        while (container.firstChild) container.removeChild(container.firstChild);
+        var arr = masIdeasLoad();
+        arr.forEach(function (nota) {
+          container.appendChild(masIdeasMakeCard(nota));
+        });
+      }
+      function masIdeasAdd() {
+        var container = document.getElementById('masIdeasList');
+        if (!container) return;
+        var arr = masIdeasLoad();
+        var now = new Date();
+        var ts =
+          now.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: '2-digit' }) +
+          ' ' +
+          now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+        var nota = { id: Date.now(), ts: ts, text: '' };
+        arr.unshift(nota);
+        masIdeasSave(arr);
+        container.insertBefore(masIdeasMakeCard(nota), container.firstChild);
+        var ta = container.querySelector('.nota-body');
+        if (ta) ta.focus();
+      }
+      var masIdeasAddBtn = document.getElementById('masIdeasAddBtn');
+      if (masIdeasAddBtn) masIdeasAddBtn.addEventListener('click', masIdeasAdd);
     })();

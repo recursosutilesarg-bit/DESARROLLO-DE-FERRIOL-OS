@@ -4223,3 +4223,56 @@ html[data-ferriol-theme='blanco'] .panel select.ferriol-native-select option {
   background-color: #f4f4f5 !important;
   color: #18181b !important;
 }
+
+/* Más · mini calendario y teclas de calculadora */
+.ferriol-cal-cell--empty {
+  min-height: 2.35rem;
+}
+.ferriol-cal-day {
+  min-height: 2.35rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.15);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+.ferriol-cal-day:active {
+  transform: scale(0.96);
+}
+.ferriol-cal-day--today {
+  border-color: rgba(52, 211, 153, 0.55);
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.25);
+}
+.ferriol-cal-day--pick {
+  background: rgba(139, 92, 246, 0.35);
+  border-color: rgba(196, 181, 253, 0.45);
+}
+.ferriol-cal-day--dot {
+  position: relative;
+}
+.ferriol-cal-day--dot::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(251, 191, 36, 0.95);
+}
+.ferriol-calc-pad .ferriol-calc-btn {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-ferriol-theme='blanco'] .ferriol-cal-day {
+  border-color: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.55);
+  color: #18181b;
+}
+html[data-ferriol-theme='blanco'] .ferriol-cal-day--pick {
+  background: rgba(124, 58, 237, 0.18);
+  border-color: rgba(124, 58, 237, 0.35);
+}
