@@ -739,9 +739,15 @@
               <div class="ferriol-cierre-panel-head">
                 <span class="ferriol-cierre-step" aria-hidden="true">1</span>
                 <div>
-                  <h3 id="cierreLiquidacionHd" class="ferriol-cierre-panel-title">Liquidación del turno</h3>
+                  <h3 id="cierreLiquidacionHd" class="ferriol-cierre-panel-title">Cierre de caja</h3>
                   <p class="ferriol-cierre-panel-sub">Lo que entró hoy en la caja (cobros reales, no fiado en cuenta)</p>
                 </div>
+              </div>
+              <div id="cierreWizardSteps" class="ferriol-cierre-steps">
+                <span class="ferriol-cierre-step-chip" data-step="efec">1. Efectivo</span>
+                <span class="ferriol-cierre-step-chip" data-step="tarj">2. Tarjeta</span>
+                <span class="ferriol-cierre-step-chip" data-step="transf">3. Transferencia</span>
+                <span class="ferriol-cierre-step-chip" data-step="final">4. Finalizar</span>
               </div>
 
               <div id="cajaSummary" class="ferriol-cierre-summary">
@@ -767,10 +773,11 @@
                     <button type="button" class="ferriol-cierre-line ferriol-cierre-line-btn touch-target" data-ci-select="efec">
                       <span>Efectivo</span><span id="cajaEfectivo" class="ferriol-cierre-amt">$0</span>
                     </button>
-                    <p id="cierreInterVsEfec" class="text-[11px] text-white/45 mt-1">Sistema $0 vs Real $0</p>
+                    <p id="cierreInterVsEfec" class="text-[11px] text-white/45 mt-1">Sistema $0 vs Real —</p>
+                    <p id="cierreInterStateEfec" class="text-[11px] text-amber-200/90 mt-1">Pendiente</p>
                     <div class="ferriol-ci-method-body hidden">
                     <div class="ferriol-cierre-inline-actions">
-                      <button type="button" class="ferriol-ci-action ferriol-ci-action-ok active touch-target" data-ci-medio="efec" data-ci-val="confirmado">Confirmar</button>
+                      <button type="button" class="ferriol-ci-action ferriol-ci-action-ok touch-target" data-ci-medio="efec" data-ci-val="confirmado">Confirmar</button>
                       <button type="button" class="ferriol-ci-action ferriol-ci-action-fix touch-target" data-ci-medio="efec" data-ci-val="corregir">Corregir</button>
                     </div>
                     <div id="cierreInterDenomSection" class="rounded-xl border border-white/10 bg-black/20 p-3 mt-2 hidden">
@@ -796,10 +803,11 @@
                     <button type="button" class="ferriol-cierre-line ferriol-cierre-line-btn touch-target" data-ci-select="tarj">
                       <span>Tarjeta</span><span id="cajaTarjeta" class="ferriol-cierre-amt">$0</span>
                     </button>
-                    <p id="cierreInterVsTarj" class="text-[11px] text-white/45 mt-1">Sistema $0 vs Real $0</p>
+                    <p id="cierreInterVsTarj" class="text-[11px] text-white/45 mt-1">Sistema $0 vs Real —</p>
+                    <p id="cierreInterStateTarj" class="text-[11px] text-amber-200/90 mt-1">Pendiente</p>
                     <div class="ferriol-ci-method-body hidden">
                     <div class="ferriol-cierre-inline-actions">
-                      <button type="button" class="ferriol-ci-action ferriol-ci-action-ok active touch-target" data-ci-medio="tarj" data-ci-val="confirmado">Confirmar</button>
+                      <button type="button" class="ferriol-ci-action ferriol-ci-action-ok touch-target" data-ci-medio="tarj" data-ci-val="confirmado">Confirmar</button>
                       <button type="button" class="ferriol-ci-action ferriol-ci-action-fix touch-target" data-ci-medio="tarj" data-ci-val="corregir">Corregir</button>
                     </div>
                     <div id="cierreInterTarjRealWrap" class="hidden mt-2">
@@ -811,10 +819,11 @@
                     <button type="button" class="ferriol-cierre-line ferriol-cierre-line-btn touch-target" data-ci-select="transf">
                       <span>Transferencia</span><span id="cajaTransf" class="ferriol-cierre-amt">$0</span>
                     </button>
-                    <p id="cierreInterVsTransf" class="text-[11px] text-white/45 mt-1">Sistema $0 vs Real $0</p>
+                    <p id="cierreInterVsTransf" class="text-[11px] text-white/45 mt-1">Sistema $0 vs Real —</p>
+                    <p id="cierreInterStateTransf" class="text-[11px] text-amber-200/90 mt-1">Pendiente</p>
                     <div class="ferriol-ci-method-body hidden">
                     <div class="ferriol-cierre-inline-actions">
-                      <button type="button" class="ferriol-ci-action ferriol-ci-action-ok active touch-target" data-ci-medio="transf" data-ci-val="confirmado">Confirmar</button>
+                      <button type="button" class="ferriol-ci-action ferriol-ci-action-ok touch-target" data-ci-medio="transf" data-ci-val="confirmado">Confirmar</button>
                       <button type="button" class="ferriol-ci-action ferriol-ci-action-fix touch-target" data-ci-medio="transf" data-ci-val="corregir">Corregir</button>
                     </div>
                     <div id="cierreInterTransfRealWrap" class="hidden mt-2">
@@ -850,6 +859,11 @@
                     <span class="text-white/65">Diferencia total (real − sistema)</span>
                     <span id="cierreInterAuditDiff" class="font-extrabold tabular-nums text-[#86efac]">$0</span>
                   </div>
+                </div>
+                <div id="cierreInterResumeCard" class="rounded-xl border border-white/12 bg-black/30 p-3 mb-3">
+                  <div class="flex justify-between text-sm"><span class="text-white/60">Sistema total</span><span id="cierreInterTotalSistema" class="font-semibold tabular-nums text-white/90">$0</span></div>
+                  <div class="flex justify-between text-sm mt-1"><span class="text-white/60">Real total</span><span id="cierreInterTotalReal" class="font-semibold tabular-nums text-white/90">—</span></div>
+                  <div class="flex justify-between text-sm mt-1"><span class="text-white/60">Estado</span><span id="cierreInterGlobalEstado" class="font-semibold text-amber-200">Pendiente</span></div>
                 </div>
               </div>
             </section>
@@ -891,7 +905,7 @@
                 <i data-lucide="share-2" class="w-5 h-5 shrink-0"></i>
                 Generar comprobante / compartir
               </button>
-              <button type="button" id="cerrarCaja" class="w-full btn-glow rounded-xl py-3.5 font-semibold flex items-center justify-center gap-2 touch-target active:scale-[0.99] shadow-lg">
+              <button type="button" id="cerrarCaja" class="w-full btn-glow rounded-xl py-3.5 font-semibold flex items-center justify-center gap-2 touch-target active:scale-[0.99] shadow-lg" disabled>
                 <i data-lucide="lock" class="w-5 h-5 shrink-0"></i>
                 Confirmar cierre y nuevo día
               </button>

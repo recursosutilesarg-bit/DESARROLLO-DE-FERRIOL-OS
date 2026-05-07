@@ -4624,7 +4624,7 @@
 
     /** Cierre de caja minimalista: método por método + comparativo sistema/real. */
     var _cierreInterGastos = { pagosProv: 0, egresosFijos: 0, rowsProv: [], rowsGastoFijo: [] };
-    var _cierreInterModo = { efec: 'confirmado', tarj: 'confirmado', transf: 'confirmado' };
+    var _cierreInterModo = { efec: 'pendiente', tarj: 'pendiente', transf: 'pendiente' };
     var _cierreInterMetricas = { efecSistema: 0, tarjSistema: 0, transfSistema: 0 };
 
     async function ferriolCierreInteractivoLoadGastosHoy() {
@@ -4728,6 +4728,7 @@
       ferriolCierreInteractivoRenderVs();
       ferriolCierreInteractivoRefreshAuditUi();
       ferriolRefreshCierreEstado();
+      ferriolCierreInteractivoRefreshWizard();
     }
 
     function ferriolCierreInteractivoRenderVs() {
@@ -4743,6 +4744,60 @@
       if (efEl) efEl.textContent = 'Sistema $' + efSys.toLocaleString('es-AR') + ' vs Real ' + (efReal === null ? '—' : ('$' + Number(efReal).toLocaleString('es-AR')));
       if (tjEl) tjEl.textContent = 'Sistema $' + tjSys.toLocaleString('es-AR') + ' vs Real ' + (tjReal === null ? '—' : ('$' + Number(tjReal).toLocaleString('es-AR')));
       if (tfEl) tfEl.textContent = 'Sistema $' + tfSys.toLocaleString('es-AR') + ' vs Real ' + (tfReal === null ? '—' : ('$' + Number(tfReal).toLocaleString('es-AR')));
+    }
+
+    function ferriolCierreInteractivoRefreshWizard() {
+      var map = [
+        { key: 'efec', stateId: 'cierreInterStateEfec' },
+        { key: 'tarj', stateId: 'cierreInterStateTarj' },
+        { key: 'transf', stateId: 'cierreInterStateTransf' }
+      ];
+      var allDone = true;
+      map.forEach(function (x) {
+        var st = _cierreInterModo[x.key];
+        var el = document.getElementById(x.stateId);
+        if (!el) return;
+        if (st === 'pendiente') {
+          el.textContent = 'Pendiente';
+          el.className = 'text-[11px] text-amber-200/90 mt-1';
+          allDone = false;
+        } else if (st === 'confirmado') {
+          el.textContent = 'Confirmado';
+          el.className = 'text-[11px] text-emerald-300 mt-1';
+        } else {
+          el.textContent = 'Corregido';
+          el.className = 'text-[11px] text-cyan-300 mt-1';
+        }
+      });
+      var efReal = _cierreInterModo.efec === 'confirmado' ? Number(_cierreInterMetricas.efecSistema || 0) : ferriolParseMontoLocal((document.getElementById('cierreInterEfecReal') || {}).value);
+      var tjReal = _cierreInterModo.tarj === 'confirmado' ? Number(_cierreInterMetricas.tarjSistema || 0) : ferriolParseMontoLocal((document.getElementById('cierreInterTarjReal') || {}).value);
+      var tfReal = _cierreInterModo.transf === 'confirmado' ? Number(_cierreInterMetricas.transfSistema || 0) : ferriolParseMontoLocal((document.getElementById('cierreInterTransfReal') || {}).value);
+      var realReady = efReal !== null && tjReal !== null && tfReal !== null;
+      var sysTotal = Number(_cierreInterMetricas.efecSistema || 0) + Number(_cierreInterMetricas.tarjSistema || 0) + Number(_cierreInterMetricas.transfSistema || 0);
+      var sysEl = document.getElementById('cierreInterTotalSistema');
+      var realEl = document.getElementById('cierreInterTotalReal');
+      var estEl = document.getElementById('cierreInterGlobalEstado');
+      if (sysEl) sysEl.textContent = '$' + sysTotal.toLocaleString('es-AR');
+      if (realEl) realEl.textContent = realReady ? ('$' + (Number(efReal) + Number(tjReal) + Number(tfReal)).toLocaleString('es-AR')) : '—';
+      if (estEl) {
+        if (!allDone || !realReady) {
+          estEl.textContent = 'Pendiente';
+          estEl.className = 'font-semibold text-amber-200';
+        } else {
+          estEl.textContent = 'Listo para finalizar';
+          estEl.className = 'font-semibold text-emerald-300';
+        }
+      }
+      document.querySelectorAll('#cierreWizardSteps .ferriol-cierre-step-chip').forEach(function (chip) {
+        var s = chip.getAttribute('data-step');
+        var active = (s === 'efec' && _cierreInterModo.efec !== 'pendiente')
+          || (s === 'tarj' && _cierreInterModo.tarj !== 'pendiente')
+          || (s === 'transf' && _cierreInterModo.transf !== 'pendiente')
+          || (s === 'final' && allDone && realReady);
+        chip.classList.toggle('active', !!active);
+      });
+      var cerrarBtn = document.getElementById('cerrarCaja');
+      if (cerrarBtn) cerrarBtn.disabled = !(allDone && realReady);
     }
 
     function ferriolCierreInteractivoRefreshAuditUi() {
@@ -4780,6 +4835,7 @@
       }
       ferriolCierreInteractivoRenderVs();
       ferriolCierreInteractivoRefreshAuditUi();
+      ferriolCierreInteractivoRefreshWizard();
     }
 
     async function ferriolCierreInteractivoRefreshAll() {
@@ -4856,6 +4912,7 @@
           var fri = document.getElementById('cierreInterEfecReal');
           if (fri && _cierreInterModo.efec === 'corregir') fri.value = sum ? String(sum) : '';
           ferriolCierreInteractivoRefreshAuditUi();
+          ferriolCierreInteractivoRefreshWizard();
           ferriolRefreshCierreEstado();
         });
       });
@@ -4863,6 +4920,7 @@
         var el = document.getElementById(id);
         if (el) el.addEventListener('input', function () {
           ferriolCierreInteractivoRenderVs();
+          ferriolCierreInteractivoRefreshWizard();
           ferriolRefreshCierreEstado();
         });
       });
@@ -4873,9 +4931,7 @@
         };
       }
       ferriolCierreInteractivoSetCardSeleccion('');
-      ferriolCierreInteractivoSetMedioEstado('efec', 'confirmado');
-      ferriolCierreInteractivoSetMedioEstado('tarj', 'confirmado');
-      ferriolCierreInteractivoSetMedioEstado('transf', 'confirmado');
+      ferriolCierreInteractivoRefreshWizard();
     })();
 
     async function updateDashboard() {
@@ -9385,11 +9441,9 @@
       if (document.getElementById('cierreInterEfecReal')) document.getElementById('cierreInterEfecReal').value = '';
       if (document.getElementById('cierreInterTarjReal')) document.getElementById('cierreInterTarjReal').value = '';
       if (document.getElementById('cierreInterTransfReal')) document.getElementById('cierreInterTransfReal').value = '';
-      _cierreInterModo = { efec: 'confirmado', tarj: 'confirmado', transf: 'confirmado' };
+      _cierreInterModo = { efec: 'pendiente', tarj: 'pendiente', transf: 'pendiente' };
       ferriolCierreInteractivoSetCardSeleccion('');
-      ferriolCierreInteractivoSetMedioEstado('efec', 'confirmado');
-      ferriolCierreInteractivoSetMedioEstado('tarj', 'confirmado');
-      ferriolCierreInteractivoSetMedioEstado('transf', 'confirmado');
+      ferriolCierreInteractivoRefreshWizard();
 
       ferriolRefreshCierreArqueoDiff();
       renderCierresCajaHistorial();
