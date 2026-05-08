@@ -1,10 +1,8 @@
 // Service Worker — Ferriol OS PWA
-const CACHE_NAME = 'ferriol-os-v18';
+const CACHE_NAME = 'ferriol-os-v19';
 const ASSETS = [
   './kiosco.html',
   './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
   './icons/icon-192.svg',
   './icons/icon-512.svg'
 ];

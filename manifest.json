@@ -6,8 +6,8 @@
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "theme_color": "#052e16",
-  "background_color": "#052e16",
+  "theme_color": "#12051f",
+  "background_color": "#12051f",
   "categories": ["business", "productivity"],
   "icons": [
     {
@@ -30,13 +30,13 @@
     },
     {
       "src": "icons/icon-192.svg",
-      "sizes": "192x192",
+      "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
       "src": "icons/icon-512.svg",
-      "sizes": "512x512",
+      "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     }

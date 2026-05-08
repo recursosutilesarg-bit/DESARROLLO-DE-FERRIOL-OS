@@ -2180,9 +2180,9 @@
       return !!(currentUser && (currentUser.role === 'partner' || currentUser.role === 'super') && !isEmpresaLensSuper());
     }
     (function setupPartnerWithdrawAndFounderPayModals() {
-      var btnOpen = document.getElementById('btnPartnerWithdrawOpen');
-      if (btnOpen) {
-        btnOpen.addEventListener('click', function () {
+      function wirePartnerWithdrawOpen(btn) {
+        if (!btn) return;
+        btn.addEventListener('click', function () {
           if (!canUserRequestCommissionWithdrawal()) {
             try { ferriolAppAlert('No podés pedir retiro en esta vista. Usá la cuenta de administrador o la vista administración del fundador.'); } catch (_) {}
             return;
@@ -2190,6 +2190,8 @@
           openPartnerWithdrawModal();
         });
       }
+      wirePartnerWithdrawOpen(document.getElementById('btnPartnerWithdrawOpen'));
+      wirePartnerWithdrawOpen(document.getElementById('btnPartnerWithdrawOpenFromSolic'));
       var pwClose = document.getElementById('partnerWithdrawModalClose');
       var pwOv = document.getElementById('partnerWithdrawModalOverlay');
       if (pwClose) pwClose.addEventListener('click', closePartnerWithdrawModal);
@@ -2297,33 +2299,66 @@
         });
       }
     })();
-    async function loadPartnerBilleteraSection() {
-      var av = document.getElementById('partnerWalletAvailable');
-      var br = document.getElementById('partnerWalletBreakdown');
-      var hist = document.getElementById('partnerWithdrawHistory');
-      var btnW = document.getElementById('btnPartnerWithdrawOpen');
-      if (!av || !hist) return;
-      if (!supabaseClient || !currentUser || !ferriolDistribuidorVentaShell()) {
-        av.textContent = '—';
-        if (br) br.textContent = '';
-        if (btnW) { btnW.disabled = true; btnW.classList.add('opacity-50'); btnW.removeAttribute('title'); }
-        if (hist) {
-          hist.innerHTML = '<p class="text-white/45 text-xs py-2 text-center">—</p>';
+    function ferriolPartnerWalletTargetsCollect() {
+      var defs = [
+        { av: 'partnerWalletAvailable', br: 'partnerWalletBreakdown', hist: 'partnerWithdrawHistory', btn: 'btnPartnerWithdrawOpen' },
+        { av: 'partnerSolicWithdrawAvail', br: 'partnerSolicWithdrawBreakdown', hist: 'partnerSolicWithdrawHistory', btn: 'btnPartnerWithdrawOpenFromSolic' }
+      ];
+      return defs
+        .map(function (d) {
+          return {
+            av: document.getElementById(d.av),
+            br: d.br ? document.getElementById(d.br) : null,
+            hist: document.getElementById(d.hist),
+            btn: d.btn ? document.getElementById(d.btn) : null
+          };
+        })
+        .filter(function (t) {
+          return t.av && t.hist;
+        });
+    }
+
+    function ferriolPartnerWalletApplyLoading(targets) {
+      targets.forEach(function (t) {
+        t.av.textContent = '…';
+        if (t.br) t.br.textContent = '';
+        t.hist.innerHTML = '<p class="text-white/45 text-xs py-2 text-center">Cargando…</p>';
+      });
+    }
+
+    function ferriolPartnerWalletApplyEmpty(targets, histMsg) {
+      targets.forEach(function (t) {
+        t.av.textContent = '—';
+        if (t.br) t.br.textContent = '';
+        t.hist.innerHTML = '<p class="text-white/45 text-xs py-2 text-center">' + histMsg + '</p>';
+        if (t.btn) {
+          t.btn.disabled = true;
+          t.btn.classList.add('opacity-50');
+          t.btn.removeAttribute('title');
         }
+      });
+    }
+
+    async function loadPartnerBilleteraSection() {
+      var targets = ferriolPartnerWalletTargetsCollect();
+      if (!targets.length) return;
+      if (!supabaseClient || !currentUser || !ferriolDistribuidorVentaShell()) {
+        ferriolPartnerWalletApplyEmpty(targets, '—');
         return;
       }
-      av.textContent = '…';
-      if (br) br.textContent = '';
-      hist.innerHTML = '<p class="text-white/45 text-xs py-2 text-center">Cargando…</p>';
+      ferriolPartnerWalletApplyLoading(targets);
       try {
         var balRpc = await supabaseClient.rpc('ferriol_partner_withdrawable_balance', { p_partner_id: currentUser.id });
         if (balRpc.error) throw balRpc.error;
         var bal = Number(balRpc.data != null ? balRpc.data : 0);
-        av.textContent = '$ ' + bal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS';
+        var availText =
+          '$ ' + bal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ARS';
         var led = await supabaseClient.from('mlm_ledger').select('amount').eq('beneficiary_user_id', currentUser.id).in('event_type', ['sale_commission', 'renewal']).in('status', ['approved', 'paid']);
         if (led.error) throw led.error;
         var ingresosTotal = 0;
-        (led.data || []).forEach(function (L) { ingresosTotal += Number(L.amount || 0); });
+        (led.data || []).forEach(function (L) {
+          ingresosTotal += Number(L.amount || 0);
+        });
         var rqTotals = await supabaseClient.from('ferriol_partner_withdrawal_requests').select('amount_ars, status').eq('partner_user_id', currentUser.id);
         if (rqTotals.error) throw rqTotals.error;
         var historialComprometido = 0;
@@ -2333,61 +2368,113 @@
           if (w.status !== 'rejected') historialComprometido += a;
           if (w.status === 'paid') paidSum += a;
         });
-        if (br) {
-          br.textContent =
-            'Libro $ ' +
-            ingresosTotal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
-            ' · Retiros $ ' +
-            historialComprometido.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
-            ' · Pagado $ ' +
-            paidSum.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-        var rq = await supabaseClient.from('ferriol_partner_withdrawal_requests').select('*').eq('partner_user_id', currentUser.id).order('created_at', { ascending: false }).limit(40);
+        var breakdownText =
+          'Libro $ ' +
+          ingresosTotal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
+          ' · Retiros $ ' +
+          historialComprometido.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
+          ' · Pagado $ ' +
+          paidSum.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        var rq = await supabaseClient
+          .from('ferriol_partner_withdrawal_requests')
+          .select('*')
+          .eq('partner_user_id', currentUser.id)
+          .order('created_at', { ascending: false })
+          .limit(40);
         if (rq.error) throw rq.error;
         var rows = rq.data || [];
-        if (btnW) {
-          if (currentUser.role === 'partner' || currentUser.role === 'super') {
-            btnW.disabled = false;
-            btnW.classList.remove('opacity-50');
-            btnW.removeAttribute('title');
-          } else {
-            btnW.disabled = true;
-            btnW.classList.add('opacity-50');
-            btnW.setAttribute('title', 'Solo cuentas partner o fundador (vista administración) pueden solicitar retiro.');
+        var canPartnerWithdraw = currentUser.role === 'partner' || currentUser.role === 'super';
+        targets.forEach(function (t) {
+          t.av.textContent = availText;
+          if (t.br) t.br.textContent = breakdownText;
+          if (t.btn) {
+            if (canPartnerWithdraw) {
+              t.btn.disabled = false;
+              t.btn.classList.remove('opacity-50');
+              t.btn.removeAttribute('title');
+            } else {
+              t.btn.disabled = true;
+              t.btn.classList.add('opacity-50');
+              t.btn.setAttribute('title', 'Solo cuentas partner o fundador (vista administración) pueden solicitar retiro.');
+            }
+            if (currentUser.role === 'super' && isSuperSocioLens()) {
+              t.btn.setAttribute(
+                'title',
+                'En cuenta fundador solo ves el saldo; los retiros los gestiona una cuenta con rol partner.'
+              );
+            }
           }
-        }
-        if (currentUser.role === 'super' && isSuperSocioLens() && btnW) {
-          btnW.setAttribute(
-            'title',
-            'En cuenta fundador solo ves el saldo; los retiros los gestiona una cuenta con rol partner.'
-          );
-        }
-        if (!rows.length) {
-          hist.innerHTML = '<p class="text-xs text-white/45 py-3 text-center">Todavía no tenés solicitudes de retiro.</p>';
-        } else {
-          hist.innerHTML = '<div class="space-y-2 max-h-[40vh] overflow-y-auto">' + rows.map(function (w) {
-            var st = w.status === 'paid' ? 'text-white' : w.status === 'rejected' ? 'text-red-200/90' : w.status === 'approved_pending_payout' ? 'text-cyan-200' : 'text-amber-200';
-            var lab = w.status === 'pending_review' ? 'En revisión empresa' : w.status === 'approved_pending_payout' ? 'Aprobado · pendiente transferencia' : w.status === 'paid' ? 'Pagado' : 'Rechazado';
-            var dt = String(w.created_at || '').slice(0, 16).replace('T', ' ');
-            var extra = '';
-            if (w.status === 'paid' && w.founder_congrats_message) extra = '<p class="text-[10px] text-white/80 mt-1">' + String(w.founder_congrats_message).replace(/</g, '&lt;') + '</p>';
-            if (w.status === 'rejected' && w.reject_note) extra = '<p class="text-[10px] text-red-200/80 mt-1">Motivo: ' + String(w.reject_note).replace(/</g, '&lt;') + '</p>';
-            return '<div class="rounded-lg border border-white/10 bg-black/25 px-3 py-2"><p class="text-xs"><span class="' + st + ' font-medium">' + lab + '</span> · ' + dt + '</p><p class="text-sm text-white/90 font-semibold">$ ' + Number(w.amount_ars || 0).toLocaleString('es-AR') + ' ARS</p>' + extra + '</div>';
-          }).join('') + '</div>';
-        }
+          if (!rows.length) {
+            t.hist.innerHTML =
+              '<p class="text-xs text-white/45 py-3 text-center">Todavía no tenés solicitudes de retiro.</p>';
+          } else {
+            t.hist.innerHTML =
+              '<div class="space-y-2 max-h-[40vh] overflow-y-auto">' +
+              rows
+                .map(function (w) {
+                  var st =
+                    w.status === 'paid'
+                      ? 'text-white'
+                      : w.status === 'rejected'
+                        ? 'text-red-200/90'
+                        : w.status === 'approved_pending_payout'
+                          ? 'text-cyan-200'
+                          : 'text-amber-200';
+                  var lab =
+                    w.status === 'pending_review'
+                      ? 'En revisión empresa'
+                      : w.status === 'approved_pending_payout'
+                        ? 'Aprobado · pendiente transferencia'
+                        : w.status === 'paid'
+                          ? 'Pagado'
+                          : 'Rechazado';
+                  var dt = String(w.created_at || '').slice(0, 16).replace('T', ' ');
+                  var extra = '';
+                  if (w.status === 'paid' && w.founder_congrats_message)
+                    extra =
+                      '<p class="text-[10px] text-white/80 mt-1">' +
+                      String(w.founder_congrats_message).replace(/</g, '&lt;') +
+                      '</p>';
+                  if (w.status === 'rejected' && w.reject_note)
+                    extra =
+                      '<p class="text-[10px] text-red-200/80 mt-1">Motivo: ' +
+                      String(w.reject_note).replace(/</g, '&lt;') +
+                      '</p>';
+                  return (
+                    '<div class="rounded-lg border border-white/10 bg-black/25 px-3 py-2"><p class="text-xs"><span class="' +
+                    st +
+                    ' font-medium">' +
+                    lab +
+                    '</span> · ' +
+                    dt +
+                    '</p><p class="text-sm text-white/90 font-semibold">$ ' +
+                    Number(w.amount_ars || 0).toLocaleString('es-AR') +
+                    ' ARS</p>' +
+                    extra +
+                    '</div>'
+                  );
+                })
+                .join('') +
+              '</div>';
+          }
+        });
       } catch (e) {
-        av.textContent = '—';
-        if (btnW && ferriolDistribuidorVentaShell()) {
-          var canW = currentUser.role === 'partner' || currentUser.role === 'super';
-          btnW.disabled = !canW;
-          btnW.classList.toggle('opacity-50', !canW);
-        }
-        hist.innerHTML =
-          '<p class="text-red-300/90 text-xs py-2">No se pudo cargar la billetera. ' +
-          String(e.message || e).replace(/</g, '&lt;') +
-          '</p>';
+        targets.forEach(function (t) {
+          t.av.textContent = '—';
+          if (t.btn && ferriolDistribuidorVentaShell()) {
+            var canW = currentUser.role === 'partner' || currentUser.role === 'super';
+            t.btn.disabled = !canW;
+            t.btn.classList.toggle('opacity-50', !canW);
+          }
+          t.hist.innerHTML =
+            '<p class="text-red-300/90 text-xs py-2">No se pudo cargar la billetera. ' +
+            String(e.message || e).replace(/</g, '&lt;') +
+            '</p>';
+        });
       }
-      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
+      try {
+        if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
+      } catch (_) {}
       scheduleRefreshFerriolSolicitudesBadges();
     }
     async function loadFounderWithdrawalReviewList() {
@@ -2598,13 +2685,143 @@
     }
     function syncPartnerSolicitudesTabShell() {
       var tram = document.getElementById('partnerTramitesPanel');
-      if (!tram) return;
-      if (!currentUser || !ferriolDistribuidorVentaShell() || !isNetworkAdminRole(currentUser.role) || isAnyKioscoPreviewMode()) {
-        tram.style.display = 'none';
+      var subShell = document.getElementById('partnerSolicitudesSubShell');
+      var show =
+        !!(currentUser && ferriolDistribuidorVentaShell() && isNetworkAdminRole(currentUser.role) && !isAnyKioscoPreviewMode());
+      if (!show) {
+        if (tram) tram.style.display = 'none';
+        if (subShell) subShell.classList.add('hidden');
         return;
       }
-      tram.style.display = 'block';
+      if (tram) tram.style.display = 'block';
+      if (subShell) {
+        subShell.classList.remove('hidden');
+        var pref = '';
+        try {
+          pref = sessionStorage.getItem('ferriol_partner_solic_tab') || '';
+        } catch (_) {}
+        switchPartnerSolicitudesSubTab(pref === 'distribuidor' || pref === 'retiros' ? pref : 'ventas');
+      }
     }
+
+    function switchPartnerSolicitudesSubTab(tab) {
+      if (tab !== 'ventas' && tab !== 'distribuidor' && tab !== 'retiros') tab = 'ventas';
+      try {
+        sessionStorage.setItem('ferriol_partner_solic_tab', tab);
+      } catch (_) {}
+      var bar = document.getElementById('partnerSolicitudesTabBar');
+      if (bar) {
+        bar.querySelectorAll('[data-partner-solic-tab]').forEach(function (btn) {
+          var id = btn.getAttribute('data-partner-solic-tab');
+          var on = id === tab;
+          btn.setAttribute('aria-selected', on ? 'true' : 'false');
+          btn.classList.toggle('border-[#ffffff]/50', on);
+          btn.classList.toggle('bg-[#ffffff]/20', on);
+          btn.classList.toggle('text-white', on);
+          btn.classList.toggle('border-transparent', !on);
+          btn.classList.toggle('text-white/55', !on);
+          btn.classList.toggle('hover:text-white/80', !on);
+        });
+      }
+      var pv = document.getElementById('partnerSolicPaneVentas');
+      var pd = document.getElementById('partnerSolicPaneDistribuidor');
+      var pr = document.getElementById('partnerSolicPaneRetiros');
+      function showPane(el, vis) {
+        if (!el) return;
+        el.classList.toggle('hidden', !vis);
+        el.style.setProperty('display', vis ? 'block' : 'none', 'important');
+      }
+      showPane(pv, tab === 'ventas');
+      showPane(pd, tab === 'distribuidor');
+      showPane(pr, tab === 'retiros');
+      if (tab === 'retiros') void loadPartnerBilleteraSection();
+      if (tab === 'ventas') void loadPartnerVentasComprobantesHistorial();
+      try {
+        if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
+      } catch (_) {}
+    }
+
+    async function loadPartnerVentasComprobantesHistorial() {
+      var wrap = document.getElementById('partnerSolicVentasHistorial');
+      if (!wrap || !supabaseClient || !currentUser || !ferriolDistribuidorVentaShell()) return;
+      wrap.innerHTML = '<p class="text-white/45 text-xs py-2 text-center">Cargando…</p>';
+      try {
+        var r = await supabaseClient
+          .from('ferriol_client_sale_requests')
+          .select('id, created_at, status, client_name, client_email, amount_ars, payment_type, period_month, reject_note')
+          .eq('partner_id', currentUser.id)
+          .order('created_at', { ascending: false })
+          .limit(50);
+        if (r.error) throw r.error;
+        var rows = r.data || [];
+        if (!rows.length) {
+          wrap.innerHTML =
+            '<p class="text-xs text-white/45 py-3 text-center">Todavía no cargaste ventas con comprobante. Usá «Cargar venta con comprobante» arriba.</p>';
+          return;
+        }
+        function tipoLab(pt) {
+          if (pt === 'vendor_mantenimiento') return 'Cuota mantenimiento vendedor';
+          if (pt === 'kiosco_licencia') return 'Suscripción mensual (negocio)';
+          if (pt === 'kit_inicial') return 'Kit vendedor';
+          return pt || '—';
+        }
+        function stLab(st) {
+          if (st === 'pending') return { c: 'text-amber-200', t: 'En revisión empresa' };
+          if (st === 'approved') return { c: 'text-emerald-200/95', t: 'Aprobada' };
+          if (st === 'rejected') return { c: 'text-red-200/90', t: 'Rechazada' };
+          return { c: 'text-white/70', t: st || '—' };
+        }
+        wrap.innerHTML =
+          '<div class="space-y-2 max-h-[42vh] overflow-y-auto pr-1">' +
+          rows
+            .map(function (row) {
+              var sl = stLab(row.status);
+              var dt = row.created_at ? String(row.created_at).slice(0, 16).replace('T', ' ') : '';
+              var nm = String(row.client_name || '').replace(/</g, '&lt;');
+              var em = String(row.client_email || '').replace(/</g, '&lt;');
+              var rej =
+                row.status === 'rejected' && row.reject_note
+                  ? '<p class="text-[10px] text-red-200/75 mt-1">Motivo: ' + String(row.reject_note).replace(/</g, '&lt;') + '</p>'
+                  : '';
+              var pm =
+                row.payment_type === 'vendor_mantenimiento' && row.period_month
+                  ? '<p class="text-[10px] text-white/45">Mes: ' + String(row.period_month).slice(0, 10) + '</p>'
+                  : '';
+              return (
+                '<div class="rounded-lg border border-white/10 bg-black/30 px-3 py-2">' +
+                '<p class="text-xs"><span class="' +
+                sl.c +
+                ' font-medium">' +
+                sl.t +
+                '</span> · ' +
+                dt +
+                '</p>' +
+                '<p class="text-sm text-white/90 font-semibold mt-0.5">$ ' +
+                Number(row.amount_ars || 0).toLocaleString('es-AR') +
+                ' ARS · <span class="text-white/60 font-normal text-xs">' +
+                tipoLab(row.payment_type) +
+                '</span></p>' +
+                '<p class="text-[11px] text-white/55">' +
+                nm +
+                ' · ' +
+                em +
+                '</p>' +
+                pm +
+                rej +
+                '</div>'
+              );
+            })
+            .join('') +
+          '</div>';
+      } catch (e) {
+        wrap.innerHTML =
+          '<p class="text-red-300/90 text-xs py-2">' + String(e.message || e).replace(/</g, '&lt;') + '</p>';
+      }
+      try {
+        if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
+      } catch (_) {}
+    }
+
     (function wireSolicitudesSubTabs() {
       var fb = document.getElementById('founderSolicitudesTabBar');
       if (fb) {
@@ -2613,6 +2830,15 @@
           if (!t || !fb.contains(t)) return;
           var id = t.getAttribute('data-solicitud-tab');
           if (id) switchFounderSolicitudesTab(id);
+        });
+      }
+      var pb = document.getElementById('partnerSolicitudesTabBar');
+      if (pb) {
+        pb.addEventListener('click', function (e) {
+          var t = e.target && e.target.closest && e.target.closest('[data-partner-solic-tab]');
+          if (!t || !pb.contains(t)) return;
+          var id = t.getAttribute('data-partner-solic-tab');
+          if (id) switchPartnerSolicitudesSubTab(id);
         });
       }
     })();
@@ -10447,8 +10673,88 @@
     };
 
     var _libretalCuentaItemsCache = null;
+    var _libretalCuentaModalGroups = null;
     var _libretalCuentaUltimoMonto = 0;
     var _libretalCuentaUltimoItems = null;
+
+    function _libretaGroupPendientesByFechaHora(items) {
+      var map = new Map();
+      items.forEach(function (it) {
+        var k = it.fecha_hora != null && String(it.fecha_hora).trim() !== ''
+          ? String(it.fecha_hora)
+          : '__s_' + String(it.id || '');
+        if (!map.has(k)) map.set(k, []);
+        map.get(k).push(it);
+      });
+      var grupos = Array.from(map.entries()).map(function (ent) {
+        var arr = ent[1];
+        var fh = arr[0].fecha_hora;
+        var ts = fh ? new Date(fh).getTime() : 0;
+        return { key: ent[0], items: arr, ts: isNaN(ts) ? 0 : ts };
+      });
+      grupos.sort(function (a, b) { return b.ts - a.ts; });
+      return grupos;
+    }
+
+    function _libretaCuentaLineHtml(item) {
+      var desc = (item.descripcion || '').replace(/</g, '&lt;');
+      var m = Math.round(Number(item.monto || 0)).toLocaleString('es-AR');
+      var tipoTag = item.tipo === 'transferencia_pendiente' ? ' <span class="text-orange-300/90 text-[10px]">(Transf. pend.)</span>' : '';
+      var sid = String(item.id || '').replace(/"/g, '&quot;');
+      return '<div class="libreta-cuenta-line flex items-stretch gap-2 px-4 py-3 border-b border-white/08">' +
+        '<label class="flex items-center shrink-0 touch-target cursor-pointer pt-0.5">' +
+        '<input type="checkbox" class="libreta-cuenta-chk w-4 h-4 rounded border-white/25 accent-amber-400" data-libreta-item-id="' + sid + '" checked onchange="window._libretaCuentaSyncSeleccion()">' +
+        '</label>' +
+        '<div class="flex justify-between gap-3 flex-1 min-w-0">' +
+        '<span class="text-white/90 min-w-0 flex-1 leading-snug">' + desc + tipoTag + '</span>' +
+        '<span class="font-bold text-[#f5f5f5] shrink-0">$' + m + '</span>' +
+        '</div></div>';
+    }
+
+    window._libretaCuentaSyncSeleccion = function () {
+      var ticketEl = document.getElementById('libretalCuentaTicket');
+      var totalEl = document.getElementById('libretalCuentaTotalSeleccion');
+      var btnCobrar = document.getElementById('libretalCuentaBtnCobrar');
+      if (!ticketEl || !_libretalCuentaItemsCache || !_libretalCuentaItemsCache.length) return;
+      var sum = 0;
+      var n = 0;
+      ticketEl.querySelectorAll('.libreta-cuenta-chk[data-libreta-item-id]').forEach(function (chk) {
+        if (!chk.checked) return;
+        var id = chk.getAttribute('data-libreta-item-id');
+        var it = _libretalCuentaItemsCache.find(function (x) { return String(x.id) === String(id); });
+        if (it) {
+          sum += Number(it.monto || 0);
+          n++;
+        }
+      });
+      if (totalEl) totalEl.textContent = '$' + Math.round(sum).toLocaleString('es-AR');
+      if (btnCobrar) {
+        btnCobrar.disabled = n === 0;
+        btnCobrar.classList.toggle('opacity-45', n === 0);
+      }
+    };
+
+    window._libretaCuentaSeleccionarTodo = function (marcar) {
+      var ticketEl = document.getElementById('libretalCuentaTicket');
+      if (!ticketEl) return;
+      ticketEl.querySelectorAll('.libreta-cuenta-chk').forEach(function (chk) { chk.checked = !!marcar; });
+      window._libretaCuentaSyncSeleccion();
+    };
+
+    window._libretaCuentaSeleccionarGrupoIdx = function (idx) {
+      if (!_libretalCuentaModalGroups || idx == null || idx < 0 || idx >= _libretalCuentaModalGroups.length) return;
+      var ticketEl = document.getElementById('libretalCuentaTicket');
+      if (!ticketEl) return;
+      ticketEl.querySelectorAll('.libreta-cuenta-chk').forEach(function (chk) { chk.checked = false; });
+      var ids = _libretalCuentaModalGroups[idx] || [];
+      ids.forEach(function (id) {
+        var sid = String(id);
+        ticketEl.querySelectorAll('.libreta-cuenta-chk').forEach(function (chk) {
+          if (chk.getAttribute('data-libreta-item-id') === sid) chk.checked = true;
+        });
+      });
+      window._libretaCuentaSyncSeleccion();
+    };
 
     function _libretaNewCobroGrupoId() {
       if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
@@ -10559,18 +10865,45 @@
         return;
       }
       _libretalCuentaItemsCache = items;
+      _libretalCuentaModalGroups = [];
       var total = items.reduce(function (s, i) { return s + Number(i.monto || 0); }, 0);
       var nombreEl = document.getElementById('libretalCuentaClienteNombre');
       if (nombreEl) nombreEl.textContent = _libretalClienteActual.nombre || '';
       var ticketEl = document.getElementById('libretalCuentaTicket');
       var sinTel = document.getElementById('libretalCuentaSinTel');
       if (ticketEl) {
-        ticketEl.innerHTML = items.map(function (item) {
-          var desc = (item.descripcion || '').replace(/</g, '&lt;');
-          var m = Math.round(Number(item.monto || 0)).toLocaleString('es-AR');
-          var tipoTag = item.tipo === 'transferencia_pendiente' ? ' <span class="text-orange-300/90 text-[10px]">(Transf. pend.)</span>' : '';
-          return '<div class="libreta-cuenta-line flex justify-between gap-3 px-4 py-3 border-b border-white/08"><span class="text-white/90 min-w-0 flex-1">' + desc + tipoTag + '</span><span class="font-bold text-[#f5f5f5] shrink-0">$' + m + '</span></div>';
-        }).join('') + '<div class="flex justify-between items-baseline px-4 pt-4 pb-2"><span class="text-white/60 text-sm">Total adeudado</span><span class="font-bold text-xl text-amber-400">$' + Math.round(total).toLocaleString('es-AR') + '</span></div>';
+        var bloques = [];
+        var agrupados = _libretaGroupPendientesByFechaHora(items);
+        agrupados.forEach(function (grupo, gi) {
+          var rows = grupo.items.map(_libretaCuentaLineHtml).join('');
+          _libretalCuentaModalGroups.push(grupo.items.map(function (it) { return it.id; }));
+          if (grupo.items.length > 1) {
+            var fh = grupo.items[0].fecha_hora;
+            var label = 'Compra';
+            if (fh) {
+              try {
+                var d = new Date(fh);
+                label = isNaN(d.getTime()) ? 'Compra' : ('Compra · ' + d.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }));
+              } catch (_) {}
+            }
+            var sub = grupo.items.reduce(function (s, x) { return s + Number(x.monto || 0); }, 0);
+            bloques.push(
+              '<div class="mb-1 rounded-xl border border-white/08 overflow-hidden">' +
+              '<div class="flex items-center justify-between gap-2 px-3 py-2 bg-white/[0.06]">' +
+              '<span class="text-[11px] text-white/65 min-w-0">' + label + ' · <strong class="text-[#f5f5f5]">$' + Math.round(sub).toLocaleString('es-AR') + '</strong></span>' +
+              '<button type="button" onclick="event.stopPropagation();window._libretaCuentaSeleccionarGrupoIdx(' + gi + ')" class="shrink-0 text-[11px] px-2.5 py-1.5 rounded-lg bg-[#ffffff]/15 text-[#ffffff] touch-target font-semibold">Solo esta compra</button>' +
+              '</div>' + rows + '</div>'
+            );
+          } else {
+            bloques.push(rows);
+          }
+        });
+        ticketEl.innerHTML =
+          '<p class="text-[11px] text-white/45 px-4 pb-2">Marcá qué vas a cobrar ahora (podés dejar deuda pendiente).</p>' +
+          bloques.join('') +
+          '<div class="flex justify-between items-baseline px-4 pt-4 pb-2 border-t border-white/08 mt-2">' +
+          '<span class="text-white/60 text-sm">Total de la cuenta</span>' +
+          '<span class="font-bold text-lg text-white/90">$' + Math.round(total).toLocaleString('es-AR') + '</span></div>';
       }
       if (sinTel) {
         var tieneTel = !!(_libretalClienteActual.telefono && String(_libretalClienteActual.telefono).replace(/\D/g, ''));
@@ -10588,6 +10921,7 @@
       if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
       if (!state._restoringFromHistory) pushHistoryExtra({ overlay: 'libretalCuentaModal' });
       lucide.createIcons();
+      window._libretaCuentaSyncSeleccion();
     };
 
     window._cerrarCuentaLibreta = function () {
@@ -10599,6 +10933,7 @@
         history.replaceState(n, '', location.href);
       }
       _libretalCuentaItemsCache = null;
+      _libretalCuentaModalGroups = null;
     };
 
     window._libretaCuentaCompartirPendiente = function () {
@@ -10609,10 +10944,30 @@
 
     window._libretaCuentaConfirmarCobro = async function () {
       if (!_libretalClienteActual || !supabaseClient || !currentUser?.id) return;
-      var items = _libretalCuentaItemsCache;
-      if (!items || !items.length) return;
+      var cache = _libretalCuentaItemsCache;
+      if (!cache || !cache.length) return;
+      var ticketEl = document.getElementById('libretalCuentaTicket');
+      var selIds = [];
+      if (ticketEl) {
+        ticketEl.querySelectorAll('.libreta-cuenta-chk[data-libreta-item-id]').forEach(function (chk) {
+          if (!chk.checked) return;
+          var id = chk.getAttribute('data-libreta-item-id');
+          if (id) selIds.push(id);
+        });
+      }
+      if (!selIds.length) {
+        if (typeof showScanToast === 'function') showScanToast('Marcá al menos un ítem para cobrar', true);
+        return;
+      }
+      var items = cache.filter(function (it) { return selIds.indexOf(String(it.id)) !== -1; });
+      if (!items.length) return;
+      var totalTodo = cache.reduce(function (s, i) { return s + Number(i.monto || 0); }, 0);
       var total = items.reduce(function (s, i) { return s + Number(i.monto || 0); }, 0);
-      if (!(await ferriolAppConfirm('¿Confirmás que cobraste $' + Math.round(total).toLocaleString('es-AR') + ' y querés saldar la cuenta?'))) return;
+      var esTotal = Math.round(total) === Math.round(totalTodo);
+      var msgConfirm = esTotal
+        ? ('¿Confirmás que cobraste $' + Math.round(total).toLocaleString('es-AR') + ' y querés saldar toda la cuenta?')
+        : ('¿Confirmás el cobro de $' + Math.round(total).toLocaleString('es-AR') + ' por ' + items.length + ' ítem(s) seleccionado(s)?');
+      if (!(await ferriolAppConfirm(msgConfirm))) return;
       var ids = items.map(function (i) { return i.id; }).filter(Boolean);
       if (!ids.length) return;
       var cobroGrupoId = _libretaNewCobroGrupoId();
@@ -10690,7 +11045,11 @@
         document.getElementById('libretalCuentaFooterPendiente').classList.add('hidden');
         var exito = document.getElementById('libretalCuentaFooterExito');
         var txt = document.getElementById('libretalCuentaExitoTexto');
-        if (txt) txt.textContent = 'Cuenta saldada por $' + Math.round(total).toLocaleString('es-AR');
+        if (txt) {
+          txt.textContent = esTotal
+            ? ('Cuenta saldada por $' + Math.round(total).toLocaleString('es-AR'))
+            : ('Cobro registrado: $' + Math.round(total).toLocaleString('es-AR') + ' · Quedó deuda pendiente');
+        }
         var btnWAc = document.getElementById('libretalCuentaBtnWAComprobante');
         var okTel = !!(_libretalClienteActual.telefono && String(_libretalClienteActual.telefono).replace(/\D/g, ''));
         if (btnWAc) {
@@ -10698,7 +11057,7 @@
           btnWAc.classList.toggle('opacity-45', !okTel);
         }
         if (exito) exito.classList.remove('hidden');
-        if (typeof showScanToast === 'function') showScanToast('Cuenta saldada', false);
+        if (typeof showScanToast === 'function') showScanToast(esTotal ? 'Cuenta saldada' : 'Cobro registrado', false);
         lucide.createIcons();
       } catch (e) {
         console.error(e);
@@ -13394,6 +13753,14 @@ async function showApp() {
           var r2 = await supabaseClient.from('ferriol_membership_day_requests').select('*').eq('requested_by', currentUser.id).order('created_at', { ascending: false }).limit(20);
           var r2p = await supabaseClient.from('ferriol_partner_provision_requests').select('*').eq('requested_by', currentUser.id).order('created_at', { ascending: false }).limit(25);
           var r2k = await supabaseClient.from('ferriol_kiosquero_provision_requests').select('*').eq('requested_by', currentUser.id).order('created_at', { ascending: false }).limit(25);
+          var r2u =
+            currentUser.role === 'partner'
+              ? await supabaseClient
+                  .from('ferriol_kiosquero_partner_upgrade_requests')
+                  .select('*')
+                  .order('created_at', { ascending: false })
+                  .limit(25)
+              : { data: [], error: null };
           var pool2 = window._ferriolAllProfilesCache || [];
           function nameOf2(id) {
             var p = pool2.find(function (x) { return x.id === id; });
@@ -13414,6 +13781,46 @@ async function showApp() {
                 var kn = String(nameOf2(row.kiosquero_user_id)).replace(/</g, '&lt;');
                 var dt = row.created_at ? String(row.created_at).slice(0, 10) : '';
                 h2 += '<div class="rounded-lg border border-white/10 bg-black/20 px-2 py-1.5"><span class="' + st + '">' + row.status + '</span> · ' + kn + ' · ' + (row.days_delta > 0 ? '+' : '') + row.days_delta + ' d · ' + dt + '</div>';
+              });
+              h2 += '</div>';
+            }
+          }
+          if (r2u.error) {
+            h2 +=
+              '<p class="text-xs text-sky-200/90 font-medium mb-1 mt-2">Upgrade negocio → distribuidor</p><p class="text-[10px] text-red-300/90 mb-2">' +
+              String(r2u.error.message || '') +
+              '</p>';
+          } else {
+            var urows = r2u.data || [];
+            h2 += '<p class="text-xs text-sky-200/90 font-medium mb-2 mt-2">Upgrade negocio → distribuidor (referidos)</p>';
+            if (urows.length === 0) {
+              h2 +=
+                '<p class="text-[10px] text-white/50 mb-3">Solicitudes que envían tus comercios para pasar a socio. Si cargaron una y no aparece, ejecutá en Supabase el SQL <strong class="text-white/65">supabase-ferriol-kpur-partner-referral-select.sql</strong>.</p>';
+            } else {
+              h2 += '<div class="space-y-1.5 max-h-[20vh] overflow-y-auto text-[11px] mb-3">';
+              urows.forEach(function (ur) {
+                var st =
+                  ur.status === 'pending'
+                    ? 'text-amber-200'
+                    : ur.status === 'approved'
+                      ? 'text-emerald-200/90'
+                      : 'text-red-200/80';
+                var kn = String(nameOf2(ur.profile_id)).replace(/</g, '&lt;');
+                var dt = ur.created_at ? String(ur.created_at).slice(0, 10) : '';
+                var note = ur.applicant_note
+                  ? ' · <span class="text-white/40">' + String(ur.applicant_note).replace(/</g, '&lt;').slice(0, 100) + '</span>'
+                  : '';
+                h2 +=
+                  '<div class="rounded-lg border border-sky-500/25 bg-sky-950/15 px-2 py-1.5"><span class="' +
+                  st +
+                  '">' +
+                  ur.status +
+                  '</span> · ' +
+                  kn +
+                  ' · ' +
+                  dt +
+                  note +
+                  '</div>';
               });
               h2 += '</div>';
             }
@@ -15077,6 +15484,9 @@ async function showApp() {
         }
         closeClientSaleRequestModal();
         if (fileIn) fileIn.value = '';
+        try {
+          void loadPartnerVentasComprobantesHistorial();
+        } catch (_) {}
         ferriolAppAlert('Enviado. La empresa lo revisa en Solicitudes. Cuando apruebe, verás la comisión en Ingresos.');
       };
     }
@@ -15918,8 +16328,4 @@ async function showApp() {
         masIdeasSave(arr);
         container.insertBefore(masIdeasMakeCard(nota), container.firstChild);
         var ta = container.querySelector('.nota-body');
-        if (ta) ta.focus();
-      }
-      var masIdeasAddBtn = document.getElementById('masIdeasAddBtn');
-      if (masIdeasAddBtn) masIdeasAddBtn.addEventListener('click', masIdeasAdd);
-    })();
+        if (ta) ta.f

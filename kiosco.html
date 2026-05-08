@@ -1245,11 +1245,19 @@
         <p id="libretalCuentaSinTel" class="hidden text-amber-400/90 text-xs text-center px-4 mt-3">Agregá un teléfono al cliente para compartir por WhatsApp.</p>
       </div>
       <div id="libretalCuentaFooterPendiente" class="libreta-cuenta-modal-footer shrink-0 border-t border-white/10 px-4 pt-3 flex flex-col gap-2 bg-[#020b05]/80 backdrop-blur-md">
+        <div class="flex items-center justify-between gap-3 px-0.5">
+          <span class="text-xs text-white/55">Total a cobrar</span>
+          <span id="libretalCuentaTotalSeleccion" class="text-lg font-bold text-amber-400 tabular-nums">$0</span>
+        </div>
+        <div class="flex gap-2">
+          <button type="button" onclick="window._libretaCuentaSeleccionarTodo(true)" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-xs font-semibold touch-target">Marcar todo</button>
+          <button type="button" onclick="window._libretaCuentaSeleccionarTodo(false)" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-xs font-semibold touch-target">Desmarcar todo</button>
+        </div>
         <button type="button" id="libretalCuentaBtnWA" onclick="window._libretaCuentaCompartirPendiente()" class="btn-neomorphic rounded-xl py-3 text-sm font-semibold touch-target flex items-center justify-center gap-2 w-full">
           <i data-lucide="message-circle" class="w-4 h-4"></i> Compartir ticket por WhatsApp
         </button>
-        <button type="button" onclick="window._libretaCuentaConfirmarCobro()" class="btn-glow rounded-xl py-3.5 text-sm font-semibold touch-target flex items-center justify-center gap-2 w-full">
-          <i data-lucide="banknote" class="w-4 h-4"></i> Cobré — marcar cuenta saldada
+        <button type="button" id="libretalCuentaBtnCobrar" onclick="window._libretaCuentaConfirmarCobro()" class="btn-glow rounded-xl py-3.5 text-sm font-semibold touch-target flex items-center justify-center gap-2 w-full">
+          <i data-lucide="banknote" class="w-4 h-4"></i> Registrar cobro (selección)
         </button>
       </div>
       <div id="libretalCuentaFooterExito" class="hidden libreta-cuenta-modal-footer shrink-0 border-t border-white/10 px-4 pt-3 flex flex-col gap-2 bg-[#020b05]/80 backdrop-blur-md">
@@ -3103,38 +3111,69 @@
         </div>
         <!-- Sección Solicitudes: colas de acción + historial (fundador) -->
         <div id="super-section-solicitudes" class="super-section super-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; min-height: 100%; max-height: 85vh; padding-bottom: 6rem;">
-          <div id="solicitudesHubComprobantesRow" class="hidden mb-5 rounded-2xl border border-cyan-500/30 bg-cyan-500/[0.07] p-3 sm:p-4">
-            <h3 class="text-sm font-semibold text-cyan-100/95 mb-1 flex items-center gap-2">
-              <i data-lucide="image" class="w-4 h-4 shrink-0"></i>
-              Comprobantes entrantes
-            </h3>
-            <p class="text-[11px] text-white/50 mb-3">Bandeja de comercios y distribuidores: aprobás o registrás la venta según corresponda.</p>
-            <button type="button" id="btnSolicitudesHubOpenComprobantes" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target flex items-center justify-center gap-2 text-sm">
-              <i data-lucide="folder-open" class="w-5 h-5 shrink-0"></i>
-              Abrir comprobantes y movimientos
-            </button>
-          </div>
-          <div id="solicitudesDistribuidorCargarVentaBar" class="hidden mb-5 rounded-2xl border border-teal-400/35 bg-teal-950/25 p-4 sm:p-4">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
-              <div class="min-w-0">
-                <p class="text-sm font-semibold text-teal-100">Venta como distribuidor del sistema</p>
-                <p class="text-[11px] text-white/55 mt-1 leading-snug">Kit, licencia de comercio o cuota del socio: cargá el comprobante acá. La empresa valida en la pestaña <strong class="text-white/70">Ventas</strong> de esta misma pantalla.</p>
+          <!-- Partner / fundador vista socio: tres áreas dentro de Solicitudes -->
+          <div id="partnerSolicitudesSubShell" class="partner-solicitudes-sub-shell hidden mb-6">
+            <p class="text-[11px] text-white/45 mb-2 px-0.5">Elegí el tipo de trámite. La empresa revisa en su panel; vos ves el estado y el historial.</p>
+            <div id="partnerSolicitudesTabBar" class="flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 flex-wrap mb-4" role="tablist" aria-label="Solicitudes del socio">
+              <button type="button" class="partner-solic-tab inline-flex flex-1 min-w-[5.5rem] items-center justify-center gap-1 py-2.5 px-1 rounded-lg text-[11px] sm:text-xs font-semibold touch-target transition-all border border-[#ffffff]/50 bg-[#ffffff]/20 text-white" data-partner-solic-tab="ventas" role="tab" aria-selected="true"><i data-lucide="image-plus" class="w-3.5 h-3.5 shrink-0 hidden sm:block"></i><span class="truncate text-center leading-tight">Ventas y comprobantes</span></button>
+              <button type="button" class="partner-solic-tab inline-flex flex-1 min-w-[5.5rem] items-center justify-center gap-1 py-2.5 px-1 rounded-lg text-[11px] sm:text-xs font-semibold touch-target transition-all border border-transparent text-white/55 hover:text-white/80" data-partner-solic-tab="distribuidor" role="tab" aria-selected="false"><i data-lucide="user-plus" class="w-3.5 h-3.5 shrink-0 hidden sm:block"></i><span class="truncate text-center leading-tight">Pagos · nuevos distribuidores</span></button>
+              <button type="button" class="partner-solic-tab inline-flex flex-1 min-w-[5.5rem] items-center justify-center gap-1 py-2.5 px-1 rounded-lg text-[11px] sm:text-xs font-semibold touch-target transition-all border border-transparent text-white/55 hover:text-white/80" data-partner-solic-tab="retiros" role="tab" aria-selected="false"><i data-lucide="wallet" class="w-3.5 h-3.5 shrink-0 hidden sm:block"></i><span class="truncate text-center leading-tight">Solicitud de retiro</span></button>
+            </div>
+            <div id="partnerSolicPaneVentas" class="partner-solic-subpane" data-partner-solic-pane="ventas">
+              <div id="solicitudesHubComprobantesRow" class="hidden mb-5 rounded-2xl border border-cyan-500/30 bg-cyan-500/[0.07] p-3 sm:p-4">
+                <h3 class="text-sm font-semibold text-cyan-100/95 mb-1 flex items-center gap-2">
+                  <i data-lucide="image" class="w-4 h-4 shrink-0"></i>
+                  Comprobantes entrantes
+                </h3>
+                <p class="text-[11px] text-white/50 mb-3">Bandeja de comercios y distribuidores: aprobás o registrás la venta según corresponda.</p>
+                <button type="button" id="btnSolicitudesHubOpenComprobantes" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target flex items-center justify-center gap-2 text-sm">
+                  <i data-lucide="folder-open" class="w-5 h-5 shrink-0"></i>
+                  Abrir comprobantes y movimientos
+                </button>
               </div>
-              <button type="button" id="btnSolicitudesCargarVentaComprobante" class="btn-glow shrink-0 py-3 px-4 rounded-xl text-sm font-semibold touch-target whitespace-nowrap">Cargar venta con comprobante</button>
+              <div id="solicitudesDistribuidorCargarVentaBar" class="hidden mb-5 rounded-2xl border border-teal-400/35 bg-teal-950/25 p-4 sm:p-4">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+                  <div class="min-w-0">
+                    <p class="text-sm font-semibold text-teal-100">Venta como distribuidor del sistema</p>
+                    <p class="text-[11px] text-white/55 mt-1 leading-snug">Kit, licencia de comercio o cuota del socio: cargá el comprobante acá. La empresa valida en la pestaña <strong class="text-white/70">Ventas</strong> del panel fundador.</p>
+                  </div>
+                  <button type="button" id="btnSolicitudesCargarVentaComprobante" class="btn-glow shrink-0 py-3 px-4 rounded-xl text-sm font-semibold touch-target whitespace-nowrap">Cargar venta con comprobante</button>
+                </div>
+              </div>
+              <div class="rounded-xl border border-white/12 bg-black/20 p-3 sm:p-4 mb-2">
+                <h3 class="text-sm font-semibold text-white/90 mb-1 flex items-center gap-2"><i data-lucide="history" class="w-4 h-4 text-teal-200/90"></i> Historial · ventas enviadas con comprobante</h3>
+                <p class="text-[10px] text-white/45 mb-3">Todas las solicitudes que cargaste para que Ferriol verifique y acredite comisión.</p>
+                <div id="partnerSolicVentasHistorial" class="text-sm min-h-[3rem]"><p class="text-white/40 text-xs py-2 text-center">Abrís esta pestaña para cargar el historial.</p></div>
+              </div>
             </div>
-          </div>
-          <div id="partnerTramitesPanel" class="partner-tramites-panel mb-6" style="display: none;">
-            <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
-              <i data-lucide="list" class="w-5 h-5 text-[#ffffff]"></i>
-              Trámites
-            </h2>
-            <p class="text-xs text-white/50 mb-4">Seguimiento de lo que enviaste a la empresa (días de vigencia, altas, etc.). <strong class="text-white/65">Saldo y retiros</strong> están en la pestaña <strong class="text-white/70">Billetera</strong>.</p>
-            <div id="partnerSolicPaneTramites" class="ferriol-solic-partner-pane mb-4" data-partner-solic-pane="tramites">
-            <div class="rounded-xl border border-cyan-500/25 bg-cyan-500/05 p-3 mb-2">
-              <h3 class="text-xs font-semibold text-cyan-200/90 mb-2">Estado de tus solicitudes</h3>
-              <p class="text-[10px] text-white/45 mb-2">Solicitudes de días, altas de negocio, etc.</p>
+            <div id="partnerSolicPaneDistribuidor" class="partner-solic-subpane hidden" style="display: none;" data-partner-solic-pane="distribuidor">
+              <div id="partnerTramitesPanel" class="partner-tramites-panel mb-2" style="display: none;">
+                <h2 class="font-bold text-lg sm:text-xl mb-1 flex items-center gap-2">
+                  <i data-lucide="badge-dollar-sign" class="w-5 h-5 text-[#ffffff]"></i>
+                  Pagos y altas de distribuidores
+                </h2>
+                <p class="text-xs text-white/50 mb-4">Upgrade kiosco→socio, nuevas cuentas socio, nuevos negocios y solicitudes de días de vigencia que pediste a la empresa. El estado aparece abajo; <strong class="text-white/65">retiros de dinero</strong> están en la pestaña <strong class="text-white/70">Solicitud de retiro</strong> o en <strong class="text-white/70">Billetera</strong>.</p>
+                <div id="partnerSolicPaneTramites" class="ferriol-solic-partner-pane mb-4" data-partner-solic-pane="tramites">
+                  <div class="rounded-xl border border-cyan-500/25 bg-cyan-500/05 p-3 mb-2">
+                    <h3 class="text-xs font-semibold text-cyan-200/90 mb-2">Estado e historial</h3>
+                    <p class="text-[10px] text-white/45 mb-2">Seguí cada trámite hasta que Ferriol lo apruebe o rechace.</p>
+                  </div>
+                  <div id="superDayRequestsPartnerBox" class="hidden rounded-xl border border-cyan-500/35 bg-cyan-500/08 px-3 py-3 text-sm"></div>
+                </div>
+              </div>
             </div>
-            <div id="superDayRequestsPartnerBox" class="hidden rounded-xl border border-cyan-500/35 bg-cyan-500/08 px-3 py-3 text-sm"></div>
+            <div id="partnerSolicPaneRetiros" class="partner-solic-subpane hidden" style="display: none;" data-partner-solic-pane="retiros">
+              <div class="rounded-2xl border border-white/35 bg-white/[0.08] p-4 mb-4">
+                <p class="text-xs text-white/50 mb-1">Disponible para retirar</p>
+                <p id="partnerSolicWithdrawAvail" class="text-2xl font-bold text-[#ffffff] tabular-nums">—</p>
+                <p id="partnerSolicWithdrawBreakdown" class="text-[10px] text-white/40 mt-2"></p>
+                <button type="button" id="btnPartnerWithdrawOpenFromSolic" class="btn-glow rounded-xl py-3 w-full font-semibold mt-4 touch-target">Retirar dinero</button>
+                <p class="text-[10px] text-white/35 mt-3">Misma billetera que en la pestaña inferior <strong class="text-white/55">Billetera</strong>; acá podés gestionar retiros sin salir de Solicitudes.</p>
+              </div>
+              <div class="rounded-xl border border-white/10 bg-black/20 p-3 mb-4">
+                <h3 class="text-sm font-semibold text-white/90 mb-2">Historial de retiros</h3>
+                <div id="partnerSolicWithdrawHistory" class="text-sm min-h-[3rem]"><p class="text-white/45 text-xs py-2 text-center">Cargando…</p></div>
+              </div>
             </div>
           </div>
           <h2 class="founder-solicitudes-heading font-bold text-xl mb-1 flex items-center gap-2 super-only super-main-only">

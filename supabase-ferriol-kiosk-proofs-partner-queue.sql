@@ -137,8 +137,8 @@ DECLARE
   knm text;
 BEGIN
   SELECT role INTO v_role FROM public.profiles WHERE id = v_actor LIMIT 1;
-  IF v_role IS DISTINCT FROM 'partner' THEN
-    RETURN jsonb_build_object('ok', false, 'error', 'Solo distribuidores (partners) pueden registrar la venta.');
+  IF v_role IS DISTINCT FROM 'partner' AND v_role IS DISTINCT FROM 'super' THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'Solo distribuidores o administradores empresa pueden registrar la venta desde esta cola.');
   END IF;
 
   SELECT * INTO q FROM public.ferriol_kiosk_partner_proof_queue WHERE id = p_queue_id FOR UPDATE;
