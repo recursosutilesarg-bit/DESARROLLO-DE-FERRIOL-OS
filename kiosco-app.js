@@ -3676,6 +3676,8 @@
       superSection: 'ingresos',  // afiliados | ingresos | sistema | ajustes | ajustes-* | solicitudes | pagos-pendientes | mas | partner-comprobantes
       /** Pantalla del panel super a la que vuelve «Volver» desde el hub Configuraciones (fundador · vista empresa). */
       superFounderHubReturn: 'ingresos',
+      /** Panel kiosco previo antes de abrir Configuración del negocio (para «Volver» desde el hub). */
+      kioscoConfigReturnPanel: 'dashboard',
       _returnSuperSectionFromComprobantes: 'ingresos',
       afiliadosSubTab: 'usuarios',  // usuarios (kiosquero) | distribuidores (partner)
       superUiMode: 'empresa',  // empresa | socio | negocio — solo si role === 'super'
@@ -7709,6 +7711,10 @@
         switchSuperSection('ingresos');
       }
       if (name !== 'scanner') window._scanForProductCode = false;
+      if (name === 'config') {
+        state.kioscoConfigReturnPanel =
+          state.currentPanel && state.currentPanel !== 'config' ? state.currentPanel : 'dashboard';
+      }
       state.currentPanel = name;
       syncInventoryPickScannerBtn();
       document.body.setAttribute('data-panel', name);
@@ -11953,7 +11959,9 @@ async function showApp() {
         var exitMasBtn = e.target.closest('[data-config-exit-mas]');
         if (exitMasBtn && root.contains(exitMasBtn)) {
           openConfigSubview('');
-          goToPanel('mas');
+          var ret = state.kioscoConfigReturnPanel || 'dashboard';
+          if (ret === 'config') ret = 'dashboard';
+          goToPanel(ret);
           return;
         }
         var backBtn = e.target.closest('[data-config-back]');
