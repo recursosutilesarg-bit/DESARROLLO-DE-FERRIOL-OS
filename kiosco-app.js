@@ -6420,8 +6420,9 @@
       if (!currentUser) return false;
       if (currentUser.role === 'partner') return !isPartnerKioscoPreviewMode();
       if (currentUser.role === 'super') {
+        // En admin, mostrar ajustes del perfil salvo en modo negocio simulado.
         if (isSuperKioscoPreviewMode()) return false;
-        return state.superUiMode === 'empresa' || state.superUiMode === 'socio';
+        return true;
       }
       return false;
     }
@@ -6436,7 +6437,8 @@
       if (empresaWrap) empresaWrap.classList.add('hidden');
       if (redWrap) redWrap.classList.add('hidden');
       if (show && currentUser) {
-        if (currentUser.role === 'super' && isEmpresaLensSuper()) {
+        if (currentUser.role === 'super') {
+          // Fundador/admin: siempre mostrar ajustes del sistema en menú perfil.
           if (empresaWrap) empresaWrap.classList.remove('hidden');
         } else {
           if (redWrap) redWrap.classList.remove('hidden');
@@ -8105,6 +8107,15 @@
     var accountMenuBtnEmpAjustesSistema = document.getElementById('accountMenuBtnEmpAjustesSistema');
     if (accountMenuBtnEmpAjustesSistema) {
       accountMenuBtnEmpAjustesSistema.addEventListener('click', function () {
+        if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper()) return;
+        closeAccountMenuDrawer(true);
+        state.superSection = 'ajustes';
+        goToPanel('super');
+      });
+    }
+    var accountMenuBtnEmpConfiguraciones = document.getElementById('accountMenuBtnEmpConfiguraciones');
+    if (accountMenuBtnEmpConfiguraciones) {
+      accountMenuBtnEmpConfiguraciones.addEventListener('click', function () {
         if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper()) return;
         closeAccountMenuDrawer(true);
         state.superSection = 'ajustes';
