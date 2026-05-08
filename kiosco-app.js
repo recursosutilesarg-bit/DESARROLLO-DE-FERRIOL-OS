@@ -8116,30 +8116,12 @@
         } catch (_) {}
       });
     }
-    var accountMenuBtnEmpAjustesSistema = document.getElementById('accountMenuBtnEmpAjustesSistema');
-    if (accountMenuBtnEmpAjustesSistema) {
-      accountMenuBtnEmpAjustesSistema.addEventListener('click', function () {
-        if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper()) return;
-        closeAccountMenuDrawer(true);
-        state.superSection = 'ajustes';
-        goToPanel('super');
-      });
-    }
     var accountMenuBtnEmpConfiguraciones = document.getElementById('accountMenuBtnEmpConfiguraciones');
     if (accountMenuBtnEmpConfiguraciones) {
       accountMenuBtnEmpConfiguraciones.addEventListener('click', function () {
         if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper()) return;
         closeAccountMenuDrawer(true);
         state.superSection = 'configuraciones';
-        goToPanel('super');
-      });
-    }
-    var accountMenuBtnEmpColorApp = document.getElementById('accountMenuBtnEmpColorApp');
-    if (accountMenuBtnEmpColorApp) {
-      accountMenuBtnEmpColorApp.addEventListener('click', function () {
-        if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper()) return;
-        closeAccountMenuDrawer(true);
-        state.superSection = 'ajustes-tema';
         goToPanel('super');
       });
     }
