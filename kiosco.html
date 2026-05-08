@@ -1948,6 +1948,15 @@
               <p class="text-[10px] text-white/40 mt-1">Cobros declarados <strong class="text-red-200/80">rechazados</strong></p>
             </div>
           </div>
+          <div id="ingresosDistribuidorVentasBar" class="hidden mb-5 rounded-2xl border border-teal-400/35 bg-teal-950/25 p-4 sm:p-4">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+              <div class="min-w-0">
+                <p class="text-sm font-semibold text-teal-100">Venta como distribuidor del sistema</p>
+                <p class="text-[11px] text-white/55 mt-1 leading-snug">Kit, licencia de comercio o cuota del socio: cargá comprobante como haría un partner. La validación sigue en <strong class="text-white/70">Solicitudes</strong> (ventas con comprobante).</p>
+              </div>
+              <button type="button" id="btnIngresosDistribuidorCargarVenta" class="btn-glow shrink-0 py-3 px-4 rounded-xl text-sm font-semibold touch-target whitespace-nowrap">Cargar venta con comprobante</button>
+            </div>
+          </div>
           <div class="rounded-2xl border border-white/15 bg-black/25 p-4 sm:p-5 mb-5">
             <div class="flex items-center justify-between gap-2 mb-3">
               <h3 id="ingresosChartTitle" class="font-semibold text-sm text-white/90">Desempeño diario</h3>
@@ -3332,7 +3341,7 @@
       <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="clientSaleRequestModalOverlay"></div>
       <div class="relative glass-strong rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto scale-in">
         <div class="flex items-center justify-between mb-3">
-          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="receipt" class="w-5 h-5 text-white"></i> Enviar venta con comprobante</h3>
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="receipt" class="w-5 h-5 text-white"></i> Venta distribuidor · enviar comprobante</h3>
           <button type="button" id="clientSaleRequestModalClose" class="btn-neomorphic rounded-xl p-2 touch-target"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <p class="text-sm text-white/60 mb-3">Completá los datos. El <strong class="text-white/85">cliente debe estar ya registrado en Ferriol</strong> con el mismo email (misma base que el perfil) para que la empresa pueda acreditar el pago y <strong class="text-white/90">tu comisión en Ingresos</strong> al aprobar.</p>
