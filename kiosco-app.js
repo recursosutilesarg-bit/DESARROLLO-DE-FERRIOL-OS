@@ -6447,7 +6447,7 @@
       if (navMas) navMas.classList.toggle('hidden', show);
     }
 
-    /** Kiosquero (y vista negocio simulada): Configuración en menú del avatar; se oculta el tile en Más. */
+    /** Botón Configuración en menú perfil: kiosquero, partner y super. */
     function syncAccountMenuKiosqueroConfigPlacement() {
       var cfgBtn = document.getElementById('accountMenuBtnConfig');
       var masTile = document.querySelector('.kiosco-mas-config-entry');
@@ -6455,11 +6455,18 @@
       var showInProfile =
         !!(
           currentUser &&
-          (currentUser.role === 'kiosquero' || isAnyKioscoPreviewMode())
+          (
+            currentUser.role === 'kiosquero' ||
+            isAnyKioscoPreviewMode() ||
+            currentUser.role === 'partner' ||
+            currentUser.role === 'super'
+          )
         );
       if (cfgBtn) cfgBtn.classList.toggle('hidden', !showInProfile);
-      if (masTile) masTile.classList.toggle('hidden', showInProfile);
-      if (masPrimary) masPrimary.classList.toggle('hidden', showInProfile);
+      // Solo kiosquero mueve Configuración desde "Más" al perfil.
+      var hideKioscoMasTile = !!(currentUser && (currentUser.role === 'kiosquero' || isAnyKioscoPreviewMode()));
+      if (masTile) masTile.classList.toggle('hidden', hideKioscoMasTile);
+      if (masPrimary) masPrimary.classList.toggle('hidden', hideKioscoMasTile);
     }
 
     /** Panel “Mi plan” (action sheet · opciones sobre el menú cuenta) */
@@ -8002,6 +8009,11 @@
     if (accountMenuBtnConfig) {
       accountMenuBtnConfig.addEventListener('click', function () {
         closeAccountMenuDrawer(true);
+        if (currentUser && (currentUser.role === 'partner' || currentUser.role === 'super')) {
+          state.superSection = 'configuraciones';
+          goToPanel('super');
+          return;
+        }
         goToPanel('config');
       });
     }
