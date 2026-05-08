@@ -6209,11 +6209,11 @@
         if (isEmpresaLensSuper()) {
           navLbl.textContent = 'Solicitudes';
           navBtn.title = 'Solicitudes · retiros, ventas y comprobantes';
-          if (navIcon) navIcon.setAttribute('data-lucide', 'clipboard-list');
+          if (navIcon) navIcon.setAttribute('data-lucide', 'inbox');
         } else if (isPartnerLens()) {
           navLbl.textContent = 'Billetera';
           navBtn.title = 'Billetera · comisiones';
-          if (navIcon) navIcon.setAttribute('data-lucide', 'wallet');
+          if (navIcon) navIcon.setAttribute('data-lucide', 'circle-dollar-sign');
         }
       }
       syncPartnerSolicitudesTabShell();

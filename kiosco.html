@@ -366,7 +366,7 @@
           </div>
         </div>
         <button id="cartBtn" class="btn-neomorphic rounded-xl p-2.5 relative transition-all duration-300 hover:scale-105 active:scale-95 touch-target kiosquero-only">
-          <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+          <i data-lucide="shopping-basket" class="w-5 h-5"></i>
           <span id="cartCount" class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#dc2626] text-xs font-bold flex items-center justify-center">0</span>
         </button>
         <button type="button" id="headerProfileBtn" class="relative w-10 h-10 rounded-full border-2 border-white/30 bg-gradient-to-br from-white/40 to-violet-600/35 overflow-hidden shrink-0 touch-target shadow-md hover:border-white/50 active:scale-95 transition-all cursor-pointer z-[51]" title="Mi cuenta" aria-label="Abrir menú de mi cuenta">
@@ -401,29 +401,29 @@
       <div class="flex items-stretch justify-between gap-0.5 sm:gap-1 flex-nowrap overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <button type="button" data-super-section="solicitudes" id="navSuperWalletOrSolicitudesBtn" class="super-nav-btn bottom-nav-btn relative flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Cola de trabajo: solicitudes o billetera">
           <span class="relative inline-flex shrink-0">
-            <i data-lucide="clipboard-list" id="navSuperWalletOrSolicitudesIcon" class="w-5 h-5 shrink-0"></i>
+            <i data-lucide="inbox" id="navSuperWalletOrSolicitudesIcon" class="w-5 h-5 shrink-0"></i>
             <span id="navSuperSolicitudesBadge" class="pointer-events-none absolute -top-1 -right-2 z-[1] min-w-[0.9375rem] h-[0.9375rem] px-0.5 rounded-full bg-red-500 text-[8px] font-bold leading-[0.9375rem] text-white text-center shadow tabular-nums hidden" aria-hidden="true"></span>
           </span>
           <span class="truncate w-full text-center" id="navSuperWalletOrSolicitudesLabel">Solicitudes</span>
         </button>
         <button type="button" data-super-section="pagos-pendientes" class="super-nav-btn super-only super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Registrar transferencias de retiros a socios">
-          <i data-lucide="banknote" class="w-5 h-5 shrink-0"></i>
+          <i data-lucide="coins" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Pagos</span>
         </button>
         <button type="button" id="navSuperIngresosBtn" data-super-section="ingresos" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Ingresos · métricas y ventas">
-          <i data-lucide="trending-up" class="w-5 h-5 shrink-0"></i>
+          <i data-lucide="chart-line" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Ingresos</span>
         </button>
         <button data-super-section="afiliados" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Directorio Comercios / Distribuidores">
-          <i data-lucide="users" class="w-5 h-5 shrink-0"></i>
+          <i data-lucide="users-round" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Afiliados</span>
         </button>
         <button data-super-section="sistema" class="super-nav-btn super-only super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Tablero MLM, cobros y referencia">
-          <i data-lucide="git-fork" class="w-5 h-5 shrink-0"></i>
+          <i data-lucide="network" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Sistema</span>
         </button>
         <button type="button" id="navSuperBottomMasBtn" data-super-section="mas" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Ajustes y herramientas">
-          <i data-lucide="settings" class="w-5 h-5 shrink-0"></i>
+          <i data-lucide="sliders-horizontal" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Ajustes</span>
         </button>
       </div>
@@ -435,24 +435,24 @@
     <div class="bottom-nav-bar glass-strong border-t border-white/10 px-2 py-3 max-w-2xl mx-auto">
       <div class="flex items-center justify-between gap-1">
         <button data-nav="dashboard" class="bottom-nav-btn nav-item flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Inicio">
-          <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i>
+          <i data-lucide="house" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Inicio</span>
         </button>
         <button data-nav="inventory" class="bottom-nav-btn nav-item flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Productos">
-          <i data-lucide="package" class="w-5 h-5 shrink-0"></i>
+          <i data-lucide="shopping-basket" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Productos</span>
         </button>
         <div class="flex-shrink-0 flex items-center justify-center px-1">
           <button data-nav="scanner" id="scannerCircleBtn" class="scanner-circle btn-glow pulse-glow flex items-center justify-center rounded-full w-14 h-14 sm:w-16 sm:h-16 touch-target" title="Escanear">
-            <i data-lucide="scan" class="w-7 h-7 sm:w-8 sm:h-8 text-white"></i>
+            <i data-lucide="scan-barcode" class="w-7 h-7 sm:w-8 sm:h-8 text-white"></i>
           </button>
         </div>
         <button data-nav="caja" class="bottom-nav-btn nav-item flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Caja">
-          <i data-lucide="wallet" class="w-5 h-5 shrink-0"></i>
+          <i data-lucide="circle-dollar-sign" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Caja</span>
         </button>
         <button data-nav="mas" class="bottom-nav-btn nav-item flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target" title="Deudores y Ajustes">
-          <i data-lucide="menu" class="w-5 h-5 shrink-0"></i>
+          <i data-lucide="layers-2" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Más</span>
         </button>
       </div>
@@ -673,7 +673,7 @@
             </button>
           </div>
           <button id="scanHoldBtn" type="button" class="ferriol-scanner-hold-btn touch-target select-none" aria-label="Mantener presionado para escanear con la cámara">
-            <i data-lucide="scan-line" class="ferriol-scanner-hold-icon"></i>
+            <i data-lucide="scan-barcode" class="ferriol-scanner-hold-icon"></i>
             <span class="ferriol-scanner-hold-label">Escanear</span>
           </button>
           <p class="ferriol-scanner-hold-hint">Mantené presionado para escanear</p>
@@ -690,7 +690,7 @@
         </span>
         <div class="flex items-center gap-2">
           <button id="inventoryPickScannerBtn" type="button" class="hidden btn-neomorphic rounded-xl px-3 py-2 flex items-center gap-1.5 text-sm font-semibold touch-target">
-            <i data-lucide="scan" class="w-4 h-4"></i> Escanear
+            <i data-lucide="scan-barcode" class="w-4 h-4"></i> Escanear
           </button>
           <button id="addProduct" class="btn-glow rounded-xl px-3 py-2 flex items-center gap-1.5 text-sm font-semibold touch-target">
             <i data-lucide="plus" class="w-4 h-4"></i> Nuevo
@@ -710,20 +710,20 @@
       <!-- HUB: tarjetas (grid 2 columnas) -->
       <div id="caja-hub" class="p-4">
         <h2 class="font-bold text-xl mb-5 flex items-center gap-2 pt-1">
-          <i data-lucide="wallet" class="w-5 h-5 text-[#ffffff]"></i>
+          <i data-lucide="circle-dollar-sign" class="w-5 h-5 text-[#ffffff]"></i>
           Caja
         </h2>
         <div class="grid grid-cols-2 gap-4">
           <button onclick="window._switchCajaTab('cierre')" class="caja-hub-btn glass rounded-2xl p-5 border border-white/10 flex flex-col items-center gap-3 w-full transition-all hover:border-[#ffffff]/50 active:scale-[0.98] touch-target">
             <div class="w-12 h-12 rounded-2xl bg-[#ffffff]/20 flex items-center justify-center">
-              <i data-lucide="check-circle" class="w-6 h-6 text-[#ffffff]"></i>
+              <i data-lucide="clipboard-check" class="w-6 h-6 text-[#ffffff]"></i>
             </div>
             <span class="font-semibold text-sm">Cierre de caja</span>
             <span class="text-xs text-white/50 text-center leading-tight">Liquidación y arqueo</span>
           </button>
           <button onclick="window._switchCajaTab('libreta')" class="caja-hub-btn glass rounded-2xl p-5 border border-white/10 flex flex-col items-center gap-3 w-full transition-all hover:border-[#ffffff]/50 active:scale-[0.98] touch-target">
             <div class="w-12 h-12 rounded-2xl bg-[#ffffff]/20 flex items-center justify-center">
-              <i data-lucide="notebook-pen" class="w-6 h-6 text-[#ffffff]"></i>
+              <i data-lucide="book-marked" class="w-6 h-6 text-[#ffffff]"></i>
             </div>
             <span class="font-semibold text-sm">Libreta de fiado</span>
             <span class="text-xs text-white/50 text-center leading-tight">Clientes con deuda</span>
@@ -732,7 +732,7 @@
             <summary class="caja-gastos-summary">
               <div class="caja-gastos-summary-main">
                 <div class="caja-gastos-summary-icon">
-                  <i data-lucide="receipt" class="w-5 h-5 text-amber-200"></i>
+                  <i data-lucide="coins" class="w-5 h-5 text-amber-200"></i>
                 </div>
                 <div class="min-w-0 flex-1">
                   <p class="font-semibold text-base">Gastos</p>
@@ -1095,7 +1095,7 @@
             <i data-lucide="chevron-left" class="w-5 h-5"></i>
           </button>
           <span class="font-semibold text-sm flex items-center gap-1.5">
-            <i data-lucide="notebook-pen" class="w-4 h-4 text-[#ffffff]"></i> Libreta de fiado
+            <i data-lucide="book-marked" class="w-4 h-4 text-[#ffffff]"></i> Libreta de fiado
           </span>
           <button onclick="window._abrirNuevoClienteLibreta()" class="btn-glow rounded-xl px-3 py-1.5 flex items-center gap-1 text-sm font-semibold touch-target">
             <i data-lucide="user-plus" class="w-4 h-4"></i> Nuevo
@@ -1336,13 +1336,13 @@
         <div id="masMainHub">
         <div id="masMainHubPrimary">
         <h2 class="mas-hub-title font-bold text-xl mb-4 flex items-center gap-2">
-          <i data-lucide="menu" class="w-5 h-5 text-[#ffffff]"></i>
+          <i data-lucide="layers-2" class="w-5 h-5 text-[#ffffff]"></i>
           Más opciones
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button type="button" data-nav="config" class="kiosco-mas-config-entry glass rounded-2xl p-6 border border-white/10 flex flex-col items-center gap-3 text-left w-full transition-all hover:border-[#ffffff]/50 active:scale-[0.98] touch-target sm:col-span-2">
             <div class="w-14 h-14 rounded-2xl bg-[#ffffff]/30 flex items-center justify-center">
-              <i data-lucide="settings" class="w-7 h-7 text-[#ffffff]"></i>
+              <i data-lucide="sliders-horizontal" class="w-7 h-7 text-[#ffffff]"></i>
             </div>
             <span class="font-semibold text-base">Configuración</span>
             <span class="text-xs text-white/60">Nombre, mensajes y copia de seguridad</span>
@@ -1355,7 +1355,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button type="button" data-mas-open="calc" class="mas-tool-tile glass rounded-xl p-4 border border-white/12 flex items-center gap-3 text-left w-full transition-all hover:border-white/30 active:scale-[0.99] touch-target">
             <div class="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
-              <i data-lucide="calculator" class="w-5 h-5 text-[#ffffff]"></i>
+              <i data-lucide="sigma" class="w-5 h-5 text-[#ffffff]"></i>
             </div>
             <div class="min-w-0">
               <span class="font-semibold text-sm block">Calculadora</span>
@@ -1364,7 +1364,7 @@
           </button>
           <button type="button" data-mas-open="precios" class="mas-tool-tile glass rounded-xl p-4 border border-white/12 flex items-center gap-3 text-left w-full transition-all hover:border-white/30 active:scale-[0.99] touch-target">
             <div class="w-11 h-11 rounded-xl bg-emerald-500/25 flex items-center justify-center shrink-0">
-              <i data-lucide="badge-dollar-sign" class="w-5 h-5 text-emerald-200"></i>
+              <i data-lucide="percent" class="w-5 h-5 text-emerald-200"></i>
             </div>
             <div class="min-w-0">
               <span class="font-semibold text-sm block">Precios</span>
@@ -1373,7 +1373,7 @@
           </button>
           <button type="button" data-mas-open="recordatorios" class="mas-tool-tile glass rounded-xl p-4 border border-white/12 flex items-center gap-3 text-left w-full transition-all hover:border-white/30 active:scale-[0.99] touch-target">
             <div class="w-11 h-11 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
-              <i data-lucide="bell" class="w-5 h-5 text-amber-200"></i>
+              <i data-lucide="bell-ring" class="w-5 h-5 text-amber-200"></i>
             </div>
             <div class="min-w-0">
               <span class="font-semibold text-sm block">Recordatorios</span>
@@ -1382,7 +1382,7 @@
           </button>
           <button type="button" data-mas-open="calendario" class="mas-tool-tile glass rounded-xl p-4 border border-white/12 flex items-center gap-3 text-left w-full transition-all hover:border-white/30 active:scale-[0.99] touch-target">
             <div class="w-11 h-11 rounded-xl bg-sky-500/20 flex items-center justify-center shrink-0">
-              <i data-lucide="calendar-days" class="w-5 h-5 text-sky-200"></i>
+              <i data-lucide="calendar-range" class="w-5 h-5 text-sky-200"></i>
             </div>
             <div class="min-w-0">
               <span class="font-semibold text-sm block">Calendario</span>
@@ -1391,7 +1391,7 @@
           </button>
           <button type="button" data-mas-open="notas" class="mas-tool-tile glass rounded-xl p-4 border border-white/12 flex items-center gap-3 text-left w-full sm:col-span-2 transition-all hover:border-white/30 active:scale-[0.99] touch-target">
             <div class="w-11 h-11 rounded-xl bg-violet-500/20 flex items-center justify-center shrink-0">
-              <i data-lucide="lightbulb" class="w-5 h-5 text-violet-200"></i>
+              <i data-lucide="pen-line" class="w-5 h-5 text-violet-200"></i>
             </div>
             <div class="min-w-0">
               <span class="font-semibold text-sm block">Notas e ideas</span>
@@ -1406,7 +1406,7 @@
           <button type="button" data-mas-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target inline-flex items-center gap-2">
             <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver
           </button>
-          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="calculator" class="w-5 h-5"></i> Calculadora</h3>
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="sigma" class="w-5 h-5"></i> Calculadora</h3>
           <input type="text" readonly id="masCalcDisplay" value="0" class="w-full glass rounded-xl px-4 py-4 border border-white/20 text-right text-2xl font-semibold tabular-nums text-[#ffffff] tracking-tight" inputmode="none" />
           <div class="ferriol-calc-pad grid grid-cols-4 gap-2">
             <button type="button" class="ferriol-calc-btn btn-neomorphic rounded-xl py-3 text-sm font-semibold touch-target" data-calc-act="clear">C</button>
@@ -1435,7 +1435,7 @@
           <button type="button" data-mas-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target inline-flex items-center gap-2">
             <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver
           </button>
-          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="badge-dollar-sign" class="w-5 h-5 text-emerald-200"></i> Calculadora de precios</h3>
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="percent" class="w-5 h-5 text-emerald-200"></i> Calculadora de precios</h3>
           <p class="text-xs text-white/55">Completá dos valores y tocá <strong class="text-white/75">Calcular</strong>. El margen es sobre el costo (ej. 40 → 40 % de ganancia sobre costo).</p>
           <div class="space-y-3">
             <label class="block text-xs text-white/50">Costo ($)</label>
@@ -1454,7 +1454,7 @@
           <button type="button" data-mas-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target inline-flex items-center gap-2">
             <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver
           </button>
-          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="bell" class="w-5 h-5 text-amber-200"></i> Recordatorios</h3>
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="bell-ring" class="w-5 h-5 text-amber-200"></i> Recordatorios</h3>
           <div class="glass rounded-xl p-3 border border-white/12 space-y-2">
             <input type="text" id="masRemTitle" placeholder="Título (ej. Pedido proveedor)" class="w-full rounded-lg px-3 py-2 border border-white/15 bg-black/20 text-sm text-white placeholder-white/35 focus:outline-none focus:ring-2 focus:ring-amber-400/40" />
             <div class="grid grid-cols-2 gap-2">
@@ -1473,7 +1473,7 @@
           <button type="button" data-mas-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target inline-flex items-center gap-2">
             <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver
           </button>
-          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="calendar-days" class="w-5 h-5 text-sky-200"></i> Calendario</h3>
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="calendar-range" class="w-5 h-5 text-sky-200"></i> Calendario</h3>
           <div class="flex items-center justify-between gap-2">
             <button type="button" id="masCalPrev" class="btn-neomorphic rounded-xl px-3 py-2 touch-target" aria-label="Mes anterior">‹</button>
             <span id="masCalMonthLabel" class="font-semibold text-sm text-center flex-1 tabular-nums"></span>
@@ -1494,7 +1494,7 @@
           <button type="button" data-mas-back class="btn-neomorphic rounded-xl py-2 px-3 text-sm touch-target inline-flex items-center gap-2">
             <i data-lucide="arrow-left" class="w-4 h-4"></i> Volver
           </button>
-          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="lightbulb" class="w-5 h-5 text-violet-200"></i> Notas e ideas</h3>
+          <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="pen-line" class="w-5 h-5 text-violet-200"></i> Notas e ideas</h3>
           <p id="masIdeasStatus" class="text-[11px] text-emerald-300/90 min-h-[1rem] opacity-0 transition-opacity">Guardado ✓</p>
           <button type="button" id="masIdeasAddBtn" class="notas-add-btn w-full py-3 rounded-xl border-2 border-dashed border-white/25 text-sm font-medium text-white/70 touch-target hover:border-white/40 hover:bg-white/5">+ Nueva nota</button>
           <div id="masIdeasList" class="notas-list"></div>
@@ -3479,7 +3479,7 @@
         <div class="flex gap-2">
           <input type="text" id="prodCodigo" placeholder="Código" class="flex-1 glass rounded-xl px-4 py-3 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffffff]">
           <button type="button" id="prodEscanearCodigo" class="btn-neomorphic rounded-xl px-4 py-3 shrink-0 touch-target" title="Escanear código">
-            <i data-lucide="scan" class="w-5 h-5"></i>
+            <i data-lucide="scan-barcode" class="w-5 h-5"></i>
           </button>
         </div>
         <!-- 1. Margen primero -->
