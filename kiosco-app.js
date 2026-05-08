@@ -13949,17 +13949,26 @@ async function showApp() {
           return;
         }
         var hubBtn = ev.target.closest('[data-ferriol-ajustes-target]');
-        if (hubBtn && isEmpresaLensSuper()) {
+        var canUseFounderAjustes = isEmpresaLensSuper();
+        var canUsePartnerConfig = isPartnerLens();
+        if (hubBtn && (canUseFounderAjustes || canUsePartnerConfig)) {
           var sec = hubBtn.getAttribute('data-ferriol-ajustes-target');
-          if (sec) {
+          var allow =
+            !!sec &&
+            (canUseFounderAjustes || (canUsePartnerConfig && (sec === 'ajustes-tema' || sec === 'configuraciones')));
+          if (allow) {
             ev.preventDefault();
             switchSuperSection(sec);
             return;
           }
         }
-        if (ev.target.closest('.btnSuperAjustesVolverHub') && isEmpresaLensSuper()) {
+        if (ev.target.closest('.btnSuperAjustesVolverHub') && (canUseFounderAjustes || canUsePartnerConfig)) {
           ev.preventDefault();
-          switchSuperSection('ajustes');
+          if (canUseFounderAjustes) {
+            switchSuperSection('ajustes');
+          } else {
+            switchSuperSection('configuraciones');
+          }
           return;
         }
         var saveSliceBtn = ev.target.closest('.ferriol-save-admin-slice');
