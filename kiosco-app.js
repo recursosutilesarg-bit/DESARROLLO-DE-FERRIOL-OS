@@ -8014,7 +8014,11 @@
     if (accountMenuBtnConfig) {
       accountMenuBtnConfig.addEventListener('click', function () {
         closeAccountMenuDrawer(true);
-        if (currentUser && (currentUser.role === 'partner' || currentUser.role === 'super')) {
+        if (
+          currentUser &&
+          (currentUser.role === 'partner' || currentUser.role === 'super') &&
+          !isAnyKioscoPreviewMode()
+        ) {
           state.superSection = 'configuraciones';
           goToPanel('super');
           return;
