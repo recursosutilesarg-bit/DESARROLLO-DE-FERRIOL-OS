@@ -422,9 +422,9 @@
           <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i>
           <span class="truncate w-full text-center">Sistema</span>
         </button>
-        <button type="button" id="navSuperBottomMasBtn" data-super-section="mas" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Ajustes y herramientas">
+        <button type="button" id="navSuperBottomMasBtn" data-super-section="mas" class="super-nav-btn bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Más opciones y ayuda">
           <i data-lucide="settings" class="w-5 h-5 shrink-0"></i>
-          <span class="truncate w-full text-center">Ajustes</span>
+          <span class="truncate w-full text-center">Más</span>
         </button>
       </div>
     </div>
@@ -1552,7 +1552,7 @@
                     <span id="planCheckoutMpRoleBtnLabel">TARJETA / EFECTIVO</span>
                   </button>
                 </div>
-                <p id="planPanelMercadoPagoMissingHint" class="text-[11px] text-white/45 leading-snug mt-2">Sin link cargado por la empresa para este producto · <strong class="text-white/65">Más → Ajustes del sistema</strong>.</p>
+                <p id="planPanelMercadoPagoMissingHint" class="text-[11px] text-white/45 leading-snug mt-2">Sin link cargado por la empresa para este producto · <strong class="text-white/65">Perfil → Configuraciones</strong>.</p>
               </div>
             </div>
           </div>
@@ -1596,7 +1596,7 @@
                       <span>TARJETA / EFECTIVO</span>
                     </button>
                   </div>
-                  <p id="planCheckoutDistribMercadoMissingHint" class="text-[11px] text-white/45 leading-snug mt-2 hidden">Sin link para el kit: cargalo en <strong class="text-white/65">Más → Ajustes del sistema</strong>.</p>
+                  <p id="planCheckoutDistribMercadoMissingHint" class="text-[11px] text-white/45 leading-snug mt-2 hidden">Sin link para el kit: cargalo en <strong class="text-white/65">Perfil → Configuraciones</strong>.</p>
                 </div>
               </div>
             </div>
@@ -1811,7 +1811,7 @@
           </div>
           <p id="superDirectoryStats" class="hidden text-xs text-white/45 mb-2 super-only super-main-only"></p>
           <p class="text-xs text-white/50 mb-2 super-only super-main-only">Directorio global: filtro <strong class="text-white/65">Sin referidor</strong> y asignación desde el detalle de cada fila.</p>
-          <p class="text-xs text-white/50 mb-3">Pestañas <strong class="text-white/70">Comercios</strong> / <strong class="text-white/70">Distribuidores</strong>: tocá una fila para detalle y membresía. Quitar cuentas: contraseña en la tarjeta <strong class="text-white/65">Ajustes del sistema</strong> (pestaña <strong class="text-white/65">Ajustes</strong>).</p>
+          <p class="text-xs text-white/50 mb-3">Pestañas <strong class="text-white/70">Comercios</strong> / <strong class="text-white/70">Distribuidores</strong>: tocá una fila para detalle y membresía. Quitar cuentas: contraseña en <strong class="text-white/65">Configuraciones</strong> (menú del perfil, fundador vista empresa).</p>
           <input type="text" id="superSearchEmail" placeholder="Buscar por email o nombre..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm mb-3" autocomplete="off">
           <div class="flex flex-wrap gap-2 mb-2">
             <button type="button" class="super-filter-btn px-3 py-1.5 rounded-lg text-sm font-medium border border-[#ffffff]/50 bg-[#ffffff]/30" data-filter="todos">Todos</button>
@@ -2406,7 +2406,7 @@
                   <li><i data-lucide="check" class="w-3 h-3 text-violet-300 shrink-0"></i>Vista empresa / negocio</li>
                   <li><i data-lucide="check" class="w-3 h-3 text-violet-300 shrink-0"></i>Aprobación solicitudes</li>
                   <li><i data-lucide="check" class="w-3 h-3 text-violet-300 shrink-0"></i>Libro MLM y cobros</li>
-                  <li><i data-lucide="check" class="w-3 h-3 text-violet-300 shrink-0"></i>Ajustes del sistema</li>
+                  <li><i data-lucide="check" class="w-3 h-3 text-violet-300 shrink-0"></i>Configuraciones</li>
                   <li><i data-lucide="check" class="w-3 h-3 text-violet-300 shrink-0"></i>Directorio completo</li>
                 </ul>
                 <span class="mlm-access-code">SQL: role = 'super'</span>
@@ -2539,7 +2539,7 @@
                 </tbody>
               </table>
             </div>
-            <p class="text-[10px] text-white/35 mt-2 px-0.5">* Los % intro/normal se configuran en Más → Ajustes → Comisiones. Los valores de la tabla usan los porcentajes activos del plan (<code class="text-white/50">mlm_plan_config</code>).</p>
+            <p class="text-[10px] text-white/35 mt-2 px-0.5">* Los % intro/normal se configuran en <strong class="text-white/45">Configuraciones → Comisiones administradores</strong>. Los valores de la tabla usan los porcentajes activos del plan (<code class="text-white/50">mlm_plan_config</code>).</p>
           </div>
 
           <!-- ── 6. LEYENDA DE ESTADOS ────────────────────────── -->
@@ -2639,13 +2639,13 @@
         <div id="super-section-ajustes" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <button type="button" id="btnSuperAjustesVolverMas" class="mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
-            Volver a opciones principales
+            Volver
           </button>
           <h2 class="font-bold text-xl mb-2 flex items-center gap-2">
             <i data-lucide="settings" class="w-5 h-5 text-[#ffffff]"></i>
-            Ajustes del sistema
+            Configuraciones
           </h2>
-          <p class="text-xs text-white/50 mb-4">Elegí un tema: cada pantalla tiene su propio <strong class="text-white/70">Guardar</strong>. Los datos se cargan al abrir el panel de administración.</p>
+          <p class="text-xs text-white/50 mb-4">Todas las opciones del sistema: contacto, transferencia empresa, período de prueba, Mercado Pago, comisiones, textos del plan, respaldo masivo y <strong class="text-white/70">color de la app</strong>.</p>
           <p class="text-xs text-sky-200/95 mb-4 leading-relaxed rounded-lg border border-sky-500/35 bg-sky-950/40 px-3 py-2.5"><strong class="text-white/95">Mercado Pago:</strong> abrí <strong class="text-white/95">Links Mercado Pago</strong> en esta lista y pegá cada link público (<code class="text-sky-100/95">https://...</code>).</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button type="button" data-ferriol-ajustes-target="ajustes-contacto" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#ffffff]/45 active:scale-[0.98] touch-target">
@@ -2683,6 +2683,11 @@
               <span class="font-semibold text-white">Avisos de renovación (prueba)</span>
               <span class="text-xs text-white/50">Ventana en días y textos por día en la campana</span>
             </button>
+            <button type="button" data-ferriol-ajustes-target="aviso-global" class="glass rounded-2xl p-4 border border-amber-400/35 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-amber-400/60 active:scale-[0.98] touch-target sm:col-span-2">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0"><i data-lucide="megaphone" class="w-5 h-5 text-amber-200"></i></div>
+              <span class="font-semibold text-white">Aviso global</span>
+              <span class="text-xs text-white/50">Mensaje en la campana para kiosqueros y red comercial</span>
+            </button>
             <button type="button" data-ferriol-ajustes-target="ajustes-precios" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-white/45 active:scale-[0.98] touch-target sm:col-span-2">
               <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0"><i data-lucide="coins" class="w-5 h-5 text-white"></i></div>
               <span class="font-semibold text-white">Precios de referencia (ARS)</span>
@@ -2707,9 +2712,9 @@
         </div>
 
         <div id="super-section-ajustes-contacto" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
-          <button type="button" data-ferriol-back-target="configuraciones" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
+          <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
-            Volver a ajustes del sistema
+            Volver
           </button>
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="phone" class="w-5 h-5 text-[#ffffff]"></i> Contacto y seguridad</h2>
           <div class="space-y-4">
@@ -2735,7 +2740,7 @@
         <div id="super-section-ajustes-tema" class="super-section super-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
-            Volver a ajustes del sistema
+            Volver
           </button>
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="palette" class="w-5 h-5 text-violet-200"></i> Color de la app</h2>
           <p class="text-xs text-white/50 mb-4">Elegí el tema visual. Se aplica al instante para esta sesión y se guarda en este dispositivo.</p>
@@ -2788,7 +2793,7 @@
         <div id="super-section-ajustes-transferencia" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
-            Volver a ajustes del sistema
+            Volver
           </button>
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 text-[#ffffff]"></i> Datos de transferencia (Ferriol)</h2>
           <p class="text-xs text-white/50 mb-3">Los kiosqueros ven estos datos solo como <strong class="text-white/70">instrucciones de pago de la empresa (Ferriol)</strong>. Los datos bancarios personales del socio <strong class="text-white/70">no se muestran</strong> al negocio referido.</p>
@@ -2800,7 +2805,7 @@
         <div id="super-section-ajustes-mercadopago" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
-            Volver a ajustes del sistema
+            Volver
           </button>
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="link-2" class="w-5 h-5 text-sky-300"></i> Links Mercado Pago</h2>
           <div id="ferriolMercadoPagoCheckoutSettings" class="rounded-xl border border-sky-400/45 bg-sky-950/25 ring-1 ring-sky-400/20 p-3 sm:p-4 scroll-mt-28">
@@ -2820,7 +2825,7 @@
         <div id="super-section-ajustes-trial" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
-            Volver a ajustes del sistema
+            Volver
           </button>
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="calendar-clock" class="w-5 h-5 text-cyan-300"></i> Período de prueba</h2>
           <p class="text-xs text-white/50 mb-3">Solo afecta <strong class="text-white/75">nuevos</strong> registros (kiosco o socio).</p>
@@ -2833,7 +2838,7 @@
         <div id="super-section-ajustes-kit" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
-            Volver a ajustes del sistema
+            Volver
           </button>
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="package-check" class="w-5 h-5 text-amber-300"></i> Aprobación del kit inicial</h2>
           <p class="text-xs text-white/50 mb-3">Aviso en el avatar del socio durante la ventana configurada.</p>
@@ -2848,7 +2853,7 @@
         <div id="super-section-ajustes-comisiones" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
-            Volver a ajustes del sistema
+            Volver
           </button>
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="percent" class="w-5 h-5 text-[#ffffff]"></i> Comisiones a administradores</h2>
           <p class="text-xs text-white/50 mb-3">Sobre el monto bruto verificado en Cobros.</p>
@@ -2873,7 +2878,7 @@
         <div id="super-section-ajustes-renovacion" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
-            Volver a ajustes del sistema
+            Volver
           </button>
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="bell-ring" class="w-5 h-5 text-amber-300"></i> Avisos de renovación (prueba)</h2>
           <p class="text-xs text-white/50 mb-3">Placeholders: <span class="text-white/70">{dias}</span>, <span class="text-white/70">{nombre}</span>.</p>
@@ -2887,7 +2892,7 @@
         <div id="super-section-ajustes-precios" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
-            Volver a ajustes del sistema
+            Volver
           </button>
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="coins" class="w-5 h-5 text-white"></i> Precios de referencia (ARS)</h2>
           <p class="text-xs text-white/50 mb-3">Enteros en pesos · <code class="text-white/55">app_settings.ferriol_plan_amounts</code></p>
@@ -2912,7 +2917,7 @@
         <div id="super-section-ajustes-checkout" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
-            Volver a ajustes del sistema
+            Volver
           </button>
           <h2 class="font-bold text-xl mb-2 flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-amber-300"></i> Textos Mi plan / checkout</h2>
           <p class="text-xs text-white/50 mb-3">Elegí la pantalla del cliente y editá <strong class="text-white/65">sobre la misma página</strong> (copia del checkout real). Luego tocá <strong class="text-white/65">Guardar</strong> para publicar en <code class="text-white/55">ferriol_checkout_copy</code>.</p>
@@ -3029,7 +3034,7 @@
             <textarea id="adminCheckoutCopyProducts" rows="3" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y font-mono"></textarea>
             <label class="block text-xs text-white/70 mb-1">Frase extra · modal datos bancarios (suscripción)</label>
             <input type="text" id="adminCheckoutCopyModalKiosco" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm" placeholder="Opcional">
-            <p class="text-[11px] text-white/40">El monto mostrado en la vista previa sale de <strong class="text-white/55">Ajustes → Precios plan</strong>.</p>
+            <p class="text-[11px] text-white/40">El monto mostrado en la vista previa sale de <strong class="text-white/55">Configuraciones → Precios de referencia</strong>.</p>
           </div>
 
           <div data-founder-checkout-form="admin" class="hidden space-y-3 max-w-3xl ferriol-founder-checkout-edit-panel">
@@ -3065,7 +3070,7 @@
             <textarea id="adminCheckoutCopyDistrib" rows="4" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y font-mono"></textarea>
             <label class="block text-xs text-white/70 mb-1">Texto modal · datos bancarios (kit)</label>
             <textarea id="adminCheckoutModalDistribKit" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y font-mono"></textarea>
-            <p class="text-[11px] text-white/40">El monto del kit en la vista previa sale de <strong class="text-white/55">Ajustes → Precios plan</strong>.</p>
+            <p class="text-[11px] text-white/40">El monto del kit en la vista previa sale de <strong class="text-white/55">Configuraciones → Precios de referencia</strong>.</p>
           </div>
 
           <div class="max-w-3xl mt-5 pt-4 border-t border-white/10">
@@ -3077,7 +3082,7 @@
         <div id="super-section-ajustes-respaldo" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
-            Volver a ajustes del sistema
+            Volver
           </button>
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="database-backup" class="w-5 h-5 text-[#ffffff]"></i> Respaldo de todos los usuarios</h2>
           <p class="text-xs text-white/50 mb-3">Exportá o importá JSON; al importar se complementan datos (no se borra lo existente).</p>
@@ -3104,7 +3109,7 @@
               <button type="button" class="partner-solic-tab inline-flex flex-1 min-w-[5.5rem] items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-partner-solic-tab="tramites" role="tab" aria-selected="false"><span class="truncate">Trámites</span><span class="ferriol-partner-solic-badge pointer-events-none min-w-[1rem] h-4 shrink-0 rounded-full bg-red-500/95 px-0.5 text-[9px] font-bold leading-4 text-white text-center shadow tabular-nums hidden" data-partner-solic-badge="tramites" aria-hidden="true"></span></button>
             </div>
             <div id="partnerSolicPaneBilletera" class="ferriol-solic-partner-pane mb-4" data-partner-solic-pane="billetera">
-            <p class="text-xs text-white/50 mb-4">El monto verde es <strong class="text-white/70">todo lo acreditado en Ingresos</strong> (mismo criterio: comisiones de venta aprobadas, histórico) <strong class="text-white/70">menos</strong> lo que ya figura en tu historial de retiros (pagados y pedidos en curso; los rechazados no restan). En <strong class="text-white/65">Ingresos</strong> el gráfico usa el período del filtro; acá el saldo es siempre <strong class="text-white/65">histórico completo</strong>. La empresa valida fondos y transfiere según los datos que cargaste en <strong class="text-white/65">Ajustes del sistema</strong> o en tu perfil (titular = nombre de tu cuenta).</p>
+            <p class="text-xs text-white/50 mb-4">El monto verde es <strong class="text-white/70">todo lo acreditado en Ingresos</strong> (mismo criterio: comisiones de venta aprobadas, histórico) <strong class="text-white/70">menos</strong> lo que ya figura en tu historial de retiros (pagados y pedidos en curso; los rechazados no restan). En <strong class="text-white/65">Ingresos</strong> el gráfico usa el período del filtro; acá el saldo es siempre <strong class="text-white/65">histórico completo</strong>. La empresa valida fondos y transfiere según los datos que cargaste en <strong class="text-white/65">Configuraciones</strong> o en tu perfil (titular = nombre de tu cuenta).</p>
             <div class="rounded-2xl border border-white/35 bg-white/[0.08] p-4 mb-4">
               <p class="text-xs text-white/50 mb-1">Disponible para retirar</p>
               <p id="partnerWalletAvailable" class="text-2xl font-bold text-[#ffffff] tabular-nums">—</p>
@@ -3166,9 +3171,9 @@
         </div>
         <!-- Aviso global (pantalla dedicada; acceso desde menú perfil o hub Más) -->
         <div id="super-section-aviso-global" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
-          <button type="button" id="btnSuperAvisoGlobalVolverMas" class="mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
+          <button type="button" id="btnSuperAvisoGlobalVolverMas" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5" data-ferriol-back-target="ajustes">
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
-            Volver a opciones principales
+            Volver
           </button>
           <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
             <i data-lucide="megaphone" class="w-5 h-5 text-amber-200"></i>
@@ -3189,37 +3194,13 @@
           </button>
           <p id="adminNotificationMsg" class="text-xs mt-2 text-white hidden"></p>
         </div>
-        <!-- Sección hub (pestaña Ajustes; id mas por compatibilidad con switchSuperSection) -->
+        <!-- Sección hub «Más» (id mas por compatibilidad con switchSuperSection) -->
         <div id="super-section-mas" class="super-section glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
           <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
             <i data-lucide="settings" class="w-5 h-5 text-[#ffffff]"></i>
-            Ajustes
+            Más opciones
           </h2>
-          <p class="text-xs text-white/50 mb-4"><strong class="text-white/70">Menú del perfil (tuerca):</strong> cada opción de <strong class="text-white/75">Ajustes</strong> abre su pantalla. Fundador en vista empresa: <strong class="text-white/65">Ajustes del sistema</strong> y <strong class="text-white/65">Aviso global</strong> desde el menú o desde los accesos de abajo. Las ventas con comprobante de socios se gestionan en <strong class="text-white/65">Solicitudes</strong>. <strong class="text-white/65">Socio / administración:</strong> <strong class="text-white/65">Billetera y solicitudes</strong> o <strong class="text-white/65">Comprobantes</strong> en el mismo menú. Enlaces para referir: <strong class="text-white/65">Afiliados</strong>. Datos bancarios propios: menú del perfil → <strong class="text-white/65">Mis datos bancarios</strong>.</p>
-          <div class="super-only super-main-only mb-2">
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-[#ffffff]/55">Fundador · accesos rápidos</p>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 super-only super-main-only">
-            <button type="button" id="btnSuperMasOpenAjustes" class="glass rounded-2xl p-5 border border-[#ffffff]/30 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-[#ffffff]/55 active:scale-[0.98] touch-target sm:col-span-2">
-              <div class="w-12 h-12 rounded-xl bg-[#ffffff]/25 flex items-center justify-center shrink-0">
-                <i data-lucide="settings" class="w-6 h-6 text-[#ffffff]"></i>
-              </div>
-              <span class="font-semibold text-base text-white">Ajustes del sistema</span>
-              <span class="text-xs text-white/55">WhatsApp empresa, datos de transferencia, período de prueba, comisiones, precios y <strong class="text-sky-200/95">link Mercado Pago</strong>. Respaldo masivo.</span>
-            </button>
-          </div>
-          <div class="super-only super-main-only mb-2 mt-2">
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-white/40">Comunicación y datos</p>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8 super-only super-main-only">
-            <button type="button" id="btnSuperMasScrollAviso" class="glass rounded-2xl p-5 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-amber-400/45 active:scale-[0.98] touch-target sm:col-span-2">
-              <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
-                <i data-lucide="megaphone" class="w-6 h-6 text-amber-200"></i>
-              </div>
-              <span class="font-semibold text-base text-white">Aviso global</span>
-              <span class="text-xs text-white/55">Mensaje a kiosqueros y administradores (campana).</span>
-            </button>
-          </div>
+          <p class="text-xs text-white/50 mb-4"><strong class="text-white/65">Menú perfil:</strong> <strong class="text-white/70">Configuraciones</strong> reúne todo el sistema (tema de la app, Mercado Pago, avisos, precios…). Gestión de comprobantes en <strong class="text-white/65">Solicitudes</strong>. Socios: <strong class="text-white/65">Billetera</strong> / <strong class="text-white/65">Comprobantes</strong>. Enlaces para referidos: <strong class="text-white/65">Afiliados</strong>. Datos bancarios propios: <strong class="text-white/65">Mis datos bancarios</strong>.</p>
         </div>
       </div>
     </section>
@@ -3904,14 +3885,7 @@
               <i data-lucide="sliders-horizontal" class="w-[1.125rem] h-[1.125rem] text-gray-500 shrink-0 stroke-[1.75]"></i>
               <span class="flex-1 min-w-0 text-left">
                 <span class="block leading-snug">Configuraciones</span>
-                <span class="block text-[11px] text-gray-500 font-normal mt-0.5 leading-snug">Abrir panel de ajustes</span>
-              </span>
-            </button>
-            <button type="button" id="accountMenuBtnEmpAvisoGlobal" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors">
-              <i data-lucide="megaphone" class="w-[1.125rem] h-[1.125rem] text-gray-500 shrink-0 stroke-[1.75]"></i>
-              <span class="flex-1 min-w-0 text-left">
-                <span class="block leading-snug">Aviso global</span>
-                <span class="block text-[11px] text-gray-500 font-normal mt-0.5 leading-snug">Mensaje en la campana para todos</span>
+                <span class="block text-[11px] text-gray-500 font-normal mt-0.5 leading-snug">Tema, avisos, Mercado Pago, WhatsApp, precios y más</span>
               </span>
             </button>
           </div>

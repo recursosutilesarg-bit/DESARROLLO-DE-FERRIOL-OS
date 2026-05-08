@@ -3674,6 +3674,8 @@
       /** Profundidad del historial interno (popstate): 1 = solo inicio; máx. 5 = inicio + 4 pantallas atrás. */
       _ferriolNavDepth: 1,
       superSection: 'ingresos',  // afiliados | ingresos | sistema | ajustes | ajustes-* | solicitudes | pagos-pendientes | mas | partner-comprobantes
+      /** Pantalla del panel super a la que vuelve «Volver» desde el hub Configuraciones (fundador · vista empresa). */
+      superFounderHubReturn: 'ingresos',
       _returnSuperSectionFromComprobantes: 'ingresos',
       afiliadosSubTab: 'usuarios',  // usuarios (kiosquero) | distribuidores (partner)
       superUiMode: 'empresa',  // empresa | socio | negocio — solo si role === 'super'
@@ -6447,7 +6449,7 @@
       if (navMas) navMas.classList.toggle('hidden', show);
     }
 
-    /** Botón Configuración en menú perfil: kiosquero, partner y super. */
+    /** Botón Configuración en menú perfil: kiosquero y simulación negocio. Socio/super en panel red ya tienen “Configuraciones” en el bloque Ajustes (evita duplicado). */
     function syncAccountMenuKiosqueroConfigPlacement() {
       var cfgBtn = document.getElementById('accountMenuBtnConfig');
       var masTile = document.querySelector('.kiosco-mas-config-entry');
@@ -6462,7 +6464,8 @@
             currentUser.role === 'super'
           )
         );
-      if (cfgBtn) cfgBtn.classList.toggle('hidden', !showInProfile);
+      var adminNetworkMas = ferriolAccountMenuNetworkMasEligible();
+      if (cfgBtn) cfgBtn.classList.toggle('hidden', !showInProfile || !!adminNetworkMas);
       // Solo kiosquero mueve Configuración desde "Más" al perfil.
       var hideKioscoMasTile = !!(currentUser && (currentUser.role === 'kiosquero' || isAnyKioscoPreviewMode()));
       if (masTile) masTile.classList.toggle('hidden', hideKioscoMasTile);
@@ -6544,6 +6547,9 @@
       syncAccountMenuDrawerUserBlock();
       syncAccountMenuDrawerShell();
       syncAccountMenuAdminTools();
+      try {
+        syncAccountMenuKiosqueroConfigPlacement();
+      } catch (_) {}
       syncPlanRolePayLabels();
       ferriolRefreshAccountMenuHelpButton().catch(function () {});
       positionAccountMenuDrawerPanel();
@@ -7729,7 +7735,7 @@
         renderIngresosBienvenida();
         var landSuper = state.superSection || 'ingresos';
         if (landSuper === 'balance') landSuper = 'ingresos';
-        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'ingresos' && landSuper !== 'solicitudes' && landSuper !== 'pagos-pendientes' && landSuper !== 'mas' && landSuper !== 'configuraciones' && landSuper !== 'ajustes-tema') landSuper = 'ingresos';
+        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'ingresos' && landSuper !== 'partner-comprobantes' && landSuper !== 'solicitudes' && landSuper !== 'pagos-pendientes' && landSuper !== 'mas' && landSuper !== 'configuraciones' && landSuper !== 'ajustes-tema') landSuper = 'ingresos';
         if (currentUser && currentUser.role === 'partner' && landSuper === 'pagos-pendientes') landSuper = 'ingresos';
         switchSuperSection(landSuper);
       } else {
@@ -7930,14 +7936,13 @@
         } catch (_) {}
       }
     }
-    var btnSuperMasOpenAjustes = document.getElementById('btnSuperMasOpenAjustes');
-    if (btnSuperMasOpenAjustes) btnSuperMasOpenAjustes.addEventListener('click', function () { switchSuperSection('ajustes'); });
-    var btnSuperMasScrollAviso = document.getElementById('btnSuperMasScrollAviso');
-    if (btnSuperMasScrollAviso) btnSuperMasScrollAviso.addEventListener('click', function () { switchSuperSection('aviso-global'); });
-    var btnSuperAvisoGlobalVolverMas = document.getElementById('btnSuperAvisoGlobalVolverMas');
-    if (btnSuperAvisoGlobalVolverMas) btnSuperAvisoGlobalVolverMas.addEventListener('click', function () { switchSuperSection('mas'); });
     var btnSuperAjustesVolverMas = document.getElementById('btnSuperAjustesVolverMas');
-    if (btnSuperAjustesVolverMas) btnSuperAjustesVolverMas.addEventListener('click', function () { switchSuperSection('mas'); });
+    if (btnSuperAjustesVolverMas) {
+      btnSuperAjustesVolverMas.addEventListener('click', function () {
+        var r = state.superFounderHubReturn || 'ingresos';
+        switchSuperSection(r);
+      });
+    }
     function openPartnerTransferInfoModal() {
       openAccountProfileModal('bank');
     }
@@ -8121,16 +8126,15 @@
       accountMenuBtnEmpConfiguraciones.addEventListener('click', function () {
         if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper()) return;
         closeAccountMenuDrawer(true);
-        state.superSection = 'configuraciones';
-        goToPanel('super');
-      });
-    }
-    var accountMenuBtnEmpAvisoGlobal = document.getElementById('accountMenuBtnEmpAvisoGlobal');
-    if (accountMenuBtnEmpAvisoGlobal) {
-      accountMenuBtnEmpAvisoGlobal.addEventListener('click', function () {
-        if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper()) return;
-        closeAccountMenuDrawer(true);
-        state.superSection = 'aviso-global';
+        var cur = state.superSection || 'ingresos';
+        var isSub =
+          cur === 'ajustes' ||
+          cur === 'aviso-global' ||
+          cur === 'configuraciones' ||
+          (typeof cur === 'string' && cur.indexOf('ajustes-') === 0);
+        if (!isSub) state.superFounderHubReturn = cur;
+        else if (!state.superFounderHubReturn) state.superFounderHubReturn = 'ingresos';
+        state.superSection = 'ajustes';
         goToPanel('super');
       });
     }
@@ -13949,7 +13953,15 @@ async function showApp() {
           var sec = hubBtn.getAttribute('data-ferriol-ajustes-target');
           var allow =
             !!sec &&
-            (canUseFounderAjustes || (canUsePartnerConfig && (sec === 'ajustes-tema' || sec === 'configuraciones')));
+            (
+              canUseFounderAjustes ||
+              (canUsePartnerConfig && (
+                sec === 'ajustes-tema' ||
+                sec === 'configuraciones' ||
+                sec === 'solicitudes' ||
+                sec === 'partner-comprobantes'
+              ))
+            );
           if (allow) {
             ev.preventDefault();
             switchSuperSection(sec);
