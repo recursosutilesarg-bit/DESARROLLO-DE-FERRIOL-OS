@@ -2521,9 +2521,6 @@
           syncPartnerSolicitudesTabShell();
           return;
         }
-        if (ferriolDistribuidorVentaShell()) {
-          void loadPartnerBilleteraSection();
-        }
         if (isEmpresaLensSuper() && clWrap) {
           await loadFounderClientSaleRequestsPanel();
         } else {
@@ -2599,57 +2596,14 @@
       if (!valid[pref]) pref = 'retiros';
       switchFounderSolicitudesTab(pref);
     }
-    function switchPartnerSolicitudesTab(tabId) {
-      var bar = document.getElementById('partnerSolicitudesTabBar');
-      var bPan = document.getElementById('partnerSolicPaneBilletera');
-      var tPan = document.getElementById('partnerSolicPaneTramites');
-      if (!bar || !bPan || !tPan) return;
-      if (tabId !== 'billetera' && tabId !== 'tramites') return;
-      try { sessionStorage.setItem('ferriol_partner_solic_tab', tabId); } catch (_) {}
-      bar.querySelectorAll('.partner-solic-tab').forEach(function (btn) {
-        var on = btn.getAttribute('data-partner-solic-tab') === tabId;
-        btn.setAttribute('aria-selected', on ? 'true' : 'false');
-        if (on) {
-          btn.style.border = '1px solid rgba(255, 255, 255, 0.55)';
-          btn.style.background = 'rgba(255, 255, 255, 0.22)';
-          btn.style.color = '#ffffff';
-        } else {
-          btn.style.border = '1px solid transparent';
-          btn.style.background = 'transparent';
-          btn.style.color = 'rgba(255, 255, 255, 0.55)';
-        }
-      });
-      var showWallet = tabId === 'billetera';
-      if (showWallet) {
-        bPan.classList.remove('hidden');
-        bPan.style.removeProperty('display');
-        tPan.classList.add('hidden');
-        tPan.style.setProperty('display', 'none', 'important');
-      } else {
-        bPan.classList.add('hidden');
-        bPan.style.setProperty('display', 'none', 'important');
-        tPan.classList.remove('hidden');
-        tPan.style.removeProperty('display');
-      }
-      try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
-    }
     function syncPartnerSolicitudesTabShell() {
-      var bar = document.getElementById('partnerSolicitudesTabBar');
-      var pan = document.getElementById('partnerBilleteraPanel');
-      if (!bar) return;
+      var tram = document.getElementById('partnerTramitesPanel');
+      if (!tram) return;
       if (!currentUser || !ferriolDistribuidorVentaShell() || !isNetworkAdminRole(currentUser.role) || isAnyKioscoPreviewMode()) {
-        bar.classList.add('hidden');
+        tram.style.display = 'none';
         return;
       }
-      if (pan && pan.style.display === 'none') {
-        bar.classList.add('hidden');
-        return;
-      }
-      bar.classList.remove('hidden');
-      var pref = '';
-      try { pref = sessionStorage.getItem('ferriol_partner_solic_tab') || ''; } catch (_) {}
-      if (pref !== 'tramites') pref = 'billetera';
-      switchPartnerSolicitudesTab(pref);
+      tram.style.display = 'block';
     }
     (function wireSolicitudesSubTabs() {
       var fb = document.getElementById('founderSolicitudesTabBar');
@@ -2659,15 +2613,6 @@
           if (!t || !fb.contains(t)) return;
           var id = t.getAttribute('data-solicitud-tab');
           if (id) switchFounderSolicitudesTab(id);
-        });
-      }
-      var pb = document.getElementById('partnerSolicitudesTabBar');
-      if (pb) {
-        pb.addEventListener('click', function (e) {
-          var t = e.target && e.target.closest && e.target.closest('[data-partner-solic-tab]');
-          if (!t || !pb.contains(t)) return;
-          var id = t.getAttribute('data-partner-solic-tab');
-          if (id) switchPartnerSolicitudesTab(id);
         });
       }
     })();
@@ -2704,6 +2649,7 @@
 
     function ferriolClearAllSolicitudesBadges() {
       ferriolSolicBadgeSet(document.getElementById('navSuperSolicitudesBadge'), 0);
+      ferriolSolicBadgeSet(document.getElementById('navSuperBilleteraBadge'), 0);
       document.querySelectorAll('[data-founder-solic-badge]').forEach(function (b) { ferriolSolicBadgeSet(b, 0); });
       document.querySelectorAll('[data-partner-solic-badge]').forEach(function (b) { ferriolSolicBadgeSet(b, 0); });
     }
@@ -2811,8 +2757,7 @@
         ferriolSolicBadgeSet(document.querySelector('[data-founder-solic-badge="ventas"]'), cCs);
         ferriolSolicBadgeSet(document.querySelector('[data-founder-solic-badge="empresa"]'), cEp);
         ferriolSolicBadgeSet(document.querySelector('[data-founder-solic-badge="aprobaciones"]'), cApr);
-        ferriolSolicBadgeSet(document.querySelector('[data-partner-solic-badge="billetera"]'), 0);
-        ferriolSolicBadgeSet(document.querySelector('[data-partner-solic-badge="tramites"]'), 0);
+        ferriolSolicBadgeSet(document.getElementById('navSuperBilleteraBadge'), 0);
         try {
           if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
         } catch (_) {}
@@ -2834,9 +2779,8 @@
           ferriolClearAllSolicitudesBadges();
           return;
         }
-        ferriolSolicBadgeSet(document.querySelector('[data-partner-solic-badge="billetera"]'), b);
-        ferriolSolicBadgeSet(document.querySelector('[data-partner-solic-badge="tramites"]'), t);
-        ferriolSolicBadgeSet(navBd, b + t);
+        ferriolSolicBadgeSet(navBd, t);
+        ferriolSolicBadgeSet(document.getElementById('navSuperBilleteraBadge'), b);
         document.querySelectorAll('[data-founder-solic-badge]').forEach(function (el) { ferriolSolicBadgeSet(el, 0); });
         try {
           if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
@@ -3687,7 +3631,7 @@
       historialFilter: 'hoy',
       /** Profundidad del historial interno (popstate): 1 = solo inicio; máx. 5 = inicio + 4 pantallas atrás. */
       _ferriolNavDepth: 1,
-      superSection: 'ingresos',  // afiliados | ingresos | sistema | ajustes | ajustes-* | solicitudes | pagos-pendientes | mas | partner-comprobantes
+      superSection: 'ingresos',  // afiliados | ingresos | sistema | ajustes | ajustes-* | solicitudes | billetera | pagos-pendientes | mas | partner-comprobantes
       /** Pantalla del panel super a la que vuelve «Volver» desde el hub Configuraciones (fundador · vista empresa). */
       superFounderHubReturn: 'ingresos',
       /** Panel kiosco previo antes de abrir Configuración del negocio (para «Volver» desde el hub). */
@@ -6219,15 +6163,29 @@
     }
 
     function syncPartnerBilleteraShell() {
-      var pan = document.getElementById('partnerBilleteraPanel');
-      if (pan) {
+      var pw = document.getElementById('partnerWalletPanel');
+      if (pw) {
         if (!currentUser || !isNetworkAdminRole(currentUser.role)) {
-          pan.style.display = 'none';
+          pw.style.display = 'none';
         } else if (isAnyKioscoPreviewMode()) {
-          pan.style.display = 'none';
+          pw.style.display = 'none';
         } else {
-          pan.style.display = ferriolDistribuidorVentaShell() ? 'block' : 'none';
+          pw.style.display = ferriolDistribuidorVentaShell() ? 'block' : 'none';
         }
+      }
+      var navBill = document.getElementById('navSuperBilleteraBtn');
+      if (navBill) {
+        navBill.classList.toggle(
+          'hidden',
+          !(currentUser && isNetworkAdminRole(currentUser.role) && !isAnyKioscoPreviewMode() && ferriolDistribuidorVentaShell())
+        );
+      }
+      var cfgTile = document.getElementById('accountMenuShortcutBilleteraTile');
+      if (cfgTile) {
+        cfgTile.classList.toggle(
+          'hidden',
+          !(currentUser && isNetworkAdminRole(currentUser.role) && !isAnyKioscoPreviewMode() && ferriolDistribuidorVentaShell())
+        );
       }
       var hubRow = document.getElementById('solicitudesHubComprobantesRow');
       if (hubRow) {
@@ -6247,7 +6205,7 @@
         navLbl.textContent = 'Solicitudes y aprobaciones';
         navBtn.title =
           isEmpresaLensSuper() || ferriolDistribuidorVentaShell()
-            ? 'Solicitudes y aprobaciones · retiros, ventas, trámites y comprobantes'
+            ? 'Solicitudes y aprobaciones · retiros (empresa), ventas, trámites y comprobantes'
             : 'Solicitudes y aprobaciones';
         if (navIcon) navIcon.setAttribute('data-lucide', 'clipboard-list');
       }
@@ -7746,7 +7704,7 @@
         try { sessionStorage.setItem('ferriol_partner_ui', 'red'); } catch (_) {}
         applyAppShell();
       }
-      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'afiliados' && state.superSection !== 'ingresos' && state.superSection !== 'partner-comprobantes' && state.superSection !== 'solicitudes' && state.superSection !== 'pagos-pendientes' && state.superSection !== 'mas' && state.superSection !== 'configuraciones' && state.superSection !== 'ajustes-tema') {
+      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'afiliados' && state.superSection !== 'ingresos' && state.superSection !== 'partner-comprobantes' && state.superSection !== 'solicitudes' && state.superSection !== 'billetera' && state.superSection !== 'pagos-pendientes' && state.superSection !== 'mas' && state.superSection !== 'configuraciones' && state.superSection !== 'ajustes-tema') {
         switchSuperSection('ingresos');
       }
       if (name !== 'scanner') window._scanForProductCode = false;
@@ -7785,7 +7743,7 @@
         renderIngresosBienvenida();
         var landSuper = state.superSection || 'ingresos';
         if (landSuper === 'balance') landSuper = 'ingresos';
-        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'ingresos' && landSuper !== 'partner-comprobantes' && landSuper !== 'solicitudes' && landSuper !== 'pagos-pendientes' && landSuper !== 'mas' && landSuper !== 'configuraciones' && landSuper !== 'ajustes-tema') landSuper = 'ingresos';
+        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'ingresos' && landSuper !== 'partner-comprobantes' && landSuper !== 'solicitudes' && landSuper !== 'billetera' && landSuper !== 'pagos-pendientes' && landSuper !== 'mas' && landSuper !== 'configuraciones' && landSuper !== 'ajustes-tema') landSuper = 'ingresos';
         if (currentUser && currentUser.role === 'partner' && landSuper === 'pagos-pendientes') landSuper = 'ingresos';
         switchSuperSection(landSuper);
       } else {
@@ -7912,6 +7870,9 @@
         var allowPc = ferriolDistribuidorVentaShell();
         if (!allowPc) sn = 'ingresos';
       }
+      if (sn === 'billetera') {
+        if (!ferriolDistribuidorVentaShell()) sn = 'ingresos';
+      }
       state.superSection = sn;
       var isAjustesTema = state.superSection === 'ajustes-tema';
       var needsEmpresaLens =
@@ -7956,6 +7917,9 @@
       if (state.superSection === 'solicitudes') {
         void renderSuperMembershipDayRequestBanners();
         void loadSuperSolicitudesSection();
+      }
+      if (state.superSection === 'billetera') {
+        void loadPartnerBilleteraSection();
       }
       if (state.superSection === 'pagos-pendientes' && isEmpresaLensSuper()) {
         void loadFounderPagosPendientesSection();
@@ -13199,10 +13163,8 @@ async function showApp() {
         partnerBox.innerHTML = '';
       }
       if (!supabaseClient || !currentUser) {
-        if (state.superSection === 'solicitudes') {
-          syncFounderSolicitudesTabShell();
-          syncPartnerSolicitudesTabShell();
-        }
+        if (state.superSection === 'solicitudes') syncFounderSolicitudesTabShell();
+        syncPartnerSolicitudesTabShell();
         return;
       }
       try {
@@ -13529,10 +13491,8 @@ async function showApp() {
           founderBox.innerHTML = '<p class="text-xs text-white/60">Aprobaciones: error al cargar.</p>';
         }
       } finally {
-        if (state.superSection === 'solicitudes') {
-          syncFounderSolicitudesTabShell();
-          syncPartnerSolicitudesTabShell();
-        }
+        if (state.superSection === 'solicitudes') syncFounderSolicitudesTabShell();
+        syncPartnerSolicitudesTabShell();
         scheduleRefreshFerriolSolicitudesBadges();
       }
     }
@@ -14020,7 +13980,8 @@ async function showApp() {
               (canUsePartnerConfig && (
                 sec === 'ajustes-tema' ||
                 sec === 'configuraciones' ||
-                sec === 'solicitudes'
+                sec === 'solicitudes' ||
+                sec === 'billetera'
               ))
             );
           if (allow) {

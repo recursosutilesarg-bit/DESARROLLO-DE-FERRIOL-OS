@@ -399,12 +399,19 @@
   <nav id="navSuperBottom" class="ferriol-bottom-nav fixed bottom-0 left-0 right-0 z-40 super-only hidden">
     <div class="bottom-nav-bar glass-strong border-t border-white/10 px-2 py-3 max-w-2xl mx-auto">
       <div class="flex items-stretch justify-between gap-0.5 sm:gap-1 flex-nowrap overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <button type="button" data-super-section="solicitudes" id="navSuperWalletOrSolicitudesBtn" class="super-nav-btn bottom-nav-btn relative flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Solicitudes y aprobaciones · colas, comprobantes y movimientos">
+        <button type="button" data-super-section="solicitudes" id="navSuperWalletOrSolicitudesBtn" class="super-nav-btn bottom-nav-btn relative flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Solicitudes y aprobaciones · colas, comprobantes y trámites">
           <span class="relative inline-flex shrink-0">
             <i data-lucide="clipboard-list" id="navSuperWalletOrSolicitudesIcon" class="w-5 h-5 shrink-0"></i>
             <span id="navSuperSolicitudesBadge" class="pointer-events-none absolute -top-1 -right-2 z-[1] min-w-[0.9375rem] h-[0.9375rem] px-0.5 rounded-full bg-red-500 text-[8px] font-bold leading-[0.9375rem] text-white text-center shadow tabular-nums hidden" aria-hidden="true"></span>
           </span>
           <span class="block w-full text-center whitespace-normal leading-tight text-[10px] sm:text-xs px-0.5" id="navSuperWalletOrSolicitudesLabel">Solicitudes y aprobaciones</span>
+        </button>
+        <button type="button" data-super-section="billetera" id="navSuperBilleteraBtn" class="super-nav-btn bottom-nav-btn relative hidden flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Billetera · saldo y retiros">
+          <span class="relative inline-flex shrink-0">
+            <i data-lucide="wallet" class="w-5 h-5 shrink-0"></i>
+            <span id="navSuperBilleteraBadge" class="pointer-events-none absolute -top-1 -right-2 z-[1] min-w-[0.9375rem] h-[0.9375rem] px-0.5 rounded-full bg-red-500 text-[8px] font-bold leading-[0.9375rem] text-white text-center shadow tabular-nums hidden" aria-hidden="true"></span>
+          </span>
+          <span class="truncate w-full text-center">Billetera</span>
         </button>
         <button type="button" data-super-section="pagos-pendientes" class="super-nav-btn super-only super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Registrar transferencias de retiros a socios">
           <i data-lucide="wallet" class="w-5 h-5 shrink-0"></i>
@@ -2800,10 +2807,15 @@
               <span class="font-semibold text-white">Color de la app</span>
               <span class="text-xs text-white/50">Elegí tema oscuro, claro o acentos</span>
             </button>
-            <button type="button" data-ferriol-ajustes-target="solicitudes" class="glass rounded-2xl p-4 border border-white/15 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-white/35 active:scale-[0.98] touch-target sm:col-span-2">
+            <button type="button" data-ferriol-ajustes-target="solicitudes" class="glass rounded-2xl p-4 border border-white/15 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-white/35 active:scale-[0.98] touch-target">
               <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0"><i data-lucide="clipboard-list" class="w-5 h-5 text-white"></i></div>
               <span class="font-semibold text-white">Solicitudes y aprobaciones</span>
-              <span class="text-xs text-white/50">Billetera, retiros, trámites y bandeja de comprobantes entrantes</span>
+              <span class="text-xs text-white/50">Trámites, bandeja de comprobantes entrantes y colas (fundador en vista empresa)</span>
+            </button>
+            <button type="button" data-ferriol-ajustes-target="billetera" id="accountMenuShortcutBilleteraTile" class="glass rounded-2xl p-4 border border-amber-400/35 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-amber-300/55 active:scale-[0.98] touch-target hidden">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0"><i data-lucide="wallet" class="w-5 h-5 text-amber-100"></i></div>
+              <span class="font-semibold text-white">Billetera</span>
+              <span class="text-xs text-white/50">Saldo disponible, pedir retiro e historial</span>
             </button>
           </div>
         </div>
@@ -3128,35 +3140,19 @@
               Abrir comprobantes y movimientos
             </button>
           </div>
-          <div id="partnerBilleteraPanel" class="partner-billetera-panel mb-6" style="display: none;">
+          <div id="partnerTramitesPanel" class="partner-tramites-panel mb-6" style="display: none;">
             <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
-              <i data-lucide="wallet" class="w-5 h-5 text-[#ffffff]"></i>
-              Billetera
+              <i data-lucide="list" class="w-5 h-5 text-[#ffffff]"></i>
+              Trámites
             </h2>
-            <div id="partnerSolicitudesTabBar" class="partner-solicitudes-tab-bar mb-4 hidden flex gap-1 p-1 rounded-xl bg-black/25 border border-white/10 flex-wrap overflow-x-auto" role="tablist" aria-label="Secciones billetera">
-              <button type="button" class="partner-solic-tab inline-flex flex-1 min-w-[5.5rem] items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-[#ffffff]/50 bg-[#ffffff]/20 text-white" data-partner-solic-tab="billetera" role="tab" aria-selected="true"><span class="truncate">Saldo · retiros</span><span class="ferriol-partner-solic-badge pointer-events-none min-w-[1rem] h-4 shrink-0 rounded-full bg-red-500/95 px-0.5 text-[9px] font-bold leading-4 text-white text-center shadow tabular-nums hidden" data-partner-solic-badge="billetera" aria-hidden="true"></span></button>
-              <button type="button" class="partner-solic-tab inline-flex flex-1 min-w-[5.5rem] items-center justify-center gap-1 py-2 rounded-lg text-xs font-semibold touch-target transition-all border border-transparent text-white/50 hover:text-white/75" data-partner-solic-tab="tramites" role="tab" aria-selected="false"><span class="truncate">Trámites</span><span class="ferriol-partner-solic-badge pointer-events-none min-w-[1rem] h-4 shrink-0 rounded-full bg-red-500/95 px-0.5 text-[9px] font-bold leading-4 text-white text-center shadow tabular-nums hidden" data-partner-solic-badge="tramites" aria-hidden="true"></span></button>
-            </div>
-            <div id="partnerSolicPaneBilletera" class="ferriol-solic-partner-pane mb-4" data-partner-solic-pane="billetera">
-            <p class="text-xs text-white/50 mb-4">El monto verde es <strong class="text-white/70">todo lo acreditado en Ingresos</strong> (mismo criterio: comisiones de venta aprobadas, histórico) <strong class="text-white/70">menos</strong> lo que ya figura en tu historial de retiros (pagados y pedidos en curso; los rechazados no restan). En <strong class="text-white/65">Ingresos</strong> el gráfico usa el período del filtro; acá el saldo es siempre <strong class="text-white/65">histórico completo</strong>. La empresa valida fondos y transfiere según los datos que cargaste en <strong class="text-white/65">Configuraciones</strong> o en tu perfil (titular = nombre de tu cuenta).</p>
-            <div class="rounded-2xl border border-white/35 bg-white/[0.08] p-4 mb-4">
-              <p class="text-xs text-white/50 mb-1">Disponible para retirar</p>
-              <p id="partnerWalletAvailable" class="text-2xl font-bold text-[#ffffff] tabular-nums">—</p>
-              <p id="partnerWalletBreakdown" class="text-[10px] text-white/40 mt-2"></p>
-              <button type="button" id="btnPartnerWithdrawOpen" class="btn-glow rounded-xl py-3 w-full font-semibold mt-4 touch-target">Retirar dinero</button>
-            </div>
-            <div class="rounded-xl border border-white/10 bg-black/20 p-3 mb-4">
-              <h3 class="text-sm font-semibold text-white/90 mb-2">Historial de retiros</h3>
-              <div id="partnerWithdrawHistory" class="text-sm min-h-[3rem]"><p class="text-white/45 text-xs py-2 text-center">Cargando…</p></div>
-            </div>
-            </div><!-- /partnerSolicPaneBilletera -->
-            <div id="partnerSolicPaneTramites" class="ferriol-solic-partner-pane hidden mb-4" style="display: none;" data-partner-solic-pane="tramites">
+            <p class="text-xs text-white/50 mb-4">Seguimiento de lo que enviaste a la empresa (días de vigencia, altas, etc.). <strong class="text-white/65">Saldo y retiros</strong> están en la pestaña <strong class="text-white/70">Billetera</strong>.</p>
+            <div id="partnerSolicPaneTramites" class="ferriol-solic-partner-pane mb-4" data-partner-solic-pane="tramites">
             <div class="rounded-xl border border-cyan-500/25 bg-cyan-500/05 p-3 mb-2">
-              <h3 class="text-xs font-semibold text-cyan-200/90 mb-2">Seguimiento de otros trámites</h3>
+              <h3 class="text-xs font-semibold text-cyan-200/90 mb-2">Estado de tus solicitudes</h3>
               <p class="text-[10px] text-white/45 mb-2">Solicitudes de días, altas de negocio, etc.</p>
             </div>
             <div id="superDayRequestsPartnerBox" class="hidden rounded-xl border border-cyan-500/35 bg-cyan-500/08 px-3 py-3 text-sm"></div>
-            </div><!-- /partnerSolicPaneTramites -->
+            </div>
           </div>
           <h2 class="founder-solicitudes-heading font-bold text-xl mb-1 flex items-center gap-2 super-only super-main-only">
             <i data-lucide="clipboard-list" class="w-5 h-5 text-[#ffffff]"></i>
@@ -3188,6 +3184,28 @@
             <p id="superEmpresaPaymentProofMsg" class="text-xs mt-2 text-teal-200/80 hidden"></p>
           </div>
           <div id="superDayRequestsFounderBox" class="ferriol-solic-fundador-pane hidden mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-3 text-sm super-only super-main-only" style="display: none;" data-solicitud-pane="aprobaciones"></div>
+        </div>
+        <!-- Billetera socio (saldo y retiros); pestaña aparte de Solicitudes -->
+        <div id="super-section-billetera" class="super-section super-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; min-height: 100%; max-height: 85vh; padding-bottom: 6rem;">
+          <div id="partnerWalletPanel" class="partner-wallet-panel mb-6" style="display: none;">
+            <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
+              <i data-lucide="wallet" class="w-5 h-5 text-[#ffffff]"></i>
+              Billetera
+            </h2>
+            <div id="partnerSolicPaneBilletera" class="ferriol-solic-partner-pane mb-4" data-partner-solic-pane="billetera">
+            <p class="text-xs text-white/50 mb-4">El monto verde es <strong class="text-white/70">todo lo acreditado en Ingresos</strong> (mismo criterio: comisiones de venta aprobadas, histórico) <strong class="text-white/70">menos</strong> lo que ya figura en tu historial de retiros (pagados y pedidos en curso; los rechazados no restan). En <strong class="text-white/65">Ingresos</strong> el gráfico usa el período del filtro; acá el saldo es siempre <strong class="text-white/65">histórico completo</strong>. La empresa valida fondos y transfiere según los datos que cargaste en <strong class="text-white/65">Configuraciones</strong> o en tu perfil (titular = nombre de tu cuenta).</p>
+            <div class="rounded-2xl border border-white/35 bg-white/[0.08] p-4 mb-4">
+              <p class="text-xs text-white/50 mb-1">Disponible para retirar</p>
+              <p id="partnerWalletAvailable" class="text-2xl font-bold text-[#ffffff] tabular-nums">—</p>
+              <p id="partnerWalletBreakdown" class="text-[10px] text-white/40 mt-2"></p>
+              <button type="button" id="btnPartnerWithdrawOpen" class="btn-glow rounded-xl py-3 w-full font-semibold mt-4 touch-target">Retirar dinero</button>
+            </div>
+            <div class="rounded-xl border border-white/10 bg-black/20 p-3 mb-4">
+              <h3 class="text-sm font-semibold text-white/90 mb-2">Historial de retiros</h3>
+              <div id="partnerWithdrawHistory" class="text-sm min-h-[3rem]"><p class="text-white/45 text-xs py-2 text-center">Cargando…</p></div>
+            </div>
+            </div>
+          </div>
         </div>
         <!-- Pagos pendientes: retiros aprobados → transferencia + comprobante (solo fundador) -->
         <div id="super-section-pagos-pendientes" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; min-height: 100%; max-height: 85vh; padding-bottom: 6rem;">
@@ -3229,7 +3247,7 @@
             <i data-lucide="settings" class="w-5 h-5 text-[#ffffff]"></i>
             Más opciones
           </h2>
-          <p class="text-xs text-white/50 mb-4"><strong class="text-white/65">Menú perfil:</strong> <strong class="text-white/70">Configuraciones</strong> reúne todo el sistema (tema de la app, Mercado Pago, avisos, precios…). Colas de trabajo, billetera y bandeja de comprobantes están en la pestaña inferior <strong class="text-white/65">Solicitudes y aprobaciones</strong>. Enlaces para referidos: <strong class="text-white/65">Afiliados</strong>. Datos bancarios propios: <strong class="text-white/65">Mis datos bancarios</strong>.</p>
+          <p class="text-xs text-white/50 mb-4"><strong class="text-white/65">Menú perfil:</strong> <strong class="text-white/70">Configuraciones</strong> reúne todo el sistema (tema de la app, Mercado Pago, avisos, precios…). Colas, comprobantes y trámites: pestaña inferior <strong class="text-white/65">Solicitudes y aprobaciones</strong>. Saldo y retiros: <strong class="text-white/65">Billetera</strong>. Enlaces para referidos: <strong class="text-white/65">Afiliados</strong>. Datos bancarios propios: <strong class="text-white/65">Mis datos bancarios</strong>.</p>
         </div>
       </div>
     </section>
