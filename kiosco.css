@@ -4296,7 +4296,8 @@ html[data-ferriol-theme='blanco'] .bottom-nav-btn.active {
   }
 }
 
-html[data-ferriol-theme='blanco'] #ferriolThemeChips .ferriol-theme-chip {
+html[data-ferriol-theme='blanco'] #ferriolThemeChips .ferriol-theme-chip,
+html[data-ferriol-theme='blanco'] #ferriolThemeChipsAdmin .ferriol-theme-chip {
   background: rgba(255, 255, 255, 0.82);
   border-color: rgba(0, 0, 0, 0.1);
 }
