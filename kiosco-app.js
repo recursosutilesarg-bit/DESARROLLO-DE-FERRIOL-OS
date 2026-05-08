@@ -2736,6 +2736,7 @@
       showPane(pr, tab === 'retiros');
       if (tab === 'retiros') void loadPartnerBilleteraSection();
       if (tab === 'ventas') void loadPartnerVentasComprobantesHistorial();
+      if (tab === 'distribuidor') void renderSuperMembershipDayRequestBanners();
       try {
         if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
       } catch (_) {}
