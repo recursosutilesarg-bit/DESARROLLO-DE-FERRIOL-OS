@@ -6179,13 +6179,6 @@
           !(currentUser && isNetworkAdminRole(currentUser.role) && !isAnyKioscoPreviewMode() && ferriolDistribuidorVentaShell())
         );
       }
-      var cfgTile = document.getElementById('accountMenuShortcutBilleteraTile');
-      if (cfgTile) {
-        cfgTile.classList.toggle(
-          'hidden',
-          !(currentUser && isNetworkAdminRole(currentUser.role) && !isAnyKioscoPreviewMode() && ferriolDistribuidorVentaShell())
-        );
-      }
       var hubRow = document.getElementById('solicitudesHubComprobantesRow');
       if (hubRow) {
         var showHub =
@@ -13981,9 +13974,7 @@ async function showApp() {
               canUseFounderAjustes ||
               (canUsePartnerConfig && (
                 sec === 'ajustes-tema' ||
-                sec === 'configuraciones' ||
-                sec === 'solicitudes' ||
-                sec === 'billetera'
+                sec === 'configuraciones'
               ))
             );
           if (allow) {
