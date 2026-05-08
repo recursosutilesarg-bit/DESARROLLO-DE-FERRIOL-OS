@@ -2651,7 +2651,6 @@
       ferriolSolicBadgeSet(document.getElementById('navSuperSolicitudesBadge'), 0);
       ferriolSolicBadgeSet(document.getElementById('navSuperBilleteraBadge'), 0);
       document.querySelectorAll('[data-founder-solic-badge]').forEach(function (b) { ferriolSolicBadgeSet(b, 0); });
-      document.querySelectorAll('[data-partner-solic-badge]').forEach(function (b) { ferriolSolicBadgeSet(b, 0); });
     }
 
     function ferriolTearDownSolicitudesBadgeRealtime() {
@@ -13999,7 +13998,7 @@ async function showApp() {
           } else if (canUseFounderAjustes) {
             switchSuperSection('ajustes');
           } else {
-            switchSuperSection('configuraciones');
+            switchSuperSection(state.superSection === 'configuraciones' ? 'ingresos' : 'configuraciones');
           }
           return;
         }
