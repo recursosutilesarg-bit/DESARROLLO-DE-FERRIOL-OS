@@ -7725,7 +7725,12 @@
       document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
       const panel = document.getElementById('panel-' + name);
       if (panel) panel.classList.remove('hidden');
-      if (name === 'config') fillConfigForm();
+      if (name === 'config') {
+        fillConfigForm();
+        try {
+          openConfigSubview('');
+        } catch (_) {}
+      }
       if (name === 'super') {
         if (superListCountdownInterval) clearInterval(superListCountdownInterval);
         renderSuper();
@@ -11925,6 +11930,10 @@ async function showApp() {
       var hub = document.getElementById('configSubHub');
       var t = String(target || '').trim();
       if (hub) hub.classList.toggle('hidden', !!t);
+      var cfgTitle = document.querySelector('#panel-config > .glass > h2.font-bold');
+      var exitMas = document.getElementById('btnKioscoConfigVolverMas');
+      if (exitMas) exitMas.classList.toggle('hidden', !!t);
+      if (cfgTitle) cfgTitle.classList.toggle('hidden', !!t);
       document.querySelectorAll('#panel-config .config-subview').forEach(function (el) {
         el.classList.toggle('hidden', String(el.getAttribute('data-config-sub') || '') !== t);
       });
@@ -11939,6 +11948,12 @@ async function showApp() {
         var openBtn = e.target.closest('[data-config-open]');
         if (openBtn && root.contains(openBtn)) {
           openConfigSubview(openBtn.getAttribute('data-config-open'));
+          return;
+        }
+        var exitMasBtn = e.target.closest('[data-config-exit-mas]');
+        if (exitMasBtn && root.contains(exitMasBtn)) {
+          openConfigSubview('');
+          goToPanel('mas');
           return;
         }
         var backBtn = e.target.closest('[data-config-back]');
