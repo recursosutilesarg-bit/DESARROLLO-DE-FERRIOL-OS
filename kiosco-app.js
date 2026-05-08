@@ -13785,7 +13785,10 @@ async function showApp() {
               h2 += '</div>';
             }
           }
-          if (r2u.error) {
+          if (currentUser.role === 'super' && isSuperSocioLens()) {
+            h2 +=
+              '<p class="text-[10px] text-white/45 mb-3 mt-2">Upgrade negocio → distribuidor: las revisiones las hace la cuenta fundador en vista empresa (no listamos todas las solicitudes globales acá).</p>';
+          } else if (r2u.error) {
             h2 +=
               '<p class="text-xs text-sky-200/90 font-medium mb-1 mt-2">Upgrade negocio → distribuidor</p><p class="text-[10px] text-red-300/90 mb-2">' +
               String(r2u.error.message || '') +
@@ -16328,4 +16331,8 @@ async function showApp() {
         masIdeasSave(arr);
         container.insertBefore(masIdeasMakeCard(nota), container.firstChild);
         var ta = container.querySelector('.nota-body');
-        if (ta) ta.f
+        if (ta) ta.focus();
+      }
+      var masIdeasAddBtn = document.getElementById('masIdeasAddBtn');
+      if (masIdeasAddBtn) masIdeasAddBtn.addEventListener('click', masIdeasAdd);
+    })();
