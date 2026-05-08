@@ -82,6 +82,28 @@ select,
   user-select: text;
 }
 
+.ferriol-inline-editable {
+  cursor: text;
+  border-radius: 0.55rem;
+  outline: 1px dashed transparent;
+  outline-offset: 2px;
+  transition: outline-color 0.15s ease, background-color 0.15s ease;
+}
+
+.ferriol-inline-editable:hover {
+  outline-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.ferriol-inline-editable:focus {
+  outline-color: rgba(167, 139, 250, 0.75);
+  background: rgba(167, 139, 250, 0.1);
+}
+
+.ferriol-inline-editable-list {
+  min-height: 5.5rem;
+}
+
 #termsContent {
   -webkit-user-select: text;
   user-select: text;

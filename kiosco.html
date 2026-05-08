@@ -2857,34 +2857,34 @@
             Volver a ajustes del sistema
           </button>
           <h2 class="font-bold text-xl mb-2 flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-amber-300"></i> Textos Mi plan / checkout</h2>
-          <p class="text-xs text-white/50 mb-3">Elegí la pantalla del cliente: la vista previa replica <strong class="text-white/65">Mi plan</strong> (mismos bloques). Editá abajo y tocá <strong class="text-white/65">Guardar</strong> para publicar en <code class="text-white/55">ferriol_checkout_copy</code>. Una línea = un ítem de lista en beneficios.</p>
+          <p class="text-xs text-white/50 mb-3">Elegí la pantalla del cliente y editá <strong class="text-white/65">sobre la misma página</strong> (copia del checkout real). Luego tocá <strong class="text-white/65">Guardar</strong> para publicar en <code class="text-white/55">ferriol_checkout_copy</code>.</p>
           <div class="ferriol-founder-checkout-tabs flex flex-wrap gap-2 mb-3" role="tablist" aria-label="Pantalla de checkout">
             <button type="button" role="tab" aria-selected="true" data-founder-checkout-tab="kiosco" class="ferriol-founder-checkout-tab touch-target rounded-xl px-3 py-2.5 text-xs sm:text-sm font-semibold border transition-colors border-violet-400/55 bg-violet-500/25 text-white shadow-lg shadow-violet-900/20">Suscripción · negocio</button>
             <button type="button" role="tab" aria-selected="false" data-founder-checkout-tab="admin" class="ferriol-founder-checkout-tab touch-target rounded-xl px-3 py-2.5 text-xs sm:text-sm font-semibold border transition-colors border-white/15 bg-white/5 text-white/60">Cuota · distribuidor</button>
             <button type="button" role="tab" aria-selected="false" data-founder-checkout-tab="kit" class="ferriol-founder-checkout-tab touch-target rounded-xl px-3 py-2.5 text-xs sm:text-sm font-semibold border transition-colors border-white/15 bg-white/5 text-white/60">Kit + licencia</button>
           </div>
           <div class="ferriol-founder-checkout-preview rounded-2xl border border-white/18 bg-black/35 p-3 sm:p-4 mb-4 max-h-[min(52vh,560px)] overflow-y-auto scroll-smooth ring-1 ring-white/8" aria-label="Vista previa">
-            <p class="text-[10px] font-semibold uppercase tracking-wider text-white/40 mb-2 px-1">Vista cliente (solo lectura)</p>
-            <div class="ferriol-founder-checkout-preview-inner glass rounded-2xl p-4 sm:p-5 max-w-lg mx-auto pointer-events-none select-none opacity-[0.97]">
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-white/40 mb-2 px-1">Editor visual (misma estructura que ve el cliente)</p>
+            <div class="ferriol-founder-checkout-preview-inner glass rounded-2xl p-4 sm:p-5 max-w-lg mx-auto opacity-[0.97]">
               <div id="fcPv_payWrap">
-                <p id="fcPv_payEyebrow" class="text-[10px] font-semibold uppercase tracking-wider text-amber-200/95 mb-2">—</p>
-                <p id="fcPv_payHeadline" class="font-black text-xl sm:text-2xl text-white mb-4 leading-snug">—</p>
-                <p id="fcPv_payLead" class="text-sm text-white/76 mb-6 leading-relaxed hidden"></p>
+                <p id="fcPv_payEyebrow" contenteditable="true" class="text-[10px] font-semibold uppercase tracking-wider text-amber-200/95 mb-2 ferriol-inline-editable">—</p>
+                <p id="fcPv_payHeadline" contenteditable="true" class="font-black text-xl sm:text-2xl text-white mb-4 leading-snug ferriol-inline-editable">—</p>
+                <p id="fcPv_payLead" contenteditable="true" class="text-sm text-white/76 mb-6 leading-relaxed hidden ferriol-inline-editable"></p>
                 <div class="rounded-2xl border border-white/25 bg-gradient-to-b from-black/45 to-black/55 py-6 px-4 mb-6 text-center ring-1 ring-white/12 shadow-xl shadow-black/30">
                   <p id="fcPv_payPriceLabel" class="text-[10px] font-semibold uppercase tracking-wide text-white/55 mb-2">Suscripción mensual · negocio</p>
                   <p id="fcPv_payPriceBig" class="text-[2.35rem] sm:text-5xl font-black tabular-nums text-amber-50 tracking-tight leading-none drop-shadow-lg">—</p>
                 </div>
                 <div id="fcPv_payBenKioscoBlock" class="mb-5">
-                  <p id="fcPv_payBenKioscoTitle" class="text-[10px] font-semibold uppercase tracking-wide text-white/85 mb-2">—</p>
-                  <ul id="fcPv_payBenKioscoUl" class="space-y-2 text-sm text-white/95 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-white/35 bg-white/25 p-4 min-h-[2.5rem]"></ul>
-                  <p id="fcPv_payProdKioscoTitle" class="text-[10px] font-semibold uppercase tracking-wide text-white/52 mt-4 mb-2">—</p>
-                  <ul id="fcPv_payProdKioscoUl" class="space-y-2 text-sm text-white/82 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-white/15 bg-black/25 p-4 min-h-[2.5rem]"></ul>
+                  <p id="fcPv_payBenKioscoTitle" contenteditable="true" class="text-[10px] font-semibold uppercase tracking-wide text-white/85 mb-2 ferriol-inline-editable">—</p>
+                  <ul id="fcPv_payBenKioscoUl" contenteditable="true" class="space-y-2 text-sm text-white/95 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-white/35 bg-white/25 p-4 min-h-[2.5rem] ferriol-inline-editable ferriol-inline-editable-list"></ul>
+                  <p id="fcPv_payProdKioscoTitle" contenteditable="true" class="text-[10px] font-semibold uppercase tracking-wide text-white/52 mt-4 mb-2 ferriol-inline-editable">—</p>
+                  <ul id="fcPv_payProdKioscoUl" contenteditable="true" class="space-y-2 text-sm text-white/82 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-white/15 bg-black/25 p-4 min-h-[2.5rem] ferriol-inline-editable ferriol-inline-editable-list"></ul>
                 </div>
                 <div id="fcPv_payBenAdminBlock" class="hidden mb-5">
-                  <p id="fcPv_payBenAdminTitle" class="text-[10px] font-semibold uppercase tracking-wide text-cyan-200/85 mb-2">—</p>
-                  <ul id="fcPv_payBenAdminUl" class="space-y-2 text-sm text-cyan-50/95 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-cyan-500/35 bg-cyan-950/25 p-4 min-h-[2.5rem]"></ul>
-                  <p id="fcPv_payProdAdminTitle" class="text-[10px] font-semibold uppercase tracking-wide text-white/52 mt-4 mb-2">—</p>
-                  <ul id="fcPv_payProdAdminUl" class="space-y-2 text-sm text-white/82 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-white/15 bg-black/25 p-4 min-h-[2.5rem]"></ul>
+                  <p id="fcPv_payBenAdminTitle" contenteditable="true" class="text-[10px] font-semibold uppercase tracking-wide text-cyan-200/85 mb-2 ferriol-inline-editable">—</p>
+                  <ul id="fcPv_payBenAdminUl" contenteditable="true" class="space-y-2 text-sm text-cyan-50/95 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-cyan-500/35 bg-cyan-950/25 p-4 min-h-[2.5rem] ferriol-inline-editable ferriol-inline-editable-list"></ul>
+                  <p id="fcPv_payProdAdminTitle" contenteditable="true" class="text-[10px] font-semibold uppercase tracking-wide text-white/52 mt-4 mb-2 ferriol-inline-editable">—</p>
+                  <ul id="fcPv_payProdAdminUl" contenteditable="true" class="space-y-2 text-sm text-white/82 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-white/15 bg-black/25 p-4 min-h-[2.5rem] ferriol-inline-editable ferriol-inline-editable-list"></ul>
                 </div>
                 <div class="rounded-2xl border border-white/18 bg-black/28 p-4 sm:p-5 mb-3 ring-1 ring-white/10">
                   <p class="text-[10px] font-semibold uppercase tracking-widest text-white/55 mb-4">Métodos de pago</p>
@@ -2913,16 +2913,16 @@
                 </div>
               </div>
               <div id="fcPv_distWrap" class="hidden">
-                <p id="fcPv_distEyebrow" class="text-[10px] font-semibold uppercase tracking-wider text-violet-200/95 mb-2">—</p>
-                <p id="fcPv_distHeadline" class="font-black text-xl sm:text-2xl lg:text-[1.65rem] text-white mb-4 leading-snug">—</p>
-                <p id="fcPv_distLead" class="text-sm text-white/75 mb-5 leading-relaxed hidden"></p>
+                <p id="fcPv_distEyebrow" contenteditable="true" class="text-[10px] font-semibold uppercase tracking-wider text-violet-200/95 mb-2 ferriol-inline-editable">—</p>
+                <p id="fcPv_distHeadline" contenteditable="true" class="font-black text-xl sm:text-2xl lg:text-[1.65rem] text-white mb-4 leading-snug ferriol-inline-editable">—</p>
+                <p id="fcPv_distLead" contenteditable="true" class="text-sm text-white/75 mb-5 leading-relaxed hidden ferriol-inline-editable"></p>
                 <div class="rounded-2xl border border-violet-400/45 bg-gradient-to-b from-violet-950/65 to-black/40 py-6 px-4 mb-6 text-center ring-1 ring-violet-400/25 shadow-xl shadow-black/35">
                   <p class="text-[10px] font-semibold uppercase tracking-wide text-violet-200/85 mb-2">Kit + licencia</p>
                   <p id="fcPv_distPriceBig" class="text-[2.35rem] sm:text-5xl font-black tabular-nums text-violet-50 tracking-tight leading-none drop-shadow-lg">—</p>
                 </div>
                 <div class="rounded-2xl border border-violet-500/45 bg-violet-950/35 px-4 py-4 mb-5 ring-1 ring-violet-400/20">
-                  <p id="fcPv_distBenTitle" class="text-[10px] font-semibold uppercase tracking-wide text-violet-200/95 mb-2">—</p>
-                  <ul id="fcPv_distBenUl" class="space-y-2 text-sm text-violet-50/93 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start min-h-[2rem]"></ul>
+                  <p id="fcPv_distBenTitle" contenteditable="true" class="text-[10px] font-semibold uppercase tracking-wide text-violet-200/95 mb-2 ferriol-inline-editable">—</p>
+                  <ul id="fcPv_distBenUl" contenteditable="true" class="space-y-2 text-sm text-violet-50/93 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start min-h-[2rem] ferriol-inline-editable ferriol-inline-editable-list"></ul>
                 </div>
                 <div class="rounded-2xl border border-white/18 bg-black/28 p-4 sm:p-5 mb-4 ring-1 ring-white/10">
                   <p class="text-[10px] font-semibold uppercase tracking-widest text-white/55 mb-4">Métodos de pago</p>
@@ -2953,7 +2953,7 @@
             </div>
           </div>
 
-          <div data-founder-checkout-panel="kiosco" class="space-y-3 max-w-3xl ferriol-founder-checkout-edit-panel">
+          <div data-founder-checkout-form="kiosco" class="hidden space-y-3 max-w-3xl ferriol-founder-checkout-edit-panel">
             <p class="text-xs text-amber-200/85 font-semibold uppercase">Editar · Suscripción mensual (negocio)</p>
             <label class="block text-xs text-white/70 mb-1">Encabezado</label>
             <input type="text" id="adminCheckoutPayKioscoEyebrow" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm font-mono" maxlength="140" placeholder="Encabezado">
@@ -2974,7 +2974,7 @@
             <p class="text-[11px] text-white/40">El monto mostrado en la vista previa sale de <strong class="text-white/55">Ajustes → Precios plan</strong>.</p>
           </div>
 
-          <div data-founder-checkout-panel="admin" class="hidden space-y-3 max-w-3xl ferriol-founder-checkout-edit-panel">
+          <div data-founder-checkout-form="admin" class="hidden space-y-3 max-w-3xl ferriol-founder-checkout-edit-panel">
             <p class="text-xs text-cyan-200/90 font-semibold uppercase">Editar · Cuota mensual (distribuidor)</p>
             <label class="block text-xs text-white/70 mb-1">Encabezado</label>
             <input type="text" id="adminCheckoutPayAdminEyebrow" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm font-mono" maxlength="140">
@@ -2993,7 +2993,7 @@
             <input type="text" id="adminCheckoutCopyModalAdmin" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm" placeholder="Opcional">
           </div>
 
-          <div data-founder-checkout-panel="kit" class="hidden space-y-3 max-w-3xl ferriol-founder-checkout-edit-panel">
+          <div data-founder-checkout-form="kit" class="hidden space-y-3 max-w-3xl ferriol-founder-checkout-edit-panel">
             <p class="text-xs text-violet-200/90 font-semibold uppercase">Editar · Kit + licencia distribuidor</p>
             <label class="block text-xs text-white/70 mb-1">Encabezado</label>
             <input type="text" id="adminCheckoutDistribEyebrow" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm font-mono" placeholder="KIT + LICENCIA DE DISTRIBUIDOR" maxlength="140">

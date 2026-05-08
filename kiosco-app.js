@@ -6941,14 +6941,54 @@
       } catch (_) {}
     }
 
+    function ferriolFounderEditableListToLines(el) {
+      if (!el) return [];
+      return String(el.innerText || '')
+        .split(/\r?\n/)
+        .map(function (line) {
+          return String(line || '').replace(/^[\s\u00A0]*[✓★•\-]\s*/u, '').trim();
+        })
+        .filter(Boolean);
+    }
+
+    function ferriolFounderSetFieldValue(id, val) {
+      var el = document.getElementById(id);
+      if (el) el.value = val != null ? String(val) : '';
+    }
+
+    function ferriolFounderSyncFormFromInlineEditor() {
+      var tab = window._ferriolFounderCheckoutTab || 'kiosco';
+      var t = function (id) {
+        var el = document.getElementById(id);
+        return el ? String(el.innerText || '').trim() : '';
+      };
+
+      if (tab === 'kit') {
+        ferriolFounderSetFieldValue('adminCheckoutDistribEyebrow', t('fcPv_distEyebrow'));
+        ferriolFounderSetFieldValue('adminCheckoutDistribSalesHeadline', t('fcPv_distHeadline'));
+        ferriolFounderSetFieldValue('adminCheckoutDistribBeneficiosTitle', t('fcPv_distBenTitle'));
+        ferriolFounderSetFieldValue('adminCheckoutCopyDistribIntro', t('fcPv_distLead'));
+        ferriolFounderSetFieldValue('adminCheckoutCopyDistrib', ferriolFounderEditableListToLines(document.getElementById('fcPv_distBenUl')).join('\n'));
+      } else {
+        var isAdmin = tab === 'admin';
+        ferriolFounderSetFieldValue(isAdmin ? 'adminCheckoutPayAdminEyebrow' : 'adminCheckoutPayKioscoEyebrow', t('fcPv_payEyebrow'));
+        ferriolFounderSetFieldValue(isAdmin ? 'adminCheckoutPayAdminHeadline' : 'adminCheckoutPayKioscoHeadline', t('fcPv_payHeadline'));
+        ferriolFounderSetFieldValue(isAdmin ? 'adminCheckoutPayAdminLead' : 'adminCheckoutPayKioscoLead', t('fcPv_payLead'));
+        ferriolFounderSetFieldValue(isAdmin ? 'adminCheckoutPayAdminBenefitsTitle' : 'adminCheckoutPayKioscoBenefitsTitle', t(isAdmin ? 'fcPv_payBenAdminTitle' : 'fcPv_payBenKioscoTitle'));
+        ferriolFounderSetFieldValue(isAdmin ? 'adminCheckoutPayAdminProductsTitle' : 'adminCheckoutPayKioscoProductsTitle', t(isAdmin ? 'fcPv_payProdAdminTitle' : 'fcPv_payProdKioscoTitle'));
+        ferriolFounderSetFieldValue(isAdmin ? 'adminCheckoutCopyAdmin' : 'adminCheckoutCopyKiosco', ferriolFounderEditableListToLines(document.getElementById(isAdmin ? 'fcPv_payBenAdminUl' : 'fcPv_payBenKioscoUl')).join('\n'));
+        ferriolFounderSetFieldValue('adminCheckoutCopyProducts', ferriolFounderEditableListToLines(document.getElementById(isAdmin ? 'fcPv_payProdAdminUl' : 'fcPv_payProdKioscoUl')).join('\n'));
+      }
+    }
+
     (function ferriolSetupFounderCheckoutEditor() {
       var root = document.getElementById('super-section-ajustes-checkout');
       if (!root) return;
       var tabs = root.querySelectorAll('[data-founder-checkout-tab]');
-      var panels = root.querySelectorAll('[data-founder-checkout-panel]');
       var baseTab =
         'ferriol-founder-checkout-tab touch-target rounded-xl px-3 py-2.5 text-xs sm:text-sm font-semibold border transition-colors ';
       function setTab(name) {
+        try { ferriolFounderSyncFormFromInlineEditor(); } catch (_) {}
         var n = name === 'admin' || name === 'kit' ? name : 'kiosco';
         window._ferriolFounderCheckoutTab = n;
         tabs.forEach(function (b) {
@@ -6960,9 +7000,6 @@
               ? 'border-violet-400/55 bg-violet-500/25 text-white shadow-lg shadow-violet-900/20'
               : 'border-white/15 bg-white/5 text-white/60');
         });
-        panels.forEach(function (p) {
-          p.classList.toggle('hidden', p.getAttribute('data-founder-checkout-panel') !== n);
-        });
         ferriolSyncFounderCheckoutPreview();
       }
       window._ferriolFounderCheckoutSetTab = setTab;
@@ -6972,7 +7009,12 @@
         });
       });
       var debounceT = null;
-      function schedulePreview() {
+      function schedulePreview(ev) {
+        var t = ev && ev.target ? ev.target : null;
+        if (t && t.closest && t.closest('.ferriol-founder-checkout-preview-inner')) {
+          ferriolFounderSyncFormFromInlineEditor();
+          return;
+        }
         clearTimeout(debounceT);
         debounceT = setTimeout(function () {
           ferriolSyncFounderCheckoutPreview();
@@ -13845,6 +13887,7 @@ async function showApp() {
           return;
         }
         if (slice === 'checkout') {
+          try { ferriolFounderSyncFormFromInlineEditor(); } catch (_) {}
           var checkoutSaved = ferriolBuildCheckoutCopyObjectFromSettingsForm();
           await supabaseClient.from('app_settings').upsert([{ key: 'ferriol_checkout_copy', value: JSON.stringify(checkoutSaved) }], { onConflict: 'key' });
           window._ferriolCheckoutCopyParsed = ferriolParseCheckoutCopyValue(JSON.stringify(checkoutSaved));
