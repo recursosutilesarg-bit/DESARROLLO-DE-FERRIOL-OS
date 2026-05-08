@@ -485,11 +485,11 @@
         <div id="dashboardResumenDia" class="glass rounded-2xl p-4 sm:p-5 slide-up kiosquero-only border border-[#ffffff]/30">
           <div class="min-w-0">
             <p class="text-sm text-white/60 mb-0.5">Resumen del día</p>
-            <p id="resumenDiaTexto" class="text-2xl sm:text-3xl font-bold text-[#ffffff]">Entraron $0</p>
+            <p id="resumenDiaTexto" class="ferriol-caja-ingreso-monto">Entraron $0</p>
             <p id="resumenDiaVentas" class="text-sm text-white/50 mt-1">0 ventas</p>
             <div id="resumenDiaPorMetodo" class="flex flex-wrap gap-1.5 mt-2"></div>
-            <button type="button" id="btnCobroRapido" onclick="window._abrirCobroRapido && window._abrirCobroRapido()" class="w-full mt-5 py-2.5 px-4 rounded-xl border border-[#ffffff]/40 bg-[#ffffff]/08 hover:bg-[#ffffff]/14 text-sm font-semibold flex items-center justify-center gap-2 touch-target text-[#ffffff] active:scale-[0.99]">
-              <i data-lucide="zap" class="w-4 h-4 shrink-0"></i>
+            <button type="button" id="btnCobroRapido" onclick="window._abrirCobroRapido && window._abrirCobroRapido()" class="ferriol-btn-cobro-rapido touch-target" aria-label="Abrir cobro rápido">
+              <i data-lucide="zap" class="shrink-0" aria-hidden="true"></i>
               Cobro rápido
             </button>
           </div>
@@ -547,7 +547,7 @@
             <div>
               <div class="flex justify-between items-center gap-2 mb-0.5">
                 <span class="text-[11px] font-semibold text-white leading-tight">1 · Facturación <span class="text-[9px] font-normal text-white/45">(cobrado)</span></span>
-                <span id="estadoCuentaIngresosBarLabel" class="text-[11px] tabular-nums text-white/90 font-semibold shrink-0">$0</span>
+                <span id="estadoCuentaIngresosBarLabel" class="ferriol-caja-ingreso-monto ferriol-caja-ingreso-monto--inline shrink-0 tabular-nums">$0</span>
               </div>
               <div class="h-3.5 rounded-lg bg-white/10 overflow-hidden">
                 <div id="estadoCuentaBarIngresos" class="h-full rounded-lg bg-white transition-all duration-300 min-w-0" style="width:0%"></div>
@@ -594,7 +594,7 @@
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 mt-2.5 text-[11px] sm:text-xs">
             <div class="rounded-xl bg-white/10 border border-white/20 px-2 py-1.5">
               <p class="text-white/55">Facturación</p>
-              <p id="estadoCuentaIngresos" class="font-semibold text-white">$0</p>
+              <p id="estadoCuentaIngresos" class="ferriol-caja-ingreso-monto ferriol-caja-ingreso-monto--tile">$0</p>
             </div>
             <div class="rounded-xl bg-orange-500/10 border border-orange-400/20 px-2 py-1.5">
               <p class="text-white/55">Mercadería vendida</p>
@@ -785,7 +785,7 @@
                 <div class="ferriol-cierre-kpi-grid">
                   <div class="ferriol-cierre-kpi-card">
                     <span class="ferriol-cierre-kpi-label">Ingresos cobrados</span>
-                    <span id="cajaTotal" class="ferriol-cierre-kpi-value">$0</span>
+                    <span id="cajaTotal" class="ferriol-cierre-kpi-value ferriol-cierre-kpi-value--ingreso">$0</span>
                     <span class="ferriol-cierre-kpi-hint">Efectivo + tarjeta + transf. + cobros libreta</span>
                   </div>
                   <div class="ferriol-cierre-kpi-card ferriol-cierre-kpi-card--gain">
@@ -909,7 +909,7 @@
               <div class="space-y-2 text-sm">
                 <div class="flex justify-between gap-3 py-2 border-b border-white/08">
                   <span class="text-white/65">Ingresos (ventas cobradas)</span>
-                  <span id="cajaMesIngresos" class="font-semibold text-[#ffffff] shrink-0">$0</span>
+                  <span id="cajaMesIngresos" class="ferriol-caja-ingreso-monto ferriol-caja-ingreso-monto--row shrink-0">$0</span>
                 </div>
                 <div class="flex justify-between gap-3 py-1.5 text-xs border-b border-white/06">
                   <span class="text-white/50">Gastos fijos</span>
