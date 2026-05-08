@@ -8118,7 +8118,7 @@
       accountMenuBtnEmpConfiguraciones.addEventListener('click', function () {
         if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper()) return;
         closeAccountMenuDrawer(true);
-        state.superSection = 'ajustes';
+        state.superSection = 'configuraciones';
         goToPanel('super');
       });
     }
@@ -8148,7 +8148,7 @@
         var ok = (currentUser.role === 'partner') || isSuperSocioLens();
         if (!ok || isPartnerKioscoPreviewMode()) return;
         closeAccountMenuDrawer(true);
-        state.superSection = 'ajustes-tema';
+        state.superSection = 'configuraciones';
         goToPanel('super');
       });
     }
