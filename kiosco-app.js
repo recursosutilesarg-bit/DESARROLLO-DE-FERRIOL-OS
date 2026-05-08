@@ -65,10 +65,8 @@
       return 'negro';
     }
     function ferriolSyncThemeChipUi() {
-      var wrap = document.getElementById('ferriolThemeChips');
-      if (!wrap) return;
       var cur = ferriolGetUiTheme();
-      wrap.querySelectorAll('[data-ferriol-theme-pick]').forEach(function (btn) {
+      document.querySelectorAll('[data-ferriol-theme-pick]').forEach(function (btn) {
         var v = String(btn.getAttribute('data-ferriol-theme-pick') || '').toLowerCase();
         if (v === 'negro') btn.classList.toggle('ferriol-theme-chip--active', cur === 'negro');
         else btn.classList.toggle('ferriol-theme-chip--active', cur === v);
@@ -8113,6 +8111,15 @@
         goToPanel('super');
       });
     }
+    var accountMenuBtnEmpColorApp = document.getElementById('accountMenuBtnEmpColorApp');
+    if (accountMenuBtnEmpColorApp) {
+      accountMenuBtnEmpColorApp.addEventListener('click', function () {
+        if (!currentUser || currentUser.role !== 'super' || !isEmpresaLensSuper()) return;
+        closeAccountMenuDrawer(true);
+        state.superSection = 'ajustes-tema';
+        goToPanel('super');
+      });
+    }
     var accountMenuBtnEmpAvisoGlobal = document.getElementById('accountMenuBtnEmpAvisoGlobal');
     if (accountMenuBtnEmpAvisoGlobal) {
       accountMenuBtnEmpAvisoGlobal.addEventListener('click', function () {
@@ -13906,6 +13913,19 @@ async function showApp() {
       var root = document.getElementById('panel-super');
       if (!root) return;
       root.addEventListener('click', function (ev) {
+        var themePick = ev.target.closest('[data-ferriol-theme-pick]');
+        if (themePick && root.contains(themePick)) {
+          ferriolApplyUiTheme(themePick.getAttribute('data-ferriol-theme-pick'));
+          var hint = document.getElementById('ferriolThemeSavedHintAdmin');
+          if (hint && state.superSection === 'ajustes-tema') {
+            hint.classList.remove('hidden');
+            try {
+              clearTimeout(root._ferriolThemeHintAdminT);
+              root._ferriolThemeHintAdminT = setTimeout(function () { hint.classList.add('hidden'); }, 2400);
+            } catch (_) {}
+          }
+          return;
+        }
         var hubBtn = ev.target.closest('[data-ferriol-ajustes-target]');
         if (hubBtn && isEmpresaLensSuper()) {
           var sec = hubBtn.getAttribute('data-ferriol-ajustes-target');
