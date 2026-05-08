@@ -6437,8 +6437,7 @@
       if (empresaWrap) empresaWrap.classList.add('hidden');
       if (redWrap) redWrap.classList.add('hidden');
       if (show && currentUser) {
-        if (currentUser.role === 'super') {
-          // Fundador/admin: siempre mostrar ajustes del sistema en menú perfil.
+        if (currentUser.role === 'super' && isEmpresaLensSuper()) {
           if (empresaWrap) empresaWrap.classList.remove('hidden');
         } else {
           if (redWrap) redWrap.classList.remove('hidden');
@@ -7851,11 +7850,12 @@
         if (!allowPc) sn = 'ingresos';
       }
       state.superSection = sn;
+      var isAjustesTema = state.superSection === 'ajustes-tema';
       var needsEmpresaLens =
         state.superSection === 'sistema' ||
         state.superSection === 'aviso-global' ||
         state.superSection === 'ajustes' ||
-        (typeof state.superSection === 'string' && state.superSection.indexOf('ajustes-') === 0);
+        (typeof state.superSection === 'string' && state.superSection.indexOf('ajustes-') === 0 && !isAjustesTema);
       if (needsEmpresaLens && currentUser && (currentUser.role !== 'super' || !isEmpresaLensSuper())) {
         state.superSection = 'ingresos';
       }
@@ -8141,6 +8141,17 @@
       });
     }
     var accountMenuBtnRedSolicitudes = document.getElementById('accountMenuBtnRedSolicitudes');
+    var accountMenuBtnRedConfiguraciones = document.getElementById('accountMenuBtnRedConfiguraciones');
+    if (accountMenuBtnRedConfiguraciones) {
+      accountMenuBtnRedConfiguraciones.addEventListener('click', function () {
+        if (!currentUser) return;
+        var ok = (currentUser.role === 'partner') || isSuperSocioLens();
+        if (!ok || isPartnerKioscoPreviewMode()) return;
+        closeAccountMenuDrawer(true);
+        state.superSection = 'ajustes-tema';
+        goToPanel('super');
+      });
+    }
     if (accountMenuBtnRedSolicitudes) {
       accountMenuBtnRedSolicitudes.addEventListener('click', function () {
         if (!currentUser) return;
