@@ -13962,9 +13962,13 @@ async function showApp() {
             return;
           }
         }
-        if (ev.target.closest('.btnSuperAjustesVolverHub') && (canUseFounderAjustes || canUsePartnerConfig)) {
+        var backBtn = ev.target.closest('.btnSuperAjustesVolverHub');
+        if (backBtn && (canUseFounderAjustes || canUsePartnerConfig)) {
           ev.preventDefault();
-          if (canUseFounderAjustes) {
+          var backTarget = String(backBtn.getAttribute('data-ferriol-back-target') || '').trim();
+          if (backTarget) {
+            switchSuperSection(backTarget);
+          } else if (canUseFounderAjustes) {
             switchSuperSection('ajustes');
           } else {
             switchSuperSection('configuraciones');
