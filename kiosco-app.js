@@ -1354,13 +1354,13 @@
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
     function ferriolSyncIngresosDistribuidorVentasBar() {
-      var bar = document.getElementById('ingresosDistribuidorVentasBar');
+      var bar = document.getElementById('solicitudesDistribuidorCargarVentaBar');
       if (!bar) return;
       var show =
         !!(
           currentUser &&
           state.currentPanel === 'super' &&
-          state.superSection === 'ingresos' &&
+          state.superSection === 'solicitudes' &&
           ferriolDistribuidorVentaShell()
         );
       bar.classList.toggle('hidden', !show);
@@ -1944,7 +1944,7 @@
           }).join('') + '</div>'
           : '';
         if (!rows.length) {
-          clBox.innerHTML = '<p class="text-white/50 text-sm py-4">Ninguna solicitud con comprobante. Los administradores envían desde <strong class="text-white/75">Ingresos</strong>: botón <strong class="text-white/75">Cargar venta</strong> junto al período.</p>';
+          clBox.innerHTML = '<p class="text-white/50 text-sm py-4">Ninguna solicitud con comprobante. Los administradores envían desde la pestaña inferior <strong class="text-white/75">Solicitudes y aprobaciones</strong>: botón <strong class="text-white/75">Cargar venta con comprobante</strong>.</p>';
         } else {
           clBox.innerHTML = (htmlPend || '<p class="text-amber-200/90 text-sm py-2">Nada pendiente de validar en este listado.</p>') + htmlHist;
         }
@@ -7926,6 +7926,9 @@
       if (state.superSection === 'mas' || state.superSection === 'aviso-global') {
         void loadSuperMasBankingSection();
       }
+      try {
+        ferriolSyncIngresosDistribuidorVentasBar();
+      } catch (_) {}
       lucide.createIcons();
       if (state.superSection === 'ajustes-checkout') {
         requestAnimationFrame(function () {
@@ -13787,10 +13790,10 @@ async function showApp() {
         openClientSaleRequestModal();
       });
     }
-    var btnIngDistVenta = document.getElementById('btnIngresosDistribuidorCargarVenta');
-    if (btnIngDistVenta && !btnIngDistVenta.dataset.ferriolBound) {
-      btnIngDistVenta.dataset.ferriolBound = '1';
-      btnIngDistVenta.addEventListener('click', function () {
+    var btnSolCargarVenta = document.getElementById('btnSolicitudesCargarVentaComprobante');
+    if (btnSolCargarVenta && !btnSolCargarVenta.dataset.ferriolBound) {
+      btnSolCargarVenta.dataset.ferriolBound = '1';
+      btnSolCargarVenta.addEventListener('click', function () {
         if (!ferriolDistribuidorVentaShell()) return;
         openClientSaleRequestModal();
       });
@@ -14952,7 +14955,7 @@ async function showApp() {
             routeKioskToPartnerQueue
               ? currentUser.role === 'partner'
                 ? 'Enviado a tu distribuidor directo. Va a revisar el comprobante y cargará la venta ante Ferriol cuando corresponda.'
-                : 'Enviado a tu distribuidor directo. Él cargará la venta ante Ferriol desde «Ingresos» para registrar tu pago con su comisión.'
+                : 'Enviado a tu distribuidor directo. Él cargará la venta ante Ferriol desde Solicitudes y aprobaciones o la bandeja de comprobantes.'
               : 'Enviado. La empresa lo revisa en Solicitudes y aplica el cobro al aprobar.'
           );
         });

@@ -1955,15 +1955,6 @@
               <p class="text-[10px] text-white/40 mt-1">Cobros declarados <strong class="text-red-200/80">rechazados</strong></p>
             </div>
           </div>
-          <div id="ingresosDistribuidorVentasBar" class="hidden mb-5 rounded-2xl border border-teal-400/35 bg-teal-950/25 p-4 sm:p-4">
-            <div class="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
-              <div class="min-w-0">
-                <p class="text-sm font-semibold text-teal-100">Venta como distribuidor del sistema</p>
-                <p class="text-[11px] text-white/55 mt-1 leading-snug">Kit, licencia de comercio o cuota del socio: cargá comprobante como haría un partner. La validación sigue en <strong class="text-white/70">Solicitudes</strong> (ventas con comprobante).</p>
-              </div>
-              <button type="button" id="btnIngresosDistribuidorCargarVenta" class="btn-glow shrink-0 py-3 px-4 rounded-xl text-sm font-semibold touch-target whitespace-nowrap">Cargar venta con comprobante</button>
-            </div>
-          </div>
           <div class="rounded-2xl border border-white/15 bg-black/25 p-4 sm:p-5 mb-5">
             <div class="flex items-center justify-between gap-2 mb-3">
               <h3 id="ingresosChartTitle" class="font-semibold text-sm text-white/90">Desempeño diario</h3>
@@ -3139,6 +3130,15 @@
               <i data-lucide="folder-open" class="w-5 h-5 shrink-0"></i>
               Abrir comprobantes y movimientos
             </button>
+          </div>
+          <div id="solicitudesDistribuidorCargarVentaBar" class="hidden mb-5 rounded-2xl border border-teal-400/35 bg-teal-950/25 p-4 sm:p-4">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+              <div class="min-w-0">
+                <p class="text-sm font-semibold text-teal-100">Venta como distribuidor del sistema</p>
+                <p class="text-[11px] text-white/55 mt-1 leading-snug">Kit, licencia de comercio o cuota del socio: cargá el comprobante acá. La empresa valida en la pestaña <strong class="text-white/70">Ventas</strong> de esta misma pantalla.</p>
+              </div>
+              <button type="button" id="btnSolicitudesCargarVentaComprobante" class="btn-glow shrink-0 py-3 px-4 rounded-xl text-sm font-semibold touch-target whitespace-nowrap">Cargar venta con comprobante</button>
+            </div>
           </div>
           <div id="partnerTramitesPanel" class="partner-tramites-panel mb-6" style="display: none;">
             <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
