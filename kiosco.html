@@ -2856,44 +2856,162 @@
             <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
             Volver a ajustes del sistema
           </button>
-          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-amber-300"></i> Textos Mi plan / checkout</h2>
-          <p class="text-xs text-white/50 mb-3">Una línea = un beneficio donde aplique. <code class="text-white/55">ferriol_checkout_copy</code></p>
-          <div class="space-y-3 max-w-3xl">
-            <label class="block text-xs text-white/70 mb-1">Encabezado · pantalla distribuidor</label>
-            <input type="text" id="adminCheckoutDistribEyebrow" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm font-mono" placeholder="KIT + LICENCIA DE DISTRIBUIDOR" maxlength="140">
-            <label class="block text-xs text-white/70 mb-1">Titular promocional · distribuidor</label>
-            <input type="text" id="adminCheckoutDistribSalesHeadline" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm" maxlength="220">
-            <label class="block text-xs text-white/70 mb-1">Título beneficios · distribuidor</label>
-            <input type="text" id="adminCheckoutDistribBeneficiosTitle" placeholder="Beneficios" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white placeholder-white/35 text-sm" maxlength="80">
-            <hr class="border-white/15 my-3">
-            <p class="text-xs text-white/90 font-semibold uppercase">Plan · suscripción mensual (negocio)</p>
-            <input type="text" id="adminCheckoutPayKioscoEyebrow" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2 font-mono" maxlength="140" placeholder="Encabezado">
-            <input type="text" id="adminCheckoutPayKioscoHeadline" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2" placeholder="Titular">
-            <textarea id="adminCheckoutPayKioscoLead" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2" placeholder="Texto opcional"></textarea>
-            <input type="text" id="adminCheckoutPayKioscoBenefitsTitle" placeholder="Título beneficios" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2" maxlength="120">
-            <input type="text" id="adminCheckoutPayKioscoProductsTitle" placeholder="Título propuesta valor" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2" maxlength="120">
-            <hr class="border-white/15 my-3">
-            <p class="text-xs text-cyan-200/90 font-semibold uppercase">Plan · cuota distribuidor</p>
-            <input type="text" id="adminCheckoutPayAdminEyebrow" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2 font-mono" maxlength="140">
-            <input type="text" id="adminCheckoutPayAdminHeadline" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2">
-            <textarea id="adminCheckoutPayAdminLead" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2"></textarea>
-            <input type="text" id="adminCheckoutPayAdminBenefitsTitle" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2" maxlength="120">
-            <input type="text" id="adminCheckoutPayAdminProductsTitle" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2" maxlength="120">
-            <label class="block text-xs text-white/70 mb-1">Beneficios · kiosco</label>
-            <textarea id="adminCheckoutCopyKiosco" rows="4" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2 font-mono"></textarea>
-            <label class="block text-xs text-white/70 mb-1">Beneficios · cuota distribuidor</label>
-            <textarea id="adminCheckoutCopyAdmin" rows="4" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2 font-mono"></textarea>
-            <label class="block text-xs text-white/70 mb-1">Beneficios · «Quiero ser distribuidor»</label>
-            <textarea id="adminCheckoutCopyDistrib" rows="4" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2 font-mono"></textarea>
-            <label class="block text-xs text-white/70 mb-1">Propuesta Ferriol / valor</label>
-            <textarea id="adminCheckoutCopyProducts" rows="3" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2 font-mono"></textarea>
-            <label class="block text-xs text-white/70 mb-1">Párrafo opcional · «Quiero ser distribuidor»</label>
-            <textarea id="adminCheckoutCopyDistribIntro" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2"></textarea>
-            <label class="block text-xs text-white/70 mb-1">Modal datos bancarios (kit + licencia)</label>
-            <textarea id="adminCheckoutModalDistribKit" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y mb-2 font-mono"></textarea>
-            <input type="text" id="adminCheckoutCopyModalKiosco" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-2" placeholder="Frase extra modal kiosco">
-            <input type="text" id="adminCheckoutCopyModalAdmin" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm mb-4" placeholder="Frase extra modal distribuidor">
-            <button type="button" class="ferriol-save-admin-slice btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold" data-admin-slice="checkout">Guardar</button>
+          <h2 class="font-bold text-xl mb-2 flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-amber-300"></i> Textos Mi plan / checkout</h2>
+          <p class="text-xs text-white/50 mb-3">Elegí la pantalla del cliente: la vista previa replica <strong class="text-white/65">Mi plan</strong> (mismos bloques). Editá abajo y tocá <strong class="text-white/65">Guardar</strong> para publicar en <code class="text-white/55">ferriol_checkout_copy</code>. Una línea = un ítem de lista en beneficios.</p>
+          <div class="ferriol-founder-checkout-tabs flex flex-wrap gap-2 mb-3" role="tablist" aria-label="Pantalla de checkout">
+            <button type="button" role="tab" aria-selected="true" data-founder-checkout-tab="kiosco" class="ferriol-founder-checkout-tab touch-target rounded-xl px-3 py-2.5 text-xs sm:text-sm font-semibold border transition-colors border-violet-400/55 bg-violet-500/25 text-white shadow-lg shadow-violet-900/20">Suscripción · negocio</button>
+            <button type="button" role="tab" aria-selected="false" data-founder-checkout-tab="admin" class="ferriol-founder-checkout-tab touch-target rounded-xl px-3 py-2.5 text-xs sm:text-sm font-semibold border transition-colors border-white/15 bg-white/5 text-white/60">Cuota · distribuidor</button>
+            <button type="button" role="tab" aria-selected="false" data-founder-checkout-tab="kit" class="ferriol-founder-checkout-tab touch-target rounded-xl px-3 py-2.5 text-xs sm:text-sm font-semibold border transition-colors border-white/15 bg-white/5 text-white/60">Kit + licencia</button>
+          </div>
+          <div class="ferriol-founder-checkout-preview rounded-2xl border border-white/18 bg-black/35 p-3 sm:p-4 mb-4 max-h-[min(52vh,560px)] overflow-y-auto scroll-smooth ring-1 ring-white/8" aria-label="Vista previa">
+            <p class="text-[10px] font-semibold uppercase tracking-wider text-white/40 mb-2 px-1">Vista cliente (solo lectura)</p>
+            <div class="ferriol-founder-checkout-preview-inner glass rounded-2xl p-4 sm:p-5 max-w-lg mx-auto pointer-events-none select-none opacity-[0.97]">
+              <div id="fcPv_payWrap">
+                <p id="fcPv_payEyebrow" class="text-[10px] font-semibold uppercase tracking-wider text-amber-200/95 mb-2">—</p>
+                <p id="fcPv_payHeadline" class="font-black text-xl sm:text-2xl text-white mb-4 leading-snug">—</p>
+                <p id="fcPv_payLead" class="text-sm text-white/76 mb-6 leading-relaxed hidden"></p>
+                <div class="rounded-2xl border border-white/25 bg-gradient-to-b from-black/45 to-black/55 py-6 px-4 mb-6 text-center ring-1 ring-white/12 shadow-xl shadow-black/30">
+                  <p id="fcPv_payPriceLabel" class="text-[10px] font-semibold uppercase tracking-wide text-white/55 mb-2">Suscripción mensual · negocio</p>
+                  <p id="fcPv_payPriceBig" class="text-[2.35rem] sm:text-5xl font-black tabular-nums text-amber-50 tracking-tight leading-none drop-shadow-lg">—</p>
+                </div>
+                <div id="fcPv_payBenKioscoBlock" class="mb-5">
+                  <p id="fcPv_payBenKioscoTitle" class="text-[10px] font-semibold uppercase tracking-wide text-white/85 mb-2">—</p>
+                  <ul id="fcPv_payBenKioscoUl" class="space-y-2 text-sm text-white/95 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-white/35 bg-white/25 p-4 min-h-[2.5rem]"></ul>
+                  <p id="fcPv_payProdKioscoTitle" class="text-[10px] font-semibold uppercase tracking-wide text-white/52 mt-4 mb-2">—</p>
+                  <ul id="fcPv_payProdKioscoUl" class="space-y-2 text-sm text-white/82 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-white/15 bg-black/25 p-4 min-h-[2.5rem]"></ul>
+                </div>
+                <div id="fcPv_payBenAdminBlock" class="hidden mb-5">
+                  <p id="fcPv_payBenAdminTitle" class="text-[10px] font-semibold uppercase tracking-wide text-cyan-200/85 mb-2">—</p>
+                  <ul id="fcPv_payBenAdminUl" class="space-y-2 text-sm text-cyan-50/95 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-cyan-500/35 bg-cyan-950/25 p-4 min-h-[2.5rem]"></ul>
+                  <p id="fcPv_payProdAdminTitle" class="text-[10px] font-semibold uppercase tracking-wide text-white/52 mt-4 mb-2">—</p>
+                  <ul id="fcPv_payProdAdminUl" class="space-y-2 text-sm text-white/82 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start rounded-2xl border border-white/15 bg-black/25 p-4 min-h-[2.5rem]"></ul>
+                </div>
+                <div class="rounded-2xl border border-white/18 bg-black/28 p-4 sm:p-5 mb-3 ring-1 ring-white/10">
+                  <p class="text-[10px] font-semibold uppercase tracking-widest text-white/55 mb-4">Métodos de pago</p>
+                  <div class="space-y-5">
+                    <div>
+                      <p class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 shrink-0 text-amber-200/95"></i> Transferencia</p>
+                      <div class="w-full rounded-2xl px-5 py-4 font-bold text-base text-white shadow-xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-700 ring-2 ring-amber-200/45 flex items-center justify-center gap-2">
+                        <i data-lucide="building-2" class="w-6 h-6 shrink-0"></i>
+                        <span>Ver datos para transferir</span>
+                      </div>
+                    </div>
+                    <div class="border-t border-white/12 pt-5">
+                      <p class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i data-lucide="credit-card" class="w-5 h-5 shrink-0 text-sky-200/95"></i> Mercado Pago</p>
+                      <div class="w-full rounded-xl border border-sky-500/40 bg-gradient-to-b from-sky-950/45 to-black/35 p-3 ring-1 ring-sky-400/25 shadow-inner shadow-black/30">
+                        <div class="w-full rounded-xl py-3 px-3 inline-flex items-center justify-center gap-2 font-bold text-[0.6875rem] sm:text-xs text-white leading-tight text-center border-2 border-sky-400/50 bg-gradient-to-br from-[#009ee3]/90 via-[#008ad4]/95 to-[#006ebb] shadow-lg shadow-sky-900/30 ring-1 ring-white/15">
+                          <i data-lucide="external-link" class="w-[1.125rem] h-[1.125rem] shrink-0 opacity-95"></i>
+                          <span>TARJETA / EFECTIVO</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-3 w-full rounded-xl py-3 px-3 inline-flex items-center justify-center gap-2 font-bold text-sm text-amber-50 border-2 border-amber-400/55 bg-gradient-to-br from-amber-600/40 via-orange-600/32 to-amber-900/45 ring-1 ring-amber-300/30 shadow-md shadow-black/25">
+                  <i data-lucide="circle-check" class="w-[1.125rem] h-[1.125rem] shrink-0 text-amber-100/95"></i>
+                  <span>YA PAGUÉ</span>
+                </div>
+              </div>
+              <div id="fcPv_distWrap" class="hidden">
+                <p id="fcPv_distEyebrow" class="text-[10px] font-semibold uppercase tracking-wider text-violet-200/95 mb-2">—</p>
+                <p id="fcPv_distHeadline" class="font-black text-xl sm:text-2xl lg:text-[1.65rem] text-white mb-4 leading-snug">—</p>
+                <p id="fcPv_distLead" class="text-sm text-white/75 mb-5 leading-relaxed hidden"></p>
+                <div class="rounded-2xl border border-violet-400/45 bg-gradient-to-b from-violet-950/65 to-black/40 py-6 px-4 mb-6 text-center ring-1 ring-violet-400/25 shadow-xl shadow-black/35">
+                  <p class="text-[10px] font-semibold uppercase tracking-wide text-violet-200/85 mb-2">Kit + licencia</p>
+                  <p id="fcPv_distPriceBig" class="text-[2.35rem] sm:text-5xl font-black tabular-nums text-violet-50 tracking-tight leading-none drop-shadow-lg">—</p>
+                </div>
+                <div class="rounded-2xl border border-violet-500/45 bg-violet-950/35 px-4 py-4 mb-5 ring-1 ring-violet-400/20">
+                  <p id="fcPv_distBenTitle" class="text-[10px] font-semibold uppercase tracking-wide text-violet-200/95 mb-2">—</p>
+                  <ul id="fcPv_distBenUl" class="space-y-2 text-sm text-violet-50/93 leading-snug [&>li]:flex [&>li]:gap-2.5 [&>li]:items-start min-h-[2rem]"></ul>
+                </div>
+                <div class="rounded-2xl border border-white/18 bg-black/28 p-4 sm:p-5 mb-4 ring-1 ring-white/10">
+                  <p class="text-[10px] font-semibold uppercase tracking-widest text-white/55 mb-4">Métodos de pago</p>
+                  <div class="space-y-5">
+                    <div>
+                      <p class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i data-lucide="landmark" class="w-5 h-5 shrink-0 text-amber-200/95"></i> Transferencia</p>
+                      <div class="w-full rounded-2xl px-5 py-4 font-bold text-base text-white shadow-xl bg-gradient-to-br from-amber-400 via-orange-500 to-rose-700 ring-2 ring-amber-200/45 flex items-center justify-center gap-2">
+                        <i data-lucide="building-2" class="w-6 h-6 shrink-0"></i>
+                        <span>Ver datos para transferir</span>
+                      </div>
+                    </div>
+                    <div class="border-t border-white/12 pt-5">
+                      <p class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i data-lucide="credit-card" class="w-5 h-5 shrink-0 text-sky-200/95"></i> Mercado Pago</p>
+                      <div class="w-full rounded-xl border border-sky-500/40 bg-gradient-to-b from-sky-950/45 to-black/35 p-3 ring-1 ring-sky-400/25 shadow-inner shadow-black/30">
+                        <div class="w-full rounded-xl py-3 px-3 inline-flex items-center justify-center gap-2 font-bold text-[0.6875rem] sm:text-xs text-white leading-tight text-center border-2 border-sky-400/50 bg-gradient-to-br from-[#009ee3]/90 via-[#008ad4]/95 to-[#006ebb] shadow-lg">
+                          <i data-lucide="external-link" class="w-[1.125rem] h-[1.125rem] shrink-0 opacity-95"></i>
+                          <span>TARJETA / EFECTIVO</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-3 w-full rounded-xl py-3 px-3 inline-flex items-center justify-center gap-2 font-bold text-sm text-amber-50 border-2 border-amber-400/55 bg-gradient-to-br from-amber-600/40 via-orange-600/32 to-amber-900/45 ring-1 ring-amber-300/30 shadow-md shadow-black/25">
+                  <i data-lucide="circle-check" class="w-[1.125rem] h-[1.125rem] shrink-0 text-amber-100/95"></i>
+                  <span>YA PAGUÉ</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div data-founder-checkout-panel="kiosco" class="space-y-3 max-w-3xl ferriol-founder-checkout-edit-panel">
+            <p class="text-xs text-amber-200/85 font-semibold uppercase">Editar · Suscripción mensual (negocio)</p>
+            <label class="block text-xs text-white/70 mb-1">Encabezado</label>
+            <input type="text" id="adminCheckoutPayKioscoEyebrow" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm font-mono" maxlength="140" placeholder="Encabezado">
+            <label class="block text-xs text-white/70 mb-1">Titular</label>
+            <input type="text" id="adminCheckoutPayKioscoHeadline" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm" placeholder="Titular">
+            <label class="block text-xs text-white/70 mb-1">Texto opcional (párrafo)</label>
+            <textarea id="adminCheckoutPayKioscoLead" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y" placeholder="Texto opcional"></textarea>
+            <label class="block text-xs text-white/70 mb-1">Título bloque beneficios</label>
+            <input type="text" id="adminCheckoutPayKioscoBenefitsTitle" placeholder="Título beneficios" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm" maxlength="120">
+            <label class="block text-xs text-white/70 mb-1">Título bloque propuesta / valor</label>
+            <input type="text" id="adminCheckoutPayKioscoProductsTitle" placeholder="Título propuesta valor" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm" maxlength="120">
+            <label class="block text-xs text-white/70 mb-1">Lista · beneficios (una línea = un ítem)</label>
+            <textarea id="adminCheckoutCopyKiosco" rows="4" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y font-mono"></textarea>
+            <label class="block text-xs text-white/70 mb-1">Lista · propuesta Ferriol (también se usa en cuota distribuidor)</label>
+            <textarea id="adminCheckoutCopyProducts" rows="3" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y font-mono"></textarea>
+            <label class="block text-xs text-white/70 mb-1">Frase extra · modal datos bancarios (suscripción)</label>
+            <input type="text" id="adminCheckoutCopyModalKiosco" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm" placeholder="Opcional">
+            <p class="text-[11px] text-white/40">El monto mostrado en la vista previa sale de <strong class="text-white/55">Ajustes → Precios plan</strong>.</p>
+          </div>
+
+          <div data-founder-checkout-panel="admin" class="hidden space-y-3 max-w-3xl ferriol-founder-checkout-edit-panel">
+            <p class="text-xs text-cyan-200/90 font-semibold uppercase">Editar · Cuota mensual (distribuidor)</p>
+            <label class="block text-xs text-white/70 mb-1">Encabezado</label>
+            <input type="text" id="adminCheckoutPayAdminEyebrow" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm font-mono" maxlength="140">
+            <label class="block text-xs text-white/70 mb-1">Titular</label>
+            <input type="text" id="adminCheckoutPayAdminHeadline" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm">
+            <label class="block text-xs text-white/70 mb-1">Texto opcional (párrafo)</label>
+            <textarea id="adminCheckoutPayAdminLead" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y"></textarea>
+            <label class="block text-xs text-white/70 mb-1">Título bloque beneficios</label>
+            <input type="text" id="adminCheckoutPayAdminBenefitsTitle" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm" maxlength="120">
+            <label class="block text-xs text-white/70 mb-1">Título bloque propuesta / valor</label>
+            <input type="text" id="adminCheckoutPayAdminProductsTitle" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm" maxlength="120">
+            <label class="block text-xs text-white/70 mb-1">Lista · beneficios cuota</label>
+            <textarea id="adminCheckoutCopyAdmin" rows="4" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y font-mono"></textarea>
+            <p class="text-[11px] text-white/45">La lista <strong class="text-white/60">Propuesta Ferriol</strong> es la misma que en la pestaña <strong class="text-white/60">Suscripción · negocio</strong>.</p>
+            <label class="block text-xs text-white/70 mb-1">Frase extra · modal datos bancarios (cuota)</label>
+            <input type="text" id="adminCheckoutCopyModalAdmin" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm" placeholder="Opcional">
+          </div>
+
+          <div data-founder-checkout-panel="kit" class="hidden space-y-3 max-w-3xl ferriol-founder-checkout-edit-panel">
+            <p class="text-xs text-violet-200/90 font-semibold uppercase">Editar · Kit + licencia distribuidor</p>
+            <label class="block text-xs text-white/70 mb-1">Encabezado</label>
+            <input type="text" id="adminCheckoutDistribEyebrow" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm font-mono" placeholder="KIT + LICENCIA DE DISTRIBUIDOR" maxlength="140">
+            <label class="block text-xs text-white/70 mb-1">Titular promocional</label>
+            <input type="text" id="adminCheckoutDistribSalesHeadline" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm" maxlength="220">
+            <label class="block text-xs text-white/70 mb-1">Título del bloque beneficios</label>
+            <input type="text" id="adminCheckoutDistribBeneficiosTitle" placeholder="Beneficios" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm" maxlength="80">
+            <label class="block text-xs text-white/70 mb-1">Párrafo introductorio opcional</label>
+            <textarea id="adminCheckoutCopyDistribIntro" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y"></textarea>
+            <label class="block text-xs text-white/70 mb-1">Lista · beneficios (una línea = un ítem)</label>
+            <textarea id="adminCheckoutCopyDistrib" rows="4" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y font-mono"></textarea>
+            <label class="block text-xs text-white/70 mb-1">Texto modal · datos bancarios (kit)</label>
+            <textarea id="adminCheckoutModalDistribKit" rows="2" class="w-full glass rounded-xl px-3 py-2.5 border border-white/20 text-white text-sm resize-y font-mono"></textarea>
+            <p class="text-[11px] text-white/40">El monto del kit en la vista previa sale de <strong class="text-white/55">Ajustes → Precios plan</strong>.</p>
+          </div>
+
+          <div class="max-w-3xl mt-5 pt-4 border-t border-white/10">
+            <button type="button" class="ferriol-save-admin-slice btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold touch-target" data-admin-slice="checkout">Guardar textos (publicar a clientes)</button>
             <p id="adminSliceMsg-checkout" class="text-xs mt-2 hidden"></p>
           </div>
         </div>
