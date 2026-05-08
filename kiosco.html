@@ -1158,194 +1158,6 @@
 
     </section>
 
-    <!-- Modal: Nuevo cliente en libreta -->
-    <div id="libretalNuevoClienteModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="window._cerrarModalLibreta('libretalNuevoClienteModal')"></div>
-      <div class="relative glass-strong rounded-2xl p-5 w-full max-w-sm scale-in">
-        <h3 class="font-bold text-lg mb-4 text-center">Nuevo cliente</h3>
-        <div class="space-y-3">
-          <div>
-            <label class="block text-xs text-white/60 mb-1">Nombre del cliente</label>
-            <input type="text" id="libretalNuevoNombre" placeholder="Ej: Juan Pérez" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
-          </div>
-          <div>
-            <label class="block text-xs text-white/60 mb-1">WhatsApp (opcional)</label>
-            <input type="tel" id="libretalNuevoTel" placeholder="Ej: 549111234567" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
-          </div>
-        </div>
-        <p id="libretalNuevoClienteErr" class="text-red-300 text-xs mt-2 hidden"></p>
-        <div class="flex gap-2 mt-5">
-          <button onclick="window._cerrarModalLibreta('libretalNuevoClienteModal')" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cancelar</button>
-          <button onclick="window._guardarNuevoClienteLibreta()" class="flex-1 btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target">Guardar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal: Editar cliente en libreta -->
-    <div id="libretalEditarClienteModal" class="fixed inset-0 z-[97] hidden items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="window._cerrarModalLibreta('libretalEditarClienteModal')"></div>
-      <div class="relative glass-strong rounded-2xl p-5 w-full max-w-sm scale-in">
-        <h3 class="font-bold text-lg mb-4 text-center">Editar cliente</h3>
-        <div class="space-y-3">
-          <div>
-            <label class="block text-xs text-white/60 mb-1">Nombre</label>
-            <input type="text" id="libretalEditNombre" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
-          </div>
-          <div>
-            <label class="block text-xs text-white/60 mb-1">WhatsApp</label>
-            <input type="tel" id="libretalEditTel" placeholder="Ej: 549111234567" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
-          </div>
-        </div>
-        <p id="libretalEditClienteErr" class="text-red-300 text-xs mt-2 hidden"></p>
-        <div class="flex gap-2 mt-5">
-          <button onclick="window._cerrarModalLibreta('libretalEditarClienteModal')" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cancelar</button>
-          <button onclick="window._guardarEditarClienteLibreta()" class="flex-1 btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target">Guardar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal: Agregar ítem a cliente -->
-    <div id="libretalNuevoItemModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="window._cerrarModalLibreta('libretalNuevoItemModal')"></div>
-      <div class="relative glass-strong rounded-2xl p-5 w-full max-w-sm scale-in">
-        <h3 class="font-bold text-lg mb-1 text-center">Agregar ítem</h3>
-        <p id="libretalItemModalSubtitle" class="text-sm text-white/50 text-center mb-4"></p>
-        <div class="space-y-3">
-          <div>
-            <label class="block text-xs text-white/60 mb-1">¿Qué se llevó?</label>
-            <input type="text" id="libretalItemDesc" placeholder="Ej: Gaseosa, pan, cigarrillos..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
-          </div>
-          <div>
-            <label class="block text-xs text-white/60 mb-1">Monto ($)</label>
-            <input type="number" id="libretalItemMonto" placeholder="0" min="1" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
-            <input type="hidden" id="libretalItemTipo" value="fiado">
-          </div>
-        </div>
-        <p id="libretalItemErr" class="text-red-300 text-xs mt-2 hidden"></p>
-        <div class="flex gap-2 mt-5">
-          <button onclick="window._cerrarModalLibreta('libretalNuevoItemModal')" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cancelar</button>
-          <button onclick="window._guardarItemLibreta()" class="flex-1 btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target">Guardar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal: Sacar cuenta / cobrar (pantalla completa) -->
-    <div id="libretalCuentaModal" class="fixed inset-0 z-[96] hidden flex-col" style="background: linear-gradient(145deg, #0a0a0a 0%, #171717 45%, #262626 100%);">
-      <div class="flex items-center gap-3 px-4 border-b border-white/10 shrink-0" style="padding-top: max(0.75rem, env(safe-area-inset-top, 0)); padding-bottom: 0.75rem;">
-        <button type="button" onclick="window._cerrarCuentaLibreta()" class="caja-back-btn touch-target shrink-0">
-          <i data-lucide="chevron-left" class="w-5 h-5"></i>
-        </button>
-        <div class="flex-1 min-w-0">
-          <p class="text-xs text-white/45 uppercase tracking-wide">Cobrar cuenta</p>
-          <p id="libretalCuentaClienteNombre" class="font-bold text-sm truncate">Cliente</p>
-          <p class="text-[10px] text-white/38 mt-0.5 leading-snug">Marcá líneas · «Solo esta compra» si fue un mismo fiado · dejás deuda si no marcás todo</p>
-        </div>
-      </div>
-      <div id="libretalCuentaScroll" class="flex-1 overflow-y-auto px-0 py-3 min-h-0">
-        <div id="libretalCuentaTicket" class="text-sm space-y-0"></div>
-        <p id="libretalCuentaSinTel" class="hidden text-amber-400/90 text-xs text-center px-4 mt-3">Agregá un teléfono al cliente para compartir por WhatsApp.</p>
-      </div>
-      <div id="libretalCuentaFooterPendiente" class="libreta-cuenta-modal-footer shrink-0 border-t border-white/10 px-4 pt-3 flex flex-col gap-2 bg-[#020b05]/80 backdrop-blur-md">
-        <div class="flex items-center justify-between gap-3 px-0.5">
-          <span class="text-xs text-white/55">Total a cobrar</span>
-          <span id="libretalCuentaTotalSeleccion" class="text-lg font-bold text-amber-400 tabular-nums">$0</span>
-        </div>
-        <div class="flex gap-2">
-          <button type="button" onclick="window._libretaCuentaSeleccionarTodo(true)" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-xs font-semibold touch-target">Marcar todo</button>
-          <button type="button" onclick="window._libretaCuentaSeleccionarTodo(false)" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-xs font-semibold touch-target">Desmarcar todo</button>
-        </div>
-        <button type="button" id="libretalCuentaBtnWA" onclick="window._libretaCuentaCompartirPendiente()" class="btn-neomorphic rounded-xl py-3 text-sm font-semibold touch-target flex items-center justify-center gap-2 w-full">
-          <i data-lucide="message-circle" class="w-4 h-4"></i> Compartir ticket por WhatsApp
-        </button>
-        <button type="button" id="libretalCuentaBtnCobrar" onclick="window._libretaCuentaConfirmarCobro()" class="btn-glow rounded-xl py-3.5 text-sm font-semibold touch-target flex items-center justify-center gap-2 w-full">
-          <i data-lucide="banknote" class="w-4 h-4"></i> Registrar cobro (selección)
-        </button>
-      </div>
-      <div id="libretalCuentaFooterExito" class="hidden libreta-cuenta-modal-footer shrink-0 border-t border-white/10 px-4 pt-3 flex flex-col gap-2 bg-[#020b05]/80 backdrop-blur-md">
-        <p id="libretalCuentaExitoTexto" class="text-center text-sm text-[#ffffff] font-medium px-2"></p>
-        <button type="button" id="libretalCuentaBtnWAComprobante" onclick="window._libretaCuentaCompartirComprobante()" class="btn-glow rounded-xl py-3.5 text-sm font-semibold touch-target flex items-center justify-center gap-2 w-full">
-          <i data-lucide="send" class="w-4 h-4"></i> Compartir comprobante por WhatsApp
-        </button>
-        <button type="button" onclick="window._cerrarCuentaLibreta()" class="btn-neomorphic rounded-xl py-3 text-sm touch-target w-full">Listo</button>
-      </div>
-    </div>
-
-    <!-- Modal: Detalle de ítem de libreta (slide-up) -->
-    <div id="libretalItemDetalleModal" class="fixed inset-0 z-[95] hidden items-end justify-center">
-      <div class="absolute inset-0 bg-black/50" onclick="window._cerrarItemDetalle()"></div>
-      <div class="relative glass-strong rounded-t-3xl w-full max-w-lg mx-auto libreta-item-detalle-sheet">
-        <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>
-        <!-- Descripción y monto -->
-        <div class="flex items-start justify-between gap-3 mb-4">
-          <div class="flex-1 min-w-0">
-            <p id="itemDetalleDesc" class="font-bold text-base leading-snug"></p>
-            <p id="itemDetalleMeta" class="text-xs text-white/40 mt-0.5"></p>
-          </div>
-          <p id="itemDetalleMonto" class="font-bold text-xl text-amber-400 shrink-0"></p>
-        </div>
-        <!-- Fecha y hora grande -->
-        <div class="glass rounded-xl px-4 py-3 mb-4 flex items-center gap-3">
-          <i data-lucide="calendar-clock" class="w-5 h-5 text-[#ffffff] shrink-0"></i>
-          <div>
-            <p id="itemDetalleFechaHora" class="font-semibold text-sm"></p>
-            <p class="text-xs text-white/40">Fecha y hora del fiado</p>
-          </div>
-        </div>
-        <!-- Comentario -->
-        <div class="mb-4">
-          <label class="block text-xs text-white/50 mb-1.5 font-medium">Comentario (opcional)</label>
-          <textarea id="itemDetalleComentario" rows="2" placeholder="Ej: quedó de pagar el viernes..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/30 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffffff] resize-none"></textarea>
-        </div>
-        <div class="flex gap-2">
-          <button onclick="window._cerrarItemDetalle()" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cerrar</button>
-          <button onclick="window._guardarComentarioItem()" class="flex-1 btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target">Guardar comentario</button>
-        </div>
-        <input type="hidden" id="itemDetalleId">
-      </div>
-    </div>
-
-    <!-- Prompt post-pago: agregar a libreta de fiado (pantalla completa) -->
-    <div id="libretalFiadoPrompt" class="fixed inset-0 z-[80] hidden flex-col" style="background:linear-gradient(135deg,#171717 0%,#262626 100%);">
-      <!-- Header -->
-      <div class="flex items-center gap-3 px-5 pt-5 pb-4 border-b border-white/10">
-        <div class="w-10 h-10 rounded-2xl bg-[#ffffff]/20 flex items-center justify-center shrink-0">
-          <i data-lucide="book-open" class="w-5 h-5 text-[#ffffff]"></i>
-        </div>
-        <div class="flex-1">
-          <h3 class="font-bold text-lg leading-tight">¿A quién fue el fiado?</h3>
-          <p class="text-sm text-white/50">Seleccioná un cliente de la libreta</p>
-          <p id="libretalPromptTipoNota" class="hidden text-[11px] text-amber-200/90 mt-1.5 leading-snug"></p>
-        </div>
-        <button onclick="window._omitirFiadoPrompt()" class="w-9 h-9 rounded-xl glass flex items-center justify-center touch-target shrink-0">
-          <i data-lucide="x" class="w-4 h-4 text-white/60"></i>
-        </button>
-      </div>
-
-      <!-- Lista de clientes (ocupa todo el espacio disponible) -->
-      <div id="libretalPromptClientesList" class="flex-1 overflow-y-auto px-4 py-3 space-y-2"></div>
-
-      <!-- Footer: nuevo cliente + omitir -->
-      <div class="px-4 pt-3 border-t border-white/10 space-y-2" style="padding-bottom: calc(5rem + max(0.5rem, env(safe-area-inset-bottom, 0)))">
-
-        <!-- Formulario inline para nuevo cliente (oculto por defecto) -->
-        <div id="libretalPromptNuevoForm" class="hidden space-y-2 mb-2">
-          <p class="text-xs text-white/50 font-medium uppercase tracking-wide">Nuevo cliente</p>
-          <input id="libretalPromptNombre" type="text" placeholder="Nombre *" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffffff]" />
-          <input id="libretalPromptTel" type="tel" placeholder="Teléfono (opcional)" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffffff]" />
-          <p id="libretalPromptErr" class="text-red-400 text-xs hidden"></p>
-          <div class="flex gap-2">
-            <button onclick="window._cancelarNuevoClientePrompt()" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cancelar</button>
-            <button id="libretalPromptGuardarBtn" onclick="window._guardarNuevoClienteDesdePrompt()" class="flex-1 bg-[#ffffff] text-neutral-900 rounded-xl py-2.5 text-sm font-semibold touch-target">Crear y agregar</button>
-          </div>
-        </div>
-
-        <button id="libretalPromptNuevoBtn" onclick="window._abrirNuevoClienteDesdePrompt()" class="w-full btn-neomorphic rounded-xl py-3 text-sm font-medium touch-target flex items-center justify-center gap-2">
-          <i data-lucide="user-plus" class="w-4 h-4"></i> Nuevo cliente
-        </button>
-        <button onclick="window._omitirFiadoPrompt()" class="w-full text-sm text-white/35 py-2 touch-target">Omitir / No registrar</button>
-      </div>
-    </div>
-
     <!-- Más — Configuración + Herramientas -->
     <section id="panel-mas" class="panel hidden">
       <div class="glass rounded-2xl p-6 slide-up">
@@ -3502,6 +3314,197 @@
       </div>
     </div>
   </main>
+
+  <!-- Libreta (fiado): estos modales van fuera de #mainContent porque el main tiene overflow:hidden y recortaba position:fixed en pantalla ancha + carril izquierdo, dejando ver el menú detrás -->
+  <!-- Modal: Nuevo cliente en libreta -->
+  <div id="libretalNuevoClienteModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="window._cerrarModalLibreta('libretalNuevoClienteModal')"></div>
+    <div class="relative glass-strong rounded-2xl p-5 w-full max-w-sm scale-in">
+      <h3 class="font-bold text-lg mb-4 text-center">Nuevo cliente</h3>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs text-white/60 mb-1">Nombre del cliente</label>
+          <input type="text" id="libretalNuevoNombre" placeholder="Ej: Juan Pérez" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
+        </div>
+        <div>
+          <label class="block text-xs text-white/60 mb-1">WhatsApp (opcional)</label>
+          <input type="tel" id="libretalNuevoTel" placeholder="Ej: 549111234567" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
+        </div>
+      </div>
+      <p id="libretalNuevoClienteErr" class="text-red-300 text-xs mt-2 hidden"></p>
+      <div class="flex gap-2 mt-5">
+        <button onclick="window._cerrarModalLibreta('libretalNuevoClienteModal')" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cancelar</button>
+        <button onclick="window._guardarNuevoClienteLibreta()" class="flex-1 btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Editar cliente en libreta -->
+  <div id="libretalEditarClienteModal" class="fixed inset-0 z-[97] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="window._cerrarModalLibreta('libretalEditarClienteModal')"></div>
+    <div class="relative glass-strong rounded-2xl p-5 w-full max-w-sm scale-in">
+      <h3 class="font-bold text-lg mb-4 text-center">Editar cliente</h3>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs text-white/60 mb-1">Nombre</label>
+          <input type="text" id="libretalEditNombre" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
+        </div>
+        <div>
+          <label class="block text-xs text-white/60 mb-1">WhatsApp</label>
+          <input type="tel" id="libretalEditTel" placeholder="Ej: 549111234567" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
+        </div>
+      </div>
+      <p id="libretalEditClienteErr" class="text-red-300 text-xs mt-2 hidden"></p>
+      <div class="flex gap-2 mt-5">
+        <button onclick="window._cerrarModalLibreta('libretalEditarClienteModal')" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cancelar</button>
+        <button onclick="window._guardarEditarClienteLibreta()" class="flex-1 btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Agregar ítem a cliente -->
+  <div id="libretalNuevoItemModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="window._cerrarModalLibreta('libretalNuevoItemModal')"></div>
+    <div class="relative glass-strong rounded-2xl p-5 w-full max-w-sm scale-in">
+      <h3 class="font-bold text-lg mb-1 text-center">Agregar ítem</h3>
+      <p id="libretalItemModalSubtitle" class="text-sm text-white/50 text-center mb-4"></p>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs text-white/60 mb-1">¿Qué se llevó?</label>
+          <input type="text" id="libretalItemDesc" placeholder="Ej: Gaseosa, pan, cigarrillos..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
+        </div>
+        <div>
+          <label class="block text-xs text-white/60 mb-1">Monto ($)</label>
+          <input type="number" id="libretalItemMonto" placeholder="0" min="1" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-sm">
+          <input type="hidden" id="libretalItemTipo" value="fiado">
+        </div>
+      </div>
+      <p id="libretalItemErr" class="text-red-300 text-xs mt-2 hidden"></p>
+      <div class="flex gap-2 mt-5">
+        <button onclick="window._cerrarModalLibreta('libretalNuevoItemModal')" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cancelar</button>
+        <button onclick="window._guardarItemLibreta()" class="flex-1 btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Sacar cuenta / cobrar (pantalla completa) -->
+  <div id="libretalCuentaModal" class="libretal-cuenta-modal-layer fixed inset-0 z-[105] hidden flex-col" style="background: linear-gradient(145deg, #0a0a0a 0%, #171717 45%, #262626 100%);">
+    <div class="flex items-center gap-3 px-4 border-b border-white/10 shrink-0" style="padding-top: max(0.75rem, env(safe-area-inset-top, 0)); padding-bottom: 0.75rem;">
+      <button type="button" onclick="window._cerrarCuentaLibreta()" class="caja-back-btn touch-target shrink-0">
+        <i data-lucide="chevron-left" class="w-5 h-5"></i>
+      </button>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs text-white/45 uppercase tracking-wide">Cobrar cuenta</p>
+        <p id="libretalCuentaClienteNombre" class="font-bold text-sm truncate">Cliente</p>
+        <p class="text-[10px] text-white/38 mt-0.5 leading-snug">Marcá líneas · «Solo esta compra» si fue un mismo fiado · dejás deuda si no marcás todo</p>
+      </div>
+    </div>
+    <div id="libretalCuentaScroll" class="flex-1 overflow-y-auto px-0 py-3 min-h-0">
+      <div id="libretalCuentaTicket" class="text-sm space-y-0"></div>
+      <p id="libretalCuentaSinTel" class="hidden text-amber-400/90 text-xs text-center px-4 mt-3">Agregá un teléfono al cliente para compartir por WhatsApp.</p>
+    </div>
+    <div id="libretalCuentaFooterPendiente" class="libreta-cuenta-modal-footer shrink-0 border-t border-white/10 px-4 pt-3 flex flex-col gap-2 bg-[#020b05]/80 backdrop-blur-md">
+      <div class="flex items-center justify-between gap-3 px-0.5">
+        <span class="text-xs text-white/55">Total a cobrar</span>
+        <span id="libretalCuentaTotalSeleccion" class="text-lg font-bold text-amber-400 tabular-nums">$0</span>
+      </div>
+      <div class="flex gap-2">
+        <button type="button" onclick="window._libretaCuentaSeleccionarTodo(true)" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-xs font-semibold touch-target">Marcar todo</button>
+        <button type="button" onclick="window._libretaCuentaSeleccionarTodo(false)" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-xs font-semibold touch-target">Desmarcar todo</button>
+      </div>
+      <button type="button" id="libretalCuentaBtnWA" onclick="window._libretaCuentaCompartirPendiente()" class="btn-neomorphic rounded-xl py-3 text-sm font-semibold touch-target flex items-center justify-center gap-2 w-full">
+        <i data-lucide="message-circle" class="w-4 h-4"></i> Compartir ticket por WhatsApp
+      </button>
+      <button type="button" id="libretalCuentaBtnCobrar" onclick="window._libretaCuentaConfirmarCobro()" class="btn-glow rounded-xl py-3.5 text-sm font-semibold touch-target flex items-center justify-center gap-2 w-full">
+        <i data-lucide="banknote" class="w-4 h-4"></i> Registrar cobro (selección)
+      </button>
+    </div>
+    <div id="libretalCuentaFooterExito" class="hidden libreta-cuenta-modal-footer shrink-0 border-t border-white/10 px-4 pt-3 flex flex-col gap-2 bg-[#020b05]/80 backdrop-blur-md">
+      <p id="libretalCuentaExitoTexto" class="text-center text-sm text-[#ffffff] font-medium px-2"></p>
+      <button type="button" id="libretalCuentaBtnWAComprobante" onclick="window._libretaCuentaCompartirComprobante()" class="btn-glow rounded-xl py-3.5 text-sm font-semibold touch-target flex items-center justify-center gap-2 w-full">
+        <i data-lucide="send" class="w-4 h-4"></i> Compartir comprobante por WhatsApp
+      </button>
+      <button type="button" onclick="window._cerrarCuentaLibreta()" class="btn-neomorphic rounded-xl py-3 text-sm touch-target w-full">Listo</button>
+    </div>
+  </div>
+
+  <!-- Modal: Detalle de ítem de libreta (slide-up) -->
+  <div id="libretalItemDetalleModal" class="fixed inset-0 z-[95] hidden items-end justify-center">
+    <div class="absolute inset-0 bg-black/50" onclick="window._cerrarItemDetalle()"></div>
+    <div class="relative glass-strong rounded-t-3xl w-full max-w-lg mx-auto libreta-item-detalle-sheet">
+      <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>
+      <!-- Descripción y monto -->
+      <div class="flex items-start justify-between gap-3 mb-4">
+        <div class="flex-1 min-w-0">
+          <p id="itemDetalleDesc" class="font-bold text-base leading-snug"></p>
+          <p id="itemDetalleMeta" class="text-xs text-white/40 mt-0.5"></p>
+        </div>
+        <p id="itemDetalleMonto" class="font-bold text-xl text-amber-400 shrink-0"></p>
+      </div>
+      <!-- Fecha y hora grande -->
+      <div class="glass rounded-xl px-4 py-3 mb-4 flex items-center gap-3">
+        <i data-lucide="calendar-clock" class="w-5 h-5 text-[#ffffff] shrink-0"></i>
+        <div>
+          <p id="itemDetalleFechaHora" class="font-semibold text-sm"></p>
+          <p class="text-xs text-white/40">Fecha y hora del fiado</p>
+        </div>
+      </div>
+      <!-- Comentario -->
+      <div class="mb-4">
+        <label class="block text-xs text-white/50 mb-1.5 font-medium">Comentario (opcional)</label>
+        <textarea id="itemDetalleComentario" rows="2" placeholder="Ej: quedó de pagar el viernes..." class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/30 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffffff] resize-none"></textarea>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="window._cerrarItemDetalle()" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cerrar</button>
+        <button onclick="window._guardarComentarioItem()" class="flex-1 btn-glow rounded-xl py-2.5 text-sm font-semibold touch-target">Guardar comentario</button>
+      </div>
+      <input type="hidden" id="itemDetalleId">
+    </div>
+  </div>
+
+  <!-- Prompt post-pago: agregar a libreta de fiado (pantalla completa) -->
+  <div id="libretalFiadoPrompt" class="fixed inset-0 z-[80] hidden flex-col" style="background:linear-gradient(135deg,#171717 0%,#262626 100%);">
+    <!-- Header -->
+    <div class="flex items-center gap-3 px-5 pt-5 pb-4 border-b border-white/10">
+      <div class="w-10 h-10 rounded-2xl bg-[#ffffff]/20 flex items-center justify-center shrink-0">
+        <i data-lucide="book-open" class="w-5 h-5 text-[#ffffff]"></i>
+      </div>
+      <div class="flex-1">
+        <h3 class="font-bold text-lg leading-tight">¿A quién fue el fiado?</h3>
+        <p class="text-sm text-white/50">Seleccioná un cliente de la libreta</p>
+        <p id="libretalPromptTipoNota" class="hidden text-[11px] text-amber-200/90 mt-1.5 leading-snug"></p>
+      </div>
+      <button onclick="window._omitirFiadoPrompt()" class="w-9 h-9 rounded-xl glass flex items-center justify-center touch-target shrink-0">
+        <i data-lucide="x" class="w-4 h-4 text-white/60"></i>
+      </button>
+    </div>
+
+    <!-- Lista de clientes (ocupa todo el espacio disponible) -->
+    <div id="libretalPromptClientesList" class="flex-1 overflow-y-auto px-4 py-3 space-y-2"></div>
+
+    <!-- Footer: nuevo cliente + omitir -->
+    <div class="px-4 pt-3 border-t border-white/10 space-y-2" style="padding-bottom: calc(5rem + max(0.5rem, env(safe-area-inset-bottom, 0)))">
+
+      <!-- Formulario inline para nuevo cliente (oculto por defecto) -->
+      <div id="libretalPromptNuevoForm" class="hidden space-y-2 mb-2">
+        <p class="text-xs text-white/50 font-medium uppercase tracking-wide">Nuevo cliente</p>
+        <input id="libretalPromptNombre" type="text" placeholder="Nombre *" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffffff]" />
+        <input id="libretalPromptTel" type="tel" placeholder="Teléfono (opcional)" class="w-full glass rounded-xl px-4 py-2.5 border border-white/20 text-white placeholder-white/40 text-sm focus:outline-none focus:ring-2 focus:ring-[#ffffff]" />
+        <p id="libretalPromptErr" class="text-red-400 text-xs hidden"></p>
+        <div class="flex gap-2">
+          <button onclick="window._cancelarNuevoClientePrompt()" class="flex-1 btn-neomorphic rounded-xl py-2.5 text-sm touch-target">Cancelar</button>
+          <button id="libretalPromptGuardarBtn" onclick="window._guardarNuevoClienteDesdePrompt()" class="flex-1 bg-[#ffffff] text-neutral-900 rounded-xl py-2.5 text-sm font-semibold touch-target">Crear y agregar</button>
+        </div>
+      </div>
+
+      <button id="libretalPromptNuevoBtn" onclick="window._abrirNuevoClienteDesdePrompt()" class="w-full btn-neomorphic rounded-xl py-3 text-sm font-medium touch-target flex items-center justify-center gap-2">
+        <i data-lucide="user-plus" class="w-4 h-4"></i> Nuevo cliente
+      </button>
+      <button onclick="window._omitirFiadoPrompt()" class="w-full text-sm text-white/35 py-2 touch-target">Omitir / No registrar</button>
+    </div>
+  </div>
+
+
 
   <!-- Carrito flotante -->
   <div id="cartDrawer" class="fixed inset-0 z-[60] hidden">

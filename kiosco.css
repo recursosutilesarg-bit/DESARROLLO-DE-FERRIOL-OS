@@ -3143,6 +3143,18 @@ p#resumenDiaTexto.ferriol-caja-ingreso-monto {
   -webkit-overflow-scrolling: touch;
 }
 
+/*
+ * Cobrar cuenta · pantalla completa: debe cubrir también el carril nav (tablet/escritorio).
+ * Ya no vive dentro de #mainContent (overflow:hidden ahí recortaba fixed y dejaba ver el vidrio del menú).
+ */
+.libretal-cuenta-modal-layer {
+  width: 100%;
+  max-width: 100vw;
+  min-height: 100vh;
+  min-height: 100dvh;
+  box-sizing: border-box;
+}
+
 /* Pie del modal "Sacar cuenta": por encima de la barra inferior */
 .libreta-cuenta-modal-footer {
   padding-bottom: max(5.5rem, env(safe-area-inset-bottom, 0) + 4.75rem);
