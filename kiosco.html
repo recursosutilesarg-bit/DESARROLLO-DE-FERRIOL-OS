@@ -3416,7 +3416,7 @@
         <i data-lucide="message-circle" class="w-4 h-4"></i> Compartir ticket por WhatsApp
       </button>
       <button type="button" id="libretalCuentaBtnCobrar" onclick="window._libretaCuentaConfirmarCobro()" class="btn-glow rounded-xl py-3.5 text-sm font-semibold touch-target flex items-center justify-center gap-2 w-full">
-        <i data-lucide="banknote" class="w-4 h-4"></i> Registrar cobro (selección)
+        <i data-lucide="banknote" class="w-4 h-4"></i> Cobrar
       </button>
     </div>
     <div id="libretalCuentaFooterExito" class="hidden libreta-cuenta-modal-footer shrink-0 border-t border-white/10 px-4 pt-3 flex flex-col gap-2 bg-[#020b05]/80 backdrop-blur-md">
@@ -3565,6 +3565,7 @@
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" id="paymentModalOverlay"></div>
     <div class="relative glass-strong rounded-2xl p-6 w-full max-w-sm scale-in max-h-[90vh] overflow-y-auto">
       <h3 class="font-bold text-lg mb-2 text-center">¿Cómo cobra?</h3>
+      <p id="paymentModalLibretaHint" class="hidden text-[13px] text-center text-amber-400/95 font-semibold tabular-nums mb-1"></p>
       <p class="text-sm text-white/60 text-center mb-2">Elegí el método de pago</p>
       <input type="hidden" id="paymentClientName" value="">
       <input type="hidden" id="paymentWhatsapp" value="">

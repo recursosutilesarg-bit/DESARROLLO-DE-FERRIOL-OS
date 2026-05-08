@@ -3868,6 +3868,9 @@
       partnerUiMode: 'red'  // red (panel socio) | negocio (misma UI que kiosquero) — solo si role === 'partner'
     };
 
+    /** Selección de ítems de cuenta libreta pendiente del modal «¿Cómo cobra?». */
+    var _pendingLibretaCobro = null;
+
     /** true si la empresa aprobó upgrade kiosquero→partner (tabla ferriol_kiosquero_partner_upgrade_requests). Solo esos socios pueden usar la vista negocio en la misma cuenta. */
     async function ferriolFetchPartnerKiosqueroUpgradeEligible(uid) {
       if (!supabaseClient || !uid) return false;
@@ -4878,12 +4881,38 @@
       document.getElementById('cartTotal').textContent = `$${total.toLocaleString('es-AR')}`;
     }
 
+    function _ferriolResetPaymentModalExtras() {
+      _pendingLibretaCobro = null;
+      var pm = document.getElementById('paymentModal');
+      if (pm) pm.style.zIndex = '';
+      var hint = document.getElementById('paymentModalLibretaHint');
+      if (hint) {
+        hint.textContent = '';
+        hint.classList.add('hidden');
+      }
+      if (pm) {
+        var fb = pm.querySelector('[data-payment="fiado"]');
+        if (fb) fb.classList.remove('hidden');
+      }
+    }
+
     function openPaymentModal() {
-      if (state.cart.length === 0) return;
+      if (state.cart.length === 0 && !_pendingLibretaCobro) return;
       _selectedLibretaClienteForPayment = null;
       var we = document.getElementById('paymentWhatsappErr'); if (we) we.classList.add('hidden');
-      document.getElementById('paymentModal').classList.remove('hidden');
-      document.getElementById('paymentModal').classList.add('flex');
+      var pm = document.getElementById('paymentModal');
+      pm.classList.remove('hidden');
+      pm.classList.add('flex');
+      if (_pendingLibretaCobro) {
+        pm.style.zIndex = '110';
+        var hint = document.getElementById('paymentModalLibretaHint');
+        if (hint) {
+          hint.textContent = 'Cobro cuenta libreta · $' + Math.round(Number(_pendingLibretaCobro.total) || 0).toLocaleString('es-AR');
+          hint.classList.remove('hidden');
+        }
+        var fBtn = pm.querySelector('[data-payment="fiado"]');
+        if (fBtn) fBtn.classList.add('hidden');
+      }
       if (!state._restoringFromHistory) pushHistoryExtra({ modal: 'payment' });
       lucide.createIcons();
     }
@@ -4895,6 +4924,7 @@
         delete n.modal;
         history.replaceState(n, '', location.href);
       }
+      _ferriolResetPaymentModalExtras();
     }
     var _fiadoTipoModalCallback = null;
     function openFiadoTipoModal(callback) {
@@ -6335,7 +6365,7 @@
       document.getElementById('ventasProductosModal') && (function () { var m = document.getElementById('ventasProductosModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
       document.getElementById('ventasCobradasModal') && (function () { var m = document.getElementById('ventasCobradasModal'); m.classList.add('hidden'); })();
       document.getElementById('transaccionesModal') && (function () { var m = document.getElementById('transaccionesModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
-      document.getElementById('paymentModal') && (function () { var m = document.getElementById('paymentModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
+      document.getElementById('paymentModal') && (function () { var m = document.getElementById('paymentModal'); m.classList.add('hidden'); m.classList.remove('flex'); _ferriolResetPaymentModalExtras(); })();
       document.getElementById('fiadoTipoModal') && (function () { closeFiadoTipoModal(); })();
       document.getElementById('cobroRapidoModal') && (function () { var m = document.getElementById('cobroRapidoModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
       document.getElementById('renovarModal') && (function () { var m = document.getElementById('renovarModal'); m.classList.add('hidden'); m.classList.remove('flex'); })();
@@ -9199,6 +9229,12 @@
     document.querySelectorAll('[data-payment]').forEach(btn => {
       btn.onclick = () => {
         const method = btn.dataset.payment;
+        if (_pendingLibretaCobro) {
+          if (method === 'fiado') return;
+          void completeLibretaCobroWithMethod(method);
+          if (document.getElementById('cartClientName')) document.getElementById('cartClientName').value = '';
+          return;
+        }
         _selectedLibretaClienteForPayment = null;
         if (method === 'fiado') {
           openFiadoTipoModal(function (subMethod) {
@@ -10858,6 +10894,128 @@
       window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(texto), '_blank');
     }
 
+    async function completeLibretaCobroWithMethod(method) {
+      var pend = _pendingLibretaCobro;
+      if (!pend || !pend.items || !pend.items.length) {
+        closePaymentModal();
+        return;
+      }
+      if (method !== 'efectivo' && method !== 'tarjeta' && method !== 'transferencia') {
+        closePaymentModal();
+        return;
+      }
+      closePaymentModal();
+      if (!supabaseClient || !currentUser?.id || !pend.cliente || !pend.cliente.id) {
+        if (typeof showScanToast === 'function') showScanToast('Sesión requerida para registrar el cobro en la libreta.', true);
+        return;
+      }
+      var items = pend.items;
+      var total = pend.total;
+      var esTotal = pend.esTotal;
+      var clienteRow = pend.cliente;
+      var clienteId = clienteRow.id;
+      var ids = items.map(function (i) { return i.id; }).filter(Boolean);
+      if (!ids.length) return;
+      var cobroGrupoId = _libretaNewCobroGrupoId();
+      try {
+        var chunkSize = 80;
+        var lastErr = null;
+        for (var c = 0; c < ids.length; c += chunkSize) {
+          var chunk = ids.slice(c, c + chunkSize);
+          var res = await supabaseClient.from('libreta_items').update({ pagado: true, cobro_grupo_id: cobroGrupoId })
+            .eq('cliente_id', clienteId)
+            .eq('user_id', currentUser.id)
+            .eq('pagado', false)
+            .in('id', chunk);
+          if (res.error) { lastErr = res.error; break; }
+        }
+        if (lastErr) {
+          var emsg = (lastErr.message || '').toLowerCase();
+          if (emsg.indexOf('cobro_grupo') !== -1 || emsg.indexOf('schema cache') !== -1 || lastErr.code === 'PGRST204') {
+            ferriolAppAlert('Para agrupar cada cobro como ticket ejecutá en Supabase → SQL:\n\nALTER TABLE libreta_items ADD COLUMN IF NOT EXISTS cobro_grupo_id text;\n');
+            throw lastErr;
+          }
+          throw lastErr;
+        }
+        var ventaItems = items.map(function (it, idx) {
+          var m = Number(it.monto) || 0;
+          return {
+            nombre: ((it.descripcion || '') + '').trim() || 'Cuenta libreta',
+            codigo: '_libreta_' + String(it.id != null ? it.id : idx),
+            precio: m,
+            cant: 1,
+            costo: m
+          };
+        });
+        var fechaHoraCobro = new Date().toISOString();
+        var clienteNombreCobro = (clienteRow.nombre || '').trim() || null;
+        state.transaccionesList.push({
+          id: Date.now(),
+          method: method,
+          client: clienteNombreCobro || '—',
+          items: ventaItems,
+          total: total,
+          fechaHora: fechaHoraCobro
+        });
+        try {
+          var ventaCobroRes = await supabaseClient.from('ventas').insert({
+            user_id: currentUser.id,
+            fecha_hora: fechaHoraCobro,
+            total: total,
+            metodo_pago: method,
+            cliente_nombre: clienteNombreCobro,
+            items: ventaItems
+          });
+          if (ventaCobroRes.error) throw ventaCobroRes.error;
+        } catch (errV) {
+          console.warn('Venta cobro libreta no guardada en la nube:', errV && errV.message);
+          if (typeof showScanToast === 'function') showScanToast('Ítems marcados pagados localmente. Revisá la conexión para el historial de ventas.', false);
+        }
+        var dCobro = getData();
+        dCobro.ventas = dCobro.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 };
+        if (method !== 'fiado' && method !== 'transferencia_pendiente') {
+          dCobro.ventas[method] = (dCobro.ventas[method] || 0) + total;
+        }
+        dCobro.transacciones = (dCobro.transacciones || 0) + 1;
+        dCobro.lastCierreDate = ferriolTodayYmdLocal();
+        setData(dCobro);
+        try { await updateDashboard(); } catch (_) {}
+        _libretalCuentaUltimoMonto = total;
+        _libretalCuentaUltimoItems = items.map(function (it) {
+          return {
+            descripcion: it.descripcion,
+            monto: it.monto,
+            fecha_hora: it.fecha_hora,
+            tipo: it.tipo
+          };
+        });
+        await renderLibretaItems(clienteId);
+        document.getElementById('libretalCuentaFooterPendiente').classList.add('hidden');
+        var exito = document.getElementById('libretalCuentaFooterExito');
+        var txt = document.getElementById('libretalCuentaExitoTexto');
+        if (txt) {
+          txt.textContent = esTotal
+            ? ('Cuenta saldada por $' + Math.round(total).toLocaleString('es-AR') + ' · ' + (method === 'efectivo' ? 'Efectivo' : method === 'tarjeta' ? 'Tarjeta' : 'Transferencia'))
+            : ('Cobro: $' + Math.round(total).toLocaleString('es-AR') + ' · ' + (method === 'efectivo' ? 'Efectivo' : method === 'tarjeta' ? 'Tarjeta' : 'Transferencia') + ' · Quedó deuda');
+        }
+        var btnWAc = document.getElementById('libretalCuentaBtnWAComprobante');
+        var okTel = !!(clienteRow.telefono && String(clienteRow.telefono).replace(/\D/g, ''));
+        if (btnWAc) {
+          btnWAc.disabled = !okTel;
+          btnWAc.classList.toggle('opacity-45', !okTel);
+        }
+        if (exito) exito.classList.remove('hidden');
+        if (typeof showScanToast === 'function') {
+          showScanToast((esTotal ? 'Cuenta saldada' : 'Cobro registrado') + ' · $' + Math.round(total).toLocaleString('es-AR'), false);
+        }
+        if (typeof playBeepCobro === 'function') playBeepCobro();
+        lucide.createIcons();
+      } catch (e) {
+        console.error(e);
+        if (typeof showScanToast === 'function') showScanToast('No se pudo registrar el cobro', true);
+      }
+    }
+
     window._abrirCuentaLibreta = async function () {
       if (!_libretalClienteActual) return;
       var items = await loadLibretaItems(_libretalClienteActual.id, true);
@@ -10926,6 +11084,7 @@
     };
 
     window._cerrarCuentaLibreta = function () {
+      if (_pendingLibretaCobro) closePaymentModal();
       var modal = document.getElementById('libretalCuentaModal');
       if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
       if (!state._restoringFromHistory && history.state && history.state.overlay === 'libretalCuentaModal') {
@@ -10943,8 +11102,12 @@
       _libretaAbrirWhatsAppConTexto(_libretalClienteActual.telefono, msg);
     };
 
-    window._libretaCuentaConfirmarCobro = async function () {
-      if (!_libretalClienteActual || !supabaseClient || !currentUser?.id) return;
+    window._libretaCuentaConfirmarCobro = function () {
+      if (!_libretalClienteActual) return;
+      if (!supabaseClient || !currentUser?.id) {
+        if (typeof showScanToast === 'function') showScanToast('Iniciá sesión y conectá Supabase para cobrar cuentas de la libreta.', true);
+        return;
+      }
       var cache = _libretalCuentaItemsCache;
       if (!cache || !cache.length) return;
       var ticketEl = document.getElementById('libretalCuentaTicket');
@@ -10965,105 +11128,17 @@
       var totalTodo = cache.reduce(function (s, i) { return s + Number(i.monto || 0); }, 0);
       var total = items.reduce(function (s, i) { return s + Number(i.monto || 0); }, 0);
       var esTotal = Math.round(total) === Math.round(totalTodo);
-      var msgConfirm = esTotal
-        ? ('¿Confirmás que cobraste $' + Math.round(total).toLocaleString('es-AR') + ' y querés saldar toda la cuenta?')
-        : ('¿Confirmás el cobro de $' + Math.round(total).toLocaleString('es-AR') + ' por ' + items.length + ' ítem(s) seleccionado(s)?');
-      if (!(await ferriolAppConfirm(msgConfirm))) return;
-      var ids = items.map(function (i) { return i.id; }).filter(Boolean);
-      if (!ids.length) return;
-      var cobroGrupoId = _libretaNewCobroGrupoId();
-      try {
-        var chunkSize = 80;
-        var lastErr = null;
-        for (var c = 0; c < ids.length; c += chunkSize) {
-          var chunk = ids.slice(c, c + chunkSize);
-          var res = await supabaseClient.from('libreta_items').update({ pagado: true, cobro_grupo_id: cobroGrupoId })
-            .eq('cliente_id', _libretalClienteActual.id)
-            .eq('user_id', currentUser.id)
-            .eq('pagado', false)
-            .in('id', chunk);
-          if (res.error) { lastErr = res.error; break; }
-        }
-        if (lastErr) {
-          var msg = (lastErr.message || '').toLowerCase();
-          if (msg.indexOf('cobro_grupo') !== -1 || msg.indexOf('schema cache') !== -1 || lastErr.code === 'PGRST204') {
-            ferriolAppAlert('Para agrupar cada cobro como ticket ejecutá en Supabase → SQL:\n\nALTER TABLE libreta_items ADD COLUMN IF NOT EXISTS cobro_grupo_id text;\n');
-            throw lastErr;
-          }
-          throw lastErr;
-        }
-        var ventaItems = items.map(function (it, idx) {
-          var m = Number(it.monto) || 0;
-          return {
-            nombre: ((it.descripcion || '') + '').trim() || 'Cuenta libreta',
-            codigo: '_libreta_' + String(it.id != null ? it.id : idx),
-            precio: m,
-            cant: 1,
-            costo: m
-          };
-        });
-        var fechaHoraCobro = new Date().toISOString();
-        var clienteNombreCobro = (_libretalClienteActual.nombre || '').trim() || null;
-        state.transaccionesList.push({
-          id: Date.now(),
-          method: 'cobro_libreta',
-          client: clienteNombreCobro || '—',
-          items: ventaItems,
-          total: total,
-          fechaHora: fechaHoraCobro
-        });
-        try {
-          var ventaCobroRes = await supabaseClient.from('ventas').insert({
-            user_id: currentUser.id,
-            fecha_hora: fechaHoraCobro,
-            total: total,
-            metodo_pago: 'cobro_libreta',
-            cliente_nombre: clienteNombreCobro,
-            items: ventaItems
-          });
-          if (ventaCobroRes.error) throw ventaCobroRes.error;
-        } catch (errV) {
-          console.warn('Venta cobro libreta no guardada en la nube:', errV && errV.message);
-          if (typeof showScanToast === 'function') showScanToast('Cuenta saldada. Revisá conexión para el historial de ventas.', false);
-        }
-        var dCobro = getData();
-        dCobro.ventas = dCobro.ventas || { efectivo: 0, tarjeta: 0, transferencia: 0, fiado: 0, transferencia_pendiente: 0, cobro_libreta: 0 };
-        dCobro.ventas.cobro_libreta = (dCobro.ventas.cobro_libreta || 0) + total;
-        dCobro.transacciones = (dCobro.transacciones || 0) + 1;
-        dCobro.lastCierreDate = ferriolTodayYmdLocal();
-        setData(dCobro);
-        try { await updateDashboard(); } catch (_) {}
-        _libretalCuentaUltimoMonto = total;
-        _libretalCuentaUltimoItems = items.map(function (it) {
-          return {
-            descripcion: it.descripcion,
-            monto: it.monto,
-            fecha_hora: it.fecha_hora,
-            tipo: it.tipo
-          };
-        });
-        await renderLibretaItems(_libretalClienteActual.id);
-        document.getElementById('libretalCuentaFooterPendiente').classList.add('hidden');
-        var exito = document.getElementById('libretalCuentaFooterExito');
-        var txt = document.getElementById('libretalCuentaExitoTexto');
-        if (txt) {
-          txt.textContent = esTotal
-            ? ('Cuenta saldada por $' + Math.round(total).toLocaleString('es-AR'))
-            : ('Cobro registrado: $' + Math.round(total).toLocaleString('es-AR') + ' · Quedó deuda pendiente');
-        }
-        var btnWAc = document.getElementById('libretalCuentaBtnWAComprobante');
-        var okTel = !!(_libretalClienteActual.telefono && String(_libretalClienteActual.telefono).replace(/\D/g, ''));
-        if (btnWAc) {
-          btnWAc.disabled = !okTel;
-          btnWAc.classList.toggle('opacity-45', !okTel);
-        }
-        if (exito) exito.classList.remove('hidden');
-        if (typeof showScanToast === 'function') showScanToast(esTotal ? 'Cuenta saldada' : 'Cobro registrado', false);
-        lucide.createIcons();
-      } catch (e) {
-        console.error(e);
-        if (typeof showScanToast === 'function') showScanToast('No se pudo actualizar', true);
-      }
+      _pendingLibretaCobro = {
+        cliente: {
+          id: _libretalClienteActual.id,
+          nombre: _libretalClienteActual.nombre,
+          telefono: _libretalClienteActual.telefono
+        },
+        items: items,
+        total: total,
+        esTotal: esTotal
+      };
+      openPaymentModal();
     };
 
     window._libretaCuentaCompartirComprobante = function () {
