@@ -2806,29 +2806,13 @@
         }
         var cApr = cMd + cPp + cKp + cKu;
         var total = cW + cCs + cEp + cApr;
-        var bpB = 0;
-        var bpT = 0;
-        try {
-          var uidF = currentUser.id;
-          var founderOwn = await Promise.all([
-            ferriolSolicBadgeCount(supabaseClient.from('ferriol_partner_withdrawal_requests').select('id', { count: 'exact', head: true }).eq('partner_user_id', uidF).in('status', ['pending_review', 'approved_pending_payout'])),
-            ferriolSolicBadgeCount(supabaseClient.from('ferriol_membership_day_requests').select('id', { count: 'exact', head: true }).eq('requested_by', uidF).eq('status', 'pending')),
-            ferriolSolicBadgeCount(supabaseClient.from('ferriol_partner_provision_requests').select('id', { count: 'exact', head: true }).eq('requested_by', uidF).eq('status', 'pending')),
-            ferriolSolicBadgeCount(supabaseClient.from('ferriol_kiosquero_provision_requests').select('id', { count: 'exact', head: true }).eq('requested_by', uidF).eq('status', 'pending'))
-          ]);
-          bpB = founderOwn[0];
-          bpT = founderOwn[1] + founderOwn[2] + founderOwn[3];
-        } catch (_) {
-          bpB = 0;
-          bpT = 0;
-        }
-        ferriolSolicBadgeSet(navBd, total + bpB + bpT);
+        ferriolSolicBadgeSet(navBd, total);
         ferriolSolicBadgeSet(document.querySelector('[data-founder-solic-badge="retiros"]'), cW);
         ferriolSolicBadgeSet(document.querySelector('[data-founder-solic-badge="ventas"]'), cCs);
         ferriolSolicBadgeSet(document.querySelector('[data-founder-solic-badge="empresa"]'), cEp);
         ferriolSolicBadgeSet(document.querySelector('[data-founder-solic-badge="aprobaciones"]'), cApr);
-        ferriolSolicBadgeSet(document.querySelector('[data-partner-solic-badge="billetera"]'), bpB);
-        ferriolSolicBadgeSet(document.querySelector('[data-partner-solic-badge="tramites"]'), bpT);
+        ferriolSolicBadgeSet(document.querySelector('[data-partner-solic-badge="billetera"]'), 0);
+        ferriolSolicBadgeSet(document.querySelector('[data-partner-solic-badge="tramites"]'), 0);
         try {
           if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
         } catch (_) {}
@@ -3782,11 +3766,11 @@
     function isEmpresaLensSuper() {
       return !!(currentUser && currentUser.role === 'super' && state.superUiMode === 'empresa');
     }
-    /** Registrar venta con comprobante como vendedor (kit / licencia / cuota): socio partner o fundador en Empresa o Administración — no en Modo usuario tienda. */
+    /** Billetera, cola Comprobantes y «cargar venta MLM»: solo cuenta partner en red (no preview tienda) o fundador en vista Administración (socio), nunca vista Fundador empresa. */
     function ferriolDistribuidorVentaShell() {
       if (!currentUser) return false;
       if (currentUser.role === 'partner') return !isPartnerKioscoPreviewMode();
-      if (currentUser.role === 'super') return !!(isEmpresaLensSuper() || isSuperSocioLens());
+      if (currentUser.role === 'super') return isSuperSocioLens();
       return false;
     }
     /** Kiosquero o vista preview tienda: caja, inventario, suscripción mensual negocio (no venta MLM con comprobante). */
@@ -6251,7 +6235,7 @@
       if (navLbl && navBtn && currentUser && isNetworkAdminRole(currentUser.role) && !isAnyKioscoPreviewMode()) {
         if (isEmpresaLensSuper()) {
           navLbl.textContent = 'Solicitudes';
-          navBtn.title = 'Solicitudes · retiros, ventas y comprobantes · tu billetera';
+          navBtn.title = 'Solicitudes · retiros, ventas y comprobantes';
           if (navIcon) navIcon.setAttribute('data-lucide', 'inbox');
         } else if (ferriolDistribuidorVentaShell()) {
           navLbl.textContent = 'Billetera';
