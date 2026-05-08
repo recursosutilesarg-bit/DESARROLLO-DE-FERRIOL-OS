@@ -7692,7 +7692,7 @@
         try { sessionStorage.setItem('ferriol_partner_ui', 'red'); } catch (_) {}
         applyAppShell();
       }
-      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'afiliados' && state.superSection !== 'ingresos' && state.superSection !== 'partner-comprobantes' && state.superSection !== 'solicitudes' && state.superSection !== 'pagos-pendientes' && state.superSection !== 'mas') {
+      if (name === 'super' && currentUser && currentUser.role === 'partner' && state.superSection && state.superSection !== 'afiliados' && state.superSection !== 'ingresos' && state.superSection !== 'partner-comprobantes' && state.superSection !== 'solicitudes' && state.superSection !== 'pagos-pendientes' && state.superSection !== 'mas' && state.superSection !== 'configuraciones' && state.superSection !== 'ajustes-tema') {
         switchSuperSection('ingresos');
       }
       if (name !== 'scanner') window._scanForProductCode = false;
@@ -7722,7 +7722,7 @@
         renderIngresosBienvenida();
         var landSuper = state.superSection || 'ingresos';
         if (landSuper === 'balance') landSuper = 'ingresos';
-        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'ingresos' && landSuper !== 'solicitudes' && landSuper !== 'pagos-pendientes' && landSuper !== 'mas') landSuper = 'ingresos';
+        if (currentUser && currentUser.role === 'partner' && landSuper !== 'afiliados' && landSuper !== 'ingresos' && landSuper !== 'solicitudes' && landSuper !== 'pagos-pendientes' && landSuper !== 'mas' && landSuper !== 'configuraciones' && landSuper !== 'ajustes-tema') landSuper = 'ingresos';
         if (currentUser && currentUser.role === 'partner' && landSuper === 'pagos-pendientes') landSuper = 'ingresos';
         switchSuperSection(landSuper);
       } else {
