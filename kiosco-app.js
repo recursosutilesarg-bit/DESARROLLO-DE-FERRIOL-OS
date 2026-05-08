@@ -2337,12 +2337,12 @@
           if (w.status === 'paid') paidSum += a;
         });
         if (br) {
-          br.innerHTML =
-            'Comisiones en libro (sale_commission + renewal, approved o paid, histórico): $ ' +
+          br.textContent =
+            'Libro $ ' +
             ingresosTotal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
-            ' · Retiros en historial (pagados + en trámite, sin rechazados): $ ' +
+            ' · Retiros $ ' +
             historialComprometido.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
-            ' · Ya transferido a vos: $ ' +
+            ' · Pagado $ ' +
             paidSum.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
         var rq = await supabaseClient.from('ferriol_partner_withdrawal_requests').select('*').eq('partner_user_id', currentUser.id).order('created_at', { ascending: false }).limit(40);
@@ -2359,11 +2359,11 @@
             btnW.setAttribute('title', 'Solo cuentas partner o fundador (vista administración) pueden solicitar retiro.');
           }
         }
-        if (currentUser.role === 'super' && isSuperSocioLens() && br) {
-          br.innerHTML = '<p class="text-[10px] text-amber-200/90 mb-1.5">Cuenta fundador (vista administración): ves el saldo de tu usuario. Para pedir retiros a la empresa hace falta una cuenta con rol <strong class="text-amber-100/90">partner</strong>.</p>' + br.innerHTML;
-        }
-        if (currentUser.role === 'partner' && bal === 0 && ingresosTotal === 0 && br) {
-          br.innerHTML += '<p class="text-[10px] text-white/35 mt-1.5">Si creés que deberías tener saldo: corré de nuevo <code class="text-white/50">supabase-ferriol-partner-withdrawals.sql</code> en Supabase (funciones) y revisá en <code class="text-white/50">mlm_ledger</code> que tu usuario sea <code class="text-white/50">beneficiary_user_id</code> con <code class="text-white/50">sale_commission</code> o <code class="text-white/50">renewal</code> y estado <code class="text-white/50">approved</code>/<code class="text-white/50">paid</code>. Forzá recarga del sitio (Ctrl+F5) por si el navegador usa un <code class="text-white/50">kiosco-app.js</code> viejo.</p>';
+        if (currentUser.role === 'super' && isSuperSocioLens() && btnW) {
+          btnW.setAttribute(
+            'title',
+            'En cuenta fundador solo ves el saldo; los retiros los gestiona una cuenta con rol partner.'
+          );
         }
         if (!rows.length) {
           hist.innerHTML = '<p class="text-xs text-white/45 py-3 text-center">Todavía no tenés solicitudes de retiro.</p>';
@@ -2385,7 +2385,10 @@
           btnW.disabled = !canW;
           btnW.classList.toggle('opacity-50', !canW);
         }
-        hist.innerHTML = '<p class="text-red-300/90 text-xs py-2">No se pudo cargar la billetera. ¿Ejecutaste <code class="text-white/80">supabase-ferriol-partner-withdrawals.sql</code>? ' + String(e.message || e) + '</p>';
+        hist.innerHTML =
+          '<p class="text-red-300/90 text-xs py-2">No se pudo cargar la billetera. ' +
+          String(e.message || e).replace(/</g, '&lt;') +
+          '</p>';
       }
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
       scheduleRefreshFerriolSolicitudesBadges();
