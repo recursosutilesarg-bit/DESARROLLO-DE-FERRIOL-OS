@@ -10900,7 +10900,7 @@
           }
         });
         ticketEl.innerHTML =
-          '<p class="text-[11px] text-white/45 px-4 pb-2">Marcá qué vas a cobrar ahora (podés dejar deuda pendiente).</p>' +
+          '<p class="text-[11px] text-white/45 px-4 pb-2">Podés cobrar <strong class="text-white/55">un ítem</strong>, <strong class="text-white/55">varios marcados</strong> o <strong class="text-white/55">una compra entera</strong> con «Solo esta compra» (mismo fiado del mostrador). Desmarcá lo que no cobrás ahora.</p>' +
           bloques.join('') +
           '<div class="flex justify-between items-baseline px-4 pt-4 pb-2 border-t border-white/08 mt-2">' +
           '<span class="text-white/60 text-sm">Total de la cuenta</span>' +

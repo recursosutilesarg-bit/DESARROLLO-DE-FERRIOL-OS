@@ -1142,8 +1142,8 @@
 
         <!-- Barra de acciones compacta -->
         <div class="flex gap-2 px-3 py-2 border-b border-white/07">
-          <button onclick="window._abrirCuentaLibreta()" class="btn-glow rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs font-semibold touch-target flex-[1.4] justify-center">
-            <i data-lucide="receipt" class="w-3.5 h-3.5"></i> Sacar cuenta
+          <button type="button" onclick="window._abrirCuentaLibreta()" class="btn-glow rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs font-semibold touch-target flex-[1.4] justify-center" title="Elegís qué líneas cobrar: un ítem, una compra o varios marcados">
+            <i data-lucide="receipt" class="w-3.5 h-3.5"></i> Cobrar cuenta
           </button>
           <button onclick="window._abrirNuevoItemLibreta()" class="btn-neomorphic rounded-xl px-3 py-2 flex items-center gap-1.5 text-xs font-semibold touch-target flex-1 justify-center">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i> Agregar ítem
@@ -1236,8 +1236,9 @@
           <i data-lucide="chevron-left" class="w-5 h-5"></i>
         </button>
         <div class="flex-1 min-w-0">
-          <p class="text-xs text-white/45 uppercase tracking-wide">Cuenta pendiente</p>
+          <p class="text-xs text-white/45 uppercase tracking-wide">Cobrar cuenta</p>
           <p id="libretalCuentaClienteNombre" class="font-bold text-sm truncate">Cliente</p>
+          <p class="text-[10px] text-white/38 mt-0.5 leading-snug">Marcá líneas · «Solo esta compra» si fue un mismo fiado · dejás deuda si no marcás todo</p>
         </div>
       </div>
       <div id="libretalCuentaScroll" class="flex-1 overflow-y-auto px-0 py-3 min-h-0">
