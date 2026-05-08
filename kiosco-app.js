@@ -838,12 +838,12 @@
       var ok = ferriolDistribuidorVentaShell();
       if (!ok) return;
       var cur = state.superSection;
-      state._returnSuperSectionFromComprobantes = cur === 'partner-comprobantes' ? 'ingresos' : cur;
+      state._returnSuperSectionFromComprobantes = cur === 'partner-comprobantes' ? 'solicitudes' : cur;
       switchSuperSection('partner-comprobantes');
     }
     function closePartnerComprobantesSection() {
-      var back = state._returnSuperSectionFromComprobantes || 'ingresos';
-      if (back === 'partner-comprobantes') back = 'ingresos';
+      var back = state._returnSuperSectionFromComprobantes || 'solicitudes';
+      if (back === 'partner-comprobantes') back = 'solicitudes';
       switchSuperSection(back);
     }
     function ferriolPartnerProofRowHtml(row, pmap) {
@@ -3692,7 +3692,7 @@
       superFounderHubReturn: 'ingresos',
       /** Panel kiosco previo antes de abrir Configuración del negocio (para «Volver» desde el hub). */
       kioscoConfigReturnPanel: 'dashboard',
-      _returnSuperSectionFromComprobantes: 'ingresos',
+      _returnSuperSectionFromComprobantes: 'solicitudes',
       afiliadosSubTab: 'usuarios',  // usuarios (kiosquero) | distribuidores (partner)
       superUiMode: 'empresa',  // empresa | socio | negocio — solo si role === 'super'
       partnerUiMode: 'red'  // red (panel socio) | negocio (misma UI que kiosquero) — solo si role === 'partner'
@@ -6229,19 +6229,27 @@
           pan.style.display = ferriolDistribuidorVentaShell() ? 'block' : 'none';
         }
       }
+      var hubRow = document.getElementById('solicitudesHubComprobantesRow');
+      if (hubRow) {
+        var showHub =
+          !!(
+            currentUser &&
+            isNetworkAdminRole(currentUser.role) &&
+            !isAnyKioscoPreviewMode() &&
+            ferriolDistribuidorVentaShell()
+          );
+        hubRow.classList.toggle('hidden', !showHub);
+      }
       var navLbl = document.getElementById('navSuperWalletOrSolicitudesLabel');
       var navBtn = document.getElementById('navSuperWalletOrSolicitudesBtn');
       var navIcon = document.getElementById('navSuperWalletOrSolicitudesIcon');
       if (navLbl && navBtn && currentUser && isNetworkAdminRole(currentUser.role) && !isAnyKioscoPreviewMode()) {
-        if (isEmpresaLensSuper()) {
-          navLbl.textContent = 'Solicitudes';
-          navBtn.title = 'Solicitudes · retiros, ventas y comprobantes';
-          if (navIcon) navIcon.setAttribute('data-lucide', 'inbox');
-        } else if (ferriolDistribuidorVentaShell()) {
-          navLbl.textContent = 'Billetera';
-          navBtn.title = 'Billetera · comisiones';
-          if (navIcon) navIcon.setAttribute('data-lucide', 'circle-dollar-sign');
-        }
+        navLbl.textContent = 'Solicitudes y aprobaciones';
+        navBtn.title =
+          isEmpresaLensSuper() || ferriolDistribuidorVentaShell()
+            ? 'Solicitudes y aprobaciones · retiros, ventas, trámites y comprobantes'
+            : 'Solicitudes y aprobaciones';
+        if (navIcon) navIcon.setAttribute('data-lucide', 'clipboard-list');
       }
       syncPartnerSolicitudesTabShell();
     }
@@ -7699,6 +7707,9 @@
         }
       }
       syncPartnerBilleteraShell();
+      try {
+        if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons();
+      } catch (_) {}
       if (isNetworkAdmin && !uiNegocio) {
         ferriolWireSolicitudesBadgeRealtimeIfNeeded();
         scheduleRefreshFerriolSolicitudesBadges();
@@ -7926,8 +7937,8 @@
       if (navHighlight === 'ajustes' || (typeof navHighlight === 'string' && navHighlight.indexOf('ajustes-') === 0)) navHighlight = 'mas';
       if (navHighlight === 'aviso-global') navHighlight = 'mas';
       if (navHighlight === 'partner-comprobantes') {
-        navHighlight = state._returnSuperSectionFromComprobantes || 'ingresos';
-        if (navHighlight === 'partner-comprobantes') navHighlight = 'ingresos';
+        navHighlight = state._returnSuperSectionFromComprobantes || 'solicitudes';
+        if (navHighlight === 'partner-comprobantes') navHighlight = 'solicitudes';
       }
       document.querySelectorAll('.super-nav-btn').forEach(function (btn) {
         btn.classList.toggle('active', btn.dataset.superSection === navHighlight);
@@ -8181,7 +8192,6 @@
         goToPanel('super');
       });
     }
-    var accountMenuBtnRedSolicitudes = document.getElementById('accountMenuBtnRedSolicitudes');
     var accountMenuBtnRedConfiguraciones = document.getElementById('accountMenuBtnRedConfiguraciones');
     if (accountMenuBtnRedConfiguraciones) {
       accountMenuBtnRedConfiguraciones.addEventListener('click', function () {
@@ -8193,25 +8203,13 @@
         goToPanel('super');
       });
     }
-    if (accountMenuBtnRedSolicitudes) {
-      accountMenuBtnRedSolicitudes.addEventListener('click', function () {
+    var btnSolicitudesHubOpenComprobantes = document.getElementById('btnSolicitudesHubOpenComprobantes');
+    if (btnSolicitudesHubOpenComprobantes) {
+      btnSolicitudesHubOpenComprobantes.addEventListener('click', function () {
         if (!currentUser) return;
-        var ok = (currentUser.role === 'partner') || isSuperSocioLens();
-        if (!ok || isPartnerKioscoPreviewMode()) return;
+        if (!ferriolDistribuidorVentaShell()) return;
         closeAccountMenuDrawer(true);
-        state.superSection = 'solicitudes';
-        goToPanel('super');
-      });
-    }
-    var accountMenuBtnRedComprobantes = document.getElementById('accountMenuBtnRedComprobantes');
-    if (accountMenuBtnRedComprobantes) {
-      accountMenuBtnRedComprobantes.addEventListener('click', function () {
-        if (!currentUser) return;
-        var ok = (currentUser.role === 'partner') || isSuperSocioLens();
-        if (!ok || isPartnerKioscoPreviewMode()) return;
-        closeAccountMenuDrawer(true);
-        state.superSection = 'partner-comprobantes';
-        goToPanel('super');
+        openPartnerComprobantesSection();
       });
     }
     var accountMenuBtnLogout = document.getElementById('accountMenuBtnLogout');
@@ -14022,8 +14020,7 @@ async function showApp() {
               (canUsePartnerConfig && (
                 sec === 'ajustes-tema' ||
                 sec === 'configuraciones' ||
-                sec === 'solicitudes' ||
-                sec === 'partner-comprobantes'
+                sec === 'solicitudes'
               ))
             );
           if (allow) {

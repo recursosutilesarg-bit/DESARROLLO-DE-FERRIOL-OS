@@ -399,12 +399,12 @@
   <nav id="navSuperBottom" class="ferriol-bottom-nav fixed bottom-0 left-0 right-0 z-40 super-only hidden">
     <div class="bottom-nav-bar glass-strong border-t border-white/10 px-2 py-3 max-w-2xl mx-auto">
       <div class="flex items-stretch justify-between gap-0.5 sm:gap-1 flex-nowrap overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <button type="button" data-super-section="solicitudes" id="navSuperWalletOrSolicitudesBtn" class="super-nav-btn bottom-nav-btn relative flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Cola de trabajo: solicitudes o billetera">
+        <button type="button" data-super-section="solicitudes" id="navSuperWalletOrSolicitudesBtn" class="super-nav-btn bottom-nav-btn relative flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Solicitudes y aprobaciones · colas, comprobantes y movimientos">
           <span class="relative inline-flex shrink-0">
-            <i data-lucide="inbox" id="navSuperWalletOrSolicitudesIcon" class="w-5 h-5 shrink-0"></i>
+            <i data-lucide="clipboard-list" id="navSuperWalletOrSolicitudesIcon" class="w-5 h-5 shrink-0"></i>
             <span id="navSuperSolicitudesBadge" class="pointer-events-none absolute -top-1 -right-2 z-[1] min-w-[0.9375rem] h-[0.9375rem] px-0.5 rounded-full bg-red-500 text-[8px] font-bold leading-[0.9375rem] text-white text-center shadow tabular-nums hidden" aria-hidden="true"></span>
           </span>
-          <span class="truncate w-full text-center" id="navSuperWalletOrSolicitudesLabel">Solicitudes</span>
+          <span class="block w-full text-center whitespace-normal leading-tight text-[10px] sm:text-xs px-0.5" id="navSuperWalletOrSolicitudesLabel">Solicitudes y aprobaciones</span>
         </button>
         <button type="button" data-super-section="pagos-pendientes" class="super-nav-btn super-only super-main-only bottom-nav-btn flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[4.25rem] sm:min-w-0 py-1 rounded-xl text-xs font-medium transition-all duration-300 touch-target shrink-0 sm:shrink" title="Registrar transferencias de retiros a socios">
           <i data-lucide="wallet" class="w-5 h-5 shrink-0"></i>
@@ -2800,15 +2800,10 @@
               <span class="font-semibold text-white">Color de la app</span>
               <span class="text-xs text-white/50">Elegí tema oscuro, claro o acentos</span>
             </button>
-            <button type="button" data-ferriol-ajustes-target="solicitudes" class="glass rounded-2xl p-4 border border-white/15 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-white/35 active:scale-[0.98] touch-target">
-              <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0"><i data-lucide="wallet" class="w-5 h-5 text-white"></i></div>
-              <span class="font-semibold text-white">Billetera y solicitudes</span>
-              <span class="text-xs text-white/50">Retiros, trámites y estados</span>
-            </button>
-            <button type="button" data-ferriol-ajustes-target="partner-comprobantes" class="glass rounded-2xl p-4 border border-white/15 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-white/35 active:scale-[0.98] touch-target sm:col-span-2">
-              <div class="w-10 h-10 rounded-xl bg-teal-500/20 flex items-center justify-center shrink-0"><i data-lucide="image" class="w-5 h-5 text-teal-200"></i></div>
-              <span class="font-semibold text-white">Comprobantes de comercios</span>
-              <span class="text-xs text-white/50">Bandeja de comprobantes para validar</span>
+            <button type="button" data-ferriol-ajustes-target="solicitudes" class="glass rounded-2xl p-4 border border-white/15 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-white/35 active:scale-[0.98] touch-target sm:col-span-2">
+              <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center shrink-0"><i data-lucide="clipboard-list" class="w-5 h-5 text-white"></i></div>
+              <span class="font-semibold text-white">Solicitudes y aprobaciones</span>
+              <span class="text-xs text-white/50">Billetera, retiros, trámites y bandeja de comprobantes entrantes</span>
             </button>
           </div>
         </div>
@@ -3122,6 +3117,17 @@
         </div>
         <!-- Sección Solicitudes: colas de acción + historial (fundador) -->
         <div id="super-section-solicitudes" class="super-section super-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; min-height: 100%; max-height: 85vh; padding-bottom: 6rem;">
+          <div id="solicitudesHubComprobantesRow" class="hidden mb-5 rounded-2xl border border-cyan-500/30 bg-cyan-500/[0.07] p-3 sm:p-4">
+            <h3 class="text-sm font-semibold text-cyan-100/95 mb-1 flex items-center gap-2">
+              <i data-lucide="image" class="w-4 h-4 shrink-0"></i>
+              Comprobantes entrantes
+            </h3>
+            <p class="text-[11px] text-white/50 mb-3">Bandeja de comercios y distribuidores: aprobás o registrás la venta según corresponda.</p>
+            <button type="button" id="btnSolicitudesHubOpenComprobantes" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target flex items-center justify-center gap-2 text-sm">
+              <i data-lucide="folder-open" class="w-5 h-5 shrink-0"></i>
+              Abrir comprobantes y movimientos
+            </button>
+          </div>
           <div id="partnerBilleteraPanel" class="partner-billetera-panel mb-6" style="display: none;">
             <h2 class="font-bold text-xl mb-1 flex items-center gap-2">
               <i data-lucide="wallet" class="w-5 h-5 text-[#ffffff]"></i>
@@ -3223,7 +3229,7 @@
             <i data-lucide="settings" class="w-5 h-5 text-[#ffffff]"></i>
             Más opciones
           </h2>
-          <p class="text-xs text-white/50 mb-4"><strong class="text-white/65">Menú perfil:</strong> <strong class="text-white/70">Configuraciones</strong> reúne todo el sistema (tema de la app, Mercado Pago, avisos, precios…). Gestión de comprobantes en <strong class="text-white/65">Solicitudes</strong>. Socios: <strong class="text-white/65">Billetera</strong> / <strong class="text-white/65">Comprobantes</strong>. Enlaces para referidos: <strong class="text-white/65">Afiliados</strong>. Datos bancarios propios: <strong class="text-white/65">Mis datos bancarios</strong>.</p>
+          <p class="text-xs text-white/50 mb-4"><strong class="text-white/65">Menú perfil:</strong> <strong class="text-white/70">Configuraciones</strong> reúne todo el sistema (tema de la app, Mercado Pago, avisos, precios…). Colas de trabajo, billetera y bandeja de comprobantes están en la pestaña inferior <strong class="text-white/65">Solicitudes y aprobaciones</strong>. Enlaces para referidos: <strong class="text-white/65">Afiliados</strong>. Datos bancarios propios: <strong class="text-white/65">Mis datos bancarios</strong>.</p>
         </div>
       </div>
     </section>
@@ -3918,20 +3924,6 @@
               <span class="flex-1 min-w-0 text-left">
                 <span class="block leading-snug">Configuraciones</span>
                 <span class="block text-[11px] text-gray-500 font-normal mt-0.5 leading-snug">Cambiar color de la app</span>
-              </span>
-            </button>
-            <button type="button" id="accountMenuBtnRedSolicitudes" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors">
-              <i data-lucide="wallet" class="w-[1.125rem] h-[1.125rem] text-gray-500 shrink-0 stroke-[1.75]"></i>
-              <span class="flex-1 min-w-0 text-left">
-                <span class="block leading-snug">Billetera y solicitudes</span>
-                <span class="block text-[11px] text-gray-500 font-normal mt-0.5 leading-snug">Retiros, trámites y colas</span>
-              </span>
-            </button>
-            <button type="button" id="accountMenuBtnRedComprobantes" class="w-full text-left rounded-xl py-2.5 px-3 text-sm font-medium text-gray-800 touch-target flex items-center gap-3 hover:bg-gray-100 active:bg-gray-100/80 transition-colors">
-              <i data-lucide="image" class="w-[1.125rem] h-[1.125rem] text-gray-500 shrink-0 stroke-[1.75]"></i>
-              <span class="flex-1 min-w-0 text-left">
-                <span class="block leading-snug">Comprobantes de comercios</span>
-                <span class="block text-[11px] text-gray-500 font-normal mt-0.5 leading-snug">Bandeja de comercios y distribuidores</span>
               </span>
             </button>
           </div>
