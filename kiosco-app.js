@@ -14061,6 +14061,43 @@ async function showApp() {
         localStorage.setItem(key, latest ? new Date(latest).toISOString() : new Date().toISOString());
       } catch (_) {}
     }
+    function ferriolLinkifyUrlsToHtml(raw, linkClass) {
+      var s = String(raw != null ? raw : '');
+      var cls = linkClass || 'text-cyan-200/95 underline decoration-cyan-200/35 hover:text-cyan-100';
+      // Soporta: http(s)://... y www....
+      var urlRe = /\b((https?:\/\/|www\.)[^\s<]+)\b/gi;
+      var out = [];
+      var last = 0;
+      var m = null;
+      while ((m = urlRe.exec(s)) !== null) {
+        var match = m[1] || '';
+        if (!match) continue;
+        var start = m.index || 0;
+        out.push(ferriolEscapeHtmlLite(s.slice(last, start)));
+
+        // Quitamos signos de puntuación finales para que no entren al link.
+        var cleaned = String(match);
+        var suffix = '';
+        var mm = cleaned.match(/^(.*?)([)\].,!?;:]+)$/);
+        if (mm && mm[1]) { cleaned = mm[1]; suffix = mm[2]; }
+
+        var href = cleaned.indexOf('www.') === 0 ? 'https://' + cleaned : cleaned;
+        out.push(
+          '<a href="' +
+            ferriolEscapeHtmlLite(href) +
+            '" target="_blank" rel="noopener noreferrer" class="' +
+            cls +
+            '">' +
+            ferriolEscapeHtmlLite(cleaned) +
+            '</a>' +
+            ferriolEscapeHtmlLite(suffix)
+        );
+
+        last = start + (match.length || 0);
+      }
+      out.push(ferriolEscapeHtmlLite(s.slice(last)));
+      return out.join('');
+    }
     function renderNotificationsMerged() {
       var notifSince = (currentUser && currentUser.created_at) ? new Date(currentUser.created_at).getTime() : 0;
       var visible = (notificationsCache || []).filter(function (n) { return n.created_at && new Date(n.created_at).getTime() >= notifSince; });
@@ -14090,11 +14127,17 @@ async function showApp() {
               var parts = msgRaw.split('\n');
               var head = parts.shift() || '';
               var body = parts.join('\n');
-              var safeHead = head.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-              var safeBody = body.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
-              inner = '<p class="text-white/95 text-sm leading-snug"><span class="font-bold text-amber-200">' + safeHead + '</span><br><span class="text-white/88">' + safeBody + '</span></p>';
+              inner =
+                '<p class="text-white/95 text-sm leading-snug"><span class="font-bold text-amber-200">' +
+                ferriolLinkifyUrlsToHtml(head, 'text-amber-200/95 underline decoration-amber-200/35 hover:text-amber-100') +
+                '</span><br><span class="text-white/88">' +
+                ferriolLinkifyUrlsToHtml(body, 'text-white/95 underline decoration-white/25').replace(/\n/g, '<br>') +
+                '</span></p>';
             } else {
-              inner = '<p class="text-white/90 text-sm">' + msgRaw.replace(/</g, '&lt;').replace(/\n/g, '<br>') + '</p>';
+              inner =
+                '<p class="text-white/90 text-sm">' +
+                ferriolLinkifyUrlsToHtml(msgRaw, 'text-cyan-200/95 underline decoration-cyan-200/35 hover:text-cyan-100').replace(/\n/g, '<br>') +
+                '</p>';
             }
             return '<div class="glass rounded-xl p-3 border border-white/10' + extraClass + '">' + inner + '<p class="text-white/50 text-xs mt-1">' + fecha + '</p></div>';
           }).join('');
