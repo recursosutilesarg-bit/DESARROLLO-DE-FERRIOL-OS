@@ -759,10 +759,7 @@
     }
 
     function syncPartnerProofInboxBadgeCount(n) {
-      var badges = [
-        document.getElementById('partnerProofInboxBtnBadge'),
-        document.getElementById('partnerProofInboxBtnBadgeIngresos'),
-      ].filter(Boolean);
+      var badges = [document.getElementById('partnerProofInboxBtnBadge')].filter(Boolean);
       var txt = n > 99 ? '99+' : String(n);
       badges.forEach(function (badge) {
         if (n > 0) {
@@ -4793,10 +4790,12 @@
                 efectivo += t;
                 totalIngresos += t;
               }
-              (v.items || []).forEach(function (i) {
-                var costo = i.costo != null ? Number(i.costo) : 0;
-                ganancia += ((Number(i.precio) || 0) - costo) * (i.cant || 0);
-              });
+              if (metodo !== 'fiado' && metodo !== 'transferencia_pendiente') {
+                (v.items || []).forEach(function (i) {
+                  var costo = i.costo != null ? Number(i.costo) : 0;
+                  ganancia += ((Number(i.precio) || 0) - costo) * (i.cant || 0);
+                });
+              }
             });
             return { total: totalIngresos, efectivo, tarjeta, transferencia, fiado, transferencia_pendiente, cobro_libreta: cobroLibreta, ganancia, count: res.data.length };
           }
@@ -4814,6 +4813,7 @@
       var cobroLibretaL = ventas.cobro_libreta || 0;
       var total = (ventas.efectivo || 0) + (ventas.tarjeta || 0) + (ventas.transferencia || 0) + cobroLibretaL;
       var ganancia = (state.transaccionesList || []).reduce(function (sum, t) {
+        if (t.method === 'fiado' || t.method === 'transferencia_pendiente') return sum;
         return sum + (t.items || []).reduce(function (s, i) {
           var costo = i.costo != null ? Number(i.costo) : 0;
           var precio = Number(i.precio) || 0;
@@ -14551,8 +14551,6 @@ async function showApp() {
     if (btnOpenAff) btnOpenAff.onclick = function () { openPartnerAffiliateLinksModal(); };
     var btnOpenProofInbox = document.getElementById('btnOpenPartnerProofInbox');
     if (btnOpenProofInbox) btnOpenProofInbox.addEventListener('click', openPartnerComprobantesSection);
-    var btnOpenProofInboxIng = document.getElementById('btnOpenPartnerProofInboxIngresos');
-    if (btnOpenProofInboxIng) btnOpenProofInboxIng.addEventListener('click', openPartnerComprobantesSection);
     var btnPartnerProofScreenBack = document.getElementById('btnPartnerProofScreenBack');
     if (btnPartnerProofScreenBack) btnPartnerProofScreenBack.addEventListener('click', closePartnerComprobantesSection);
     var partnerProofScreenTabC = document.getElementById('partnerProofScreenTabComercios');
