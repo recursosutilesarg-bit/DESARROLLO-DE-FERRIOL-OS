@@ -164,6 +164,25 @@
           </div>
           <button type="button" id="loginBtn" class="btn-login">Iniciar sesión</button>
         </form>
+        <p class="login-hint login-hint--solo-link login-hint-forgot text-center mb-3" id="loginHint">
+          <a href="#" id="forgotPwd" class="text-[#ffffff] underline underline-offset-2 decoration-white/35">¿Olvidaste tu contraseña?</a>
+        </p>
+        <div id="resetPwdBox" class="hidden mb-5 pt-3 border-t border-white/10">
+          <p class="text-sm text-white/70 mb-2">Ingresá tu email y te enviamos un enlace para restablecer la contraseña.</p>
+          <input type="email" id="resetPwdEmail" placeholder="Email" class="w-full mb-2 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white">
+          <button type="button" id="doResetPwd" class="btn-login w-full py-2">Enviar enlace</button>
+        </div>
+        <div id="setNewPwdBox" class="hidden mb-5 pt-3 border-t border-white/10">
+          <p class="text-sm text-white/70 mb-2">Elegí tu nueva contraseña (mín. 6 caracteres).</p>
+          <div class="password-wrap">
+            <input type="password" id="newPwdInput" placeholder="Nueva contraseña" class="w-full login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white" minlength="6">
+            <label class="toggle-pwd" for="showNewPwd" title="Ver contraseña">
+              <input type="checkbox" id="showNewPwd" class="pwd-checkbox">
+              <span class="pwd-label">Ver</span>
+            </label>
+          </div>
+          <button type="button" id="doSetNewPwd" class="btn-login w-full py-2 mt-2">Guardar nueva contraseña</button>
+        </div>
         <p class="login-signup-new-label login-signup-new-label--cta">¿PRIMERA VEZ? <span class="login-signup-new-shout">¡CREÁ UNA CUENTA!</span></p>
         <div class="login-signup-dual" role="group" aria-label="Crear cuenta: elegir tipo de registro">
           <button type="button" id="signUpBtnNegocio" class="login-signup-tile login-signup-tile--negocio touch-target" title="Crear cuenta para probar el sistema en tu negocio">
@@ -176,25 +195,6 @@
           </button>
         </div>
         <p id="loginKiosqueroPartnerHint" class="text-[11px] text-white/45 text-center leading-snug px-2 mt-3 max-w-sm mx-auto">¿Ya tenés <strong class="text-white/60">cuenta de negocio</strong> y querés vender Ferriol? <strong class="text-[#ffffff]/90">Iniciá sesión</strong> y en el inicio tocá <strong class="text-white/70">Quiero ser distribuidor</strong>.</p>
-        <p class="login-hint login-hint--solo-link" id="loginHint">
-          <a href="#" id="forgotPwd" class="text-[#ffffff]">¿Olvidaste tu contraseña?</a>
-        </p>
-        <div id="resetPwdBox" class="hidden mt-4 pt-4 border-t border-white/10">
-          <p class="text-sm text-white/70 mb-2">Ingresá tu email y te enviamos un enlace para restablecer la contraseña.</p>
-          <input type="email" id="resetPwdEmail" placeholder="Email" class="w-full mb-2 login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white">
-          <button type="button" id="doResetPwd" class="btn-login w-full py-2">Enviar enlace</button>
-        </div>
-        <div id="setNewPwdBox" class="hidden mt-4 pt-4 border-t border-white/10">
-          <p class="text-sm text-white/70 mb-2">Elegí tu nueva contraseña (mín. 6 caracteres).</p>
-          <div class="password-wrap">
-            <input type="password" id="newPwdInput" placeholder="Nueva contraseña" class="w-full login-glass input block py-2 px-3 rounded-lg border border-white/20 text-white" minlength="6">
-            <label class="toggle-pwd" for="showNewPwd" title="Ver contraseña">
-              <input type="checkbox" id="showNewPwd" class="pwd-checkbox">
-              <span class="pwd-label">Ver</span>
-            </label>
-          </div>
-          <button type="button" id="doSetNewPwd" class="btn-login w-full py-2 mt-2">Guardar nueva contraseña</button>
-        </div>
       </div>
 
       <!-- Vista: Solo formulario de creación de cuenta -->

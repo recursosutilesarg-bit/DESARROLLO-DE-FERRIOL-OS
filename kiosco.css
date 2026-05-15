@@ -809,9 +809,17 @@ button.header-sub.header-sub--toggle:active {
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
   background:
     radial-gradient(ellipse 100% 80% at 50% -20%, rgba(255,255,255, 0.28), transparent 50%),
     linear-gradient(160deg, #0a0a0a 0%, #171717 45%, #262626 100%);
+}
+
+/* Banner PWA (z-index 300, abajo) no tape enlaces del login al final de la tarjeta */
+body:has(#pwaInstallBanner.show) #loginScreen {
+  padding-bottom: max(6rem, env(safe-area-inset-bottom, 0px) + 5rem);
 }
 
 #loginScreen.hidden {
@@ -969,6 +977,11 @@ button.header-sub.header-sub--toggle:active {
 
 .login-hint--solo-link {
   margin-top: 0.5rem;
+}
+
+/* Enlace recuperar contraseña: mismo bloque .login-hint, pero tras el botón entrar */
+.login-hint-forgot.login-hint--solo-link {
+  margin-top: 0.35rem;
 }
 
 .login-glass input {
