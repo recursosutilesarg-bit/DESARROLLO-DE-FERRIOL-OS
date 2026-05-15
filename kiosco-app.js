@@ -34,9 +34,109 @@
     const SUPABASE_URL = _cfg.SUPABASE_URL || '';
     const SUPABASE_ANON_KEY = _cfg.SUPABASE_ANON_KEY || '';
     const APP_URL = _cfg.APP_URL || '';
+    /** True mientras el usuario debe completar updateUser({ password }) (enlace de recuperación). Evita que init() abra la app con sesión de recovery. */
+    var _ferriolPasswordRecoveryMode = false;
+
+    function ferriolUrlLooksLikePasswordRecovery(hash, search) {
+      var h = String(hash || '');
+      var s = String(search || '');
+      if (h.indexOf('type=recovery') !== -1) return true;
+      if (s.indexOf('type=recovery') !== -1) return true;
+      try {
+        var qs = s.indexOf('?') === 0 ? s.slice(1) : s;
+        if (new URLSearchParams(qs).get('type') === 'recovery') return true;
+      } catch (_) {}
+      return false;
+    }
+
+    function ferriolRestoreLoginChromeAfterPasswordRecovery() {
+      var wrap = document.getElementById('loginFormWrap');
+      if (wrap) {
+        var h1 = wrap.querySelector('h1');
+        if (h1) h1.textContent = 'Ferriol OS';
+        var sub = wrap.querySelector(':scope > .sub');
+        if (sub) sub.textContent = 'Sistema de gestión para negocios pequeños';
+      }
+      var form = document.getElementById('loginForm');
+      if (form) form.classList.remove('hidden');
+      var hint = document.getElementById('loginHint');
+      if (hint) hint.classList.remove('hidden');
+      document.querySelectorAll('.login-signup-new-label--cta').forEach(function (el) { el.classList.remove('hidden'); });
+      var dual = document.querySelector('#loginFormWrap .login-signup-dual');
+      if (dual) dual.classList.remove('hidden');
+      var kph = document.getElementById('loginKiosqueroPartnerHint');
+      if (kph) kph.classList.remove('hidden');
+    }
+
+    function ferriolShowPasswordRecoveryUi() {
+      _ferriolPasswordRecoveryMode = true;
+      try {
+        var app = document.getElementById('appWrap');
+        var loginScreen = document.getElementById('loginScreen');
+        if (app) app.classList.add('hidden');
+        if (loginScreen) loginScreen.classList.remove('hidden');
+
+        var wrap = document.getElementById('loginFormWrap');
+        if (wrap) wrap.classList.remove('hidden');
+
+        var suc = document.getElementById('signUpSuccessBox');
+        if (suc) suc.classList.add('hidden');
+        var signUpBox = document.getElementById('signUpBox');
+        if (signUpBox) signUpBox.classList.add('hidden');
+
+        var form = document.getElementById('loginForm');
+        if (form) form.classList.add('hidden');
+        var hint = document.getElementById('loginHint');
+        if (hint) hint.classList.add('hidden');
+        var resetBox = document.getElementById('resetPwdBox');
+        if (resetBox) resetBox.classList.add('hidden');
+
+        document.querySelectorAll('.login-signup-new-label--cta').forEach(function (el) { el.classList.add('hidden'); });
+        var dual = document.querySelector('#loginFormWrap .login-signup-dual');
+        if (dual) dual.classList.add('hidden');
+        var kph = document.getElementById('loginKiosqueroPartnerHint');
+        if (kph) kph.classList.add('hidden');
+
+        var newBox = document.getElementById('setNewPwdBox');
+        if (newBox) newBox.classList.remove('hidden');
+
+        var errEl = document.getElementById('loginErr');
+        if (errEl) {
+          errEl.textContent = '';
+          errEl.classList.remove('show');
+        }
+        var ctn = document.getElementById('loginContactAdminWrap');
+        if (ctn) ctn.classList.add('hidden');
+
+        if (wrap) {
+          var hx = wrap.querySelector('h1');
+          if (hx) hx.textContent = 'Nueva contraseña';
+          var subx = wrap.querySelector(':scope > .sub');
+          if (subx) subx.textContent = 'Definí tu nueva contraseña (mín. 6 caracteres). Después iniciá sesión con ella.';
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     const supabaseClient = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase && typeof window.supabase.createClient === 'function')
-      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: {
+            detectSessionInUrl: true,
+            persistSession: true,
+            autoRefreshToken: true
+          }
+        })
       : null;
+    if (supabaseClient) {
+      try {
+        supabaseClient.auth.onAuthStateChange(function (event) {
+          if (event === 'PASSWORD_RECOVERY') ferriolShowPasswordRecoveryUi();
+        });
+      } catch (e) {
+        console.warn('Supabase onAuthStateChange (recovery):', e);
+      }
+    }
 
     function ferriolCleanReloadParamsOnce() {
       try {
@@ -11994,11 +12094,15 @@ async function showApp() {
         errEl.classList.add('show');
         return;
       }
+      _ferriolPasswordRecoveryMode = false;
+      try {
+        await supabaseClient.auth.signOut();
+      } catch (_) {}
       errEl.textContent = 'Contraseña actualizada. Ya podés iniciar sesión con la nueva contraseña.';
       errEl.style.color = '#ffffff';
       errEl.classList.add('show');
       document.getElementById('setNewPwdBox').classList.add('hidden');
-      document.getElementById('loginFormWrap').classList.remove('hidden');
+      ferriolRestoreLoginChromeAfterPasswordRecovery();
       history.replaceState(null, '', location.pathname + location.search);
     };
 
@@ -15619,16 +15723,18 @@ async function showApp() {
     (async function init() {
       if (!supabaseClient) return;
       try {
-        const hash = location.hash || '';
-        const isRecovery = hash.includes('type=recovery');
-        if (isRecovery) {
-          document.getElementById('loginFormWrap').classList.add('hidden');
-          document.getElementById('signUpBox').classList.add('hidden');
-          document.getElementById('resetPwdBox').classList.add('hidden');
-          document.getElementById('setNewPwdBox').classList.remove('hidden');
-          document.getElementById('loginErr').classList.remove('show');
-          return;
-        }
+        var recoveryUrlHint = ferriolUrlLooksLikePasswordRecovery(location.hash, location.search);
+        await supabaseClient.auth.getSession();
+        if (recoveryUrlHint) ferriolShowPasswordRecoveryUi();
+        await new Promise(function (resolve) {
+          try {
+            if (typeof queueMicrotask === 'function') queueMicrotask(resolve);
+            else setTimeout(resolve, 0);
+          } catch (_) {
+            setTimeout(resolve, 0);
+          }
+        });
+        if (_ferriolPasswordRecoveryMode) return;
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session?.user) return;
         const uid = session.user.id;
