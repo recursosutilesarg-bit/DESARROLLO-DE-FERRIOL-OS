@@ -2,9 +2,33 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0; url=kiosco.html">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ferriol OS</title>
-  <script>window.location.replace("kiosco.html");</script>
+  <!--
+    IMPORTANTE · recuperación de contraseña (Supabase)
+    El correo puede redirigir a esta URL raíz con #access_token=…&type=recovery o con ?code=…
+    Hay que reenviar query + hash a kiosco.html; si no, se pierden los tokens y nunca verás el formulario de nueva contraseña.
+  -->
+  <noscript>
+    <meta http-equiv="refresh" content="0; url=kiosco.html">
+  </noscript>
+  <script>
+    (function () {
+      try {
+        var q = window.location.search || '';
+        var h = window.location.hash || '';
+        window.location.replace('kiosco.html' + q + h);
+      } catch (e) {
+        window.location.replace('kiosco.html');
+      }
+    })();
+  </script>
 </head>
-<body></body>
+<body>
+  <p style="margin: 2rem; font-family: system-ui, sans-serif; color: #e5e5e5; background: #111; min-height: 100vh;">
+    Redirigiendo a Ferriol OS…
+    <a href="kiosco.html" style="color: #86efac;">Abrir kiosco.html</a>
+    si no carga (auth y enlaces de correo necesitan JavaScript).
+  </p>
+</body>
 </html>
