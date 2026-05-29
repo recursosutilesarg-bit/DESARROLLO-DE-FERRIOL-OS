@@ -49,6 +49,97 @@
       return false;
     }
 
+    /** Supabase puede volver con #access_token=… o con ?code=… (PKCE); sin esto init() abre la app antes del formulario. */
+    function ferriolUrlHasAuthCallback(hash, search) {
+      var h = String(hash || '');
+      var s = String(search || '');
+      if (h.indexOf('access_token=') !== -1) return true;
+      if (h.indexOf('error=') !== -1) return true;
+      try {
+        var qs = s.charAt(0) === '?' ? s.slice(1) : s;
+        var p = new URLSearchParams(qs);
+        if (p.get('code')) return true;
+        if (p.get('error')) return true;
+      } catch (_) {}
+      return false;
+    }
+
+    function ferriolPasswordResetRedirectUrl() {
+      if (APP_URL && String(APP_URL).trim() && APP_URL.indexOf('TU-USUARIO') === -1) return APP_URL;
+      try {
+        return window.location.origin + window.location.pathname;
+      } catch (_) {
+        return String(window.location.href).split('#')[0];
+      }
+    }
+
+    function ferriolMarkPasswordRecoveryPending() {
+      try { sessionStorage.setItem('ferriol_pwd_recovery', '1'); } catch (_) {}
+    }
+
+    function ferriolClearPasswordRecoveryPending() {
+      try { sessionStorage.removeItem('ferriol_pwd_recovery'); } catch (_) {}
+    }
+
+    function ferriolPasswordRecoveryPendingFromStorage() {
+      try { return sessionStorage.getItem('ferriol_pwd_recovery') === '1'; } catch (_) { return false; }
+    }
+
+    /** Espera a que Supabase procese el enlace del correo antes de auto-abrir la app. */
+    function ferriolAwaitPasswordRecoveryBootstrap() {
+      if (!supabaseClient) return Promise.resolve();
+      var hash = location.hash || '';
+      var search = location.search || '';
+      var recoveryHint = ferriolUrlLooksLikePasswordRecovery(hash, search);
+      var authCallback = ferriolUrlHasAuthCallback(hash, search);
+      var pendingStored = ferriolPasswordRecoveryPendingFromStorage();
+
+      if (recoveryHint || pendingStored) ferriolShowPasswordRecoveryUi();
+      if (!recoveryHint && !authCallback && !pendingStored) return Promise.resolve();
+
+      return new Promise(function (resolve) {
+        var settled = false;
+        var unsub = null;
+        function finish() {
+          if (settled) return;
+          settled = true;
+          try {
+            if (unsub && unsub.subscription) unsub.subscription.unsubscribe();
+          } catch (_) {}
+          resolve();
+        }
+        unsub = supabaseClient.auth.onAuthStateChange(function (event) {
+          if (event === 'PASSWORD_RECOVERY') {
+            ferriolShowPasswordRecoveryUi();
+            finish();
+          }
+        });
+        supabaseClient.auth.getSession().then(function () {
+          if (recoveryHint) ferriolShowPasswordRecoveryUi();
+          if (_ferriolPasswordRecoveryMode) finish();
+        }).catch(function () { finish(); });
+        setTimeout(function () {
+          if (_ferriolPasswordRecoveryMode) {
+            finish();
+            return;
+          }
+          if (recoveryHint) {
+            ferriolShowPasswordRecoveryUi();
+            finish();
+            return;
+          }
+          if (authCallback) {
+            supabaseClient.auth.getSession().then(function (res) {
+              if (res.data && res.data.session) ferriolShowPasswordRecoveryUi();
+              finish();
+            }).catch(function () { finish(); });
+            return;
+          }
+          finish();
+        }, 5000);
+      });
+    }
+
     function ferriolRestoreLoginChromeAfterPasswordRecovery() {
       var wrap = document.getElementById('loginFormWrap');
       if (wrap) {
@@ -70,6 +161,7 @@
 
     function ferriolShowPasswordRecoveryUi() {
       _ferriolPasswordRecoveryMode = true;
+      ferriolMarkPasswordRecoveryPending();
       try {
         var app = document.getElementById('appWrap');
         var loginScreen = document.getElementById('loginScreen');
@@ -131,7 +223,16 @@
     if (supabaseClient) {
       try {
         supabaseClient.auth.onAuthStateChange(function (event) {
-          if (event === 'PASSWORD_RECOVERY') ferriolShowPasswordRecoveryUi();
+          if (event !== 'PASSWORD_RECOVERY') return;
+          ferriolShowPasswordRecoveryUi();
+          try {
+            var appEl = document.getElementById('appWrap');
+            if (appEl && !appEl.classList.contains('hidden')) {
+              appEl.classList.add('hidden');
+              var loginScr = document.getElementById('loginScreen');
+              if (loginScr) loginScr.classList.remove('hidden');
+            }
+          } catch (_) {}
         });
       } catch (e) {
         console.warn('Supabase onAuthStateChange (recovery):', e);
@@ -11800,6 +11901,7 @@
 
    // --- Login / Logout ---
 async function showApp() {
+    if (_ferriolPasswordRecoveryMode) return;
     const isSuper = currentUser && currentUser.role === 'super';
     const isPartner = currentUser && currentUser.role === 'partner';
     const isNetworkAdmin = isNetworkAdminRole(currentUser && currentUser.role);
@@ -12095,6 +12197,7 @@ async function showApp() {
         return;
       }
       _ferriolPasswordRecoveryMode = false;
+      ferriolClearPasswordRecoveryPending();
       try {
         await supabaseClient.auth.signOut();
       } catch (_) {}
@@ -12103,7 +12206,17 @@ async function showApp() {
       errEl.classList.add('show');
       document.getElementById('setNewPwdBox').classList.add('hidden');
       ferriolRestoreLoginChromeAfterPasswordRecovery();
-      history.replaceState(null, '', location.pathname + location.search);
+      try {
+        var cleanUrl = new URL(window.location.href);
+        cleanUrl.hash = '';
+        cleanUrl.searchParams.delete('code');
+        cleanUrl.searchParams.delete('type');
+        cleanUrl.searchParams.delete('error');
+        cleanUrl.searchParams.delete('error_description');
+        history.replaceState(null, '', cleanUrl.pathname + (cleanUrl.searchParams.toString() ? '?' + cleanUrl.searchParams.toString() : ''));
+      } catch (_) {
+        history.replaceState(null, '', location.pathname + location.search);
+      }
     };
 
     document.getElementById('backToLogin').onclick = (e) => {
@@ -12141,7 +12254,7 @@ async function showApp() {
         errEl.classList.add('show');
         return;
       }
-      const redirectUrl = (APP_URL && !APP_URL.includes('TU-USUARIO')) ? APP_URL : window.location.href;
+      const redirectUrl = ferriolPasswordResetRedirectUrl();
       const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: redirectUrl });
       if (error) {
         errEl.textContent = error.message;
@@ -12351,6 +12464,13 @@ async function showApp() {
       state.partnerUiMode = 'red';
       try { sessionStorage.removeItem('ferriol_super_ui'); } catch (_) {}
       try { sessionStorage.removeItem('ferriol_partner_ui'); } catch (_) {}
+      if (_ferriolPasswordRecoveryMode) {
+        _ferriolPasswordRecoveryMode = false;
+        ferriolClearPasswordRecoveryPending();
+        ferriolRestoreLoginChromeAfterPasswordRecovery();
+        var setNewBox = document.getElementById('setNewPwdBox');
+        if (setNewBox) setNewBox.classList.add('hidden');
+      }
       try {
         window._ferriolPartnerKitGateNeedsProof = false;
       } catch (_) {}
@@ -13462,7 +13582,7 @@ async function showApp() {
         resetPwdBtn.onclick = async function () {
           const email = u.email;
           if (!email) return;
-          const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: (typeof APP_URL !== 'undefined' && APP_URL) ? APP_URL : window.location.href });
+          const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: ferriolPasswordResetRedirectUrl() });
           if (error) ferriolAppAlert('Error: ' + error.message);
           else ferriolAppAlert('Se envió un correo a ' + email + ' para restablecer la contraseña.');
         };
@@ -15723,17 +15843,7 @@ async function showApp() {
     (async function init() {
       if (!supabaseClient) return;
       try {
-        var recoveryUrlHint = ferriolUrlLooksLikePasswordRecovery(location.hash, location.search);
-        await supabaseClient.auth.getSession();
-        if (recoveryUrlHint) ferriolShowPasswordRecoveryUi();
-        await new Promise(function (resolve) {
-          try {
-            if (typeof queueMicrotask === 'function') queueMicrotask(resolve);
-            else setTimeout(resolve, 0);
-          } catch (_) {
-            setTimeout(resolve, 0);
-          }
-        });
+        await ferriolAwaitPasswordRecoveryBootstrap();
         if (_ferriolPasswordRecoveryMode) return;
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session?.user) return;
