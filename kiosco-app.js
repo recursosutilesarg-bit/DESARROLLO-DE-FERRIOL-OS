@@ -6120,11 +6120,25 @@
       ferriolRenderCobroRapidoStockList();
       try { if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
+    function syncInventoryTopbarChrome() {
+      var pick = !!window._ferriolCobroRapidoPickMode;
+      var scanBtn = document.getElementById('inventoryPickScannerBtn');
+      if (scanBtn) {
+        var showScan = pick && state.currentPanel === 'inventory';
+        scanBtn.classList.toggle('hidden', !showScan);
+      }
+      var backLabel = document.getElementById('inventoryBackLabel');
+      if (backLabel) backLabel.textContent = pick ? 'Cobro rápido' : 'Inicio';
+    }
     function syncInventoryPickScannerBtn() {
-      var btn = document.getElementById('inventoryPickScannerBtn');
-      if (!btn) return;
-      var show = !!window._ferriolCobroRapidoPickMode && state.currentPanel === 'inventory';
-      btn.classList.toggle('hidden', !show);
+      syncInventoryTopbarChrome();
+    }
+    function handleInventoryBack() {
+      if (window._ferriolCobroRapidoPickMode) {
+        resumeCobroRapidoAfterPick();
+        return;
+      }
+      goToPanel('dashboard');
     }
     function openCobroRapidoModal() {
       try { window._ferriolCobroRapidoPickMode = false; } catch (_) {}
@@ -8276,6 +8290,7 @@
       if (name === 'historial') {
         renderHistorial(state.historialFilter || 'hoy');
       }
+      if (name === 'inventory') syncInventoryTopbarChrome();
       if (name === 'clientes') loadClientes().then(renderClientes);
       if (name === 'mas') {
         try {
@@ -8956,6 +8971,8 @@
       pauseCobroRapidoModalVisual();
       goToPanel('inventory');
     };
+    var inventoryBackBtn = document.getElementById('inventoryBackBtn');
+    if (inventoryBackBtn) inventoryBackBtn.onclick = handleInventoryBack;
     var inventoryPickScannerBtn = document.getElementById('inventoryPickScannerBtn');
     if (inventoryPickScannerBtn) inventoryPickScannerBtn.onclick = function () {
       if (!window._ferriolCobroRapidoPickMode) return;

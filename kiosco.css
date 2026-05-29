@@ -1549,7 +1549,13 @@ body[data-panel="inventory"] #panel-inventory {
   align-items: center;
   justify-content: space-between;
   padding: 0.6rem 1rem;
+  gap: 0.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: rgba(10, 10, 10, 0.72);
+  backdrop-filter: blur(8px);
 }
 
 .inv-title {

@@ -691,11 +691,17 @@
     <!-- Productos -->
     <section id="panel-inventory" class="panel hidden">
       <div class="inv-topbar">
-        <span class="inv-title">
-          <i data-lucide="package-search" class="w-4 h-4"></i>
-          Productos
-        </span>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1 min-w-0 flex-1">
+          <button type="button" id="inventoryBackBtn" class="caja-back-btn touch-target shrink-0" aria-label="Volver">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+            <span id="inventoryBackLabel" class="truncate">Inicio</span>
+          </button>
+          <span class="inv-title shrink-0">
+            <i data-lucide="package-search" class="w-4 h-4"></i>
+            Productos
+          </span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
           <button id="inventoryPickScannerBtn" type="button" class="hidden btn-neomorphic rounded-xl px-3 py-2 flex items-center gap-1.5 text-sm font-semibold touch-target">
             <i data-lucide="scan-barcode" class="w-4 h-4"></i> Escanear
           </button>
