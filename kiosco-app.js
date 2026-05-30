@@ -2351,6 +2351,16 @@
       var amt = document.getElementById('partnerWithdrawAmount');
       if (err) { err.classList.add('hidden'); err.textContent = ''; }
       if (amt) amt.value = '';
+      ferriolLoadPartnerWithdrawalMinArs().then(function (minArs) {
+        ferriolSyncPartnerWithdrawMinHints(minArs);
+        if (amt && minArs > 0) {
+          amt.min = String(minArs);
+          amt.placeholder = String(minArs);
+        } else if (amt) {
+          amt.min = '1';
+          amt.placeholder = '0';
+        }
+      }).catch(function () { ferriolSyncPartnerWithdrawMinHints(0); });
       if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
@@ -2411,6 +2421,14 @@
           var amt = parseFloat(raw, 10);
           if (isNaN(amt) || amt <= 0) {
             if (err) { err.textContent = 'Ingresá un monto válido en ARS.'; err.classList.remove('hidden'); }
+            return;
+          }
+          var minW = await ferriolLoadPartnerWithdrawalMinArs();
+          if (minW > 0 && amt < minW) {
+            if (err) {
+              err.textContent = 'El retiro mínimo es $ ' + minW.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' ARS.';
+              err.classList.remove('hidden');
+            }
             return;
           }
           pwSub.disabled = true;
@@ -2519,6 +2537,46 @@
         });
     }
 
+    var _ferriolPartnerWithdrawalMinArs = null;
+
+    function ferriolParsePartnerWithdrawalMinArs(raw) {
+      var n = parseFloat(String(raw != null ? raw : '').replace(',', '.'));
+      if (!Number.isFinite(n) || n < 0) return 0;
+      return Math.floor(n);
+    }
+
+    function ferriolFormatPartnerWithdrawalMinHint(minArs) {
+      minArs = Number(minArs) || 0;
+      if (minArs <= 0) return 'Sin retiro mínimo configurado.';
+      return 'Retiro mínimo: $ ' + minArs.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' ARS.';
+    }
+
+    function ferriolSyncPartnerWithdrawMinHints(minArs) {
+      var hint = ferriolFormatPartnerWithdrawalMinHint(minArs);
+      ['partnerWalletMinHint', 'partnerSolicWithdrawMinHint', 'partnerWithdrawMinHint'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = hint;
+      });
+    }
+
+    async function ferriolLoadPartnerWithdrawalMinArs(forceReload) {
+      if (!forceReload && _ferriolPartnerWithdrawalMinArs != null) return _ferriolPartnerWithdrawalMinArs;
+      _ferriolPartnerWithdrawalMinArs = 0;
+      if (!supabaseClient) return 0;
+      try {
+        var rpc = await supabaseClient.rpc('ferriol_partner_withdrawal_min_ars');
+        if (!rpc.error && rpc.data != null) {
+          _ferriolPartnerWithdrawalMinArs = ferriolParsePartnerWithdrawalMinArs(rpc.data);
+          return _ferriolPartnerWithdrawalMinArs;
+        }
+      } catch (_) {}
+      try {
+        var r = await supabaseClient.from('app_settings').select('value').eq('key', 'partner_withdrawal_min_ars').maybeSingle();
+        if (!r.error && r.data) _ferriolPartnerWithdrawalMinArs = ferriolParsePartnerWithdrawalMinArs(r.data.value);
+      } catch (_) {}
+      return _ferriolPartnerWithdrawalMinArs;
+    }
+
     function ferriolPartnerWalletApplyLoading(targets) {
       targets.forEach(function (t) {
         t.av.textContent = '…';
@@ -2548,6 +2606,12 @@
         return;
       }
       ferriolPartnerWalletApplyLoading(targets);
+      try {
+        var minArs = await ferriolLoadPartnerWithdrawalMinArs();
+        ferriolSyncPartnerWithdrawMinHints(minArs);
+      } catch (_) {
+        ferriolSyncPartnerWithdrawMinHints(0);
+      }
       try {
         var balRpc = await supabaseClient.rpc('ferriol_partner_withdrawable_balance', { p_partner_id: currentUser.id });
         if (balRpc.error) throw balRpc.error;
@@ -2590,9 +2654,15 @@
           if (t.br) t.br.textContent = breakdownText;
           if (t.btn) {
             if (canPartnerWithdraw) {
-              t.btn.disabled = false;
-              t.btn.classList.remove('opacity-50');
-              t.btn.removeAttribute('title');
+              var minWBtn = _ferriolPartnerWithdrawalMinArs != null ? _ferriolPartnerWithdrawalMinArs : 0;
+              var okAmount = minWBtn <= 0 || bal >= minWBtn;
+              t.btn.disabled = !okAmount;
+              t.btn.classList.toggle('opacity-50', !okAmount);
+              if (!okAmount && minWBtn > 0) {
+                t.btn.setAttribute('title', 'Tu saldo disponible es menor al retiro mínimo ($ ' + minWBtn.toLocaleString('es-AR') + ' ARS).');
+              } else {
+                t.btn.removeAttribute('title');
+              }
             } else {
               t.btn.disabled = true;
               t.btn.classList.add('opacity-50');
@@ -14269,7 +14339,7 @@ async function showApp() {
     async function renderSuper() {
       if (!supabaseClient) return;
       try {
-        const { data: settingsRows } = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4', 'admin_delete_password', 'trial_reminder_config', 'ferriol_transfer_info', 'trial_duration_days', 'partner_kit_review_hours', 'partner_kit_review_message', 'ferriol_support_phone', 'ferriol_checkout_copy', 'ferriol_plan_amounts', 'ferriol_mercadopago_checkout_urls', 'ferriol_mercadopago_checkout_url']);
+        const { data: settingsRows } = await supabaseClient.from('app_settings').select('key, value').in('key', ['admin_whatsapp', 'admin_whatsapp_2', 'admin_whatsapp_3', 'admin_whatsapp_4', 'admin_delete_password', 'trial_reminder_config', 'ferriol_transfer_info', 'trial_duration_days', 'partner_kit_review_hours', 'partner_kit_review_message', 'ferriol_support_phone', 'ferriol_checkout_copy', 'ferriol_plan_amounts', 'ferriol_mercadopago_checkout_urls', 'ferriol_mercadopago_checkout_url', 'partner_withdrawal_min_ars']);
         var whatsappInput = document.getElementById('adminContactWhatsapp');
         var whatsapp2Input = document.getElementById('adminContactWhatsapp2');
         var whatsapp3Input = document.getElementById('adminContactWhatsapp3');
@@ -14280,6 +14350,7 @@ async function showApp() {
         var kitRevHoursInput = document.getElementById('adminPartnerKitReviewHours');
         var kitRevMsgTa = document.getElementById('adminPartnerKitReviewMessage');
         var adminSupportPhoneEl = document.getElementById('adminSupportPhone');
+        var partnerWithdrawMinInput = document.getElementById('adminPartnerWithdrawalMinArs');
         var trialCfgParsed = { windowDays: 5, messages: {} };
         if (settingsRows) {
           settingsRows.forEach(function (r) {
@@ -14303,6 +14374,11 @@ async function showApp() {
             }
             if (r.key === 'ferriol_support_phone' && adminSupportPhoneEl) {
               adminSupportPhoneEl.value = r.value != null ? String(r.value) : '';
+            }
+            if (r.key === 'partner_withdrawal_min_ars' && partnerWithdrawMinInput) {
+              var pmin = ferriolParsePartnerWithdrawalMinArs(r.value);
+              partnerWithdrawMinInput.value = String(pmin);
+              _ferriolPartnerWithdrawalMinArs = pmin;
             }
             if (r.key === 'trial_reminder_config') trialCfgParsed = parseTrialReminderConfigValue(r.value || '');
           });
@@ -14677,6 +14753,15 @@ async function showApp() {
           });
           var upP = await supabaseClient.from('mlm_plan_config').upsert({ key: 'compensation_v1', value: merged, updated_at: new Date().toISOString() }, { onConflict: 'key' });
           if (upP.error) throw upP.error;
+          ferriolShowAdminSliceMsg(slice, 'Guardado.', false);
+          return;
+        }
+        if (slice === 'retiros') {
+          var minEl = document.getElementById('adminPartnerWithdrawalMinArs');
+          var minSave = Math.max(0, parseInt(String(minEl && minEl.value || '0').replace(/\./g, ''), 10) || 0);
+          await supabaseClient.from('app_settings').upsert([{ key: 'partner_withdrawal_min_ars', value: String(minSave) }], { onConflict: 'key' });
+          _ferriolPartnerWithdrawalMinArs = minSave;
+          ferriolSyncPartnerWithdrawMinHints(minSave);
           ferriolShowAdminSliceMsg(slice, 'Guardado.', false);
           return;
         }

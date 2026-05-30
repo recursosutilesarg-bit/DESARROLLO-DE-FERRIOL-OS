@@ -2509,6 +2509,11 @@
               <span class="font-semibold text-white">Comisiones administradores</span>
               <span class="text-xs text-white/50">Período inicial y % en Cobros (mlm_plan_config)</span>
             </button>
+            <button type="button" data-ferriol-ajustes-target="ajustes-retiros" class="glass rounded-2xl p-4 border border-emerald-400/30 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-emerald-400/55 active:scale-[0.98] touch-target">
+              <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0"><i data-lucide="wallet" class="w-5 h-5 text-emerald-200"></i></div>
+              <span class="font-semibold text-white">Retiros socios</span>
+              <span class="text-xs text-white/50">Monto mínimo para retirar comisiones</span>
+            </button>
             <button type="button" data-ferriol-ajustes-target="ajustes-renovacion" class="glass rounded-2xl p-4 border border-white/10 flex flex-col items-start gap-2 text-left w-full transition-all hover:border-amber-400/45 active:scale-[0.98] touch-target sm:col-span-2">
               <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0"><i data-lucide="bell-ring" class="w-5 h-5 text-amber-200"></i></div>
               <span class="font-semibold text-white">Avisos de renovación (prueba)</span>
@@ -2704,6 +2709,20 @@
           </div>
           <button type="button" class="ferriol-save-admin-slice btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold" data-admin-slice="comisiones">Guardar</button>
           <p id="adminSliceMsg-comisiones" class="text-xs mt-2 hidden"></p>
+        </div>
+
+        <div id="super-section-ajustes-retiros" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
+          <button type="button" class="btnSuperAjustesVolverHub mb-3 flex items-center gap-1.5 text-xs font-medium text-white/55 hover:text-white/85 touch-target py-1 -ml-0.5">
+            <i data-lucide="chevron-left" class="w-4 h-4 shrink-0"></i>
+            Volver
+          </button>
+          <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="wallet" class="w-5 h-5 text-emerald-200"></i> Retiros de socios</h2>
+          <p class="text-xs text-white/50 mb-4">Los administradores de red (partners) solo pueden solicitar retiro si el monto es al menos el mínimo configurado. Usá <strong class="text-white/65">0</strong> para no exigir mínimo.</p>
+          <label class="block text-xs text-white/70 mb-1" for="adminPartnerWithdrawalMinArs">Retiro mínimo (ARS, entero)</label>
+          <input type="number" id="adminPartnerWithdrawalMinArs" min="0" step="1" value="5000" class="w-full max-w-[12rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-base mb-2">
+          <p class="text-[10px] text-white/40 mb-4"><code class="text-white/50">app_settings.partner_withdrawal_min_ars</code></p>
+          <button type="button" class="ferriol-save-admin-slice btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold" data-admin-slice="retiros">Guardar</button>
+          <p id="adminSliceMsg-retiros" class="text-xs mt-2 hidden"></p>
         </div>
 
         <div id="super-section-ajustes-renovacion" class="super-section super-only super-main-only glass rounded-2xl p-4 sm:p-6 slide-up hidden absolute inset-x-0 top-0 overflow-y-auto" style="display: none; max-height: 85vh; padding-bottom: 6rem;">
@@ -2986,6 +3005,7 @@
                 <p class="text-xs text-white/50 mb-1">Disponible para retirar</p>
                 <p id="partnerSolicWithdrawAvail" class="text-2xl font-bold text-[#ffffff] tabular-nums">—</p>
                 <p id="partnerSolicWithdrawBreakdown" class="text-[10px] text-white/40 mt-2"></p>
+                <p id="partnerSolicWithdrawMinHint" class="text-[11px] text-emerald-200/80 mt-2"></p>
                 <button type="button" id="btnPartnerWithdrawOpenFromSolic" class="btn-glow rounded-xl py-3 w-full font-semibold mt-4 touch-target">Retirar dinero</button>
                 <p class="text-[10px] text-white/35 mt-3">Misma billetera que en la pestaña inferior <strong class="text-white/55">Billetera</strong>; acá podés gestionar retiros sin salir de Solicitudes.</p>
               </div>
@@ -3038,6 +3058,7 @@
               <p class="text-xs text-white/50 mb-1">Disponible para retirar</p>
               <p id="partnerWalletAvailable" class="text-2xl font-bold text-[#ffffff] tabular-nums">—</p>
               <p id="partnerWalletBreakdown" class="text-[10px] text-white/40 mt-2"></p>
+              <p id="partnerWalletMinHint" class="text-[11px] text-emerald-200/80 mt-2"></p>
               <button type="button" id="btnPartnerWithdrawOpen" class="btn-glow rounded-xl py-3 w-full font-semibold mt-4 touch-target">Retirar dinero</button>
             </div>
             <div class="rounded-xl border border-white/10 bg-black/20 p-3 mb-4">
@@ -3162,6 +3183,7 @@
           <button type="button" id="partnerWithdrawModalClose" class="btn-neomorphic rounded-xl p-2 touch-target"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div id="partnerWithdrawModalErr" class="text-xs text-red-300 mb-3 hidden"></div>
+        <p id="partnerWithdrawMinHint" class="text-xs text-emerald-200/85 mb-2"></p>
         <p class="text-xs text-white/55 mb-2">Monto en ARS (no puede superar tu saldo disponible).</p>
         <input type="number" id="partnerWithdrawAmount" min="1" step="1" class="w-full glass rounded-xl px-4 py-3 border border-white/20 text-white text-base mb-4" placeholder="0">
         <button type="button" id="partnerWithdrawModalSubmit" class="btn-glow rounded-xl py-3 w-full font-semibold touch-target">Enviar solicitud a la empresa</button>
