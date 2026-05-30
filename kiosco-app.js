@@ -3229,7 +3229,16 @@
       if (!profile || !supabaseClient) return null;
       var sid = profile.sponsor_id != null ? profile.sponsor_id : profile.sponsorId;
       if (!sid) return null;
-      var useRpc = !!(profile.id && currentUser && profile.id === currentUser.id && profile.role === 'kiosquero');
+      var useRpc = false;
+      if (profile.role === 'kiosquero' && profile.id) {
+        if (currentUser && currentUser.id === profile.id) useRpc = true;
+        if (!useRpc) {
+          try {
+            var su = await supabaseClient.auth.getUser();
+            useRpc = !!(su.data && su.data.user && su.data.user.id === profile.id);
+          } catch (_) {}
+        }
+      }
       if (useRpc) {
         try {
           var rpc = await supabaseClient.rpc('ferriol_get_my_sponsor_display');
@@ -6428,7 +6437,7 @@
       errEl.classList.add('show');
       var wrap = document.getElementById('loginContactAdminWrap');
       if (wrap) {
-        fillLoginContactLinks('Hola, venció mi vigencia de administrador empresa en Ferriol OS y necesito coordinar.');
+        fillLoginContactLinks('Hola, venció mi vigencia de administrador empresa en Ferriol OS y necesito coordinar.', 'super');
         wrap.classList.remove('hidden');
       }
     }
@@ -6443,7 +6452,7 @@
       errEl.classList.add('show');
       var wrap = document.getElementById('loginContactAdminWrap');
       if (wrap) {
-        fillLoginContactLinks('Hola, mi período de prueba de Ferriol OS terminó y quiero renovar.');
+        fillLoginContactLinks('Hola, mi período de prueba de Ferriol OS terminó y quiero renovar.', 'kiosquero');
         wrap.classList.remove('hidden');
       }
     }
@@ -12105,9 +12114,14 @@ async function showApp() {
           errEl.classList.add('show');
           var wrap = document.getElementById('loginContactAdminWrap');
           if (wrap) {
-            fillLoginContactLinks(profile.role === 'super'
-              ? 'Hola, mi cuenta administrador Ferriol OS está desactivada y necesito coordinar renovación.'
-              : 'Hola, mi cuenta de Ferriol OS está desactivada y quiero darme de alta.');
+            fillLoginContactLinks(
+              profile.role === 'super'
+                ? 'Hola, mi cuenta administrador Ferriol OS está desactivada y necesito coordinar renovación.'
+                : (profile.role === 'kiosquero'
+                  ? 'Hola, mi cuenta de Ferriol OS está desactivada y quiero regularizar mi acceso.'
+                  : 'Hola, mi cuenta de Ferriol OS está desactivada y quiero darme de alta.'),
+              profile.role
+            );
             wrap.classList.remove('hidden');
           }
           return;
@@ -12138,7 +12152,7 @@ async function showApp() {
           errEl.classList.add('show');
           var wrapSu = document.getElementById('loginContactAdminWrap');
           if (wrapSu) {
-            fillLoginContactLinks('Hola, venció la vigencia de mi cuenta administrador Ferriol OS y necesito coordinar.');
+            fillLoginContactLinks('Hola, venció la vigencia de mi cuenta administrador Ferriol OS y necesito coordinar.', 'super');
             wrapSu.classList.remove('hidden');
           }
           return;
@@ -12155,7 +12169,7 @@ async function showApp() {
           errEl.classList.add('show');
           var wrap = document.getElementById('loginContactAdminWrap');
           if (wrap) {
-            fillLoginContactLinks('Hola, mi período de prueba de Ferriol OS terminó y quiero renovar.');
+            fillLoginContactLinks('Hola, mi período de prueba de Ferriol OS terminó y quiero renovar.', 'kiosquero');
             wrap.classList.remove('hidden');
           }
           return;
@@ -12786,6 +12800,7 @@ async function showApp() {
           return;
         }
         var digits = String(d.phone || '').replace(/\D/g, '');
+        viewerHelpWhatsApp.sponsorName = (d.kiosco_name || '').trim() || '';
         if (digits) {
           viewerHelpWhatsApp.list = [digits];
           return;
@@ -12979,35 +12994,64 @@ async function showApp() {
       } catch (_) {}
       await loadTrialReminderConfigFromSupabase();
     }
+    function ferriolLoginContactIntroForRole(role) {
+      if (role === 'kiosquero') {
+        return 'Contactá a tu referidor / patrocinador (teléfono de su perfil) para renovar o regularizar tu acceso:';
+      }
+      if (role === 'partner' || role === 'super') {
+        return 'Contacto configurado por la empresa (fundadores):';
+      }
+      return 'Contacto para regularizar tu acceso:';
+    }
+    function syncLoginContactIntro(role) {
+      var introEl = document.getElementById('loginContactIntro');
+      if (introEl) introEl.textContent = ferriolLoginContactIntroForRole(role || viewerHelpWhatsApp.sourceRole || '');
+    }
+    function ferriolBuildViewerHelpContactHtml(message, opts) {
+      opts = opts || {};
+      var compact = !!opts.compact;
+      var list = viewerHelpWhatsApp.list && viewerHelpWhatsApp.list.length ? viewerHelpWhatsApp.list : [];
+      var msg = message || 'Hola, necesito ayuda con mi cuenta de Ferriol OS.';
+      if (list.length === 0) return viewerHelpWhatsAppEmptyHtml();
+      var isKios = viewerHelpWhatsApp.sourceRole === 'kiosquero';
+      var parts = [];
+      if (!opts.skipIntro) {
+        parts.push(isKios
+          ? '<p class="text-[11px] text-white/45 mb-2">Teléfono de tu referidor / patrocinador.</p>'
+          : '<p class="text-[11px] text-white/45 mb-2">Contacto configurado por la empresa (fundadores).</p>');
+      }
+      if (isKios && viewerHelpWhatsApp.sponsorName) {
+        parts.push('<p class="text-sm text-white/75 mb-2"><span class="text-white/50">Referidor:</span> <strong class="text-white">' + ferriolEscapeHtmlLite(viewerHelpWhatsApp.sponsorName) + '</strong></p>');
+      }
+      list.forEach(function (num, i) {
+        var disp = ferriolFormatPhoneForDisplay(num);
+        var label = list.length > 1 ? 'WhatsApp (' + (i + 1) + ')' : 'Escribir por WhatsApp';
+        var pad = compact ? 'p-2.5' : 'p-3';
+        var btnPy = compact ? 'py-2.5' : 'py-3';
+        var btnText = compact ? ' text-sm' : '';
+        parts.push(
+          '<div class="rounded-xl border border-white/15 bg-white/5 ' + pad + ' space-y-2">' +
+            '<p class="text-xs text-white/50">Teléfono</p>' +
+            '<p class="text-lg font-semibold text-white tabular-nums tracking-wide">' + ferriolEscapeHtmlLite(disp) + '</p>' +
+            '<a href="' + getWhatsAppUrl(num, msg) + '" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 w-full ' + btnPy + ' rounded-xl bg-white/90 hover:bg-white text-neutral-900 font-medium touch-target' + btnText + '">' +
+              '<i data-lucide="message-circle" class="w-5 h-5"></i> ' + label +
+            '</a>' +
+          '</div>'
+        );
+      });
+      return parts.join('');
+    }
     function fillRenovarWhatsAppLinks() {
       var container = document.getElementById('renovarWhatsAppLinks');
       if (!container) return;
-      var list = viewerHelpWhatsApp.list && viewerHelpWhatsApp.list.length ? viewerHelpWhatsApp.list : [];
-      var msg = 'Hola, necesito ayuda con mi cuenta de Ferriol OS.';
-      if (list.length === 0) {
-        container.innerHTML = viewerHelpWhatsAppEmptyHtml();
-      } else {
-        var sub = (viewerHelpWhatsApp.sourceRole === 'kiosquero') ? '<p class="text-[11px] text-white/45 mb-2">Contacto de tu referidor / patrocinador.</p>' : '<p class="text-[11px] text-white/45 mb-2">Contacto configurado por la empresa (fundadores).</p>';
-        container.innerHTML = sub + list.map(function (num, i) {
-          var label = list.length > 1 ? 'WhatsApp (' + (i + 1) + ')' : 'Escribir por WhatsApp';
-          return '<a href="' + getWhatsAppUrl(num, msg) + '" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white/90 hover:bg-white text-neutral-900 font-medium touch-target"><i data-lucide="message-circle" class="w-5 h-5"></i> ' + label + '</a>';
-        }).join('');
-      }
+      container.innerHTML = ferriolBuildViewerHelpContactHtml('Hola, necesito ayuda con mi cuenta de Ferriol OS.');
       lucide.createIcons();
     }
-    function fillLoginContactLinks(message) {
+    function fillLoginContactLinks(message, roleOpt) {
       var container = document.getElementById('loginContactWhatsAppLinks');
       if (!container) return;
-      var list = viewerHelpWhatsApp.list && viewerHelpWhatsApp.list.length ? viewerHelpWhatsApp.list : [];
-      var msg = message || 'Hola, necesito ayuda con mi cuenta de Ferriol OS.';
-      if (list.length === 0) {
-        container.innerHTML = viewerHelpWhatsAppEmptyHtml();
-      } else {
-        container.innerHTML = list.map(function (num, i) {
-          var label = list.length > 1 ? 'WhatsApp (' + (i + 1) + ')' : 'Escribir por WhatsApp';
-          return '<a href="' + getWhatsAppUrl(num, msg) + '" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-white/90 hover:bg-white text-neutral-900 font-medium text-sm touch-target"><i data-lucide="message-circle" class="w-5 h-5"></i> ' + label + '</a>';
-        }).join('');
-      }
+      syncLoginContactIntro(roleOpt || viewerHelpWhatsApp.sourceRole || '');
+      container.innerHTML = ferriolBuildViewerHelpContactHtml(message || 'Hola, necesito ayuda con mi cuenta de Ferriol OS.', { compact: true });
       lucide.createIcons();
     }
     var superUserListCache = [];
@@ -15918,9 +15962,14 @@ async function showApp() {
           document.getElementById('loginErr').classList.add('show');
           var wrap = document.getElementById('loginContactAdminWrap');
           if (wrap) {
-            fillLoginContactLinks(profile.role === 'super'
-              ? 'Hola, mi cuenta administrador Ferriol OS está desactivada y necesito coordinar renovación.'
-              : 'Hola, mi cuenta de Ferriol OS está desactivada y quiero darme de alta.');
+            fillLoginContactLinks(
+              profile.role === 'super'
+                ? 'Hola, mi cuenta administrador Ferriol OS está desactivada y necesito coordinar renovación.'
+                : (profile.role === 'kiosquero'
+                  ? 'Hola, mi cuenta de Ferriol OS está desactivada y quiero regularizar mi acceso.'
+                  : 'Hola, mi cuenta de Ferriol OS está desactivada y quiero darme de alta.'),
+              profile.role
+            );
             wrap.classList.remove('hidden');
           }
           document.getElementById('appWrap').classList.add('hidden');
@@ -15953,7 +16002,7 @@ async function showApp() {
           document.getElementById('loginErr').classList.add('show');
           var wrapS2 = document.getElementById('loginContactAdminWrap');
           if (wrapS2) {
-            fillLoginContactLinks('Hola, venció la vigencia de mi cuenta administrador Ferriol OS y necesito coordinar.');
+            fillLoginContactLinks('Hola, venció la vigencia de mi cuenta administrador Ferriol OS y necesito coordinar.', 'super');
             wrapS2.classList.remove('hidden');
           }
           document.getElementById('appWrap').classList.add('hidden');
@@ -15971,7 +16020,7 @@ async function showApp() {
           document.getElementById('loginErr').classList.add('show');
           var wrap = document.getElementById('loginContactAdminWrap');
           if (wrap) {
-            fillLoginContactLinks('Hola, mi período de prueba de Ferriol OS terminó y quiero renovar.');
+            fillLoginContactLinks('Hola, mi período de prueba de Ferriol OS terminó y quiero renovar.', 'kiosquero');
             wrap.classList.remove('hidden');
           }
           document.getElementById('appWrap').classList.add('hidden');
