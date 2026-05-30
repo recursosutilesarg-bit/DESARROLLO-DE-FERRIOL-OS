@@ -15,7 +15,7 @@
     // Notificaciones: audience all|kiosquero|partner|red (SQL supabase-ferriol-notifications-audience.sql). INSERT solo super (supabase-ferriol-notifications-rls.sql).
     // CREATE TABLE notifications ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), created_at timestamptz DEFAULT now(), message text NOT NULL, audience text NOT NULL DEFAULT 'all' );
     // La app filtra por destinatario; “no leído” en localStorage hasta un aviso más nuevo (ver getNotifLastRead / setNotifLastRead).
-    // Recordatorios de fin de prueba (mensajes por día + ventana): guardá en app_settings una fila key = 'trial_reminder_config', value = JSON, ej. {"windowDays":5,"messages":{"5":"...","4":"..."}}. Placeholders en textos: {dias}, {dias_restantes}, {nombre}, {negocio}.
+    // Recordatorios de fin de prueba (mensajes por día + ventana): app_settings key = 'trial_reminder_config', value = JSON, ej. {"windowDays":5,"kiosquero":{"messages":{"5":"..."}},"partner":{"messages":{"5":"..."}}}. Legacy: {"windowDays":5,"messages":{...}} → kiosquero. Placeholders: {dias}, {dias_restantes}, {nombre}, {negocio}.
     // Red de referidos: solo role 'partner' o 'super' tienen código y enlaces (kiosquero no refiere). SQL: supabase-referral-network.sql, supabase-mlm-foundation.sql, supabase-ferriol-payments.sql (cobros + RPC ferriol_verify_payment). Solicitudes de días (socio → empresa): supabase-ferriol-membership-day-requests.sql. Tabla ferriol_partner_provision_requests (SQL supabase-ferriol-partner-provision-requests.sql) puede seguir usándose desde panel fundador o flujos legacy; el alta vía formulario en Más fue retirado (altas por enlace de afiliación). Objeto FerriolMlm en este archivo.
     // Enlaces: ?ref=CÓDIGO&nicho=kiosco (alta negocio) | ?ref=CÓDIGO&nicho=socio (membresía vendedor). Aliases: nicho=vendedor|red|membresia, membresia=1, tipo=...
     // Historial de cierres de caja (facturación y ganancia por día); arqueo opcional: supabase-cierres-caja-arqueo.sql
@@ -6601,9 +6601,10 @@
       var subTxt = document.getElementById('trialCountdownSubtextSuper');
       if (subTxt) {
         if (inReminderWindow) {
-          var cfg = window._trialReminderConfig || { messages: {} };
-          var custom = (cfg.messages && (cfg.messages[String(daysLeft)] != null ? cfg.messages[String(daysLeft)] : cfg.messages[daysLeft])) || '';
-          var line = applyTrialReminderTokens(custom, daysLeft, '') || '';
+          var partnerSlice = getTrialReminderRoleSlice(window._trialReminderConfig, 'partner');
+          var partnerMsgs = partnerSlice.messages || {};
+          var custom = (partnerMsgs[String(daysLeft)] != null ? partnerMsgs[String(daysLeft)] : partnerMsgs[daysLeft]) || '';
+          var line = applyTrialReminderTokens(custom, daysLeft, currentUser.kioscoName, 'partner') || '';
           subTxt.textContent = line || 'Tu acceso como fundador tiene fecha de renovación registrada.';
           subTxt.classList.remove('hidden');
         } else {
@@ -8495,7 +8496,7 @@
       }
       if (state.superSection === 'ajustes-renovacion' && !isPartnerLens()) {
         try {
-          var trBase = window._superTrialReminderEditCache || { windowDays: 5, messages: {} };
+          var trBase = window._superTrialReminderEditCache || normalizeTrialReminderConfig(null);
           fillTrialReminderAdminFields(trBase, null);
         } catch (_) {}
       }
@@ -12929,101 +12930,149 @@ async function showApp() {
       for (var j = 0; j < d.length; j += 4) out += (out ? ' ' : '') + d.slice(j, j + 4);
       return out;
     }
+    function normalizeTrialReminderConfig(cfg) {
+      var base = {
+        windowDays: 5,
+        kiosquero: { messages: {} },
+        partner: { messages: {} }
+      };
+      if (!cfg || typeof cfg !== 'object') return base;
+      base.windowDays = Math.min(30, Math.max(1, parseInt(cfg.windowDays, 10) || 5));
+      if (cfg.messages && typeof cfg.messages === 'object' && !cfg.kiosquero && !cfg.partner) {
+        base.kiosquero.messages = cfg.messages;
+      }
+      if (cfg.kiosquero && cfg.kiosquero.messages && typeof cfg.kiosquero.messages === 'object') {
+        base.kiosquero.messages = cfg.kiosquero.messages;
+      }
+      if (cfg.partner && cfg.partner.messages && typeof cfg.partner.messages === 'object') {
+        base.partner.messages = cfg.partner.messages;
+      }
+      return base;
+    }
     function parseTrialReminderConfigValue(val) {
-      var def = { windowDays: 5, messages: {} };
-      if (!val || typeof val !== 'string') return def;
+      if (!val || typeof val !== 'string') return normalizeTrialReminderConfig(null);
       try {
         var j = JSON.parse(val);
-        if (j && typeof j === 'object') {
-          def.windowDays = Math.min(30, Math.max(1, parseInt(j.windowDays, 10) || 5));
-          if (j.messages && typeof j.messages === 'object') def.messages = j.messages;
-        }
+        if (j && typeof j === 'object') return normalizeTrialReminderConfig(j);
       } catch (_) {}
-      return def;
+      return normalizeTrialReminderConfig(null);
     }
     async function loadTrialReminderConfigFromSupabase() {
-      window._trialReminderConfig = { windowDays: 5, messages: {} };
+      window._trialReminderConfig = normalizeTrialReminderConfig(null);
       if (!supabaseClient) return;
       try {
         var r = await supabaseClient.from('app_settings').select('value').eq('key', 'trial_reminder_config').maybeSingle();
         if (r.data && r.data.value) window._trialReminderConfig = parseTrialReminderConfigValue(r.data.value);
       } catch (_) {}
     }
-    function getTrialReminderWindowDays() {
+    function getTrialReminderRoleSlice(cfg, role) {
+      var norm = normalizeTrialReminderConfig(cfg || window._trialReminderConfig);
+      var slice = norm[role === 'partner' ? 'partner' : 'kiosquero'] || { messages: {} };
+      return { windowDays: norm.windowDays, messages: slice.messages || {} };
+    }
+    function getTrialReminderWindowDays(roleOpt) {
+      if (roleOpt) return getTrialReminderRoleSlice(window._trialReminderConfig, roleOpt).windowDays;
       var c = window._trialReminderConfig || {};
       return Math.min(30, Math.max(1, parseInt(c.windowDays, 10) || 5));
     }
-    function defaultTrialReminderBody(dLeft) {
+    function defaultTrialReminderBody(dLeft, role) {
+      if (role === 'partner') {
+        if (dLeft === 1) return '¡Queda 1 día para renovar tu membresía de socio! Evitá quedarte sin acceso a tu panel de red.';
+        return 'Quedan ' + dLeft + ' días para renovar tu membresía. Mantené activa tu red y comisiones.';
+      }
       if (dLeft === 1) return '¡Queda 1 día para renovar! Evitá quedarte sin acceso a Ferriol OS.';
       return 'Quedan ' + dLeft + ' días para renovar tu plan. Mantené tu negocio activo sin interrupciones.';
     }
-    function applyTrialReminderTokens(text, dLeft, kioscoName) {
+    function defaultTrialReminderHead(dLeft, role) {
+      if (role === 'partner') {
+        return dLeft === 1 ? 'Queda 1 día para renovar tu membresía' : ('Quedan ' + dLeft + ' días para renovar tu membresía');
+      }
+      return dLeft === 1 ? 'Queda 1 día para renovar' : ('Quedan ' + dLeft + ' días para renovar');
+    }
+    function applyTrialReminderTokens(text, dLeft, kioscoName, role) {
       var t = (text || '').trim();
-      if (!t) t = defaultTrialReminderBody(dLeft);
-      var nombre = (kioscoName || '').trim() || 'tu negocio';
+      if (!t) t = defaultTrialReminderBody(dLeft, role);
+      var nombre = (kioscoName || '').trim() || (role === 'partner' ? 'tu cuenta' : 'tu negocio');
       return t
         .replace(/\{dias\}/gi, String(dLeft))
         .replace(/\{dias_restantes\}/gi, String(dLeft))
         .replace(/\{nombre\}/gi, nombre)
         .replace(/\{negocio\}/gi, nombre);
     }
-    function trialReminderAckStorageKey(userId, trialEndsAt, dLeft) {
+    function trialReminderAckStorageKey(userId, trialEndsAt, dLeft, role) {
       var norm = String(trialEndsAt || '').replace(/[^0-9a-zA-Z]/g, '').slice(0, 24);
-      return 'ferriol_trial_remind_ack_' + userId + '_' + norm + '_' + dLeft;
+      return 'ferriol_trial_remind_ack_' + (role || 'kiosquero') + '_' + userId + '_' + norm + '_' + dLeft;
+    }
+    function ferriolTrialReminderRoleForUser() {
+      if (!currentUser || !currentUser.trialEndsAt) return null;
+      if (currentUser.role === 'kiosquero') return 'kiosquero';
+      if (currentUser.role === 'partner' && !isPartnerKioscoPreviewMode()) return 'partner';
+      return null;
     }
     function buildTrialReminderSyntheticNotification() {
-      if (!currentUser || currentUser.role !== 'kiosquero' || !currentUser.trialEndsAt) return null;
+      var role = ferriolTrialReminderRoleForUser();
+      if (!role) return null;
       var endsAt = currentUser.trialEndsAt;
       var end = new Date(endsAt);
       var now = new Date();
       var msLeft = end - now;
       if (msLeft <= 0) return null;
       var dLeft = Math.ceil(msLeft / (24 * 60 * 60 * 1000));
-      var win = getTrialReminderWindowDays();
+      var win = getTrialReminderWindowDays(role);
       if (dLeft < 1 || dLeft > win) return null;
       try {
-        if (localStorage.getItem(trialReminderAckStorageKey(currentUser.id, endsAt, dLeft))) return null;
+        if (localStorage.getItem(trialReminderAckStorageKey(currentUser.id, endsAt, dLeft, role))) return null;
       } catch (_) {}
-      var cfg = window._trialReminderConfig || { messages: {} };
-      var custom = (cfg.messages && (cfg.messages[String(dLeft)] != null ? cfg.messages[String(dLeft)] : cfg.messages[dLeft])) || '';
-      var body = applyTrialReminderTokens(custom, dLeft, currentUser.kioscoName);
-      var head = dLeft === 1 ? 'Queda 1 día para renovar' : ('Quedan ' + dLeft + ' días para renovar');
+      var slice = getTrialReminderRoleSlice(window._trialReminderConfig, role);
+      var msgs = slice.messages || {};
+      var custom = (msgs[String(dLeft)] != null ? msgs[String(dLeft)] : msgs[dLeft]) || '';
+      var body = applyTrialReminderTokens(custom, dLeft, currentUser.kioscoName, role);
+      var head = defaultTrialReminderHead(dLeft, role);
       return {
-        id: '__ferriol_trial_' + dLeft + '_' + String(endsAt).slice(0, 16),
+        id: '__ferriol_trial_' + role + '_' + dLeft + '_' + String(endsAt).slice(0, 16),
         created_at: new Date().toISOString(),
         message: head + '\n' + body,
         _trialSynthetic: true,
-        _trialDLeft: dLeft
+        _trialDLeft: dLeft,
+        _trialRole: role
       };
     }
     function markTrialReminderAcknowledged() {
-      if (!currentUser || currentUser.role !== 'kiosquero' || !currentUser.trialEndsAt) return;
+      var role = ferriolTrialReminderRoleForUser();
+      if (!role) return;
       var endsAt = currentUser.trialEndsAt;
       var end = new Date(endsAt);
       var msLeft = end - new Date();
       if (msLeft <= 0) return;
       var dLeft = Math.ceil(msLeft / (24 * 60 * 60 * 1000));
-      var win = getTrialReminderWindowDays();
+      var win = getTrialReminderWindowDays(role);
       if (dLeft < 1 || dLeft > win) return;
       try {
-        localStorage.setItem(trialReminderAckStorageKey(currentUser.id, endsAt, dLeft), '1');
+        localStorage.setItem(trialReminderAckStorageKey(currentUser.id, endsAt, dLeft, role), '1');
       } catch (_) {}
     }
-    function readTrialReminderMessagesFromDom() {
+    function readTrialReminderMessagesFromContainer(containerId) {
       var map = {};
-      document.querySelectorAll('#trialReminderMsgsContainer textarea[data-trial-msg-day]').forEach(function (ta) {
+      var sel = containerId ? ('#' + containerId + ' textarea[data-trial-msg-day]') : '#trialReminderKiosqueroMsgsContainer textarea[data-trial-msg-day], #trialReminderPartnerMsgsContainer textarea[data-trial-msg-day]';
+      document.querySelectorAll(sel).forEach(function (ta) {
         var k = ta.getAttribute('data-trial-msg-day');
         if (k) map[k] = ta.value;
       });
       return map;
     }
-    function fillTrialReminderAdminFields(cfg, preservedMap) {
-      var container = document.getElementById('trialReminderMsgsContainer');
+    function readTrialReminderMessagesFromDom() {
+      return {
+        kiosquero: readTrialReminderMessagesFromContainer('trialReminderKiosqueroMsgsContainer'),
+        partner: readTrialReminderMessagesFromContainer('trialReminderPartnerMsgsContainer')
+      };
+    }
+    function fillTrialReminderMsgsContainer(containerId, cfg, role, preservedMap, placeholder) {
+      var container = document.getElementById(containerId);
       var winInput = document.getElementById('trialReminderWindowDays');
       if (!container || !winInput) return;
       var w = Math.min(30, Math.max(1, parseInt(winInput.value, 10) || (cfg && cfg.windowDays) || 5));
-      winInput.value = String(w);
-      var msgs = (cfg && cfg.messages) || {};
+      var slice = getTrialReminderRoleSlice(cfg, role);
+      var msgs = slice.messages || {};
       var pres = preservedMap || {};
       container.innerHTML = '';
       for (var d = w; d >= 1; d--) {
@@ -13036,14 +13085,37 @@ async function showApp() {
         var ta = document.createElement('textarea');
         ta.rows = 2;
         ta.setAttribute('data-trial-msg-day', sk);
+        ta.setAttribute('data-trial-msg-role', role);
         ta.className = 'w-full glass rounded-xl px-3 py-2 border border-white/20 text-white text-sm placeholder-white/35 focus:outline-none focus:ring-2 focus:ring-[#ffffff] resize-y min-h-[3.5rem]';
-        ta.placeholder = 'Ej: Aprovechá hoy para renovar y seguir con stock, caja y libreta sin cortes.';
+        ta.placeholder = placeholder || 'Ej: Aprovechá hoy para renovar y seguir sin cortes.';
         var v = pres[sk] != null ? pres[sk] : (msgs[sk] != null ? msgs[sk] : (msgs[d] != null ? msgs[d] : ''));
         ta.value = typeof v === 'string' ? v : String(v || '');
         wrap.appendChild(lab);
         wrap.appendChild(ta);
         container.appendChild(wrap);
       }
+    }
+    function fillTrialReminderAdminFields(cfg, preservedMaps) {
+      var winInput = document.getElementById('trialReminderWindowDays');
+      if (!winInput) return;
+      var norm = normalizeTrialReminderConfig(cfg);
+      var w = Math.min(30, Math.max(1, parseInt(winInput.value, 10) || norm.windowDays || 5));
+      winInput.value = String(w);
+      var pres = preservedMaps || {};
+      fillTrialReminderMsgsContainer(
+        'trialReminderKiosqueroMsgsContainer',
+        norm,
+        'kiosquero',
+        pres.kiosquero,
+        'Ej: Aprovechá hoy para renovar y seguir con stock, caja y libreta sin cortes.'
+      );
+      fillTrialReminderMsgsContainer(
+        'trialReminderPartnerMsgsContainer',
+        norm,
+        'partner',
+        pres.partner,
+        'Ej: Renová tu membresía de socio para seguir cobrando comisiones y gestionando tu red.'
+      );
       try { if (typeof lucide !== 'undefined' && lucide && lucide.createIcons) lucide.createIcons(); } catch (_) {}
     }
     async function loadAdminContact() {
@@ -14351,7 +14423,7 @@ async function showApp() {
         var kitRevMsgTa = document.getElementById('adminPartnerKitReviewMessage');
         var adminSupportPhoneEl = document.getElementById('adminSupportPhone');
         var partnerWithdrawMinInput = document.getElementById('adminPartnerWithdrawalMinArs');
-        var trialCfgParsed = { windowDays: 5, messages: {} };
+        var trialCfgParsed = normalizeTrialReminderConfig(null);
         if (settingsRows) {
           settingsRows.forEach(function (r) {
             if (r.key === 'admin_whatsapp' && whatsappInput) whatsappInput.value = r.value || '';
@@ -14768,14 +14840,23 @@ async function showApp() {
         if (slice === 'renovacion') {
           var winEl = document.getElementById('trialReminderWindowDays');
           var winDays = Math.min(30, Math.max(1, parseInt(winEl && winEl.value, 10) || 5));
-          var msgObj = {};
+          var kiosqueroMsgs = {};
+          var partnerMsgs = {};
           for (var d = winDays; d >= 1; d--) {
-            var ta = document.querySelector('#trialReminderMsgsContainer textarea[data-trial-msg-day="' + d + '"]');
-            msgObj[String(d)] = ta ? String(ta.value || '').trim() : '';
+            var sk = String(d);
+            var taK = document.querySelector('#trialReminderKiosqueroMsgsContainer textarea[data-trial-msg-day="' + sk + '"]');
+            var taP = document.querySelector('#trialReminderPartnerMsgsContainer textarea[data-trial-msg-day="' + sk + '"]');
+            kiosqueroMsgs[sk] = taK ? String(taK.value || '').trim() : '';
+            partnerMsgs[sk] = taP ? String(taP.value || '').trim() : '';
           }
-          var trialReminderJson = JSON.stringify({ windowDays: winDays, messages: msgObj });
+          var trialReminderJson = JSON.stringify({
+            windowDays: winDays,
+            kiosquero: { messages: kiosqueroMsgs },
+            partner: { messages: partnerMsgs }
+          });
           await supabaseClient.from('app_settings').upsert([{ key: 'trial_reminder_config', value: trialReminderJson }], { onConflict: 'key' });
-          window._superTrialReminderEditCache = parseTrialReminderConfigValue(trialReminderJson);
+          window._trialReminderConfig = parseTrialReminderConfigValue(trialReminderJson);
+          window._superTrialReminderEditCache = window._trialReminderConfig;
           fillTrialReminderAdminFields(window._superTrialReminderEditCache, null);
           ferriolShowAdminSliceMsg(slice, 'Guardado.', false);
           return;
@@ -14870,7 +14951,7 @@ async function showApp() {
       if (!el) return;
       el.addEventListener('change', function () {
         var preserved = readTrialReminderMessagesFromDom();
-        var base = window._superTrialReminderEditCache || { windowDays: 5, messages: {} };
+        var base = window._superTrialReminderEditCache || normalizeTrialReminderConfig(null);
         fillTrialReminderAdminFields(base, preserved);
       });
     })();

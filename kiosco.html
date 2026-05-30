@@ -2731,10 +2731,15 @@
             Volver
           </button>
           <h2 class="font-bold text-xl mb-3 flex items-center gap-2"><i data-lucide="bell-ring" class="w-5 h-5 text-amber-300"></i> Avisos de renovación (prueba)</h2>
-          <p class="text-xs text-white/50 mb-3">Placeholders: <span class="text-white/70">{dias}</span>, <span class="text-white/70">{nombre}</span>.</p>
-          <label class="block text-xs text-white/70 mb-1">Días antes del vencimiento para avisar (1–30)</label>
-          <input type="number" id="trialReminderWindowDays" min="1" max="30" value="5" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-base mb-3">
-          <div id="trialReminderMsgsContainer" class="space-y-1 max-h-[40vh] overflow-y-auto pr-1 mb-4"></div>
+          <p class="text-xs text-white/50 mb-3">Placeholders: <span class="text-white/70">{dias}</span>, <span class="text-white/70">{dias_restantes}</span>, <span class="text-white/70">{nombre}</span>, <span class="text-white/70">{negocio}</span>. Aparecen en la campana según el rol del usuario.</p>
+          <label class="block text-xs text-white/70 mb-1">Días antes del vencimiento para avisar (1–30, ambos roles)</label>
+          <input type="number" id="trialReminderWindowDays" min="1" max="30" value="5" class="w-full max-w-[8rem] glass rounded-xl px-4 py-2.5 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-[#ffffff] text-base mb-4">
+          <h3 class="text-sm font-semibold text-amber-200/95 mb-2 flex items-center gap-2"><i data-lucide="store" class="w-4 h-4"></i> Kiosqueros (negocios)</h3>
+          <p class="text-xs text-white/45 mb-2">Solo usuarios con plan de kiosco ven estos textos al acercarse el vencimiento.</p>
+          <div id="trialReminderKiosqueroMsgsContainer" class="space-y-1 max-h-[32vh] overflow-y-auto pr-1 mb-5 border border-white/10 rounded-xl p-3"></div>
+          <h3 class="text-sm font-semibold text-cyan-200/95 mb-2 flex items-center gap-2"><i data-lucide="users" class="w-4 h-4"></i> Partners (socios / distribuidores)</h3>
+          <p class="text-xs text-white/45 mb-2">Solo socios en panel de red. El banner del fundador (vista empresa) también usa estos textos.</p>
+          <div id="trialReminderPartnerMsgsContainer" class="space-y-1 max-h-[32vh] overflow-y-auto pr-1 mb-4 border border-white/10 rounded-xl p-3"></div>
           <button type="button" class="ferriol-save-admin-slice btn-glow rounded-xl py-2.5 px-4 text-sm font-semibold" data-admin-slice="renovacion">Guardar</button>
           <p id="adminSliceMsg-renovacion" class="text-xs mt-2 hidden"></p>
         </div>
